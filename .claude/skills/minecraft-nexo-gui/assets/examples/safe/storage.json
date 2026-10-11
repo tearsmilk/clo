@@ -4,10 +4,10 @@
  "rows": 6,
  "theme": "steel",
  "canvas": {
-  "left": 60,
+  "left": 70,
   "right": 9,
-  "top": 6,
-  "bottom": 7
+  "top": 8,
+  "bottom": 8
  },
  "layers": [
   {
@@ -29,19 +29,20 @@
    "type": "safe",
    "part": "open_door",
    "x": -3,
-   "y0": 4,
-   "y1": 121,
-   "width": 44,
-   "grow": 7,
-   "thick": 4
+   "y0": 2,
+   "y1": 219,
+   "width": 54,
+   "grow": 9,
+   "thick": 5
   },
   {
    "type": "safe",
    "part": "hinges",
    "x": -4,
    "ys": [
-    16,
-    84
+    14,
+    98,
+    182
    ],
    "leaf": 3
   },

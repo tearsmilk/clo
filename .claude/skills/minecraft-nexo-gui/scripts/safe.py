@@ -468,9 +468,11 @@ def render_icon(name):
     raise SystemExit(f'unknown safe icon {name}')
 
 
-def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=4, bolt_v=(0.2, 0.5, 0.8)):
+def open_door(img, ox, oy, x_hinge=-3, y0=2, y1=219, width=54, grow=9, thick=5,
+              bolt_v=(0.14, 0.38, 0.62, 0.86)):
     """The door swung open to the left of the window (storage screens), in perspective: its inner face is a
-    quad from the hinge edge (x_hinge, y0..y1 - same size as the closed door) to the free edge `width` px
+    quad from the hinge edge (x_hinge, y0..y1 - the whole body height: a door smaller than the safe looks like
+    a toy) to the free edge `width` px
     further left, which is closer to the viewer so it is `grow` px taller at both ends. On the face: brushed
     steel, a recessed panel, a brass mechanism with rods running to the free edge (the rods follow the
     perspective lines); the free edge shows the door's thickness with the locking bolts sticking out.
@@ -546,9 +548,11 @@ def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=4, 
         _px(img, vx, y, S['l1'])
         _px(img, vx + 1, y, S['d3'])
     # brass mechanism cover (slightly squashed by the perspective)
-    for y in range(round(gy) - 9, round(gy) + 10):
-        for x in range(round(gx) - 8, round(gx) + 9):
-            dd = ((x - gx) / 6.5) ** 2 + ((y - gy) / 8) ** 2
+    rx = max(6.5, width * 0.15)                               # mechanism size follows the door
+    ry = rx * 1.25
+    for y in range(round(gy - ry) - 1, round(gy + ry) + 2):
+        for x in range(round(gx - rx) - 1, round(gx + rx) + 2):
+            dd = ((x - gx) / rx) ** 2 + ((y - gy) / ry) ** 2
             if dd <= 1:
                 lit = (x - gx) + (y - gy)
                 if dd > 0.82:
@@ -558,7 +562,7 @@ def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=4, 
                 else:                                            # inner disc, slightly sunk
                     c = B['d1'] if lit < -2 else B['base'] if lit < 4 else B['l1']
                 _px(img, x, y, c)
-    for dx, dy in ((0, -5), (-4, 0), (4, 0), (0, 5)):              # screws on the rim
+    for dx, dy in ((0, -round(ry * 0.66)), (-round(rx * 0.66), 0), (round(rx * 0.66), 0), (0, round(ry * 0.66))):
         _px(img, round(gx) + dx, round(gy) + dy, B['d2'])
     for dx, dy, c in ((0, 0, STEEL['l2']), (-1, 0, STEEL['out']), (1, 0, STEEL['out']), (0, -1, STEEL['out']),
                       (0, 1, STEEL['out'])):                     # centre spindle

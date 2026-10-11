@@ -653,8 +653,8 @@ def draw_safe(img, oy, L):
     if p == 'body':                       # box volume: side + bottom faces and feet outside the window
         safe.body(img, ox, oy, 176, 114 + 18 * L.get('rows', 6), L.get('depth', 4), L.get('feet', True))
     elif p == 'open_door':               # the door swung open on the left (storage screen), before 'hinges'
-        safe.open_door(img, ox, oy, L.get('x', -3), L.get('y0', 4), L.get('y1', 121), L.get('width', 44),
-                       L.get('grow', 7), L.get('thick', 4))
+        safe.open_door(img, ox, oy, L.get('x', -3), L.get('y0', 2), L.get('y1', 219), L.get('width', 54),
+                       L.get('grow', 9), L.get('thick', 5))
     elif p == 'door':
         x0, y0, x1, y1 = L.get('box', [4, 4, 171, 121])
         safe.door(img, ox + x0, oy + y0, ox + x1, oy + y1, L.get('seed', 5))
