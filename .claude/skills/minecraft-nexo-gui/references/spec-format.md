@@ -150,7 +150,7 @@ slot wells, a light band under the client's "Inventory" label; window px `x`/`y`
 | `hinges` | `x` (-2), `ys`, `h` (26), `leaf` (12; 3 = frame only, for storage screens) | knuckle + leaf screwed to the door |
 | `bolts` | `x` (171), `ys`, `length` (10) | locking bolts sticking out of the right side (needs canvas `right` >= length - 3) |
 | `bolt_slots` | `x`, `ys` | retracted bolt slots in the frame |
-| `open_door` | `x` (-3, hinge edge), `y0`/`y1` (2/219 = the whole body; smaller looks like a toy), `width` (54), `grow` (9), `thick` (5) | the door swung open on the left, in perspective: inner face with carved panel, rivets, brass mechanism, rods to 4 bolts (slanted with the perspective), door thickness and bolts out of the free edge; put it before `hinges` (3 hinges for a full-height door), canvas left >= 70, top/bottom >= 8 |
+| `open_door` | `x` (-3, hinge edge), `y0`/`y1` (4/121, the closed door's size), `width` (44), `grow` (7), `thick` (9), `top_thick` (3) | the door swung open on the left, in perspective, with volume: thick lit edge with the bolts coming out of it, a top face, a raised plug panel with shadow, brass mechanism, rods following the perspective; put it before `hinges`, canvas left >= 64, top >= 8 |
 | `nameplate` | `x` (centre), `y`, `text`, `w` | brass plate with engraved letters |
 | `plate` | `x` (centre), `y`, `text` (thin, `\n`) | small brass instruction plate (warns if wider than 50 px) |
 | `display` | `slots: [c, r, n]`, `lamps` (columns), `lock` (column) | sunken LCD with lamp sockets centred in slots; lit lamps are items (`safe:lamp`) |

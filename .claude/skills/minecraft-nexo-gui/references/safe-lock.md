@@ -34,10 +34,11 @@ Meta data is stored per player (persistent). Test regex / meta syntax once on th
 
 ## Storage
 The storage screen shows the safe OPEN: `open_door` draws the door swung out on the left hinges in perspective
-(inner face, mechanism, rods, bolts out of the free edge - its far edge is taller because it is closer to the
-viewer), then three `hinges` sit on the joint. The door is as tall as the whole safe body (a door smaller than
-the safe looks like a toy - user feedback) and as wide as the texture allows. Canvas
-`{"left": 70, "right": 9, "top": 8, "bottom": 8}` -> texture 255x238 (limit 256).
+(far edge taller - closer to the viewer), then the `hinges` sit on the joint. It keeps the closed door's size
+and gets its weight from depth: a 9 px thick edge with the bolts coming out of it, a top face, a raised plug
+panel that casts a shadow, shadows under the rods and the mechanism. (User feedback: "small door" meant flat,
+not short - a door as tall as the whole window looked huge.) Canvas `{"left": 64, "right": 9, "top": 8,
+"bottom": 7}` -> texture 249x237.
 
 DeluxeMenus cannot hold items. The storage screen is a skin: use the `menu_title` string from
 `DeluxeMenus/gui_menus/hokaria_safe.yml` as the inventory title of the vault plugin (PlayerVaults, AxVaults,

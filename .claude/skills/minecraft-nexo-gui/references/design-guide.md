@@ -84,6 +84,9 @@ The builder applies these automatically through `scripts/art.py`; keep them when
   must be attached: it starts inside or behind the frame (a slot, a leaf plate, a post, a rafter under the
   awning), casts a shadow, and is drawn before whatever overlaps it. Floating or glued-on parts, or a straight
   gap where two timbers should meet, read as broken (`scripts/safe.py` body/hinge/bolts, `scripts/shop.py` eave).
+  Volume means depth, not size: when a part looks "small" or flat, keep its size and add thickness (edge and
+  top faces, lit on the light side), raised panels with a shadow under them, shadows under rods and plates.
+  Making the part bigger instead turns it into a different, oversized object.
 - **Calm body, loud buttons.** Window body and slots low-contrast and light (parchment/vanilla grey); colour
   and texture go into the buttons and the scene.
 - **Soft effects.** Sunburst rays and "gradients" are half a ramp step, banded - not a jump to a new hue.
