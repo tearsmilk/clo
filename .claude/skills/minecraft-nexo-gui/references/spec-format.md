@@ -10,7 +10,8 @@ Paths are relative to the spec file.
 | `id` | required | glyph id, file names, DeluxeMenus menu name |
 | `namespace` | `gui` | pack namespace -> `assets/<ns>/textures/gui/<id>.png` |
 | `rows` | 6 | 1-6 chest rows |
-| `theme` | `oak` | `vanilla`, `oak`, `spruce`, `birch`, `stone`, `nether`, `dark`, or a dict overriding theme keys |
+| `theme` | `oak` | `vanilla` (exact Minecraft), `oak`, `spruce`, `birch`, `stone`, `cobble`, `nether`, `dark`, `meadow` - textured frame band + calm body; or a dict |
+| `palette` | `endesga32` | shading model: `endesga32` (palette ramps + hue-shifted shading for custom colours), `endesga32-strict` (snap every colour), `none` |
 | `theme_overrides` | {} | override single theme colours: `fill` (list), `seam`, `hi`, `hi2`, `sh`, `sh2`, `slot_dk`, `slot_lt`, `slot_in`, `text`, `recess` |
 | `header` | none | title plaque, see below. Without it `title` is drawn as plain text at (8,5) |
 | `title` | none | plain title text (when no header) |
@@ -43,19 +44,19 @@ Paths are relative to the spec file.
 |-----|---------|---------|
 | `id` | required | DeluxeMenus item id |
 | `x,y,w,h` | w=h=1 | slot rect |
-| `style` | `sunburst` | `sunburst`, `gradient`, `flat`, `pattern`, `image` |
+| `style` | `sunburst` | `sunburst`, `gradient` (banded), `flat`, `button` (two-tone body), `pattern`, `image` |
 | `color` | `#5DAA3A` | base colour (also tints frame, plaque) |
-| `pattern` | `noise` | for `style: pattern`: `planks_v`, `planks_h`, `bricks`, `stone`, `grass`, `checker`, `stripes`, `dots`, `noise` |
+| `pattern` | `noise` | for `style: pattern`: `planks`/`planks_h`, `planks_v`, `bricks`, `cobble`/`stone`, `grass`, `meadow` (grass + flowers), `cloth`, `dirt`/`noise`, `sky`, `checker`, `stripes`, `dots` |
 | `image` | - | for `style: image`: illustration that covers the tile (centre-cropped, posterized to `colors`, default 48) |
 | `icon` | - | transparent PNG, auto-fitted with a hard alpha edge |
 | `icon_size` | auto | max icon side in px |
 | `icon_frame` | false | draw a bevelled box behind the icon (`icon_frame_color`) |
 | `label` | - | text; `\n` for two lines (e.g. `"Боевой\nПропуск"`) |
-| `label_style` | `shadow` | `shadow` (Minecraft text shadow), `plaque` (dark rounded plate), `bar` (full-width band), `wood` (plank plate with nails), `stone` (stone plate) |
+| `label_style` | `outline` | `outline` (white + coloured outline, 2px spacing when it fits), `shadow` (Minecraft text shadow), `plaque` (dark rounded plate), `bar` (full-width band), `wood` (plank plate with nails), `stone` (stone plate) |
 | `label_pos` | `bottom` | `bottom` or `top` |
 | `label_color` / `plaque_color` | white / derived | |
 | `frame` | - | colour of a 1px inner frame instead of the bevel (card look) |
-| `outline` | `#1E1408` | outer 1px outline |
+| `outline` | derived | outer 1px outline (default: dark, cooler shade of `color`) |
 | `inset` | 1 | px kept free on each side; 0 makes tiles touch |
 | `disabled` | false | greyscale background + the icon redrawn as orange line-art (locked / coming soon) |
 | `icon_style` | - | per-button override of the top-level `icon_style` |

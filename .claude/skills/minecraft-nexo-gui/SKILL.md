@@ -27,7 +27,9 @@ Ask only what you cannot infer; sensible defaults in brackets:
 - Theme: frame material (`oak`, `spruce`, `birch`, `stone`, `nether`, `dark`) and colour per button
 - Namespace for the pack [server name in lowercase]
 
-Read `references/design-guide.md` before choosing layout/colours - it breaks down five popular server menus
+Everything is painted through `scripts/art.py` (palette ramps, hue-shifted shading, structured textures, drawn
+buttons and plates) - read the "Polish checklist" in `references/design-guide.md` once; it is what makes the
+result look hand-drawn. Read `references/design-guide.md` before choosing layout/colours - it breaks down five popular server menus
 (quick-menu tiles, steampunk cards, bento layout, picture choices, profile strip) and the rules they share:
 varied tile sizes, textured or illustrated tiles, labels on plaques, a strong header, honest 1:1 pixels.
 

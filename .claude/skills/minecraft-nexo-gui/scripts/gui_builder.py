@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pixfont import draw_text, text_width, text_height, draw_block_text, block_text_size  # noqa: E402
 import pixelstyle  # noqa: E402
 import sprites  # noqa: E402
+import art  # noqa: E402
 
 
 # ----------------------------------------------------------------------------- colours / themes
@@ -48,27 +49,40 @@ def mix(c, t, k):
     return tuple(int(c[i] + (t[i] - c[i]) * k) for i in range(3)) + (255,)
 
 
-def lighten(c, k): return mix(c, (255, 255, 255), k)
-def darken(c, k): return mix(c, (0, 0, 0), k)
+def _steps(k):
+    return max(1, round(k * 4))
 
 
-# Each theme: panel fill style + bevel + slot colours + text colours.
+def lighten(c, k):
+    return art.step(H(c), _steps(k))       # walks the palette ramp (hue-shifted), not a mix with white
+
+
+def darken(c, k):
+    return art.step(H(c), -_steps(k))
+
+
+# Each theme: window body + frame band + slot colours + text colours. Non-vanilla themes use ENDESGA-32 tones
+# and a textured 4px frame band (planks/bricks/cobble) around a smooth body, like hand-made GUI kits.
 THEMES = {
-    # vanilla Minecraft window colours (C6C6C6 fill, white/555555 bevel, 8B8B8B slots)
+    # vanilla Minecraft window colours (C6C6C6 fill, white/555555 bevel, 8B8B8B slots) - kept exact
     'vanilla': dict(fill=['#C6C6C6'], seam=None, hi='#FFFFFF', hi2='#FFFFFF', sh='#555555', sh2='#555555',
                     slot_dk='#373737', slot_lt='#FFFFFF', slot_in='#8B8B8B', text='#404040', recess='#8B8B8B'),
-    'oak':    dict(fill=['#C49A5C', '#BC9355', '#C9A063', '#B58C4F'], seam='#8E6838', hi='#F3DFAE', hi2='#E2C68C',
-                   sh='#5A3D1C', sh2='#7A5530', slot_dk='#3E2A12', slot_lt='#FBEFCF', slot_in='#7C5A33', text='#3A1A08', recess='#6E4E2B'),
-    'spruce': dict(fill=['#7A5A3A', '#735436', '#806040', '#6C4F33'], seam='#4E3822', hi='#B8977A', hi2='#9A7C60',
-                   sh='#2E2012', sh2='#45311F', slot_dk='#24170B', slot_lt='#C9AE92', slot_in='#4A3524', text='#F2E4D0', recess='#3E2C1C'),
-    'birch':  dict(fill=['#D8C88E', '#D2C188', '#DDCD95', '#CCBA80'], seam='#A89660', hi='#FFF6D2', hi2='#EFE3B0',
-                   sh='#7C6A3C', sh2='#998652', slot_dk='#54462A', slot_lt='#FFFBEA', slot_in='#A8975F', text='#3A2E14', recess='#9A8854'),
-    'stone':  dict(fill=['#8E8E8E', '#878787', '#959595', '#828282'], seam='#6A6A6A', hi='#D8D8D8', hi2='#BDBDBD',
-                   sh='#3C3C3C', sh2='#565656', slot_dk='#2A2A2A', slot_lt='#F0F0F0', slot_in='#5E5E5E', text='#202020', recess='#4E4E4E'),
-    'nether': dict(fill=['#5A2226', '#542024', '#61262A', '#4E1D21'], seam='#3A1215', hi='#A85A5E', hi2='#8A4448',
-                   sh='#1E0709', sh2='#300D10', slot_dk='#160405', slot_lt='#C77A7E', slot_in='#3A1416', text='#F6D9C0', recess='#2A0C0E'),
-    'dark':   dict(fill=['#2C2F36', '#2A2D33', '#30333A', '#272A30'], seam='#1C1E22', hi='#5C616C', hi2='#4A4F58',
-                   sh='#0E0F12', sh2='#17191C', slot_dk='#0A0B0D', slot_lt='#6E7480', slot_in='#1F2126', text='#E8E8F0', recess='#16181C'),
+    'oak':    dict(body='#ead4aa', frame='#b86f50', frame_tex='planks', slot_in='#c28569', slot_dk='#733e39',
+                   slot_lt='#ffffff', text='#3e2731', recess='#733e39'),
+    'spruce': dict(body='#b86f50', frame='#733e39', frame_tex='planks', slot_in='#733e39', slot_dk='#3e2731',
+                   slot_lt='#e4a672', text='#ead4aa', recess='#3e2731'),
+    'birch':  dict(body='#ead4aa', frame='#e4a672', frame_tex='planks', slot_in='#e4a672', slot_dk='#b86f50',
+                   slot_lt='#ffffff', text='#3e2731', recess='#c28569'),
+    'stone':  dict(body='#8b9bb4', frame='#5a6988', frame_tex='bricks', slot_in='#5a6988', slot_dk='#262b44',
+                   slot_lt='#c0cbdc', text='#181425', recess='#3a4466'),
+    'cobble': dict(body='#c0cbdc', frame='#8b9bb4', frame_tex='cobble', slot_in='#8b9bb4', slot_dk='#3a4466',
+                   slot_lt='#ffffff', text='#262b44', recess='#5a6988'),
+    'nether': dict(body='#3e2731', frame='#a22633', frame_tex='bricks', slot_in='#181425', slot_dk='#181425',
+                   slot_lt='#733e39', text='#ead4aa', recess='#181425'),
+    'dark':   dict(body='#262b44', frame='#3a4466', frame_tex='bricks', slot_in='#181425', slot_dk='#181425',
+                   slot_lt='#5a6988', text='#c0cbdc', recess='#181425'),
+    'meadow': dict(body='#ead4aa', frame='#3e8948', frame_tex='grass', slot_in='#e4a672', slot_dk='#b86f50',
+                   slot_lt='#ffffff', text='#265c42', recess='#c28569'),
 }
 
 
@@ -109,8 +123,41 @@ def bevel_box(img, box, fill, outline=None, hi=None, sh=None, chamfer=0):
             img.putpixel((cx, cy), (0, 0, 0, 0))
 
 
+def draw_framed_panel(img, oy, rows, th):
+    """Palette themes: dark outline with cut corners, 4px textured frame band, carved inner line, smooth body."""
+    W, Hh = window_size(rows)
+    fr = th['frame']
+    band = Image.new('RGBA', (W, Hh), (0, 0, 0, 0))
+    tex = art.texture(th.get('frame_tex') or 'planks', W, Hh, fr, seed=11)
+    band.alpha_composite(tex)
+    d = ImageDraw.Draw(band)
+    # body
+    d.rectangle((5, 5, W - 6, Hh - 6), fill=art.base(th['body']))
+    d.line((5, 5, W - 6, 5), fill=art.step(th['body'], -2))          # carved inner edge (shadow top/left)
+    d.line((5, 5, 5, Hh - 6), fill=art.step(th['body'], -2))
+    d.line((6, 6, W - 7, 6), fill=art.step(th['body'], -1))
+    d.line((6, Hh - 6, W - 6, Hh - 6), fill=art.step(th['body'], 1))  # lit bottom/right
+    d.line((W - 6, 6, W - 6, Hh - 6), fill=art.step(th['body'], 1))
+    # frame band bevel + outline with cut corners
+    d.line((1, 1, W - 2, 1), fill=art.step(fr, 1))
+    d.line((1, 1, 1, Hh - 2), fill=art.step(fr, 1))
+    d.line((1, Hh - 2, W - 2, Hh - 2), fill=art.step(fr, -2))
+    d.line((W - 2, 1, W - 2, Hh - 2), fill=art.step(fr, -2))
+    d.line((4, 4, W - 5, 4), fill=art.step(fr, -2))
+    d.line((4, 4, 4, Hh - 5), fill=art.step(fr, -2))
+    o = art.outline_of(fr)
+    d.rectangle((0, 0, W - 1, Hh - 1), outline=o)
+    for cx, cy in ((0, 0), (W - 1, 0), (0, Hh - 1), (W - 1, Hh - 1)):
+        band.putpixel((cx, cy), (0, 0, 0, 0))
+    for cx, cy in ((1, 1), (W - 2, 1), (1, Hh - 2), (W - 2, Hh - 2)):
+        band.putpixel((cx, cy), o)
+    img.alpha_composite(band, (0, oy))
+
+
 def draw_panel(img, oy, rows, th, seed=7):
     """Window body with a chamfered black outline and 2px bevel, like vanilla windows."""
+    if 'frame' in th:
+        return draw_framed_panel(img, oy, rows, th)
     rnd = random.Random(seed)
     W, Hh = window_size(rows)
     px = img.load()
@@ -164,7 +211,12 @@ def draw_slot(img, x0, y0, th, size=18):
 # ----------------------------------------------------------------------------- backgrounds
 
 def pattern(name, base, w, h, seed=1):
-    """Procedural pixel textures for tile backgrounds."""
+    """Pixel textures for tile backgrounds (hand-structured, see art.py)."""
+    return art.texture(name, w, h, base, seed=seed)
+
+
+def _old_pattern(name, base, w, h, seed=1):
+    """Previous noise-based textures (kept for reference)."""
     rnd = random.Random(seed)
     base = H(base)
     lt, dk = lighten(base, 0.18), darken(base, 0.18)
@@ -220,16 +272,17 @@ def sunburst(base, w, h, cy_frac=0.42):
         a1 = a0 + math.pi / 16
         R = 400
         d.polygon([(cx, cy), (cx + R * math.cos(a0), cy + R * math.sin(a0)), (cx + R * math.cos(a1), cy + R * math.sin(a1))],
-                  fill=lighten(base, 0.28))
+                  fill=mix(base, art.step(base, 1), 0.45))     # half a ramp step: rays read as light, not as a new hue
     return im
 
 
 def gradient(base, w, h):
+    """Banded 'gradient' (pixel art has no smooth gradients): soft light band on top, base, soft shade below."""
     base = H(base)
-    im = Image.new('RGBA', (w, h))
+    im = Image.new('RGBA', (w, h), base)
     d = ImageDraw.Draw(im)
-    for yy in range(h):
-        d.line((0, yy, w, yy), fill=mix(lighten(base, 0.28), darken(base, 0.35), yy / max(1, h - 1)))
+    d.rectangle((0, 0, w, max(1, h // 3) - 1), fill=mix(base, art.step(base, 1), 0.5))
+    d.rectangle((0, h - max(1, h // 3), w, h), fill=mix(base, art.step(base, -1), 0.5))
     return im
 
 
@@ -392,6 +445,34 @@ def resolve(path, sdir):
     return path if os.path.isabs(path) else os.path.join(sdir, path)
 
 
+def tile_frame(tile, base, outline=None, frame=None):
+    """Drawn-button frame: dark outline with cut corners, lit top/left rim, 2px darker bottom lip, dark right edge."""
+    w, h = tile.size
+    d = ImageDraw.Draw(tile)
+    o = H(outline) if outline else art.outline_of(base)
+    d.rectangle((0, 0, w - 1, h - 1), outline=o)
+    k = 1
+    if frame:                                        # light inner border (cream/white frame like reference kits)
+        d.rectangle((1, 1, w - 2, h - 2), outline=H(frame))
+        k = 2
+    d.line((k, k, w - 1 - k, k), fill=art.step(base, 1))
+    d.line((k, k, k, h - 2 - k), fill=art.step(base, 1))
+    d.line((w - 1 - k, k + 1, w - 1 - k, h - 1 - k), fill=art.step(base, -1))
+    d.line((k, h - 1 - k, w - 1 - k, h - 1 - k), fill=art.step(base, -2))
+    if h > 12:
+        d.line((k + 1, h - 2 - k, w - 2 - k, h - 2 - k), fill=art.step(base, -1))
+    for cx, cy in ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)):
+        tile.putpixel((cx, cy), (0, 0, 0, 0))
+
+
+def fit_label(label, maxw, spacings=(2, 1)):
+    """Pick letter spacing: 2px reads best with an outline, fall back to 1px; None if it does not fit."""
+    for sp in spacings:
+        if text_width(label, spacing=sp) <= maxw:
+            return sp
+    return None
+
+
 def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
     style = b.get('style', 'sunburst')
     x0, y0 = slot_xy(b['x'], b['y'])
@@ -399,8 +480,7 @@ def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
     w, h = b.get('w', 1) * 18, b.get('h', 1) * 18
     inset = b.get('inset', 1)              # 1px gap to neighbours; 0 = tiles touch (bento look)
     x0, y0, w, h = x0 + inset, y0 + inset, w - 2 * inset, h - 2 * inset
-    base = H(b.get('color', '#5DAA3A'))
-    outline = H(b.get('outline', '#1E1408'))
+    base = art.base(H(b.get('color', '#63c74d')))
 
     # background
     if style == 'sunburst':
@@ -408,27 +488,19 @@ def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
     elif style == 'gradient':
         tile = gradient(base, w, h)
     elif style == 'pattern':
-        tile = pattern(b.get('pattern', 'noise'), base, w, h, seed=hash(b['id']) & 0xff)
+        tile = pattern(b.get('pattern', 'noise'), base, w, h, seed=sum(map(ord, b['id'])))
     elif style == 'image':
         tile = cover(resolve(b['image'], sdir), w, h, b.get('colors', 48))
-    else:  # flat
+    else:  # flat / button
         tile = Image.new('RGBA', (w, h), base)
-
-    # frame: outline + inner light/dark bevel (or a coloured inner frame for "card" looks)
-    td = ImageDraw.Draw(tile)
-    td.rectangle((0, 0, w - 1, h - 1), outline=outline)
-    if b.get('frame'):
-        td.rectangle((1, 1, w - 2, h - 2), outline=H(b['frame']))
-    else:
-        td.line((1, 1, w - 2, 1), fill=lighten(base, 0.45))
-        td.line((1, 1, 1, h - 2), fill=lighten(base, 0.45))
-        td.line((1, h - 2, w - 2, h - 2), fill=darken(base, 0.35))
-        td.line((w - 2, 1, w - 2, h - 2), fill=darken(base, 0.35))
+        if style == 'button' and h >= 12:            # two-tone body: lighter upper band like a real button
+            ImageDraw.Draw(tile).rectangle((0, 0, w, h // 2 - 1), fill=art.step(base, 1))
 
     if b.get('disabled'):                # grey out the background only; the icon becomes a coloured line-art
         g = ImageOps.grayscale(tile.convert('RGB')).convert('RGBA')
         tile = Image.blend(g, Image.new('RGBA', g.size, (40, 40, 40, 255)), 0.35)
-        td = ImageDraw.Draw(tile)
+        base = art.base('#5a6988')
+    tile_frame(tile, base, b.get('outline'), b.get('frame'))
 
     # label geometry
     label = b.get('label') or ''
@@ -436,94 +508,109 @@ def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
     if case == 'upper':
         label = label.upper()
     label = label.replace('\\n', '\n')
-    lstyle = b.get('label_style', 'shadow')
+    lstyle = b.get('label_style', 'outline')
     lpos = b.get('label_pos', 'bottom')
-    label_zone = 0
+    label_zone, spacing = 0, 1
     if label:
-        tw, tht = text_width(label), text_height(label)
-        maxw = w - {'plaque': 8, 'wood': 11, 'stone': 11}.get(lstyle, 4)
-        if tw > maxw:
-            raise SystemExit(f"label '{label}' is {tw}px but button '{b['id']}' fits {maxw}px - shorten it, "
-                             f"split it into two lines with \\n, or widen the button")
+        # widest text each style allows: outline needs 1px per side, plates add their own padding
+        maxw = w - {'plaque': 9, 'wood': 11, 'stone': 11, 'bar': 6}.get(lstyle, 4)
+        sp = fit_label(label, maxw, (2, 1) if lstyle in ('outline', 'shadow') else (1,))
+        if sp is None:
+            raise SystemExit(f"label '{label}' is {text_width(label)}px but button '{b['id']}' fits {maxw}px - "
+                             f"shorten it, split it into two lines with \\n, or widen the button")
+        spacing = sp
+        tht = text_height(label)
         label_zone = tht + (6 if lstyle in ('plaque', 'bar', 'wood', 'stone') else 3)
         if b.get('icon') and label_zone > h - 4:
             raise SystemExit(f"label '{label}' is too tall for button '{b['id']}' ({h}px high)")
 
     # icon (optionally inside a framed box)
     if b.get('icon'):
-        m = 1 if w <= 18 or h <= 18 else 3          # small 1x1 buttons: let the icon fill the slot
+        m = 1 if w <= 18 or h <= 18 else 2          # small 1x1 buttons: let the icon fill the slot
         top_free = m + (label_zone if lpos == 'top' else 0)
-        avail_h = h - 2 * m - label_zone
+        # outlined labels may overlap the bottom of the icon (like quick-menu tiles), so icons can be bigger
+        overlap = 4 if (label_zone and lstyle == 'outline' and lpos == 'bottom') else 0
+        avail_h = h - 2 * m - label_zone - (2 if label_zone else 0) + overlap
         avail_w = w - 2 * m
         fpad = 3 if b.get('icon_frame') else 0
         size = b.get('icon_size') or min(avail_w, avail_h) - 2 * fpad
         icon_src = b['icon']
-        if icon_src.startswith('sprite:'):
+        is_sprite = icon_src.startswith('sprite:')
+        if is_sprite:
             spr = sprites.render(icon_src[7:])
             import tempfile
             tmp = os.path.join(tempfile.gettempdir(), f"nexo_gui_sprite_{icon_src[7:]}.png")
             spr.save(tmp)
             b = dict(b, icon=tmp)
         style_opts = dict(spec_icon_style or {}, **(b.get('icon_style') or {}))
-        if style_opts.get('enabled', bool(style_opts)) or b.get('disabled'):
-            sil = style_opts.get('silhouette_color', '#E08A2E') if b.get('disabled') else None
+        auto = art._enabled and not is_sprite and spec_icon_style is None and not b.get('icon_style')
+        if auto:                                     # clean pixel icon (own colours, coloured outline, top-left light)
+            style_opts = {'colors': 12}
+        if style_opts.get('palette') == 'auto':
+            style_opts['palette'] = art.ENDESGA32
+        if (not is_sprite and style_opts.get('enabled', bool(style_opts))) or b.get('disabled'):
+            sil = style_opts.get('silhouette_color', '#feae34') if b.get('disabled') else None
             ic = pixelstyle.stylize(Image.open(resolve(b['icon'], sdir)), size=size,
                                     colors=style_opts.get('colors', 10), outline=style_opts.get('outline', 'auto'),
                                     light=style_opts.get('light', True), palette=style_opts.get('palette'),
                                     extrude_depth=0 if sil else style_opts.get('extrude', 0),
                                     sparkle=style_opts.get('sparkle', False) or b.get('sparkle', False),
                                     silhouette_color=sil)
-            if ic.width > size or ic.height > size:      # extrude/sparkle grow the canvas; keep it inside
+            if ic.width > size + 4 or ic.height > size + 4:   # extrude/sparkle grow the canvas; keep it inside
                 ic.thumbnail((size + 4, size + 4), Image.NEAREST)
         else:
             ic = load_icon(resolve(b['icon'], sdir), size, size)
         bw, bh = ic.width + 2 * fpad, ic.height + 2 * fpad
         bx = (w - bw) // 2
-        by = top_free + (avail_h - bh) // 2
+        by = top_free + max(0, (avail_h - bh) // 2)
         if b.get('icon_frame'):
-            fc = H(b.get('icon_frame_color', darken(base, 0.25)))
-            bevel_box(tile, (bx, by, bx + bw - 1, by + bh - 1), fc, outline=darken(fc, 0.55),
-                      hi=lighten(fc, 0.25), sh=darken(fc, 0.3))
+            fc = art.base(H(b.get('icon_frame_color', art.step(base, -1))))
+            art.bevel(tile, (bx, by, bx + bw - 1, by + bh - 1), fc, lip=1)
         shadow = Image.new('RGBA', ic.size, (0, 0, 0, 0))
-        shadow.putalpha(ic.getchannel('A').point(lambda v: 90 if v else 0))
+        shadow.putalpha(ic.getchannel('A').point(lambda v: 80 if v else 0))
         tile.alpha_composite(shadow, (bx + fpad + 1, by + fpad + 1))
         tile.alpha_composite(ic, (bx + fpad, by + fpad))
 
     # label
     if label:
-        tw, tht = text_width(label), text_height(label)
+        tw, tht = text_width(label, spacing=spacing), text_height(label)
         tcol = H(b.get('label_color', '#FFFFFF'))
         if lstyle == 'plaque':           # dark plate with a light rim, like the reference menus
-            pw, ph = tw + 6, tht + 5
+            pw, ph = tw + 7, tht + 6
             px0 = (w - pw) // 2
-            py0 = (h - ph) // 2 if not b.get('icon') and h < 40 else ((h - ph - 3) if lpos == 'bottom' else 3)
-            pc = H(b.get('plaque_color', darken(base, 0.62)))
-            bevel_box(tile, (px0, py0, px0 + pw - 1, py0 + ph - 1), pc, outline=darken(pc, 0.5),
-                      hi=lighten(pc, 0.22), chamfer=1)
-            draw_text(tile, px0 + 3, py0 + 3, label, tcol, shadow=darken(pc, 0.6), align='center')
+            py0 = (h - ph) // 2 if not b.get('icon') and h < 40 else ((h - ph - 4) if lpos == 'bottom' else 3)
+            pc = art.base(H(b.get('plaque_color', art.step(base, -2))))
+            art.drop_shadow(tile, (px0, py0, px0 + pw - 1, py0 + ph - 1))
+            art.bevel(tile, (px0, py0, px0 + pw - 1, py0 + ph - 1), pc, lip=1)
+            draw_text(tile, px0 + 3, py0 + 3, label, tcol, shadow=art.step(pc, -2), align='center')
         elif lstyle in ('wood', 'stone'):  # pixel UI-kit plates with nails / chips
-            pw, ph = tw + 10, min(tht + 6, h - 2)
+            pw, ph = tw + 9, min(tht + 7, h - 4)
             px0 = (w - pw) // 2
-            py0 = (h - ph) // 2 if not b.get('icon') and h < 40 else ((h - ph - 2) if lpos == 'bottom' else 2)
-            plate(tile, (px0, py0, px0 + pw - 1, py0 + ph - 1), lstyle, b.get('plaque_color'))
-            pc = H(b.get('plaque_color') or ('#D9895A' if lstyle == 'wood' else '#9A968C'))
-            draw_text(tile, px0 + 5, py0 + (ph - 7) // 2 - (1 if ph >= tht + 6 else 0), label, H(b.get('label_color', '#FFFFFF')),
-                      shadow=darken(pc, 0.55), align='center')
+            py0 = (h - ph) // 2 if not b.get('icon') and h < 40 else ((h - ph - 4) if lpos == 'bottom' else 2)
+            pcol = b.get('plaque_color') or ('#b86f50' if lstyle == 'wood' else '#8b9bb4')
+            art.plate(tile, (px0, py0, px0 + pw - 1, py0 + ph - 1), lstyle, pcol)
+            draw_text(tile, px0 + 5, py0 + max(1, (ph - 1 - 7) // 2), label, tcol, shadow=art.step(pcol, -2),
+                      align='center')
         elif lstyle == 'bar':            # full-width band
             ph = tht + 5
-            py0 = (h - ph - 1) if lpos == 'bottom' else 1
+            py0 = (h - ph - 3) if lpos == 'bottom' else 2
             if not b.get('icon') and not b.get('image') and h < 24:
                 py0 = (h - ph) // 2
-            pc = H(b.get('plaque_color', darken(base, 0.45)))
-            ImageDraw.Draw(tile).rectangle((1, py0, w - 2, py0 + ph - 1), fill=pc)
-            ImageDraw.Draw(tile).line((1, py0, w - 2, py0), fill=darken(pc, 0.4))
-            draw_text(tile, (w - tw) // 2, py0 + 3, label, tcol, shadow=darken(pc, 0.6), align='center')
-        else:                            # text with Minecraft drop shadow
+            pc = art.base(H(b.get('plaque_color', art.step(base, -2))))
+            dd = ImageDraw.Draw(tile)
+            dd.rectangle((2, py0, w - 3, py0 + ph - 1), fill=pc)
+            dd.line((2, py0, w - 3, py0), fill=art.step(pc, -1))
+            draw_text(tile, (w - tw) // 2, py0 + 3, label, tcol, shadow=art.step(pc, -2), align='center')
+        else:                            # 'outline' (default) or 'shadow'
             if not b.get('icon'):
-                ty = (h - (tht - (2 if tht % 10 == 9 else 0))) // 2   # centre on capitals, ignore descender rows
+                ty = (h - 2 - (tht - (2 if tht % 10 == 9 else 0))) // 2   # centre on capitals above the lip
             else:
-                ty = (h - tht - 3) if lpos == 'bottom' else 3
-            draw_text(tile, (w - tw) // 2, ty, label, tcol, shadow=darken(base, 0.7), align='center')
+                ty = (h - tht - 5) if lpos == 'bottom' else 3
+            if lstyle == 'shadow':
+                draw_text(tile, (w - tw) // 2, ty, label, tcol, shadow=art.step(base, -2), align='center', spacing=spacing)
+            else:
+                draw_text(tile, (w - tw) // 2, ty, label, tcol, outline=art.outline_of(base), align='center',
+                          spacing=spacing)
 
     img.alpha_composite(tile, (x0, y0))
 
@@ -572,13 +659,17 @@ def draw_header(img, oy, spec, th):
         y0, y1 = 0, oy + 13
     else:
         y0, y1 = oy + 3, oy + 15
-    bevel_box(img, (x0, y0, x0 + pw - 1, y1), col, outline=(0, 0, 0, 255), hi=lighten(col, 0.3), sh=darken(col, 0.4))
-    ty = y0 + ((y1 - y0 + 1) - 7 * sc) // 2
-    draw_text(img, x0 + 3 * sc + 1, ty, text, tcol, scale=sc, shadow=darken(col, 0.6))
+    kind = hd.get('plate', 'wood' if spec.get('theme', 'oak') != 'vanilla' else 'dark')
+    pcol = hd.get('color') if hd.get('color') else None
+    art.plate(img, (x0, y0, x0 + pw - 1, y1), kind, pcol)
+    pc = art.base(pcol or {'wood': '#b86f50', 'stone': '#8b9bb4', 'dark': '#3a4466', 'gold': '#feae34'}[kind])
+    ty = y0 + ((y1 - y0 - 1) - 7 * sc) // 2
+    draw_text(img, x0 + 3 * sc + 1, ty, text, tcol, scale=sc, shadow=art.step(pc, -3))
     if hd.get('rivets', True):
         ry = (y0 + y1) // 2 - 2
         for rx in (x0 - 7, x0 + pw + 2):
-            bevel_box(img, (rx, ry, rx + 4, ry + 4), darken(col, 0.2), outline=(0, 0, 0, 255), hi=lighten(col, 0.2))
+            art.drop_shadow(img, (rx, ry, rx + 4, ry + 4))
+            art.bevel(img, (rx, ry, rx + 4, ry + 4), '#8b9bb4', lip=1)
 
 
 def button_slots(b):
@@ -597,6 +688,7 @@ def build(spec_path, out):
     sdir = os.path.dirname(os.path.abspath(spec_path))
     gid, ns, rows = spec['id'], spec.get('namespace', 'gui'), int(spec.get('rows', 6))
     assert 1 <= rows <= 6, 'rows must be 1..6'
+    art.set_palette(spec.get('palette', 'endesga32'))
     tname = spec.get('theme', 'oak')
     th = dict(THEMES[tname]) if isinstance(tname, str) else dict(THEMES['oak'], **tname)
     th.update(spec.get('theme_overrides', {}))
@@ -621,9 +713,9 @@ def build(spec_path, out):
         x0, y0 = slot_xy(pnl['x'], pnl['y'])
         x1, y1 = x0 + pnl['w'] * 18 - 1, y0 + pnl['h'] * 18 - 1
         pad = pnl.get('pad', 1)
-        c = H(pnl.get('color', th['recess']))
+        c = art.base(H(pnl.get('color', th['recess']))) if 'frame' in th else H(pnl.get('color', th['recess']))
         bevel_box(tex, (x0 - pad, top + y0 - pad, x1 + pad, top + y1 + pad), c,
-                  outline=None, hi=darken(c, 0.45), sh=lighten(c, 0.35))
+                  outline=None, hi=darken(c, 0.3), sh=lighten(c, 0.3))   # carved: dark top/left, lit bottom/right
 
     draw_layers(tex, top, [L for L in spec.get('layers', []) if not L.get('above')], sdir, th)
 
@@ -647,7 +739,7 @@ def build(spec_path, out):
 
     title_col = H(spec.get('title_color', th['text']))
     if spec.get('title') and not spec.get('header'):
-        draw_text(tex, 8, top + 5, spec['title'], title_col)
+        draw_text(tex, 8, top + (7 if 'frame' in th else 5), spec['title'], title_col)
     draw_header(tex, top, spec, th)
     draw_decor(tex, top, spec.get('decor', []))
     inv_label = spec.get('inventory_label', 'Инвентарь')

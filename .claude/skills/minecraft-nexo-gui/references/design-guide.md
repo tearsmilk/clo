@@ -41,6 +41,26 @@ Takeaways baked into the builder:
 - the header deserves size: `header.size: 2` puts a double-size title on a tab above the window
 - keep slots that hold real items (`slots_visible`) drawn as slots so players see where items go
 
+## Polish checklist (what separates "drawn" from "generated")
+
+The builder applies these automatically through `scripts/art.py`; keep them when you hand-draw or extend it.
+
+- **Ramps, not mixes.** Never lighten/darken by mixing with white/black (muddy greys). Shade with ramps:
+  ENDESGA 32 ramps for palette colours (wood, stone, grass, sky...), and for any custom colour `art.hue_step`
+  (darker = bluer/purpler + more saturated, lighter = yellower). `palette: "endesga32-strict"` snaps everything.
+- **Structured textures, never noise.** Planks have boards with a lit top edge, dark seam, grain streaks,
+  staggered joints and nails; bricks have mortar and lit/shaded edges; cobble has cells with joints; grass has
+  tufts; cloth has folds and a hem. Random per-pixel noise reads as TV static.
+- **Every interactive thing is a drawn button:** coloured dark outline with cut corners, lit top/left rim,
+  2px darker bottom lip, darker right edge. Optional light inner frame (`frame: "#ffffff"`).
+- **Labels:** white with a coloured dark outline and 2px letter spacing when it fits (1px otherwise); plates
+  (`plaque`, `wood`, `stone`) for busy art. Outlined labels may overlap the bottom of the icon - icons get bigger.
+- **Depth:** plates, rivets and headers cast a 1px shadow; recessed panels are carved (dark top/left, lit
+  bottom/right); windows have a textured frame band around a calm, flat body so content stays readable.
+- **Calm body, loud buttons.** Window body and slots low-contrast and light (parchment/vanilla grey); colour
+  and texture go into the buttons and the scene.
+- **Soft effects.** Sunburst rays and "gradients" are half a ramp step, banded - not a jump to a new hue.
+
 ## Pixel-art asset rules (from item/icon sheets, UI kits and Minecraft-style packs)
 
 These are what `pixelstyle.stylize` and the builder apply; follow them for anything drawn by hand too.
