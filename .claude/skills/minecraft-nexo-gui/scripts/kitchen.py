@@ -253,19 +253,69 @@ def board(img, ox, oy, c0=0, r0=0, n=5, m=5, rim=(5, 3, 5, 2), thick=6, handle=2
 
 # ------------------------------------------------------------------ tool case and plate
 
-def tool_case(img, ox, oy, c0=6, r0=0, n=3, m=2, rim=4, thick=3):
-    """Walnut case with felt-lined compartments under n x m slots, brass corners, shadow on the counter."""
+def tool_case(img, ox, oy, c0=6, r0=0, n=3, m=2, rim=4, thick=5, wall=3, seed=5):
+    """Walnut tool box with depth under n x m slots: thick walls (rim with a lit bevel, a banded front face
+    with grain), deep felt-lined compartments - the inner face of the far wall shows as a `wall` px strip at
+    the top of each compartment, the felt gets a contact shadow under it and along the left wall -, the
+    partitions show their top edges (lit nose, base, the side away from the light darker), brass corner caps
+    and a brass hasp on the front, a soft shadow on the counter."""
     fx0, fy0 = ox + 7 + 18 * c0, oy + 17 + 18 * r0
     fx1, fy1 = fx0 + 18 * n - 1, fy0 + 18 * m - 1
     top = rrect(fx0 - rim, fy0 - rim, fx1 + rim, fy1 + rim - 1, 3)
-    solid, face = raised(img, top, thick, WALNUT)
-    grain(img, face, WALNUT, seed=5, density=0.06, light=0.2)
-    cells(img, fx0, fy0, n, m, WALNUT, floor=FELT, deep=True, wall_lit=WALNUT[4], wall_dark=WALNUT[1])
-    lx, ly = (fx0 + fx1) // 2 - 2, fy1 + rim                # brass latch on the front face
-    for i in range(6):
-        for j in range(4):
-            c = BRASS[0] if i in (0, 5) or j == 3 else BRASS[5] if (i, j) == (1, 0) else BRASS[4] if j == 0 else BRASS[3]
-            _px(img, lx + i, ly + j, c)
+    solid, face = raised(img, top, thick, WALNUT, shadow_off=(3, 2), front_grain=0.07, seed=seed)
+    grain(img, face, WALNUT, seed=seed, density=0.05, light=0.25)
+    ring2 = {(x, y) for x, y in face if ((x, y - 2) not in solid or (x - 2, y) not in solid)
+             and (x, y - 1) in face and (x - 1, y) in face}
+    _paint(img, ring2, WALNUT[4])                  # 2 px lit bevel on the far / left rim
+    for r in range(m):
+        for c in range(n):
+            fx, fy = fx0 + 18 * c, fy0 + 18 * r
+            ix0, iy0, ix1, iy1 = fx + 1, fy + 1, fx + 16, fy + 16
+            ImageDraw.Draw(img).rectangle((ix0, iy0, ix1, iy1), fill=FELT[3])
+            for k in range(wall):                  # inner face of the far wall: vertical wood, darker down
+                c_ = WALNUT[1] if k == wall - 1 else WALNUT[2]
+                for x in range(ix0, ix1 + 1):
+                    _px(img, x, iy0 + k, c_)
+                _px(img, ix0, iy0 + k, WALNUT[1])
+            fy_ = iy0 + wall                       # felt: contact shadow under the far wall and the left wall
+            for x in range(ix0, ix1 + 1):
+                _px(img, x, fy_, FELT[1])
+                _px(img, x, fy_ + 1, FELT[2])
+            for y in range(fy_, iy1 + 1):
+                _px(img, ix0, y, FELT[1])
+                _px(img, ix0 + 1, y, FELT[2] if y > fy_ else FELT[1])
+            for i in range(18):                    # partition / rim edges round the compartment
+                _px(img, fx + i, fy, WALNUT[4])                     # far wall top: lit nose before the drop
+                _px(img, fx + i, fy + 17, WALNUT[3])                # near wall top
+            for i in range(1, 17):
+                _px(img, fx, fy + i, WALNUT[2])                     # left wall top, its inner side in shadow
+                _px(img, fx + 17, fy + i, WALNUT[4])                # right wall top, inner side lit
+    x0, x1 = fx0 - rim, fx1 + rim
+    yf = fy1 + rim                                 # first row of the front face
+    for cx, sgn in ((x0, 1), (x1, -1)):            # brass corner caps over the front corners
+        for j in range(thick - 1):
+            for i in range(3):
+                x = cx + sgn * i
+                if (x, yf + j) in solid and (x, yf + j) not in edge(solid):
+                    _px(img, x, yf + j, BRASS[4] if j == 0 else BRASS[2] if j == thick - 2 else BRASS[3])
+        _px(img, cx + sgn, yf + 1, BRASS[5])
+        for i in range(3):                         # the cap folds over the rim top
+            x = cx + sgn * (i + 1)
+            if (x, yf - 1) in face:
+                _px(img, x, yf - 1, BRASS[3] if i else BRASS[4])
+    lx = (fx0 + fx1) // 2 - 3                      # brass hasp: hinge plate on the rim, folding down the front
+    for i in range(7):
+        _px(img, lx + i, yf - 2, BRASS[0] if i in (0, 6) else BRASS[4])
+        _px(img, lx + i, yf - 1, BRASS[0] if i in (0, 6) else BRASS[3])
+    for j in range(thick - 1):
+        for i in range(1, 6):
+            c_ = BRASS[5] if (j, i) == (0, 2) else BRASS[4] if j == 0 else BRASS[2] if j == thick - 2 else BRASS[3]
+            _px(img, lx + i, yf + j, c_)
+        _px(img, lx, yf + j, BRASS[0])
+        _px(img, lx + 6, yf + j, BRASS[0])
+        _px(img, lx + 7, yf + j, WALNUT[1])        # contact shadow of the hasp on the wood
+    _px(img, lx + 3, yf + 2, BRASS[0])             # the staple's slot
+    _px(img, lx + 3, yf + 1, BRASS[0])
     return solid
 
 

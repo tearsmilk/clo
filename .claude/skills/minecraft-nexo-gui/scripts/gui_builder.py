@@ -731,7 +731,7 @@ def draw_kitchen(img, oy, L):
                       L.get('handle', 22), L.get('handle_h', 14), L.get('seed', 2))
     elif p == 'tool_case':
         c, r, w, h = L.get('slots', [6, 0, 3, 2])
-        kitchen.tool_case(img, ox, oy, c, r, w, h, L.get('rim', 4), L.get('thick', 3))
+        kitchen.tool_case(img, ox, oy, c, r, w, h, L.get('rim', 4), L.get('thick', 5), L.get('wall', 3))
     elif p == 'plate':                    # serving plate: brim with a blue band, the well holds the slots
         c, r, w, h = L.get('slots', [6, 3, 3, 2])
         kitchen.plate(img, ox, oy, c, r, w, h, L.get('brim', 5), L.get('thick', 3))

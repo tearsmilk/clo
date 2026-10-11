@@ -36,6 +36,13 @@ If the user's numbers do not fit 9 x 6, find the reading that does and say which
 - Volume = thickness, not size (user: "make the board volumetric"): the board is 6 px thick - its front face
   is banded like a rounded edge (base under the lit nose, dark mid, shadow at the counter) with long-grain
   streaks, the top has a 2 px lit bevel band and a highlight along the lit corner, the shadow is offset 3 px.
+- A box reads deep when you see INTO it (user: "make the tool place volumetric"): each compartment shows the
+  inner face of its far wall as a 3 px strip at the top (dark mid, shadow where it meets the floor), the felt
+  gets a contact shadow under that wall and along the left wall, the partitions show their top edges (lit
+  nose on the far wall, darker on the side turned away), the walls are thick (5 px front face with grain,
+  2 px lit bevel on the rim), and metal fittings sit ON the volume - brass caps folding over the front
+  corners, a hasp folding from the rim down the front with its own contact shadow. The strip covers the top
+  rows of the slot's item area; items are drawn over it.
 - Props stay small next to the slots (user: "the knife is too big"): the knife's blade is about one slot
   long (20 px), 5 px tall - decoration must not compete with the zones.
 - Parts that stick out of the window add volume: the board's handle with a hanging hole (left), the chef's
@@ -56,7 +63,7 @@ If the user's numbers do not fit 9 x 6, find the reading that does and say which
 |------|-----------------|-------|
 | `counter` | `y0` (-1), `front_y` (116), `front` (3), `x0`/`x1` (-1/176), `seed` | stone worktop over the container part, lit front edge, front face |
 | `board` | `slots` [c, r, w, h] ([0,0,5,5]), `rim` [l, r, t, b] (5,3,5,2), `thick` (6), `handle` (22), `handle_h` (14), `seed` | cutting board with a cell per slot, knife marks, handle with a hole out of the window (canvas `left` >= handle + 2) |
-| `tool_case` | `slots` ([6,0,3,2]), `rim` (4), `thick` (3) | walnut case, felt compartments, brass latch |
+| `tool_case` | `slots` ([6,0,3,2]), `rim` (4), `thick` (5), `wall` (3) | deep walnut tool box: far-wall strip in each compartment, felt with contact shadows, partition tops, brass hasp and corner caps |
 | `plate` | `slots` ([6,3,3,2]), `brim` (5), `thick` (3) | white plate: brim with blue band, sunken well = slot area |
 | `arrow` | `x`, `y` (window px, top-left of the 6x5 shape) | cream arrow with outline and shadow |
 | `knife` | `x` (tip), `y` (spine), `blade` (20), `handle` (14), `bh` (5) | small chef's knife lying on the counter |
