@@ -149,7 +149,7 @@ public final class QuestMenu implements Listener {
             readyAll += ready;
 
             int slot = CAT_SLOTS[i];
-            inv.setItem(slot, item(catMat(c, "icon", Material.PAPER), catName(c), lore, ready > 0, Math.max(1, Math.min(64, ready))));
+            inv.setItem(slot, icon(c.key, item(catMat(c, "icon", Material.PAPER), catName(c), lore, ready > 0, Math.max(1, Math.min(64, ready)))));
             h.actions.put(slot, () -> { click(p); openCategory(p, c, 0); });
 
             // индикатор под категорией: есть награды / в процессе / всё сделано (на нарисованном фоне не нужен —
@@ -163,7 +163,7 @@ public final class QuestMenu implements Listener {
 
         inv.setItem(PROFILE, profile(p, readyAll));
         inv.setItem(PREMIUM_MAIN, premiumInfo(p));
-        inv.setItem(CLOSE, item(Material.BARRIER, gui("close"), List.of(), false, 1));
+        inv.setItem(CLOSE, icon("close", item(Material.BARRIER, gui("close"), List.of(), false, 1)));
         h.actions.put(CLOSE, () -> { click(p); p.closeInventory(); });
         p.openInventory(inv);
     }
@@ -217,7 +217,7 @@ public final class QuestMenu implements Listener {
         if (locked > 0) {
             List<String> lore = new ArrayList<>();
             for (String l : plugin.getConfig().getStringList("premium.locked-lore")) lore.add(fill(l, "count", locked));
-            items.add(item(lockedIcon(), premiumText("premium.locked-name", "count", locked), lore, false, Math.min(64, locked)));
+            items.add(icon("locked", item(lockedIcon(), premiumText("premium.locked-name", "count", locked), lore, false, Math.min(64, locked))));
             placers.add(() -> deny(p));
         }
 
@@ -232,7 +232,7 @@ public final class QuestMenu implements Listener {
         place(h, items, placers, pg);
         if (items.isEmpty()) {
             String text = c == Category.SEASONAL && plugin.registry().activeSeason(qm.today()) == null ? gui("no-season") : gui("empty");
-            inv.setItem(22, item(Material.BARRIER, text, List.of(), false, 1));
+            inv.setItem(22, icon("empty", item(Material.BARRIER, text, List.of(), false, 1)));
         }
         nav(h, p, pg, pages, np -> openCategory(p, c, np), () -> openMain(p));
         p.openInventory(inv);
@@ -254,7 +254,7 @@ public final class QuestMenu implements Listener {
             }
             default -> { }
         }
-        return item(catMat(c, "icon", Material.PAPER), catName(c), lore, false, 1);
+        return icon(c.key, item(catMat(c, "icon", Material.PAPER), catName(c), lore, false, 1));
     }
 
     // ── сюжет: список цепочек ──
@@ -289,7 +289,7 @@ public final class QuestMenu implements Listener {
 
             Material icon = locked ? lockedIcon() : ch.icon();
             String name = locked ? gui("story-locked-name", "chain", Text.strip(ch.name())) : ch.name();
-            items.add(item(icon, name, lore, ready, 1));
+            items.add(locked ? icon("locked", item(icon, name, lore, ready, 1)) : item(icon, name, lore, ready, 1));
             placers.add(() -> { click(p); openChain(p, ch.id(), 0); });
         }
 
@@ -307,10 +307,10 @@ public final class QuestMenu implements Listener {
         if (!hl.isEmpty()) hl.add("");
         hl.add(gui("chains-count", "done", done, "total", vis.size()));
         hl.add(bar(done, vis.size()) + " &f" + percent(done, vis.size()) + "%");
-        inv.setItem(HEADER, item(catMat(Category.STORY, "icon", Material.WRITABLE_BOOK), catName(Category.STORY), hl, false, 1));
+        inv.setItem(HEADER, icon("story", item(catMat(Category.STORY, "icon", Material.WRITABLE_BOOK), catName(Category.STORY), hl, false, 1)));
 
         place(h, items, placers, pg);
-        if (items.isEmpty()) inv.setItem(22, item(Material.BARRIER, gui("empty"), List.of(), false, 1));
+        if (items.isEmpty()) inv.setItem(22, icon("empty", item(Material.BARRIER, gui("empty"), List.of(), false, 1)));
         nav(h, p, pg, pages, np -> openStory(p, np), () -> openMain(p));
         p.openInventory(inv);
     }
@@ -334,8 +334,8 @@ public final class QuestMenu implements Listener {
                 List<String> lore = new ArrayList<>(q.description());
                 lore.add("");
                 lore.add(gui("step-passed"));
-                items.add(item(mat(plugin.getConfig().getString("gui.step-done-icon"), Material.LIME_STAINED_GLASS_PANE),
-                        gui("step-done-name", "step", n, "quest", Text.strip(q.name())), lore, false, Math.min(64, n)));
+                items.add(icon("step-done", item(mat(plugin.getConfig().getString("gui.step-done-icon"), Material.LIME_STAINED_GLASS_PANE),
+                        gui("step-done-name", "step", n, "quest", Text.strip(q.name())), lore, false, Math.min(64, n))));
                 placers.add(() -> deny(p));
             } else if (i == step && !locked) {
                 QuestManager.Entry e = entry(ch, i);
@@ -350,8 +350,8 @@ public final class QuestMenu implements Listener {
                 List<String> lore = locked
                         ? new ArrayList<>(plugin.getConfig().getStringList("premium.chain-locked-lore").stream().map(this::fill).toList())
                         : guiList("step-locked-lore", "prev", n - 1);
-                items.add(item(mat(plugin.getConfig().getString("gui.step-locked-icon"), Material.GRAY_DYE),
-                        gui("step-locked-name", "step", n), lore, false, Math.min(64, n)));
+                items.add(icon("step-locked", item(mat(plugin.getConfig().getString("gui.step-locked-icon"), Material.GRAY_DYE),
+                        gui("step-locked-name", "step", n), lore, false, Math.min(64, n))));
                 placers.add(() -> deny(p));
             }
         }
@@ -411,8 +411,8 @@ public final class QuestMenu implements Listener {
         else lore.add(gui("status-left", "left", q.amount() - prog));
 
         if (claimed) {
-            return item(mat(plugin.getConfig().getString("gui.claimed-icon"), Material.LIME_STAINED_GLASS_PANE),
-                    gui("claimed-name", "quest", Text.strip(q.name())), lore, false, 1);
+            return icon("claimed", item(mat(plugin.getConfig().getString("gui.claimed-icon"), Material.LIME_STAINED_GLASS_PANE),
+                    gui("claimed-name", "quest", Text.strip(q.name())), lore, false, 1));
         }
         String name = done ? gui("ready-name", "quest", q.name()) : q.name();
         return item(q.icon(), name, lore, done, 1);
@@ -452,7 +452,7 @@ public final class QuestMenu implements Listener {
             lore.add(gui("premium-left", "time", fmt(Duration.ofMillis(until - System.currentTimeMillis()))));
         }
         Material m = mat(plugin.getConfig().getString(base + ".icon"), prem ? Material.GOLDEN_HOE : Material.WHEAT);
-        return item(m, premiumText(base + ".name"), lore, prem, 1);
+        return icon(prem ? "premium-active" : "premium-inactive", item(m, premiumText(base + ".name"), lore, prem, 1));
     }
 
     // ── клики ──
@@ -503,14 +503,14 @@ public final class QuestMenu implements Listener {
 
     /** Нижняя панель: назад, страницы. */
     private void nav(Holder h, Player p, int page, int pages, java.util.function.IntConsumer open, Runnable back) {
-        h.inv.setItem(BACK, item(Material.ARROW, gui("back"), List.of(), false, 1));
+        h.inv.setItem(BACK, icon("back", item(Material.ARROW, gui("back"), List.of(), false, 1)));
         h.actions.put(BACK, () -> { click(p); back.run(); });
         if (page > 0) {
-            h.inv.setItem(PREV, item(Material.SPECTRAL_ARROW, gui("prev-page", "page", page), List.of(), false, 1));
+            h.inv.setItem(PREV, icon("prev", item(Material.SPECTRAL_ARROW, gui("prev-page", "page", page), List.of(), false, 1)));
             h.actions.put(PREV, () -> { turn(p); open.accept(page - 1); });
         }
         if (page + 1 < pages) {
-            h.inv.setItem(NEXT, item(Material.SPECTRAL_ARROW, gui("next-page", "page", page + 2), List.of(), false, 1));
+            h.inv.setItem(NEXT, icon("next", item(Material.SPECTRAL_ARROW, gui("next-page", "page", page + 2), List.of(), false, 1)));
             h.actions.put(NEXT, () -> { turn(p); open.accept(page + 1); });
         }
     }
@@ -572,6 +572,18 @@ public final class QuestMenu implements Listener {
                 try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { }
             }
             it.setItemMeta(m);
+        }
+        return it;
+    }
+
+    /** Своя иконка из ресурспака (menu.icons.<key>, например zenquests:icon_daily) поверх обычного предмета. Пусто — как есть. */
+    private ItemStack icon(String key, ItemStack it) {
+        String s = plugin.getConfig().getString("menu.icons." + key, "");
+        NamespacedKey model = s == null || s.isBlank() ? null : NamespacedKey.fromString(s.trim().toLowerCase());
+        if (model == null) return it;
+        ItemMeta m = it.getItemMeta();
+        if (m != null) {
+            try { m.setItemModel(model); it.setItemMeta(m); } catch (Throwable ignored) { }
         }
         return it;
     }

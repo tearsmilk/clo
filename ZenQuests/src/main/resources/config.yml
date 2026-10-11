@@ -34,6 +34,23 @@ menu:
   textures:
     enabled: true
     font: "zenquests:menu"
+  # Свои иконки кнопок меню (ресурспак: assets/zenquests/items/icon_*.json). Пусто "" — обычный предмет.
+  icons:
+    daily: "zenquests:icon_daily"
+    weekly: "zenquests:icon_weekly"
+    seasonal: "zenquests:icon_seasonal"
+    story: "zenquests:icon_story"
+    premium-active: "zenquests:icon_premium_on"
+    premium-inactive: "zenquests:icon_premium_off"
+    locked: "zenquests:icon_locked"
+    claimed: "zenquests:icon_claimed"
+    step-done: "zenquests:icon_step_done"
+    step-locked: "zenquests:icon_step_locked"
+    close: "zenquests:icon_close"
+    back: "zenquests:icon_back"
+    prev: "zenquests:icon_prev"
+    next: "zenquests:icon_next"
+    empty: "zenquests:icon_empty"
   # name/icon — карточка категории; pane/corner — цвет рамки её страницы; description — строки под названием
   categories:
     daily:
