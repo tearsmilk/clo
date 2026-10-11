@@ -150,19 +150,39 @@ LINE_H = 10          # line advance for multi-line text
 SPACING = 1
 
 
-def _glyph(ch):
+def _glyph(ch, narrow=False):
     g = _G.get(ch) or _G.get(ch.upper()) or _G[" "]
-    return g + ["." * len(g[0])] * (GLYPH_H - len(g))
+    g = g + ["." * len(g[0])] * (GLYPH_H - len(g))
+    return _narrow(g) if narrow else g
 
 
-def _line_width(line, spacing):
+def _narrow(rows):
+    """Narrow face for tight labels: trim an empty last column, then drop one column that repeats a
+    neighbour (closest to the middle) - 'н', 'о', 'а' lose a column of their counter, stems stay."""
+    if len(rows[0]) > 1 and all(r[-1] == "." for r in rows) and ch_used(rows):
+        rows = [r[:-1] for r in rows]
+    w = len(rows[0])
+    if w < 4:
+        return rows
+    cols = ["".join(r[c] for r in rows) for c in range(w)]
+    for c in sorted(range(1, w - 1), key=lambda c: abs(c - (w - 1) / 2)):
+        if cols[c] == cols[c - 1] or cols[c] == cols[c + 1]:
+            return [r[:c] + r[c + 1:] for r in rows]
+    return rows
+
+
+def ch_used(rows):
+    return any("#" in r for r in rows)
+
+
+def _line_width(line, spacing, narrow=False):
     if not line:
         return 0
-    return sum(len(_glyph(c)[0]) for c in line) + spacing * (len(line) - 1)
+    return sum(len(_glyph(c, narrow)[0]) for c in line) + spacing * (len(line) - 1)
 
 
-def text_width(text, scale=1, spacing=SPACING):
-    return max((_line_width(l, spacing) for l in text.split("\n")), default=0) * scale
+def text_width(text, scale=1, spacing=SPACING, narrow=False):
+    return max((_line_width(l, spacing, narrow) for l in text.split("\n")), default=0) * scale
 
 
 def text_height(text, scale=1):
@@ -172,20 +192,22 @@ def text_height(text, scale=1):
     return ((len(lines) - 1) * LINE_H + last) * scale
 
 
-def draw_text(img, x, y, text, color, scale=1, shadow=None, outline=None, spacing=SPACING, align="left"):
+def draw_text(img, x, y, text, color, scale=1, shadow=None, outline=None, spacing=SPACING, align="left",
+              narrow=False):
     """Draw text with its top-left at (x, y). color/shadow/outline are RGBA tuples.
 
     shadow: Minecraft-style 1px drop shadow (down-right). outline: 1px ring around glyphs.
     align: 'left' or 'center' (lines centred inside the block's width).
+    narrow: 4 px wide letters (see _narrow) for labels that do not fit, e.g. "Настройки" on a 3-slot tile.
     """
     lines = text.split("\n")
-    bw = text_width(text, spacing=spacing)
+    bw = text_width(text, spacing=spacing, narrow=narrow)
     mask = Image.new("L", (bw + 2, (len(lines) - 1) * LINE_H + GLYPH_H + 2), 0)
     mp = mask.load()
     for li, line in enumerate(lines):
-        cx = 1 + ((bw - _line_width(line, spacing)) // 2 if align == "center" else 0)
+        cx = 1 + ((bw - _line_width(line, spacing, narrow)) // 2 if align == "center" else 0)
         for ch in line:
-            rows = _glyph(ch)
+            rows = _glyph(ch, narrow)
             for j, row in enumerate(rows):
                 for i, c in enumerate(row):
                     if c == "#":

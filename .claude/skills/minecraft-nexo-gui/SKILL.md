@@ -99,7 +99,7 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
   great for the server name), `"bracket_tab"` (royal tab with steel/gold material letters) or `"ribbon"`.
   Material lettering (`pixfont.draw_material_text`, steel/gold/wood/emerald/crimson) is the go-to for titles. Pixel text at x2 or bolder needs wider gaps - the builder handles that; do not
   fake bold by smearing pixels, letters with 1px counters (М, Ю, Ж) turn into blobs.
-- Labels: pixel font with lowercase and Cyrillic, `\n` for two lines, `label_style` `shadow` | `plaque` | `bar` |
+- Labels: pixel font with lowercase and Cyrillic (`narrow=True` 4 px letters when a word does not fit), `\n` for two lines, `label_style` `shadow` | `plaque` | `bar` |
   `wood` | `stone` (UI-kit plates with nails/chips).
 - Scenes: when the reference is a picture-like GUI (stall, workshop, shop counter) use `layers` (rect/pattern,
   awning, post, sprite, slot_frame) instead of tiles; real items sit in framed slots. No image model needed -
@@ -186,6 +186,13 @@ Then send the user the preview first (they judge visually), then the files.
   DeluxeMenus - slot map and what the plugin does in `references/kitchen.md`. Read it for any crafting
   station / workstation menu.
 
+- **Main menu in the house style** (the user's own look: every destination a raised slab of its own material
+  on a slate counter - leather, planks, deepslate, velvet, cloth, steel - with a volumetric picture lying on
+  it: medallion + coins, portrait on a nail with the player's real head, nether portal, chest, book; dark
+  plaques, social keys, walnut header with gold letters): layers `{"type": "hub", "part": ...}` from
+  `scripts/hub.py`; example `assets/examples/main_menu/`. When the user shows someone else's menu and asks for
+  it "in our style", keep its slot layout (measure it) and redraw every tile this way - `references/main-menu.md`.
+
 ## Rebuilding a reference "1 in 1"
 When the user shows a finished GUI and asks for an exact copy, measure it instead of eyeballing:
 `scripts/ref_tools.py` (palette, charmap, boxes, compare) finds the window, stripe orders, offsets and colours;
@@ -229,5 +236,6 @@ reference is a pixel off. Full method and the measured royal kit: `references/re
 - `references/shop-flow.md` - the screens of a shop, measured stall layout, shop kit, DeluxeMenus amount/sell logic
 - `references/safe-lock.md` - safe code lock + storage skin, steel kit, code entry with DeluxeMenus meta
 - `references/kitchen.md` - workstation menus (cutting board): zone layout, slot map, kitchen kit, plugin logic
+- `references/main-menu.md` - main menu in the house style: measured layout, material slabs, player head, hub kit
 - `references/texture-shading.md` - hand-painted texture shading rules (5-tone ramps, light, AO, materials, tiles)
 - `references/artist-brief.md` - artist hand-off kit and brief

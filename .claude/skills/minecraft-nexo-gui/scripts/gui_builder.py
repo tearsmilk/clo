@@ -41,6 +41,7 @@ import rustic  # noqa: E402
 import shop  # noqa: E402
 import safe  # noqa: E402
 import kitchen  # noqa: E402
+import hub  # noqa: E402
 import scenes  # noqa: E402
 import icons16  # noqa: E402
 
@@ -396,6 +397,8 @@ def small_icon(src, sdir):
         return safe.render_icon(src[5:])
     if src.startswith('kitchen:'):                    # kitchen kit: kitchen:cutting_board
         return kitchen.render_icon(src[8:])
+    if src.startswith('hub:'):                        # main-menu kit stand-ins: hub:head
+        return hub.render_icon(src[4:])
     return load_icon(resolve(src, sdir), 16, 16)
 
 
@@ -519,6 +522,9 @@ def draw_layers(img, oy, layers, sdir, th):
             continue
         if t == 'kitchen':                # kitchen kit (kitchen.py): counter, board, tool case, plate, knife, ...
             draw_kitchen(img, oy, L)
+            continue
+        if t == 'hub':                    # main-menu kit (hub.py): slate counter, material slabs, keys, sign
+            draw_hub(img, oy, L)
             continue
         if t == 'nameplate':              # green ribbon label (rustic kit) centred on x
             rustic.nameplate(img, OX + L['x'], oy + L['y'], L['text'], L.get('min_w', 60))
@@ -743,6 +749,24 @@ def draw_kitchen(img, oy, L):
         kitchen.sign(img, ox + L.get('x', 88), oy + L['y'], L['text'])
     else:
         raise SystemExit(f"unknown kitchen part '{p}'")
+
+
+def draw_hub(img, oy, L):
+    """Main-menu kit parts: backdrop, sign, tile (slots, material, label, art, narrow, head_slot), key."""
+    p, ox = L['part'], OX
+    if p == 'backdrop':                   # slate counter under the container part, lit front edge
+        kitchen.counter(img, ox, oy, L.get('y0', -1), L.get('front_y', 127), L.get('front', 3), -1, 176,
+                        L.get('seed', 4), ramp=hub.SLATE)
+    elif p == 'sign':                     # walnut header plank with gold letters, sticks out above the window
+        hub.header(img, ox + L.get('x', 88), oy + L['y'], L['text'], hub.SLATE)
+    elif p == 'tile':
+        c, r, w, h = L['slots']
+        hub.tile(img, ox, oy, c, r, w, h, L['material'], L.get('label', ''), L.get('art'), L.get('narrow', False),
+                 L.get('seed', 1), L.get('head_slot'))
+    elif p == 'key':
+        hub.key(img, ox, oy, L['slot'], L['brand'])
+    else:
+        raise SystemExit(f"unknown hub part '{p}'")
 
 
 # ----------------------------------------------------------------------------- buttons

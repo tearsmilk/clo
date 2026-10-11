@@ -72,11 +72,12 @@ def _on_ground(img, x, y):
     return 0 <= x < img.width and 0 <= y < img.height and img.getpixel((x, y))[3] == 255
 
 
-def projected_shadow(img, solid, dx=2, dy=2, c=None, soft=True):
+def projected_shadow(img, solid, dx=2, dy=2, c=None, soft=True, ramp=None):
     """Shadow of a solid on what is already drawn (the counter): one darker tone, offset down-right, and with
     soft=True a 1 px penumbra one step lighter round its far edge (delicate shading: one extra step, still
     crisp pixels). Pixels with nothing under them (outside the counter) get no shadow."""
-    c = c or STONE[1]
+    ramp = ramp or STONE                           # the ramp of the surface the shadow falls on
+    c = c or ramp[1]
     hard = set()
     for x, y in solid:
         q = (x + dx, y + dy)
@@ -86,12 +87,13 @@ def projected_shadow(img, solid, dx=2, dy=2, c=None, soft=True):
         pen = {(x + a, y + b) for x, y in hard for a, b in ((1, 0), (0, 1), (1, 1))} - hard - set(solid)
         for q in pen:
             if _on_ground(img, *q) and q[0] >= min(x for x, _ in solid) + dx:
-                img.putpixel(q, STONE[2])
+                img.putpixel(q, ramp[2])
     for q in hard:
         img.putpixel(q, c)
 
 
-def raised(img, top, thick, ramp, shadow=True, lit_edges=True, shadow_off=(2, 2), front_grain=0.0, seed=1):
+def raised(img, top, thick, ramp, shadow=True, lit_edges=True, shadow_off=(2, 2), front_grain=0.0, seed=1,
+           shadow_ramp=None):
     """A slab seen from the front-above: `top` = top-face pixels; the front face is the top face pushed down
     `thick` px. The front face is banded like a rounded edge: base right under the lit nose, dark mid, shadow
     in the last row at the counter; front_grain adds dark streaks along it (long-grain wood). Returns
@@ -100,7 +102,7 @@ def raised(img, top, thick, ramp, shadow=True, lit_edges=True, shadow_off=(2, 2)
     for k in range(1, thick + 1):
         solid |= {(x, y + k) for x, y in top}
     if shadow:
-        projected_shadow(img, solid, *shadow_off)
+        projected_shadow(img, solid, *shadow_off, ramp=shadow_ramp)
     out = edge(solid)
     front = solid - top
     face = top - out
@@ -165,27 +167,28 @@ def sheen(img, face, ramp, x0, y0, x1, y1, at=0.3, width=0.07, seed=1):
 
 # ------------------------------------------------------------------ counter
 
-def counter(img, ox, oy, y0=-1, y_front=116, front=3, x0=-1, x1=176, seed=4):
+def counter(img, ox, oy, y0=-1, y_front=116, front=3, x0=-1, x1=176, seed=4, ramp=None):
     """Stone worktop under the whole container part: one flat base tone with granite clusters, a lit front
     edge, a darker front face and an outline. The player inventory below stays vanilla."""
+    STONE_ = ramp or STONE
     d = ImageDraw.Draw(img)
     X0, X1, Y0, YF = ox + x0, ox + x1, oy + y0, oy + y_front
-    d.rectangle((X0, Y0, X1, YF + front), fill=STONE[3])
+    d.rectangle((X0, Y0, X1, YF + front), fill=STONE_[3])
     rnd = random.Random(seed)
     shapes = (((0, 0), (1, 0)), ((0, 0), (0, 1)), ((0, 0), (1, 0), (1, 1)), ((0, 0), (1, 0), (2, 0)),
               ((0, 0), (0, 1), (1, 1)))
     for _ in range(int((X1 - X0) * (YF - Y0) * 0.006)):
         x, y = rnd.randint(X0 + 2, X1 - 3), rnd.randint(Y0 + 3, YF - 3)
-        c = STONE[2] if rnd.random() < 0.65 else STONE[4]
+        c = STONE_[2] if rnd.random() < 0.65 else STONE_[4]
         _paint(img, [(x + a, y + b) for a, b in rnd.choice(shapes)], c)
-    d.line((X0, Y0, X1, Y0), fill=STONE[0])                    # back edge (gap to the wall)
-    d.line((X0 + 1, Y0 + 1, X1 - 1, Y0 + 1), fill=STONE[2])    # AO along the back
-    d.line((X0, YF, X1, YF), fill=STONE[4])                    # lit front edge
-    d.rectangle((X0, YF + 1, X1, YF + front - 1), fill=STONE[2])
-    d.line((X0, YF + front, X1, YF + front), fill=STONE[0])
-    d.line((X0, Y0, X0, YF + front), fill=STONE[0])
-    d.line((X1, Y0, X1, YF + front), fill=STONE[0])
-    d.line((X0 + 1, Y0 + 1, X0 + 1, YF - 1), fill=STONE[4])    # lit left end
+    d.line((X0, Y0, X1, Y0), fill=STONE_[0])                    # back edge (gap to the wall)
+    d.line((X0 + 1, Y0 + 1, X1 - 1, Y0 + 1), fill=STONE_[2])    # AO along the back
+    d.line((X0, YF, X1, YF), fill=STONE_[4])                    # lit front edge
+    d.rectangle((X0, YF + 1, X1, YF + front - 1), fill=STONE_[2])
+    d.line((X0, YF + front, X1, YF + front), fill=STONE_[0])
+    d.line((X0, Y0, X0, YF + front), fill=STONE_[0])
+    d.line((X1, Y0, X1, YF + front), fill=STONE_[0])
+    d.line((X0 + 1, Y0 + 1, X0 + 1, YF - 1), fill=STONE_[4])    # lit left end
 
 
 # ------------------------------------------------------------------ cutting board

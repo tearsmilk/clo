@@ -172,12 +172,17 @@ over the container part, vanilla inventory below): `counter`, `board` (cell per 
 the window), `tool_case` (walnut + felt compartments), `plate` (white plate, the well holds the slots), `arrow`,
 `knife`, `sign` - keys and the cutting-board layout in `references/kitchen.md`.
 
+Main-menu kit parts (`{"type": "hub", "part": ...}`; destinations as material slabs on a slate counter):
+`backdrop`, `sign` (walnut plank, gold letters), `tile` (`slots`, `material` leather|planks|stone|velvet|cloth|steel,
+`label`, `art` medallion|portrait|portal|chest|book, `narrow`, `head_slot`), `key` (`slot`, `brand`
+discord|youtube|tiktok) - layout and rules in `references/main-menu.md`.
+
 `preview_items: [{"slot" | "slots", "icon", "amount"}]` - preview only: also writes `preview_items.png`, the
 menu with items in it (food on a board, loot in a storage skin); nothing goes into the menu config.
 
 16px icon sources accepted wherever an icon or `preview` is read: PNG path, `sprite:<name>`, `item:<recipe>:<ramp>`
 (`scripts/item_icons.py`), `shop:back|next|home|close|ok[:color]`, `shop:alert`, `safe:lamp[:red|amber]`,
-`kitchen:cutting_board|cutting_board32|knife` (32x32 icons are shrunk to the slot in previews).
+`kitchen:cutting_board|cutting_board32|knife` (32x32 icons are shrunk to the slot in previews), `hub:head`.
 Buttons take `dm: {...}` for raw DeluxeMenus keys (requirements, `dynamic_amount`, `priority`); the spec takes
 `on_open: [...]` (DeluxeMenus `open_commands`, actions when the menu opens) and `dm_menu: {...}` (raw menu-level
 keys such as `open_requirement`).
