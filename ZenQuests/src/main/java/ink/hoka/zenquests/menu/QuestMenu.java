@@ -10,6 +10,7 @@ import ink.hoka.zenquests.util.Text;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -538,9 +539,21 @@ public final class QuestMenu implements Listener {
             if (glow) {
                 try { m.setEnchantmentGlintOverride(true); } catch (Throwable ignored) { }
             }
+            if (name.isBlank()) {
+                // стекло рамки — без пустой подсказки при наведении
+                try { m.setHideTooltip(true); } catch (Throwable ignored) { }
+            } else if (tooltipStyle() != null) {
+                try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { }
+            }
             it.setItemMeta(m);
         }
         return it;
+    }
+
+    /** Свой стиль подсказки (тултипа) из ресурспака — menu.tooltip-style, например zenquests:farm. Пусто — обычный. */
+    private NamespacedKey tooltipStyle() {
+        String s = plugin.getConfig().getString("menu.tooltip-style", "");
+        return s == null || s.isBlank() ? null : NamespacedKey.fromString(s.trim().toLowerCase());
     }
 
     /** Полоска из 20 палочек: заполненные — зелёные. */

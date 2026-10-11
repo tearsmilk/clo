@@ -25,6 +25,10 @@ menu:
   accent: LIGHT_BLUE_STAINED_GLASS_PANE
   corner: CYAN_STAINED_GLASS_PANE
   background: BLACK_STAINED_GLASS_PANE
+  # Стиль подсказки при наведении на предметы меню (нужен ресурспак со спрайтами
+  # assets/zenquests/textures/gui/sprites/tooltip/farm_background.png и farm_frame.png).
+  # Пусто "" — обычная подсказка Minecraft. Без ресурспака у игроков будет фиолетово-чёрная рамка!
+  tooltip-style: "zenquests:farm"
   # name/icon — карточка категории; pane/corner — цвет рамки её страницы; description — строки под названием
   categories:
     daily:

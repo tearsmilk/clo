@@ -12,7 +12,7 @@ chmod +x gradlew      # один раз, если после распаковк�
 ./gradlew build
 ```
 
-Готовый плагин: `build/libs/ZenQuests-1.2.0.jar` → кинуть в `plugins/` сервера.
+Готовый плагин: `build/libs/ZenQuests-1.3.0.jar` → кинуть в `plugins/` сервера.
 В VSCode: открыть папку `ZenQuests`, поставить Extension Pack for Java + Gradle for Java
 (предложит сам), сборка — вкладка Gradle → `build → build`.
 Байткод собирается под Java 21 (минимум Paper 1.21.11), работает и на Java 25.
@@ -32,6 +32,10 @@ chmod +x gradlew      # один раз, если после распаковк�
 
 Из коробки: 38+10 ежедневных, 26+8 еженедельных, 2 сезона (12 и 8 квестов),
 3 сюжетные цепочки (в т.ч. «Хроники Тихой долины» — 11 глав).
+Фермерский тултип: `config.yml → menu.tooltip-style: "zenquests:farm"` — предметы меню получают
+свой стиль подсказки; картинки (`assets/zenquests/textures/gui/sprites/tooltip/farm_*.png`) идут
+ресурспаком через Nexo. Без пака ставь `""`, иначе у игроков будет фиолетово-чёрная рамка.
+
 Если `quests.yml` на сервере уже есть, новые квесты появятся только после его замены. Награды — команды из консоли (`{player}` — ник).
 Админ: `/квесты reload`, `/квесты reset <игрок> [daily|weekly|seasonal|story|all]`.
 
