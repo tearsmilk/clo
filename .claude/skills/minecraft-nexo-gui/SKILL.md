@@ -97,7 +97,11 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
   bricks, stone, checker, stripes, dots, noise) | `image` (+ `image`: a scene that covers the tile).
 - Headers: `header.size: 2` (double-size plate on a tab) or `header.style: "block"` (Minecraft-logo letters,
   great for the server name), `"bracket_tab"` (royal tab with steel/gold material letters) or `"ribbon"`.
-  Material lettering (`pixfont.draw_material_text`, steel/gold/wood/emerald/crimson) is the go-to for titles. Pixel text at x2 or bolder needs wider gaps - the builder handles that; do not
+  Material lettering (`pixfont.draw_material_text`, steel/gold/wood/emerald/crimson) is the go-to for titles.
+  For a show-piece title (server name, big header) draw VOLUMETRIC letters: `scripts/lettering.py volume`
+  (chunky 3D block letters - extrusion shaded by side direction, bevel, flat two-band face, one outline),
+  layer `{"type": "lettering", "text": ..., "color": "#hex"}`; the tutorial's gothic 5-step look
+  (`style: "tutorial"`) only for horror themes - `references/lettering.md`. Pixel text at x2 or bolder needs wider gaps - the builder handles that; do not
   fake bold by smearing pixels, letters with 1px counters (М, Ю, Ж) turn into blobs.
 - Labels: pixel font with lowercase and Cyrillic (`narrow=True` 4 px letters when a word does not fit), `\n` for two lines, `label_style` `shadow` | `plaque` | `bar` |
   `wood` | `stone` (UI-kit plates with nails/chips).
@@ -237,5 +241,6 @@ reference is a pixel off. Full method and the measured royal kit: `references/re
 - `references/safe-lock.md` - safe code lock + storage skin, steel kit, code entry with DeluxeMenus meta
 - `references/kitchen.md` - workstation menus (cutting board): zone layout, slot map, kitchen kit, plugin logic
 - `references/main-menu.md` - main menu in the house style: measured layout, material slabs, player head, hub kit
+- `references/lettering.md` - a beautiful title letter in five steps (shape, outline, gradient, shadows, accent)
 - `references/texture-shading.md` - hand-painted texture shading rules (5-tone ramps, light, AO, materials, tiles)
 - `references/artist-brief.md` - artist hand-off kit and brief

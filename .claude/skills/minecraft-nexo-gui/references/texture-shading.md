@@ -85,7 +85,8 @@ replicated 1:1) wins over this rule; anything new follows it.
 - Every pixel is a hard square: no blur, no smoothing, no anti-aliasing, no semi-transparent pixels.
 - Meaningful clusters (2-6 px streaks, chips, grain lines) instead of single-pixel noise.
 - No photographic gradients and no all-over dithering: gradients are bands of the five tones; a checker
-  pattern only as a deliberate texture (e.g. coarse cloth), never as a blend between two tones.
+  pattern only as a deliberate texture (e.g. coarse cloth) or as the 2 transition rows of a decorative
+  lettering gradient (`references/lettering.md`), never as an all-over blend between two tones.
 - Stepped transitions typical of good pixel art.
 - Readable at the original size and when enlarged.
 

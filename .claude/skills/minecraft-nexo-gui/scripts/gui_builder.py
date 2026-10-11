@@ -526,6 +526,17 @@ def draw_layers(img, oy, layers, sdir, th):
         if t == 'hub':                    # main-menu kit (hub.py): slate counter, material slabs, keys, sign
             draw_hub(img, oy, L)
             continue
+        if t == 'lettering':              # title letters (lettering.py): x = centre, y = top
+            import lettering
+            ramp = kitchen._r5(L['color']) if L.get('color') else lettering.GOTHIC
+            if L.get('style', 'volume') == 'volume':      # clean 3D block letters (default)
+                im = lettering.volume(L['text'], ramp, scale=L.get('scale', 3), depth=L.get('depth', 4),
+                                      accent=L.get('accent'), seed=L.get('seed', 1), pad=0)
+            else:                                          # the tutorial's 5 steps (gothic / horror look)
+                im = lettering.render(L['text'], L.get('stage', 5), ramp=ramp, scale=L.get('scale', 3),
+                                      depth=L.get('depth', 2), nib=L.get('nib', True), seed=L.get('seed', 1), pad=0)
+            img.alpha_composite(im, (OX + L['x'] - im.width // 2, oy + L['y']))
+            continue
         if t == 'nameplate':              # green ribbon label (rustic kit) centred on x
             rustic.nameplate(img, OX + L['x'], oy + L['y'], L['text'], L.get('min_w', 60))
             continue
