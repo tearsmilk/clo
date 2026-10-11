@@ -296,6 +296,15 @@ def _slab_glyph(ch, scale, condensed=False):
     ~7x14 at scale 2). Narrower but diagonals get thin - use it only when the title does not fit."""
     rows = _glyph(ch)
     w = len(rows[0])
+    if scale == 1 and condensed == 'bold':              # small bold: 2px stems, 1px joins, 7 rows tall
+        widths = []
+        for c in range(w):
+            run = best = 0
+            for r in rows:
+                run = run + 1 if r[c] == '#' else 0
+                best = max(best, run)
+            widths.append(2 if best >= 3 else 1)
+        return [''.join(r[c] * widths[c] for c in range(w)) for r in rows]
     if scale == 1:
         return rows
     if not condensed:
@@ -381,7 +390,7 @@ def draw_material_text(img, x, y, text, material='steel', scale=2, outline=True,
     O, D, M, L, S = [rgba(c) for c in (MATERIALS[material] if isinstance(material, str) else material)]
     g = gap if gap is not None else (2 if outline else 1)
     m = _slab_mask(text, scale, g, condensed)
-    if scale > 1:
+    if scale > 1 or condensed == 'bold':
         m = _round_corners(m)
     o = 1 if outline else 0
     full = Image.new('L', (m.width + 2 * o, m.height + 2 * o), 0)
@@ -401,6 +410,12 @@ def draw_material_text(img, x, y, text, material='steel', scale=2, outline=True,
             inner = 0 < xx < W - 1 and fp[xx - 1, yy] and fp[xx + 1, yy]
             if outline:
                 c = L if rel < half else M
+                if condensed == 'bold' and scale == 1:
+                    c = L if rel < 3 else M
+                    if down:
+                        c = D
+                    px[xx, yy] = c
+                    continue
                 if down or (scale > 1 and cap - 2 <= rel < cap) or (scale == 1 and rel == cap - 1):
                     c = D                                    # shaded underside / dark base
                 elif scale > 1 and rel == cap - 3:

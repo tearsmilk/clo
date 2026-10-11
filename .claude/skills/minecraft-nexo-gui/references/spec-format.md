@@ -10,7 +10,7 @@ Paths are relative to the spec file.
 | `id` | required | glyph id, file names, DeluxeMenus menu name |
 | `namespace` | `gui` | pack namespace -> `assets/<ns>/textures/gui/<id>.png` |
 | `rows` | 6 | 1-6 chest rows |
-| `theme` | `oak` | `vanilla` (exact Minecraft), `oak`, `spruce`, `birch`, `stone`, `cobble`, `nether`, `dark`, `meadow` - textured frame band + calm body; `royal` - dark slate body, thin gold line, rimmed slot wells (pair with `bracket_tab`, `section_divider`, `hotbar_frame`, `brackets`); or a dict |
+| `theme` | `oak` | `vanilla` (exact Minecraft), `oak`, `spruce`, `birch`, `stone`, `cobble`, `nether`, `dark`, `meadow` - textured frame band + calm body; `rustic` - wooden board frame around the window + parchment + maroon wells (pair with `header.style: "sign"`); `royal` - dark slate body, thin gold line, rimmed slot wells (pair with `bracket_tab`, `section_divider`, `hotbar_frame`, `brackets`); or a dict |
 | `section_divider` | none | gold bar with a gem between the container rows and the player inventory (covers the client's "Инвентарь" label - use with `hide_inventory_label`). Royal theme: `true` / `{"gem": false}` = the measured kit divider; other themes: `{"gem": "#439950", "color": "#d9893f", "overhang": 4, "brackets": true}` |
 | `hotbar_frame` | none | royal theme: `true` = measured gold/red frame; other themes `{"color": "#a83333", "corner": "#d9893f"}` |
 | `corner_brackets` | false | gold L brackets on the window corners (royal kit; top ones stick 2px out - needs `canvas` margins >= 2) |
@@ -30,6 +30,11 @@ Paths are relative to the spec file.
 | `canvas` | {} | `{"left": 30, "right": 30, "top": 17, "bottom": 0}` px of art outside the 176px window (banners, pillars, torches). Texture must stay <= 256x256; the title shift becomes `-8 - left` automatically |
 | `container_panel` | true | false = no window panel above the player inventory: the `layers` paint the whole upper part (scene menus). The builder warns and writes `preview_holes.png` if any window pixel stays transparent (vanilla grey would show there) |
 | `inventory_panel` | theme | theme name for a separate player-inventory panel (`"vanilla"` keeps it looking like Minecraft under a painted scene) |
+| `background` / `window_at` | none | use a ready-made PNG (bought pack) as the texture; `window_at: [x, y]` = vanilla window origin inside it. Turns off panel/slot/inventory drawing and turns on `preview_vanilla_under`. Layers and buttons still apply (relabel with `patch`/`text`/`nameplate`) |
+| `preview_vanilla_under` | false | preview draws the vanilla chest under the texture (what shows through in game) |
+| `variants` | none | list of dicts with `id`: one menu per entry, `${key}` placeholders anywhere in the spec (+ `${index}`, `${prev_id}`, `${next_id}`, `${prev_label}`, `${next_label}`); output `OUT/<id>/` + merged `OUT/_all/` |
+| `variant_defaults` | {} | values shared by all variants (overridden per variant) |
+| `hint_glyphs` | false | `true` = our mouse icons, or `{"lmb": "x.png", "rmb": "y.png"}`; Nexo glyphs `<ns>_lmb`/`<ns>_rmb` for lore (`%nexo_<ns>_lmb%` with PlaceholderAPI); the preview tooltip renders them |
 | `nexo_items` | [] | real icon items for slots: `{"id": "hokaria_quest_new", "icon": "sprite:quest_new" or "icons/x.png", "name": "<gold>Новый квест"}` -> 16x16 texture + `Nexo/items/<id>_items.yml`; use them with `material: nexo-<id>` in `extra_items` |
 | `open_commands` | [id] | DeluxeMenus open commands |
 | `extra_items` | [] | raw DeluxeMenus items, e.g. `{"id":"head","material":"head-%player_name%","slot":10}` |
@@ -48,6 +53,7 @@ Paths are relative to the spec file.
   and a shadow; `text` may be "" (blank tab like the reference); text in material lettering (`material`
   steel/gold/..., `size` 1 or 2 - size 2 makes the tab 26 high) or `font: "pixel"`; `width`, `height`, `top`.
 - `style: lettering` = only material letters over the window top (`material`, `size`, `y`).
+- `style: sign` = rustic plank sign with crown, coins, pennants and crossed arrows (`width`, `height`, `y`, `dx`).
 - `font: "material"` + `material` also works for `ribbon` headers (gold letters on a red ribbon).
 - `style: ribbon` = cloth ribbon with folded, V-cut tails across the top edge (quest boards, castle scenes):
   `color`, `width` (px, default text + 76), `y` (px from the window top, default `9 - band height`), `size` 1|2,
@@ -80,6 +86,7 @@ Paths are relative to the spec file.
 | `sparkle` | false | add sparkles to this icon (rare / special) |
 | `name`, `lore` | label / - | DeluxeMenus display name & lore (legacy `&` codes) |
 | `commands` | - | DeluxeMenus `left_click_commands` |
+| `right_commands` | - | DeluxeMenus `right_click_commands` |
 | `material` | invisible | set e.g. `nexo-farm_icon` to show a real item instead of `PAPER` + `item_model: nexo:empty` |
 | `hide_tooltip` | false | no tooltip (pure decoration) |
 
@@ -113,6 +120,14 @@ squeezing letters.
 | `note` | `color`, `seal` (null = none), `age` 0..1 (0.7), `torn` 0..2 (1), `pin`, `shadow`, `seed` | old parchment: yellowed rim, stains, faded ink, nibbled edges, a torn-off corner, ragged bottom, 1px shadow on the wall |
 | `divider` | `color`, `gem` | ornamental line with arrow tips, beads and a centre gem |
 | `frame` | `kind`, `inner`, `rim` | empty framed panel (like slot_bar without wells) |
+| `card` | `picture` (PNG at box-6 size = 1:1, or `scene:<name>`, `hero` icon), `label` | rustic picture card with a ribbon nameplate |
+| `grid_frame` | `slots: [c,r,w,h]` | rustic frame around a block of well slots (show them with `slots_visible`) |
+| `bookmark` | `x`, `y` (window px), `icon` (icons16 name), `w`, `h` | red ribbon tab sticking out of the window side, tucked under the parchment |
+| `patch` | `box`, `from_x` | wipe text in a background: each row filled with the colour at column `from_x` |
+| `text` | `x` (centre), `y`, `text`, `material` (name or 5 colours), `scale`, `condensed` (`"bold"` small) | material lettering anywhere |
+| `nameplate` | `x` (centre), `y`, `text`, `min_w` | green ribbon label (rustic) |
+
+Any layer takes `"if": "${var}"` - skipped when the value is empty (variants).
 | `brackets` | `size` (16), `t` (5) | gold L brackets on the 4 corners of the box - put the box 2px outside the window or a section |
 | `bracket` | `corner` tl/tr/bl/br, `t` | one bracket |
 | `meander` | `color` | gold key strip (squares, dots, bars) - beside a title tab |

@@ -37,8 +37,9 @@ def palette(p, n=40):
 
 
 def window(p):
-    """Find the chest window from the slot grid: the first slot box is the top-left 18x18 block that repeats
-    9 times to the right and at least once 18px below (the frame around it does not repeat). Window = box - (7, 17)."""
+    """Find the chest window from the slot grid: the top-left 18x18 block that repeats to the right (9 columns,
+    or fewer for packs that only paint some slots) and at least once 18px below. Window = box - (7, 17) for a
+    full row; for a narrower grid every column offset is listed (centred grids are the usual case)."""
     im = load(p)
     W, H = im.size
     raw = im.tobytes()
@@ -47,34 +48,40 @@ def window(p):
     def block(x, y):
         return b''.join(raw[(y + j) * stride + x * 4:(y + j) * stride + (x + 18) * 4] for j in range(18))
 
-    def repeats(x, y):
-        first = raw[y * stride + x * 4:y * stride + (x + 18) * 4]
-        if first[3::4].count(0) == 18:
-            return False
-        for k in range(1, 9):
-            o = y * stride + (x + 18 * k) * 4
-            if raw[o:o + 72] != first:
-                return False
+    def run(x, y):
         b0 = block(x, y)
-        return all(block(x + 18 * k, y) == b0 for k in range(1, 9)) and y + 36 <= H and block(x, y + 18) == b0
+        if b0[3::4].count(0) > 100 or y + 36 > H or block(x, y + 18) != b0:
+            return 0
+        n = 1
+        while x + 18 * (n + 1) <= W and block(x + 18 * n, y) == b0:
+            n += 1
+        return n
 
-    hit = None
+    best = None
     for y in range(0, H - 36):
-        for x in range(0, W - 162):
-            if repeats(x, y):
-                hit = (x, y)
-                break
-        if hit:
+        for x in range(0, W - 54):
+            o = y * stride + x * 4
+            first = raw[o:o + 72]
+            if first[3::4].count(0) == 18 or raw[o + 72:o + 144] != first or raw[o + 144:o + 216] != first:
+                continue
+            n = run(x, y)
+            if n >= 3 and (best is None or n > best[2]):
+                best = (x, y, n)
+        if best and best[2] == 9:
             break
-    if not hit:
-        print('no 9 x 2 grid of identical 18px slots found - read the slots with charmap')
+    if not best:
+        print('no grid of identical 18px slots found - read the slots with charmap')
         return
-    gx, gy = hit
-    wx, wy = gx - 7, gy - 17
-    print(f'first slot box at ({gx}, {gy})  ->  window origin ({wx}, {wy})')
-    print(f'spec canvas: left {wx}, top {wy}, right {W - wx - 176} (texture {W}x{H}); art bbox {im.getbbox()}')
-    print('if that grid is the PLAYER inventory (scene menus paint no container slots), the window top is '
-          + ', '.join(f'{gy - 18 * r - 30} for {r} rows' for r in range(1, 7) if gy - 18 * r - 30 >= 0))
+    gx, gy, n = best
+    print(f'first slot box at ({gx}, {gy}), {n} columns wide')
+    cands = range(0, 10 - n) if n < 9 else [0]
+    for c0 in cands:
+        wx = gx - 7 - 18 * c0
+        tag = '  <- centred' if n < 9 and c0 == (9 - n) // 2 else ''
+        print(f'  if it starts at column {c0}: window x = {wx}, canvas left {wx}, right {W - wx - 176}{tag}')
+    print(f'  window y = {gy - 17} - 18*row (row of that first slot: try the one that puts the frame top at the'
+          f' window top); art bbox {im.getbbox()}')
+    print('if the grid is the PLAYER inventory (scene menus), the window top is gy - (18*rows + 30).')
     print('check with charmap: container rows at window y 17+18r, player inventory at 18*rows+30, hotbar at '
           '18*rows+88 - references are sometimes 1px off; keep the vanilla positions.')
 
