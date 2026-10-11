@@ -21,6 +21,26 @@ What the polished menus (BuiltByBit packs, Pinterest "Minecraft GUI menu" boards
 7. **Tooltips carry the details.** The texture shows only the label; `display_name` + `lore` explain what the
    button does, cost, requirements, and end with a call to action ("» Нажми, чтобы перейти").
 
+## What the reference menus do (studied examples)
+
+Five popular styles, all built on the same grid trick:
+
+| example | frame | buttons | labels | extras |
+|---------|-------|---------|--------|--------|
+| "Quick Menu" | vanilla grey | 3x? tiles with sunburst backgrounds, big icon | white caps with dark outline, 2 lines ("MAIN\nWORLD") | group separator line between two tile blocks; bottom toolbar of 1x1 icon buttons |
+| steampunk "МЕНЮ/НАБОРЫ" | ornate copper frame wider than the window, gears, header tab above | cards of different widths with an illustration (a little scene) | full-width dark **bar** under each card | back-arrow bar at the bottom; player inventory hidden under art |
+| bento "МЕНЮ" | vanilla grey + dark plaque header with rivets | different sizes (3x4, 3x5, 3x1, 1x1); each tile has its own **material texture** (grass with coins, wooden boards, stone) | mixed-case text on a dark **plaque**, 2 lines | inner framed picture; social 1x1 icons; player inventory kept |
+| "Select Language" | vanilla grey | two big framed paintings (Kremlin, Statue of Liberty) | text + small flag under the picture | lots of breathing room - few, large choices |
+| profile strip | vanilla grey | big player face, rank badges (coloured plates), equipment slots | short caps badges | **real items** (armour, head) live in normal slots next to the art |
+
+Takeaways baked into the builder:
+- vary tile sizes: one hero tile (3x4 / 3x5), mid tiles (3x3, 3x2), strips (3x1) for secondary actions, 1x1 icons for socials/close
+- give tiles material (`style: pattern`) or a scene (`style: image`) - flat colour only for small utility buttons
+- labels on plaques/bars read better over busy art than bare text
+- a dark recessed `panel` under all tiles produces the thin separator lines seen in every example
+- the header deserves size: `header.size: 2` puts a double-size title on a tab above the window
+- keep slots that hold real items (`slots_visible`) drawn as slots so players see where items go
+
 ## Icons
 
 Best quality path: generate each icon separately with an image model (prompt template in

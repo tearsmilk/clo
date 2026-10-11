@@ -27,8 +27,9 @@ Ask only what you cannot infer; sensible defaults in brackets:
 - Theme: frame material (`oak`, `spruce`, `birch`, `stone`, `nether`, `dark`) and colour per button
 - Namespace for the pack [server name in lowercase]
 
-Read `references/design-guide.md` before choosing layout/colours - it captures what makes popular server menus
-look good (big painted tiles, one hue per destination, vanilla-style frame, honest pixels, short labels).
+Read `references/design-guide.md` before choosing layout/colours - it breaks down five popular server menus
+(quick-menu tiles, steampunk cards, bento layout, picture choices, profile strip) and the rules they share:
+varied tile sizes, textured or illustrated tiles, labels on plaques, a strong header, honest 1:1 pixels.
 
 ### 2. Make icons (one per button)
 Preferred: an image model + background removal, then let the builder pixel-fit them.
@@ -44,26 +45,37 @@ python3 scripts/icon_tools.py sheet icons/check.png icons/*.png             # lo
 - Dependencies: `pip install pillow "rembg[cpu]"` (rembg downloads its model on first use).
 
 ### 3. Write the spec and build
-A spec is JSON; see `assets/examples/farm_menu/spec.json` for a complete 6-row, 9-tile example.
+A spec is JSON. Two complete examples: `assets/examples/farm_menu/spec.json` (9 equal sunburst tiles, oak) and
+`assets/examples/hub_menu/spec.json` (bento layout like popular server menus: vanilla frame, big header tab,
+grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icons). Every key is listed in
+`references/spec-format.md`. The short version:
 ```json
 {
-  "id": "hokaria_main", "namespace": "hokaria", "rows": 6, "theme": "oak",
-  "title": "Hokaria » Меню фермы", "open_commands": ["menu"],
-  "preview_tooltip": "farm", "preview_background": "bg.png",
+  "id": "hokaria_hub", "namespace": "hokaria", "rows": 6, "theme": "vanilla",
+  "header": {"text": "Меню", "size": 2},
+  "panels": [{"x": 0, "y": 0, "w": 9, "h": 6, "color": "#3A3A3A"}],
   "buttons": [
-    {"id": "farm", "label": "Ферма", "x": 0, "y": 0, "w": 3, "h": 2, "color": "#5DAA3A",
-     "icon": "icons/farm.png", "style": "sunburst",
-     "name": "&e&lФерма", "lore": ["&7Сажай и собирай урожай"],
-     "commands": ["[close]", "[player] warp farm"]}
+    {"id": "farm", "label": "Ферма", "x": 0, "y": 0, "w": 3, "h": 4,
+     "style": "pattern", "pattern": "grass", "color": "#5E7A2E",
+     "icon": "icons/farm.png", "icon_frame": true, "label_style": "plaque",
+     "name": "&e&lФерма", "lore": ["&7Сажай и собирай урожай"], "commands": ["[close]", "[player] warp farm"]},
+    {"id": "fish", "label": "Рыбалка", "x": 6, "y": 0, "w": 3, "h": 3, "style": "image", "image": "art/pond.png",
+     "label_style": "plaque"},
+    {"id": "close", "x": 8, "y": 5, "style": "flat", "color": "#B83A3A", "icon": "icons/close.png", "commands": ["[close]"]}
   ]
 }
 ```
 - `x,y,w,h` are in **slots** (x 0-8, y 0..rows-1). Buttons may not overlap; the builder checks.
-- `style`: `sunburst` (default), `gradient`, `flat`. `label` is optional (icon-only 1x1 buttons).
-- Labels use the bundled 5x7 pixel font (Latin + full Cyrillic). Fit: ~8 letters on a 3-wide button,
-  ~5 on 2-wide; the builder refuses wider labels rather than squeezing letters together - shorten the word.
-- Optional: `draw_free_slots` (false hides empty container slots), `title_text` (live text after the glyph),
-  `ascent_nudge` / `shift_nudge` (1px corrections after testing in game).
+- Tile looks: `style` = `sunburst` | `gradient` | `flat` | `pattern` (+ `pattern`: grass, planks_v, planks_h,
+  bricks, stone, checker, stripes, dots, noise) | `image` (+ `image`: a scene that covers the tile).
+- Headers: `header.size: 2` (double-size plate on a tab) or `header.style: "block"` (Minecraft-logo letters,
+  great for the server name). Pixel text at x2 or bolder needs wider gaps - the builder handles that; do not
+  fake bold by smearing pixels, letters with 1px counters (М, Ю, Ж) turn into blobs.
+- Labels: pixel font with lowercase and Cyrillic, `\n` for two lines, `label_style` `shadow` | `plaque` | `bar`.
+  Fit is ~8-9 letters per line on a 3-wide button, ~5 on 2-wide; the builder refuses labels that do not fit
+  rather than squeezing letters (squeezed pixel letters merge into an unreadable blob).
+- Illustrations for `image` tiles: generate a small scene (or crop one from art the user already has) - a
+  pond for fishing, a market stall for the shop. They are posterized to a pixel palette automatically.
 
 ```bash
 python3 scripts/gui_builder.py spec.json out/
@@ -104,4 +116,5 @@ Then send the user the preview first (they judge visually), then the files.
 - `references/gui-geometry.md` - slot coordinates per row count, ascent/shift derivation, layering, other screens
 - `references/nexo-reference.md` - glyph keys and tags, multi-bitmap, invisible/icon items, pack layout, hosting, versions
 - `references/menu-plugins.md` - DeluxeMenus keys and actions, zMenu, writing your own plugin
-- `references/design-guide.md` - visual rules, icon pipeline, colour sets
+- `references/spec-format.md` - every spec key for gui_builder.py
+- `references/design-guide.md` - analysis of popular menus, visual rules, icon pipeline, colour sets
