@@ -1,0 +1,25 @@
+name: ZenQuests
+version: '${version}'
+main: ink.hoka.zenquests.ZenQuests
+api-version: '1.21'
+description: Система квестов
+website: https://hoka.ink
+authors: [nakuZen]
+softdepend: [TakuFarmers, Nexo]
+
+commands:
+  quests:
+    description: Меню квестов
+    usage: /квесты
+    aliases: [квесты, квест, quest, zenquests, zq]
+
+permissions:
+  zenquests.use:
+    description: Открывать меню квестов
+    default: true
+  zenquests.admin:
+    description: /квесты reload, reset и progress
+    default: op
+  zenquests.premium:
+    description: Подписка Ферма+ (доп. квесты и бонусные награды)
+    default: false

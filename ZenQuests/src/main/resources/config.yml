@@ -1,0 +1,93 @@
+# ==========================================================
+#  ZenQuests — настройки (https://hoka.ink)
+#  Сами квесты — в quests.yml. Перезагрузка без рестарта: /квесты reload
+#  Цвета: MiniMessage (<gradient:#a:#b>, <#ff8800>) и &-коды.
+# ==========================================================
+
+# Часовой пояс для сброса ежедневных (в 00:00) и еженедельных (в понедельник 00:00) квестов
+timezone: "Europe/Moscow"
+
+# true — награда выдаётся сразу при выполнении; false — игрок забирает её в меню
+auto-claim: false
+
+# Полоска прогресса сверху экрана на пару секунд, когда квест продвинулся
+bossbar:
+  enabled: true
+  seconds: 3
+
+# Не засчитывать ломание блоков, которые поставили игроки (защита от «поставил-сломал»).
+# Помнит до рестарта сервера.
+ignore-player-placed-blocks: true
+
+menu:
+  title: "<gradient:#4facfe:#00f2fe>Квесты</gradient>"
+  categories:
+    daily:    { name: "&eЕжедневные",   icon: SUNFLOWER }
+    weekly:   { name: "&bЕженедельные", icon: CLOCK }
+    seasonal: { name: "&6Сезонные",     icon: PUMPKIN_PIE }
+    story:    { name: "&dСюжет",        icon: WRITABLE_BOOK }
+
+# ── Подписка Ферма+ ──
+# Подписчик = игрок с правом из permission. Выдавай его донат-плагином или LuckPerms:
+#   /lp user <ник> permission set zenquests.premium true
+#   /lp user <ник> permission settemp zenquests.premium true 30d   (на 30 дней)
+# Что даёт: доп. квесты (premium-quests в quests.yml, premium: true у сезонных/сюжетных)
+# и бонусные награды (premium-rewards у любого квеста).
+premium:
+  permission: "zenquests.premium"
+  name: "<gradient:#ffd34e:#ff9f1c>Ферма+</gradient>"
+  quest-tag: "&6✦ Задание {premium}"
+  bonus-title: "&6✦ Бонус {premium}&6:"
+  bonus-title-locked: "&8✦ Бонус с {premium}&8:"
+  locked-icon: GOLD_BLOCK
+  locked-name: "&6🔒 Ещё {count} заданий с {premium}"
+  locked-lore:
+    - "&7Оформи подписку, чтобы открыть"
+    - "&7дополнительные задания и бонусы."
+  info-active:
+    name: "{premium} &aактивна"
+    icon: GOLDEN_HOE
+    lore:
+      - "&7Тебе доступны доп. задания"
+      - "&7и бонусные награды. Спасибо! &6♥"
+  info-inactive:
+    name: "{premium}"
+    icon: WHEAT
+    lore:
+      - "&7С подпиской:"
+      - "&f• больше ежедневных и еженедельных"
+      - "&f• свои сезонные и сюжетные задания"
+      - "&f• бонус к награде за каждый квест"
+
+messages:
+  prefix: "&6[Квесты] &r"
+  no-permission: "&cУ тебя нет прав на это."
+  players-only: "&cМеню квестов открывается только в игре."
+  completed: "&aКвест выполнен: {quest}&a! Забери награду: &f/квесты"
+  completed-auto: "&aКвест выполнен: {quest}&a! Награда выдана."
+  claimed: "&aНаграда за {quest}&a получена."
+  not-done: "&7Квест ещё не выполнен: &f{progress}/{amount}"
+  already-claimed: "&7Награда уже получена."
+  premium-bonus: "&6✦ Бонус Ферма+ за {quest}&6 получен!"
+  new-day: "&eНовые ежедневные квесты! &f/квесты"
+  reloaded: "&aКвесты перезагружены."
+  reset: "&aКвесты игрока &f{player}&a сброшены: &f{what}"
+  player-not-found: "&cИгрок &f{player}&c не в сети."
+  usage-admin: "&7/квесты reload &8— &fперезагрузить конфиги\n&7/квесты reset <игрок> [daily|weekly|seasonal|story|all] &8— &fсбросить прогресс\n&7/квесты progress <игрок> <тип> [цель|-] [кол-во] &8— &fзасчитать действие"
+  unknown-type: "&cНеизвестный тип: &f{type}"
+  progress-added: "&aИгроку &f{player}&a засчитано {type} ×{amount}"
+
+# Тексты в меню
+gui:
+  back: "&cНазад"
+  status-progress: "&7Прогресс: {bar} &f{progress}/{amount}"
+  status-ready: "&a&lНажми, чтобы забрать награду"
+  status-claimed: "&8Награда получена"
+  rewards-title: "&7Награда:"
+  resets-in: "&7Обновятся через &f{time}"
+  season-ends-in: "&7Сезон закончится через &f{time}"
+  no-season: "&7Сейчас сезонных квестов нет"
+  done-count: "&7Выполнено: &f{done}/{total}"
+  story-step: "&7Шаг &f{step}/{total}"
+  story-done: "&aЦепочка пройдена"
+  empty: "&7Здесь пока пусто"
