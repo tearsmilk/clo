@@ -43,6 +43,10 @@ If the user's numbers do not fit 9 x 6, find the reading that does and say which
 - The counter's front edge sits where the client would write "Inventory" (y 110 for 5 rows), so the label is
   hidden (`hide_inventory_label`), and the vanilla player inventory stays below (`container_panel: false`,
   `draw_player_inventory: false`, `preview_vanilla_under: true`).
+- Delicate shading (user: "beautiful, very delicate shading"): wood, stone, felt and ceramic use
+  `ramp5(..., soft=1)` (kitchen.SOFT), objects get a selective outline and a soft contact shadow, the board a
+  sheen band along the grain, the slot cells gentle walls, the plate a concave well - see "Delicate shading"
+  in `references/texture-shading.md`. The knife's steel keeps the contrasty metal ramp.
 - Grain and granite are sparse clusters; flat faces stay mostly one tone (`references/texture-shading.md`).
   Check: `python3 scripts/shading.py check out/texture/<id>.png --kit kitchen` (every colour must come from a
   kit ramp, 0 outside).

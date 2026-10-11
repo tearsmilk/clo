@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Texture shading helpers (references/texture-shading.md): five-tone ramps and a quality check.
 
-    python3 shading.py ramp5 '#5a6578' [--hue-dark 0.03 --hue-light -0.02]
+    python3 shading.py ramp5 '#5a6578' [--hue-dark 0.03 --hue-light -0.02] [--soft 1]
         Highlight / Light Midtone / Base / Dark Midtone / Shadow (+ outline), with hue and saturation shifts
     python3 shading.py demo chart.png
         5-stage shading chart (flat -> form shadow -> highlight + terminator -> reflection + bounce -> rim +
@@ -28,10 +28,12 @@ def _hex(c):
     return '#%02x%02x%02x' % tuple(c[:3])
 
 
-def ramp5(base, hue_dark=None, hue_light=None, outline=True):
+def ramp5(base, hue_dark=None, hue_light=None, outline=True, soft=0.0):
     """Five tones around `base`: [shadow, dark mid, base, light mid, highlight] (+ outline first if outline).
     Shadows turn cooler (toward blue) and a bit more saturated, highlights warmer and less saturated - unless
-    hue_dark / hue_light are given (fractions of the colour wheel, + = toward higher hue)."""
+    hue_dark / hue_light are given (fractions of the colour wheel, + = toward higher hue).
+    soft 0..1 = delicate shading: the three middle tones move close together (gentle transitions across a
+    face, band compression) while shadow and highlight keep some range for definition; the hue shift stays."""
     r, g, b = [v / 255 for v in _rgb(base)]
     h, s, v = colorsys.rgb_to_hsv(r, g, b)
 
@@ -39,23 +41,28 @@ def ramp5(base, hue_dark=None, hue_light=None, outline=True):
         dd = ((target - h0 + 0.5) % 1.0) - 0.5
         return (h0 + max(-k, min(k, dd))) % 1.0
 
-    # (value, saturation factor, side): darks are fractions of the base value, lights move toward white
+    # (value, saturation factor, side): darks are fractions of the base value, lights move toward white;
+    # the second set is the delicate one
     steps = [(0.48, 1.15, 'dark'), (0.74, 1.07, 'dark'), (None, 1.0, None), (0.42, 0.82, 'light'),
              (0.8, 0.55, 'light')]
+    gentle = [(0.62, 1.1), (0.88, 1.04), (None, 1.0), (0.2, 0.9), (0.52, 0.66)]
     out = []
-    for k, ks, side in steps:
+    for (k, ks, side), (kg, ksg) in zip(steps, gentle):
         hh, vv = h, v
+        if side:
+            amt0 = 1 - k if side == 'dark' else k
+            k = k + (kg - k) * soft
+            ks = ks + (ksg - ks) * soft
         if side == 'dark':
-            amt = 1 - k
-            hh = (h + hue_dark * amt * 2) % 1 if hue_dark is not None else toward(h, 0.66, 0.06 * amt)
+            hh = (h + hue_dark * amt0 * 2) % 1 if hue_dark is not None else toward(h, 0.66, 0.06 * amt0)
             vv = v * k
         elif side == 'light':
-            hh = (h + hue_light * k) % 1 if hue_light is not None else toward(h, 0.13, 0.03 * k)
+            hh = (h + hue_light * amt0) % 1 if hue_light is not None else toward(h, 0.13, 0.03 * amt0)
             vv = v + (1 - v) * k
         ss = max(0.0, min(1.0, s * ks))
         out.append(tuple(int(round(x * 255)) for x in colorsys.hsv_to_rgb(hh, ss, min(1.0, vv))))
     if outline:
-        o = colorsys.hsv_to_rgb(toward(h, 0.66, 0.05), min(1, s * 1.2), max(0.04, v * 0.2))
+        o = colorsys.hsv_to_rgb(toward(h, 0.66, 0.05), min(1, s * 1.2), max(0.04, v * (0.2 + 0.06 * soft)))
         out.insert(0, tuple(int(round(x * 255)) for x in o))
     return out
 
@@ -145,12 +152,14 @@ def check(path, tile=False, quiet=False, ramps=None):
             nx_, ny_ = x + dx, y + dy
             if 0 <= nx_ < W and 0 <= ny_ < H and px[nx_, ny_][3] != 0:
                 continue
-            for step in range(3):
-                qx, qy = x - dx * step, y - dy * step
+            for step in range(3):                   # skip the outline: near-black, or much darker than the
+                qx, qy = x - dx * step, y - dy * step   # next pixel inward (soft / selective outlines)
                 if not (0 <= qx < W and 0 <= qy < H) or px[qx, qy][3] != 255:
                     break
                 L = _lum(px[qx, qy])
-                if L >= 30:
+                nx2, ny2 = qx - dx, qy - dy
+                Ln = _lum(px[nx2, ny2]) if 0 <= nx2 < W and 0 <= ny2 < H and px[nx2, ny2][3] == 255 else L
+                if L >= 30 and not (step == 0 and L < 0.62 * Ln):
                     sides[k].append(L)
                     break
     mean = {k: (sum(v) / len(v) if v else None) for k, v in sides.items()}
@@ -379,6 +388,8 @@ if __name__ == '__main__':
             kw['hue_dark'] = float(a[a.index('--hue-dark') + 1])
         if '--hue-light' in a:
             kw['hue_light'] = float(a[a.index('--hue-light') + 1])
+        if '--soft' in a:
+            kw['soft'] = float(a[a.index('--soft') + 1])
         names = ['outline', 'shadow', 'dark mid', 'base', 'light mid', 'highlight']
         for n, c in zip(names, ramp5(a[1], **kw)):
             print(f'{n:10s} {_hex(c)}')

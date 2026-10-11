@@ -48,6 +48,26 @@ From the user's shading references (sphere anatomy, a 5-stage material chart, a 
 - `shading.sphere5(nx, ny, stage)` and `shading.cylinder5(side, stage, chrome)` return the tone index for
   any ball, dome, rivet, knob, pipe, handle spoke or hinge knuckle.
 
+## Delicate shading (when the user asks for soft / delicate / "делекатный" shading)
+Still five tones + outline, still crisp pixels - only the spacing and the edges change:
+- **Close middle tones**: `ramp5(base, soft=1)` keeps the hue shift but puts dark mid, base and light mid
+  close together (dark mid ~0.88 of the base value, light mid ~20 % toward white), while shadow (~0.62) and
+  highlight keep some range. Transitions across a face become gentle; metals keep the standard (contrasty)
+  ramp - "metal = hard transitions".
+- **Selective outline**: the outline pixel on the lit top / left side of a silhouette takes the shadow tone,
+  the one on the shadow side and under the object keeps the dark outline - the form stays readable, the
+  edge facing the light stops looking drawn.
+- **Soft contact shadow**: the projected shadow keeps its hard core, plus a 1 px penumbra one step lighter
+  round its far edge (one extra step, no blur).
+- **Gentle grooves**: recesses and slot walls in dark mid / light mid instead of shadow / highlight, with a
+  single shadow pixel only in the deepest inner corner.
+- **Sheen**: on varnished or glazed faces a diagonal band of light-mid runs along the grain (ragged edges, a
+  few short highlight runs in its middle) instead of a gradient.
+- **Concave forms** (plates, bowls, wells): shadowed far wall, base floor, a 2 px light-mid band on the near /
+  right slope that faces the light, a lit near wall - the floor reads curved without a gradient.
+Check the result with `shading.py check`: it skips soft outlines when it measures the light direction (an
+outline pixel much darker than the next pixel inward), so a lit-side outline does not fool it.
+
 ## 3. Colour palette - five tones per main colour
 | tone | use |
 |------|-----|

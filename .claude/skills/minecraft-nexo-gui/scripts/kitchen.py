@@ -24,12 +24,13 @@ def _r5(hexc, **kw):
     return [tuple(c) + (255,) for c in ramp5(hexc, **kw)]
 
 
-STONE = _r5('#7b818c')        # cool grey counter
-BOARD = _r5('#c4925a')        # light beech board
-WALNUT = _r5('#6e4428')       # dark wood: tool case, knife handle
-FELT = _r5('#3e7048')         # green felt lining
-CERAMIC = _r5('#e6dcc6')      # white-cream glazed plate
-GLAZE = _r5('#3f72a6')        # blue band on the plate brim
+SOFT = 1.0                    # delicate shading: close middle tones (shading.ramp5 soft); metals keep contrast
+STONE = _r5('#7b818c', soft=SOFT)        # cool grey counter
+BOARD = _r5('#c4925a', soft=SOFT)        # light beech board
+WALNUT = _r5('#6e4428', soft=SOFT)       # dark wood: tool case, knife handle
+FELT = _r5('#3e7048', soft=SOFT)         # green felt lining
+CERAMIC = _r5('#e6dcc6', soft=SOFT)      # white-cream glazed plate
+GLAZE = _r5('#3f72a6', soft=SOFT)        # blue band on the plate brim
 STEEL = _r5('#8f98a6')        # knife blade
 BRASS = _r5('#b9862c')        # rivets, case corners
 
@@ -71,14 +72,23 @@ def _on_ground(img, x, y):
     return 0 <= x < img.width and 0 <= y < img.height and img.getpixel((x, y))[3] == 255
 
 
-def projected_shadow(img, solid, dx=2, dy=2, c=None):
-    """Hard shadow of a solid on what is already drawn (the counter): one darker tone, offset down-right.
-    Pixels with nothing under them (outside the counter) get no shadow."""
+def projected_shadow(img, solid, dx=2, dy=2, c=None, soft=True):
+    """Shadow of a solid on what is already drawn (the counter): one darker tone, offset down-right, and with
+    soft=True a 1 px penumbra one step lighter round its far edge (delicate shading: one extra step, still
+    crisp pixels). Pixels with nothing under them (outside the counter) get no shadow."""
     c = c or STONE[1]
+    hard = set()
     for x, y in solid:
         q = (x + dx, y + dy)
         if q not in solid and _on_ground(img, *q):
-            img.putpixel(q, c)
+            hard.add(q)
+    if soft:
+        pen = {(x + a, y + b) for x, y in hard for a, b in ((1, 0), (0, 1), (1, 1))} - hard - set(solid)
+        for q in pen:
+            if _on_ground(img, *q) and q[0] >= min(x for x, _ in solid) + dx:
+                img.putpixel(q, STONE[2])
+    for q in hard:
+        img.putpixel(q, c)
 
 
 def raised(img, top, thick, ramp, shadow=True, lit_edges=True, shadow_off=(2, 2), front_grain=0.0, seed=1):
@@ -117,7 +127,9 @@ def raised(img, top, thick, ramp, shadow=True, lit_edges=True, shadow_off=(2, 2)
                 _px(img, x, y, ramp[4])            # front edge: protruding corner
             elif (x + 1, y) in out:
                 _px(img, x, y, ramp[2])            # right side turns away
-    _paint(img, out, ramp[0])
+    for x, y in out:                               # selective outline: softer on the lit top / left side
+        lit = ((x, y + 1) in solid or (x + 1, y) in solid) and not ((x, y - 1) in solid or (x - 1, y) in solid)
+        _px(img, x, y, ramp[1] if lit else ramp[0])
     return solid, face
 
 
@@ -133,6 +145,22 @@ def grain(img, face, ramp, seed=1, density=0.05, vertical=False, light=0.3, leng
             run = [p for p in run if p in face]
             if len(run) >= 2:
                 _paint(img, run, c)
+
+
+def sheen(img, face, ramp, x0, y0, x1, y1, at=0.3, width=0.07, seed=1):
+    """Soft sheen on a varnished top face: a diagonal band (light from the top-left) made of light-mid runs
+    along the grain, so its edges are ragged like a real reflection on wood, with a few short highlight
+    runs in its middle. One extra tone, no gradient fill."""
+    rnd = random.Random(seed + 31)
+    span = (x1 - x0) + (y1 - y0)
+    for (x, y) in sorted(face):
+        t = ((x - x0) + (y - y0)) / span
+        dist = abs(t - at) / width
+        if dist < 1 and rnd.random() < 0.17 * (1 - dist):
+            run = [(x + i, y) for i in range(rnd.randint(3, 9)) if (x + i, y) in face]
+            _paint(img, run, ramp[4])
+            if dist < 0.3 and rnd.random() < 0.25 and len(run) >= 4:
+                _paint(img, run[1:3], ramp[5])
 
 
 # ------------------------------------------------------------------ counter
@@ -202,16 +230,21 @@ def board(img, ox, oy, c0=0, r0=0, n=5, m=5, rim=(5, 3, 5, 2), thick=6, handle=2
     top -= hole                                    # the hanging hole goes through: its far wall is the front
     solid, face = raised(img, top, thick, BOARD, shadow_off=(3, 2), front_grain=0.05, seed=seed)
     grain(img, face, BOARD, seed=seed, density=0.016, length=(5, 14))
+    sheen(img, face, BOARD, bx0, by0, bx1, by1, seed=seed)
     ring2 = {(x, y) for x, y in face if ((x, y - 2) not in solid or (x - 2, y) not in solid)
              and (x, y - 1) in face and (x - 1, y) in face}
     _paint(img, ring2, BOARD[4])                   # 2 px bevel band on the lit edges: a rounded, thick edge
     rnd = random.Random(seed + 7)                  # knife marks: short diagonal scratches, fresh (light) / old
-    for _ in range(14):
+    for _ in range(10):
         x, y = rnd.randint(fx0 + 2, fx1 - 6), rnd.randint(fy0 + 2, fy1 - 6)
-        ln, c = rnd.randint(3, 4), BOARD[4] if rnd.random() < 0.6 else BOARD[2]
+        ln, c = rnd.randint(3, 4), BOARD[4] if rnd.random() < 0.75 else BOARD[2]
         _paint(img, [(x + i, y + i) for i in range(ln)], c)
-    # slot cells: shallow squares cut into the board
-    cells(img, fx0, fy0, n, m, BOARD, wall_lit=BOARD[4], wall_dark=BOARD[1])
+    # slot cells: shallow squares cut into the board - gentle walls (dark mid / light mid), a shadow pixel only
+    # in the deepest inner corner
+    cells(img, fx0, fy0, n, m, BOARD, wall_lit=BOARD[4], wall_dark=BOARD[2])
+    for r in range(m):
+        for c in range(n):
+            _px(img, fx0 + 18 * c, fy0 + 18 * r, BOARD[1])
     for (x, y) in ([(bx0 + 3 + i, by0 + 1) for i in range(9)] + [(bx0 + 1, by0 + 3 + i) for i in range(6)]
                    + [(bx0 + 2, by0 + 2)]):
         _px(img, x, y, BOARD[5])                   # highlight along the lit corner of the edge
@@ -256,24 +289,23 @@ def plate(img, ox, oy, c0=6, r0=3, n=3, m=2, brim=5, thick=3):
     cx, cy = (fx0 + fx1) / 2, (fy0 + fy1) / 2
     for i, ring in enumerate(layers):
         for (x, y) in ring:
-            lit = (x - cx) / (fx1 - fx0) + (y - cy) / (fy1 - fy0) < 0.15      # far / left half
+            u = (x - cx) / (fx1 - fx0) + (y - cy) / (fy1 - fy0)          # -1 far-left .. 1 near-right
             if i == 0:
-                c = CERAMIC[5] if lit else CERAMIC[3]                        # rolled rim
+                c = CERAMIC[5] if u < 0.15 else CERAMIC[3]                   # rolled rim
             elif i == 2:
-                c = GLAZE[4] if lit else GLAZE[3]                            # blue band
+                c = GLAZE[4] if u < 0.15 else GLAZE[3]                       # blue band
             else:
-                c = CERAMIC[4]
+                c = CERAMIC[4] if u < 0.45 else CERAMIC[3]                   # the brim turns away near-right
             _px(img, x, y, c)
     _paint(img, rest, CERAMIC[4])
     _paint(img, well, CERAMIC[3])
     wedge = edge(well)
+    for (x, y) in well - wedge:          # concave well: the near / right slope faces the light - a 2 px band
+        if any((x + a, y + b) not in well for a, b in ((0, 2), (2, 0), (0, 3), (3, 0))):
+            _px(img, x, y, CERAMIC[4])
     for (x, y) in wedge:
         far = (x, y - 1) not in well or (x - 1, y) not in well
         _px(img, x, y, CERAMIC[2] if far else CERAMIC[5])
-    for (x, y) in well - wedge:                                              # soft shadow under the far wall
-        if (x, y - 1) in wedge and (x, y - 1) not in edge(well - wedge) and y - 1 == min(
-                yy for xx, yy in wedge if xx == x):
-            _px(img, x, y, CERAMIC[2] if (x - 1, y) in well else CERAMIC[3])
     x0b, y0b = fx0 - 1 - brim, fy0 - 1 - brim
     _paint(img, [(x0b + 6 + i, y0b + 2) for i in range(7)] + [(x0b + 2, y0b + 6 + i) for i in range(4)]
            + [(x0b + 3, y0b + 4), (x0b + 4, y0b + 3)], CERAMIC[5])          # glint on the brim
@@ -486,9 +518,10 @@ def icon_board32(T=4):
                 elif h == T - 1 and nx < ny:
                     c = BOARD[4]                   # the rounded nose under the lit edge
         img.putpixel((sx, sy), c)
-    for (x, y) in edge_ring(set(kind)):
+    for (x, y) in edge_ring(set(kind)):            # selective outline: softer on the lit top / left side
         if 0 <= x < 32 and 0 <= y < 32:
-            img.putpixel((x, y), BOARD[0])
+            lit = ((x, y + 1) in kind or (x + 1, y) in kind) and not ((x, y - 1) in kind or (x - 1, y) in kind)
+            img.putpixel((x, y), BOARD[1] if lit else BOARD[0])
     for (sx, sy), (h, d, p, q) in kind.items():   # highlight along the far-left corner of the edge
         if h == T and d > -1.1 and p < -6.0 and q < 19.5:
             img.putpixel((sx, sy), BOARD[5])
