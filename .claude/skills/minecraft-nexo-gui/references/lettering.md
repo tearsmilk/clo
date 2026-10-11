@@ -91,3 +91,27 @@ When the user brings a TTF / OTF (e.g. a blackletter): `python3 scripts/font_pix
 - **Licences**: read the font's README. "Personal use only" fonts cannot go on a server with a shop or
   donations without the commercial licence. Never commit a third-party font or its converted glyphs into
   the skill or the repo - they go only into the user's own pack.
+
+## Title styles from the user's font references (`lettering.arcade / bands / maze`)
+Measured on five references the user sent (arcade "GAME", a pink-purple banded alphabet, a classic small
+bitmap font, a maze-like block font). Our glyphs, their methods; all work with Cyrillic.
+- **Base for chunky styles**: the bold small pixfont (2-column stems, 1-row bars) scaled x2 - 4 px stems,
+  2 px bars, corners rounded 1 px, 4 px between letters. Growing slab letters instead closed the counters
+  of G, A, M and made the words unreadable.
+- **arcade** (`ARCADE` palettes gold, sky, mint, ruby): light face, the bottom quarter in a darker warmer
+  band, the same dark tone as a 1 px inner shadow on the row under every counter / overhang, a 1 px
+  near-black outline that is 1 px thicker at the bottom (the letter stands on it).
+- **bands** (`BANDS` sunset, ocean, forest, royal): the face cut into three hard horizontal bands (same
+  rows for the whole word), a 1 px rim of a lighter tone down the right-facing edges, a glint on each
+  top-left corner, dark outline + 2 px thickness underneath.
+- **classic**: a small clean bold bitmap font with lowercase - that is `pixfont` (`draw_text`, the bold
+  small mode of `draw_material_text`); nothing new to build.
+- **maze** (`MAZE` snow, stone, neon): every letter a solid block filling its cell; the 5x7 glyph's empty
+  areas become ONE 1 px groove each (through the unit centres, k = 3 px per unit), running toward the
+  opening if the area is open to the edge (slots), along its long side if it is a counter; a lone empty
+  corner unit is a light chamfer pixel; an area open on two sides gets the dead-area tone. Decorative:
+  short words only, it is the hardest style to read.
+- `px=2..3` (arcade / bands) upscales AFTER styling - big "art pixels" like the references; at 1:1 in a GUI
+  keep px=1.
+- In a spec: `{"type": "lettering", "style": "arcade" | "bands" | "maze", "palette": "gold", "text": ...,
+  "x": 88, "y": -20}`. Chart of all styles: `python3 -c "import lettering; lettering.styles_chart('out.png')"`.

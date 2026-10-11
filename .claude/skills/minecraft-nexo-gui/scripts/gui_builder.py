@@ -529,7 +529,13 @@ def draw_layers(img, oy, layers, sdir, th):
         if t == 'lettering':              # title letters (lettering.py): x = centre, y = top
             import lettering
             ramp = kitchen._r5(L['color']) if L.get('color') else lettering.GOTHIC
-            if L.get('style', 'volume') == 'volume':      # clean 3D block letters (default)
+            st = L.get('style', 'volume')
+            if st in ('arcade', 'bands', 'maze'):         # the user's font references (lettering.md)
+                fn = getattr(lettering, st)
+                im = fn(L['text'], L.get('palette', {'arcade': 'gold', 'bands': 'sunset', 'maze': 'snow'}[st]))
+                img.alpha_composite(im, (OX + L['x'] - im.width // 2, oy + L['y']))
+                continue
+            if st == 'volume':                             # clean 3D block letters (default)
                 im = lettering.volume(L['text'], ramp, scale=L.get('scale', 3), depth=L.get('depth', 4),
                                       accent=L.get('accent'), seed=L.get('seed', 1), pad=0)
             else:                                          # the tutorial's 5 steps (gothic / horror look)

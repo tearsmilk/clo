@@ -252,6 +252,172 @@ def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, p
     return img
 
 
+def chunky(text, scale=2, weight=None, gap=None):
+    """Chunky letter mask (the base of the arcade / bands styles): the bold small pixfont capitals (2-column
+    stems, 1-row bars) scaled x`scale` - 4 px stems, 2 px bars at scale 2 - with convex corners rounded by
+    1 px. Growing slab letters instead closed the counters of G, A, M (unreadable). Returns a pixel set."""
+    from pixfont import _round_corners
+    m = _slab_mask(text, 1, gap if gap is not None else 2, 'bold')
+    m = m.resize((m.width * scale, m.height * scale), Image.NEAREST)
+    m = _round_corners(m)
+    mp = m.load()
+    return {(x, y) for y in range(m.height) for x in range(m.width) if mp[x, y]}
+
+
+def _canvas(pts, pad=1):
+    xs, ys = [x for x, _ in pts], [y for _, y in pts]
+    return Image.new('RGBA', (max(xs) + 1 + pad, max(ys) + 1 + pad), (0, 0, 0, 0))
+
+
+ARCADE = {'gold': ('#ffd23f', '#f08a1c', '#e0401c', '#1a0e0a'),        # face, band, inner shadow, outline
+          'sky': ('#8fe3ff', '#3f9fe0', '#2a5fb8', '#0c1630'),
+          'mint': ('#a8f0a0', '#3fbf6a', '#1f8a4a', '#0a1e12'),
+          'ruby': ('#ff9a8a', '#e04050', '#a01c3c', '#1e0a10')}
+
+
+def arcade(text, palette='gold', scale=2, drop=1, gap=None, px=1):
+    """Arcade title letters (the user's "GAME" reference): chunky letters, a light face, the bottom quarter
+    in a warmer darker band, the same band as a 1-2 px inner shadow under every bar and over every counter
+    (light from above), a 1 px near-black outline that is `drop` px thicker at the bottom (the letter
+    stands on it). px = integer upscale AFTER styling (big "art pixels" like the reference)."""
+    face, band, inner, out = [_hex(c) for c in (ARCADE.get(palette, palette) if isinstance(palette, str)
+                                                  else palette)]
+    M = {(x + 1, y + 1) for x, y in chunky(text, scale, gap=gap)}
+    top, bot = min(y for _, y in M), max(y for _, y in M)
+    split = bot - max(2, (bot - top + 1) // 4) + 1
+    solid = M | {(x, y + k) for x, y in M for k in range(1, drop + 1)}
+    ring = {(x + dx, y + dy) for x, y in solid for dx, dy in N8} - solid
+    img = _canvas(solid | ring)
+    for p in solid | ring:
+        img.putpixel(p, out)
+    for (x, y) in M:
+        c = band if y >= split else face
+        if y > top and (x, y - 1) not in M and any((x, yy) in M for yy in range(top, y - 1)):
+            c = inner                                   # the row under a counter / an overhang: inner shadow
+        img.putpixel((x, y), c)
+    return img.resize((img.width * px, img.height * px), Image.NEAREST) if px > 1 else img
+
+
+BANDS = {'sunset': ('#d2604a', '#a83660', '#6e3a72', '#3a1c34', '#e88a8a', '#f2c0a8'),  # top, mid, low,
+         'ocean': ('#5ad0d0', '#3a86c8', '#4a4aa0', '#141a3a', '#9ae8f0', '#e0fbff'),   # outline, rim, glint
+         'forest': ('#a8d04a', '#4aa050', '#2a6a5a', '#0e2218', '#c8f070', '#f0ffc0'),
+         'royal': ('#f0c040', '#c86a28', '#8a2a3a', '#2a0e14', '#ffe08a', '#fff4d0')}
+
+
+def bands(text, palette='sunset', scale=2, drop=2, gap=None, px=1):
+    """Banded title letters (the user's pink-purple reference): chunky letters, the face cut into three
+    hard horizontal bands (light top, mid, dark low - the same rows for the whole word), a 1 px rim of the
+    rim tone down the right-facing edges, a glint pixel on each top-left corner, a dark outline and a `drop`
+    px thickness under the letter in the outline tone."""
+    t1, t2, t3, out, rim, glint = [_hex(c) for c in (BANDS.get(palette, palette) if isinstance(palette, str)
+                                                    else palette)]
+    M = {(x + 1, y + 1) for x, y in chunky(text, scale, gap=gap)}
+    top, bot = min(y for _, y in M), max(y for _, y in M)
+    h = bot - top + 1
+    solid = M | {(x, y + k) for x, y in M for k in range(1, drop + 1)}
+    ring = {(x + dx, y + dy) for x, y in solid for dx, dy in N8} - solid
+    img = _canvas(solid | ring)
+    for p in solid | ring:
+        img.putpixel(p, out)
+    for (x, y) in M:
+        t = (y - top) / h
+        c = t1 if t < 0.36 else t2 if t < 0.68 else t3
+        if (x + 1, y) not in M and (x, y - 1) in M:
+            c = rim                                     # rim down the right-facing edges
+        img.putpixel((x, y), c)
+    for (x, y) in M:                                     # glints on top-left corners
+        if (x - 1, y) not in M and (x, y - 1) not in M and (x + 1, y) in M and (x, y + 1) in M:
+            img.putpixel((x + 1, y + 1), glint) if (x + 1, y + 1) in M else None
+    return img.resize((img.width * px, img.height * px), Image.NEAREST) if px > 1 else img
+
+
+MAZE = {'snow': ('#f4f4f8', '#3e3e4a', '#c4c4d4', '#8a8a9a'),       # face, groove, corner chamfer, dead area
+        'stone': ('#c9c2b4', '#2a2622', '#9a9286', '#6e675e'),
+        'neon': ('#7ff0d8', '#101a24', '#3fa894', '#28606a')}
+
+
+def maze(text, palette='snow', k=3, gutter=2):
+    """Maze title letters (the user's square-block reference): every letter is a solid block filling its
+    cell; its shape is cut in by 1 px grooves. Built from the 5x7 pixfont glyph: each empty unit of the cell
+    becomes a groove running through the unit centres (k px per unit, so the groove is 1 px and joins its
+    neighbours); a groove that reaches the cell edge opens there (slot); a lone empty corner unit becomes a
+    light chamfer pixel; a big empty area open to the edge is filled with the dead-area tone."""
+    from pixfont import _glyph
+    face, groove, cham, dead = [_hex(c) for c in (MAZE.get(palette, palette) if isinstance(palette, str)
+                                                 else palette)]
+    glyphs = [_glyph(ch) for ch in text]
+    cw = 5 * k
+    ch_ = 7 * k
+    W = len(glyphs) * (cw + gutter) + gutter
+    img = Image.new('RGBA', (W, ch_ + 2 * gutter), (0, 0, 0, 0))
+    for gi, rows in enumerate(glyphs):
+        rows = rows[:7]
+        ox, oy = gutter + gi * (cw + gutter), gutter
+        if not any('#' in r for r in rows):
+            continue
+        for y in range(ch_):
+            for x in range(cw):
+                img.putpixel((ox + x, oy + y), face)
+        bg = {(c, r) for r in range(7) for c in range(min(5, len(rows[r]))) if rows[r][c] != '#'}
+        seen = set()
+        for u in sorted(bg):
+            if u in seen:
+                continue
+            comp, todo = set(), [u]
+            while todo:
+                p = todo.pop()
+                if p in comp or p not in bg:
+                    continue
+                comp.add(p)
+                todo += [(p[0] + dx, p[1] + dy) for dx, dy in N4]
+            seen |= comp
+            border = [p for p in comp if p[0] in (0, 4) or p[1] in (0, 6)]
+            if len(comp) == 1 and border and next(iter(comp)) in ((0, 0), (4, 0), (0, 6), (4, 6)):
+                cx, cy = border[0]
+                img.putpixel((ox + (0 if cx == 0 else cw - 1), oy + (0 if cy == 0 else ch_ - 1)), cham)
+                continue
+            c0, c1 = min(c for c, _ in comp), max(c for c, _ in comp)
+            r0, r1 = min(r for _, r in comp), max(r for _, r in comp)
+            sides = {('l' if c0 == 0 else ''), ('r' if c1 == 4 else ''), ('t' if r0 == 0 else ''),
+                     ('b' if r1 == 6 else '')} - {''}
+            if len(sides) >= 2 and len(comp) >= 4:            # a big area open on two sides: dead tone
+                for (c, r) in comp:
+                    for y in range(k):
+                        for x in range(k):
+                            img.putpixel((ox + c * k + x, oy + r * k + y), dead)
+                continue
+            mid = k // 2                                      # ONE groove through the unit centres: toward
+            horiz = (c1 - c0 >= r1 - r0) if not sides else bool(sides & {'l', 'r'})   # the opening if the
+            if horiz:                                         # area is open, else along its long side
+                yy = oy + round((r0 + r1) / 2 * k) + mid      # cell edge where the area does
+                xa = ox + (0 if c0 == 0 else c0 * k + mid)
+                xb = ox + (cw - 1 if c1 == 4 else c1 * k + mid)
+                for x in range(xa, xb + 1):
+                    img.putpixel((x, yy), groove)
+            else:
+                xx = ox + round((c0 + c1) / 2 * k) + mid
+                ya = oy + (0 if r0 == 0 else r0 * k + mid)
+                yb = oy + (ch_ - 1 if r1 == 6 else r1 * k + mid)
+                for y in range(ya, yb + 1):
+                    img.putpixel((xx, y), groove)
+    return img
+
+
+def styles_chart(path, k=3):
+    """Every title style on the same words, for picking."""
+    rows = [('arcade gold', arcade('ХОКАРИЯ', 'gold')), ('arcade sky', arcade('МЕНЮ', 'sky')),
+            ('bands sunset', bands('МАГАЗИН', 'sunset')), ('bands ocean', bands('ВИКИ', 'ocean')),
+            ('maze snow', maze('ХОКАРИЯ', 'snow')), ('volume', volume('ПРОФИЛЬ', scale=2, depth=3))]
+    W = max(im.width for _, im in rows) + 20
+    H = sum(im.height for _, im in rows) + 10 * (len(rows) + 1)
+    bg = Image.new('RGBA', (W, H), (232, 228, 240, 255))
+    y = 10
+    for _, im in rows:
+        bg.alpha_composite(im, ((W - im.width) // 2, y))
+        y += im.height + 10
+    bg.resize((W * k, H * k), Image.NEAREST).save(path)
+
+
 def chart(path, letter='Б', word='МЕНЮ', k=4):
     """The five steps of one letter next to each other plus a finished word, on a dark background, x k."""
     stages = [render(letter, s, scale=4, depth=3) for s in range(1, 6)]
