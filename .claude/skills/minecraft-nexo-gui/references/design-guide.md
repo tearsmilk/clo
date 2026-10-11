@@ -35,6 +35,9 @@ Five popular styles, all built on the same grid trick:
 
 | castle "Квесты" board | no window frame: the whole upper part is a scene (stone wall wider than the window, pillars with braziers, red banners, rubble with plants) | a gold-framed row of 5 dark slot wells holding real quest-card items (! new, check done, empty), a gold divider, a gold-framed 3-slot page navigation | red cloth ribbon with V-cut tails across the top, white outlined text | gold winged ornament under the title, pinned parchment notes, vanilla player inventory below |
 
+| royal slate chest (6 rows) | dark slate body, thin gold line, gold L brackets on every corner, a dark title tab with brackets | all 54 slots as rimmed wells (light rim, recessed dark well) | none - pure storage skin | red crest banners on rods with ball ends, thin gold rails with gems, golden crystal fans + red streamers at the gem divider, key ornaments by the tab, hotbar framed in red/gold |
+| slab title font | - | - | 2px-stroke letters, light upper block over a mid lower block, sheen lines, dark base, near-black outline, cut corners; steel/gold/wood variants and an outline-less engraved variant | - |
+
 Takeaways baked into the builder:
 - vary tile sizes: one hero tile (3x4 / 3x5), mid tiles (3x3, 3x2), strips (3x1) for secondary actions, 1x1 icons for socials/close
 - give tiles material (`style: pattern`) or a scene (`style: image`) - flat colour only for small utility buttons
@@ -53,6 +56,11 @@ Takeaways baked into the builder:
   and nibbled, slightly torn edges; banners have soft sagging folds, a dirtier lower part, gaps in the trim and one
   or two small tears. "Slightly" is the point - a few pixels, never holes that break the silhouette
 - the middle of the scene stays calm (wall down to the panel) - clutter goes to the sides
+- **royal kit**: one accent metal (gold) used only for lines, brackets and ornaments, one accent colour (red cloth)
+  and one gem colour (green); everything else dark slate. Ornaments live outside the window and at the seams
+  (corners, title tab, divider) - never over slots
+- **titles in material letters** (steel on slate, gold on red, wood on a farm sign) read as part of the art;
+  flat pixel text is for labels and tooltips
 
 ## Polish checklist (what separates "drawn" from "generated")
 

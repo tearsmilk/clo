@@ -30,7 +30,8 @@ import json, math, os, random, re, sys
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pixfont import draw_text, text_width, text_height, draw_block_text, block_text_size  # noqa: E402
+from pixfont import (draw_text, text_width, text_height, draw_block_text, block_text_size,  # noqa: E402
+                     draw_material_text, material_text_size)
 import pixelstyle  # noqa: E402
 import sprites  # noqa: E402
 import art  # noqa: E402
@@ -88,6 +89,11 @@ THEMES = {
                    slot_lt='#5a6988', text='#c0cbdc', recess='#181425'),
     'meadow': dict(body='#ead4aa', frame='#3e8948', frame_tex='grass', slot_in='#e4a672', slot_dk='#b86f50',
                    slot_lt='#ffffff', text='#265c42', recess='#c28569'),
+    # dark slate + gold trim (royal/fantasy kits): outline + thin gold line + bevelled body, rimmed slot wells,
+    # gold corner brackets. Pair with header style 'bracket_tab', section_divider and hotbar_frame.
+    'royal':  dict(body='#2b3545', frame_style='royal', gold='#d9893f', gold_dk='#b55a41', outline='#1c1b2b',
+                   slot_style='rim', slot_in='#2b3545', slot_dk='#1f2432', slot_lt='#3a4959', rim_hi='#859aa9',
+                   rim_mid='#6c8294', rim_lo='#506275', text='#b3c2ca', recess='#1f2432'),
 }
 
 
@@ -159,8 +165,31 @@ def draw_framed_panel(img, box, th):
     img.alpha_composite(band, (bx, by))
 
 
+def draw_royal_panel(img, box, th):
+    """Dark slate body: near-black outline with cut corners, a thin gold line inside it, light top / mid left /
+    dark bottom-right bevel, a few etched lines along the top."""
+    bx, by, W, Hh = box
+    d = ImageDraw.Draw(img)
+    o, g, body = H(th['outline']), H(th['gold_dk']), H(th['body'])
+    d.rectangle((bx, by, bx + W - 1, by + Hh - 1), fill=o)
+    d.rectangle((bx + 1, by + 1, bx + W - 2, by + Hh - 2), fill=g)
+    d.rectangle((bx + 2, by + 2, bx + W - 3, by + Hh - 3), fill=body)
+    d.line((bx + 2, by + 2, bx + W - 3, by + 2), fill=H(th['rim_hi']))
+    d.line((bx + 2, by + 3, bx + 2, by + Hh - 3), fill=H(th['rim_mid']))
+    d.line((bx + 3, by + Hh - 3, bx + W - 3, by + Hh - 3), fill=H(th['slot_dk']))
+    d.line((bx + W - 3, by + 3, bx + W - 3, by + Hh - 3), fill=H(th['slot_dk']))
+    for cx, cy in ((0, 0), (W - 1, 0), (0, Hh - 1), (W - 1, Hh - 1)):
+        img.putpixel((bx + cx, by + cy), (0, 0, 0, 0))
+    for i, (ex, ln) in enumerate(((6, 18), (26, 9), (W - 25, 18), (W - 37, 8))):   # etched lines
+        ey = by + 5 + (i % 2) * 2
+        d.line((bx + ex, ey, bx + ex + ln, ey), fill=H(th['slot_dk']))
+        d.line((bx + ex + 1, ey + 1, bx + ex + ln, ey + 1), fill=H(th['slot_lt']))
+
+
 def draw_panel(img, box, th, seed=7):
     """Window body with a chamfered black outline and 2px bevel, like vanilla windows. box = (x, y, w, h)."""
+    if th.get('frame_style') == 'royal':
+        return draw_royal_panel(img, box, th)
     if 'frame' in th:
         return draw_framed_panel(img, box, th)
     rnd = random.Random(seed)
@@ -204,7 +233,28 @@ def draw_panel(img, box, th, seed=7):
                 px[bx + x, by + y] = sh if d_br == 1 else sh2
 
 
+def draw_rim_slot(img, x0, y0, th):
+    """Raised rim around a recessed well (royal kits): light top/right rim, mid left, dark bottom rim, inner
+    shadow top/left, lit inner bottom/right, light line above and dark gap below each slot."""
+    d = ImageDraw.Draw(img)
+    k, dk, lt = H(th['slot_in']), H(th['slot_dk']), H(th['slot_lt'])
+    hi, mid, lo = H(th['rim_hi']), H(th['rim_mid']), H(th['rim_lo'])
+    d.rectangle((x0, y0, x0 + 17, y0 + 17), fill=k)
+    d.line((x0 + 1, y0, x0 + 16, y0), fill=lt)
+    d.line((x0, y0 + 17, x0 + 17, y0 + 17), fill=dk)
+    d.line((x0 + 1, y0 + 1, x0 + 1, y0 + 16), fill=mid)
+    d.line((x0 + 2, y0 + 1, x0 + 16, y0 + 1), fill=hi)
+    d.line((x0 + 16, y0 + 1, x0 + 16, y0 + 16), fill=hi)
+    d.line((x0 + 2, y0 + 16, x0 + 15, y0 + 16), fill=lo)
+    d.line((x0 + 2, y0 + 2, x0 + 15, y0 + 2), fill=dk)
+    d.line((x0 + 2, y0 + 2, x0 + 2, y0 + 15), fill=dk)
+    d.line((x0 + 3, y0 + 15, x0 + 15, y0 + 15), fill=lt)
+    d.line((x0 + 15, y0 + 3, x0 + 15, y0 + 15), fill=lt)
+
+
 def draw_slot(img, x0, y0, th, size=18):
+    if th.get('slot_style') == 'rim' and size == 18:
+        return draw_rim_slot(img, x0, y0, th)
     d = ImageDraw.Draw(img)
     d.rectangle((x0, y0, x0 + size - 1, y0 + size - 1), fill=H(th['slot_in']))
     d.line((x0, y0, x0 + size - 2, y0), fill=H(th['slot_dk']))
@@ -429,6 +479,11 @@ def draw_layers(img, oy, layers, sdir, th):
         elif t == 'image':
             im = cover(resolve(L['path'], sdir), w, h, L.get('colors', 48))
             img.alpha_composite(im, (x0, y0))
+        elif t == 'brackets':            # gold L brackets on the 4 corners of a box (window, section, picture)
+            b, tk = L.get('size', 16), L.get('t', 5)
+            for corner, (bx, by) in (('tl', (x0, y0)), ('tr', (x1 - b + 1, y0)), ('bl', (x0, y1 - b + 1)),
+                                     ('br', (x1 - b + 1, y1 - b + 1))):
+                img.alpha_composite(props.bracket(b, b, corner, t=tk), (bx, by))
         elif t == 'slot_bar':            # framed bar around a group of slots, each slot a dark recessed well
             pad = L.get('pad', 4)
             kind = L.get('kind', 'gold')
@@ -658,6 +713,10 @@ def header_top(spec):
     if hd.get('style') == 'ribbon':
         bh = 7 * hd.get('size', 1) + 8
         return max(0, -hd.get('y', 9 - bh))
+    if hd.get('style') == 'lettering':
+        return max(0, -hd.get('y', 3))
+    if hd.get('style') == 'bracket_tab':
+        return hd.get('rise', 10) + 4
     if hd.get('size', 1) == 2:
         return 10
     return 8 if hd.get('style') == 'tab' else 0
@@ -687,6 +746,31 @@ def draw_header(img, oy, spec, th):
         draw_text(img, OX + ((176 - tw) // 2 if hd.get('center', True) else 8), oy + 5, text,
                   H(hd.get('text_color', th['text'])), scale=sc)
         return
+    if style == 'bracket_tab':           # dark plate straddling the top edge, gold brackets on its corners
+        mat = hd.get('material', 'steel')
+        sc = hd.get('size', 2)
+        if hd.get('font', 'material') == 'material':
+            tw, tht = material_text_size(text, sc)
+            tht = 7 * sc + 3
+        else:
+            tw, tht = text_width(text, scale=sc), 7 * sc
+        pw = hd.get('width', tw + 28)
+        ph = hd.get('height', tht + 10)
+        rise = hd.get('rise', 10)
+        x0, y0 = OX + (176 - pw) // 2, oy - rise
+        rt = dict(th) if 'rim_hi' in th else dict(THEMES['royal'])
+        art.drop_shadow(img, (x0, y0, x0 + pw - 1, y0 + ph - 1))
+        draw_royal_panel(img, (x0, y0, pw, ph), dict(rt, gold_dk=rt.get('gold_dk', '#b55a41')))
+        b = max(8, min(14, ph - 4))
+        for corner, (bx, by) in (('tl', (x0 - 2, y0 - 2)), ('tr', (x0 + pw - b + 2, y0 - 2)),
+                                 ('bl', (x0 - 2, y0 + ph - b + 2)), ('br', (x0 + pw - b + 2, y0 + ph - b + 2))):
+            img.alpha_composite(props.bracket(b, b, corner, t=4), (bx, by))
+        tx, ty = x0 + (pw - tw) // 2, y0 + (ph - tht) // 2
+        if hd.get('font', 'material') == 'material':
+            draw_material_text(img, tx, ty, text, mat, scale=sc)
+        else:
+            draw_text(img, tx, ty, text, H(hd.get('text_color', '#e8eef5')), scale=sc, shadow=H(rt['outline']))
+        return
     if style == 'ribbon':                # cloth ribbon with folded, V-cut tails (quest boards, castle scenes)
         sc = hd.get('size', 1)
         sp = hd.get('spacing', 1)
@@ -699,8 +783,19 @@ def draw_header(img, oy, spec, th):
         art.drop_shadow(img, (rx + 14, ry, rx + rw - 15, ry + bh - 1))
         img.alpha_composite(rib, (rx, ry))
         tcol = H(hd.get('text_color', '#FFFFFF'))
-        draw_text(img, rx + (rw - tw) // 2, ry + (bh - 7 * sc) // 2, text, tcol, scale=sc, spacing=sp,
-                  outline=art.outline_of(hd.get('color', '#c42f3c')))
+        if hd.get('font') == 'material':
+            mw, _ = material_text_size(text, sc)
+            draw_material_text(img, rx + (rw - mw) // 2, ry + (bh - 7 * sc - 3) // 2, text,
+                               hd.get('material', 'gold'), scale=sc)
+        else:
+            draw_text(img, rx + (rw - tw) // 2, ry + (bh - 7 * sc) // 2, text, tcol, scale=sc, spacing=sp,
+                      outline=art.outline_of(hd.get('color', '#c42f3c')))
+        return
+    if style == 'lettering':             # just the material letters, centred over the window top
+        sc = hd.get('size', 2)
+        mw, mh = material_text_size(text, sc)
+        draw_material_text(img, OX + (176 - mw) // 2, oy + hd.get('y', 3), text, hd.get('material', 'gold'),
+                           scale=sc)
         return
     pw = tw + 6 * sc + 2
     x0 = OX + (176 - pw) // 2
@@ -820,6 +915,29 @@ def build(spec_path, out):
         for c in range(9):
             x, y = hotbar_xy(c, rows)
             draw_slot(tex, x, y + top, inv_th)
+    sd = spec.get('section_divider')
+    if sd:                               # gold bar + gem between the container rows and the player inventory
+        sd = sd if isinstance(sd, dict) else {}
+        dy = top + rows * 18 + 22 - 5
+        over = sd.get('overhang', 4)
+        tex.alpha_composite(props.divider(176 + 2 * over, 11, sd.get('color', th.get('gold', '#d9893f')),
+                                          sd.get('gem', '#439950'), style='bar'), (OX - over, dy))
+        if sd.get('brackets', True):
+            for corner, bx in (('bl', OX - over - 1), ('br', OX + 176 + over - 13)):
+                tex.alpha_composite(props.bracket(14, 9, corner, t=4), (bx, dy - 1))
+                tex.alpha_composite(props.bracket(14, 9, 'tl' if corner == 'bl' else 'tr', t=4), (bx, dy + 3))
+    hf = spec.get('hotbar_frame')
+    if hf and spec.get('draw_player_inventory', True):   # thin coloured frame with gold corners round the hotbar
+        hf = hf if isinstance(hf, dict) else {}
+        hx, hy = hotbar_xy(0, rows)
+        hy += top
+        d = ImageDraw.Draw(tex)
+        d.rectangle((hx - 2, hy - 2, hx + 163, hy + 19), outline=H(hf.get('color', '#a83333')))
+        gc = H(hf.get('corner', th.get('gold', '#d9893f')))
+        for cx, cy, sx, sy in ((hx - 2, hy - 2, 1, 1), (hx + 163, hy - 2, -1, 1), (hx - 2, hy + 19, 1, -1),
+                               (hx + 163, hy + 19, -1, -1)):
+            d.line((cx, cy, cx + 4 * sx, cy), fill=gc)
+            d.line((cx, cy, cx, cy + 4 * sy), fill=gc)
     for b in spec.get('buttons', []):
         draw_button(tex, top, b, sdir, th, label_case, spec.get('icon_style'))
     # foreground layers (piles over the inventory corners...) must not cover the player's slots
@@ -899,6 +1017,10 @@ def build(spec_path, out):
         for k, v in it.items():
             if k not in ('id', 'preview'):
                 lines.append(f"    {k}: {json.dumps(v, ensure_ascii=False)}")
+    if not spec.get('buttons') and not spec.get('extra_items'):
+        # a pure skin (storage, backpack): DeluxeMenus still needs an items section; the same title string
+        # works for any plugin that lets you set an inventory title (chest shops, backpacks, vaults)
+        lines[-1] = "items: {}   # skin only - reuse menu_title as the title of any 54-slot inventory"
     open(os.path.join(out, f'DeluxeMenus/gui_menus/{gid}.yml'), 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
 
     # --- previews ---

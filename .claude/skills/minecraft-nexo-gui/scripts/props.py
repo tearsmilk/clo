@@ -18,6 +18,12 @@
                                                                      color, seal, age, torn, pin, shadow, seed
   divider   ornamental line with arrow tips and a centre gem         color, gem
   frame     framed panel (gold/wood/stone/iron rim) - slot bars use it   kind, inner
+  bracket   gold L corner bracket (royal frames, title tabs)          corner tl/tr/bl/br, t
+  gem       faceted rhombus gem                                       color
+  crystals  fan of golden crystal shards beside a window side         color, side, seed
+  streamer  ribbon tail with a V cut running out from a window side   color, side
+  meander   gold key ornament strip (squares, dots, bars)             color
+  rail      thin vertical gold rail with hooks and a gem              color, gem_color
 
 Rules (references/design-guide.md): coloured dark outline around every shape, light from the top-left, colours
 walk palette ramps via art.step, structure instead of noise.
@@ -258,7 +264,7 @@ def _tear(px, w, h, x, y, size, rnd):
 
 
 def banner(w, h, color='#a22633', trim=GOLD, rod='#3e2731', tail='point', emblem=None, folds='swag',
-           age=0.5, torn=1, seed=1, **_):
+           age=0.5, torn=1, seed=1, rod_ball=None, **_):
     """Hanging banner: rod with gold knobs, cloth with sagging drape folds (or vertical folds), cylinder shading,
     gold inner trim, V (point) or swallow tail. age 0..1 = wear spots, faded lower part, gaps in the trim;
     torn 0..3 = number of small tears in the edges and a ragged tip."""
@@ -341,6 +347,18 @@ def banner(w, h, color='#a22633', trim=GOLD, rod='#3e2731', tail='point', emblem
     for kx in (0, w - 2):
         d.rectangle((kx, 0, kx + 1, 4), fill=rgba(trim))
         d.point((kx, 0), fill=step(trim, 1))
+    if rod_ball:                                       # rod runs on past the cloth and ends in a gold ball
+        ext = Image.new('RGBA', (w + 8, h), (0, 0, 0, 0))
+        ox = 8 if rod_ball == 'left' else 0
+        ext.alpha_composite(im, (ox, 0))
+        e = ImageDraw.Draw(ext)
+        bx = 0 if rod_ball == 'left' else w + 4
+        rx0, rx1 = (bx + 3, ox) if rod_ball == 'left' else (w, bx)
+        e.rectangle((rx0, 1, rx1, 3), fill=rgba(rod))
+        e.line((rx0, 1, rx1, 1), fill=step(rod, 2))
+        e.ellipse((bx, 0, bx + 4, 4), fill=rgba(trim), outline=rgba('#33182a'))
+        e.point((bx + 1, 1), fill=step(trim, 1))
+        return ext
     return im
 
 
@@ -659,10 +677,25 @@ def note(w, h, color='#e6c896', seal='#a22633', seed=1, age=0.7, torn=1, pin=Fal
     return out
 
 
-def divider(w, h=7, color=GOLD, gem='#e43b44', **_):
+def divider(w, h=7, color=GOLD, gem='#e43b44', style='line', **_):
+    """Ornamental line. style 'line': thin line with arrow tips, beads and a centre gem. style 'bar': a heavy gold
+    bar over the middle half with thin lines running to both ends and a faceted gem in the centre (the section
+    divider of royal frames)."""
+    cy = h // 2
+    if style == 'bar':
+        im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+        mask = Image.new('L', (w, h), 0)
+        d = ImageDraw.Draw(mask)
+        d.line((1, cy, w - 2, cy), fill=255)
+        bw = w // 2
+        d.rectangle(((w - bw) // 2, cy - 1, (w + bw) // 2, cy + 1), fill=255)
+        im = _metal(mask, color)
+        if gem:
+            g = globals()['gem'](9, min(h, 11), gem)
+            im.alpha_composite(g, (w // 2 - 4, (h - g.height) // 2))
+        return im
     mask = Image.new('L', (w, h), 0)
     d = ImageDraw.Draw(mask)
-    cy = h // 2
     d.line((4, cy, w - 5, cy), fill=255)
     for x0, sgn in ((1, 1), (w - 2, -1)):                            # arrow tips pointing outward
         d.polygon([(x0, cy), (x0 + 3 * sgn, cy - 2), (x0 + 3 * sgn, cy + 2)], fill=255)
@@ -717,8 +750,168 @@ def well(size=18, inner='#262b44'):
     return im
 
 
+# ----------------------------------------------------------------------------- royal kit (gold on dark slate)
+
+ROYAL = dict(out='#1c1b2b', gold_dk='#b55a41', gold='#d9893f', gold_lt='#ebcc5b', gold_hi='#faec82',
+             red='#8a3337', red_dk='#5c2534')
+
+
+def bracket(w, h, corner='tl', t=5, **_):
+    """Gold L-shaped corner bracket (horizontal leg w, vertical leg h, thickness t): outline, dark-gold outer
+    stripe, light inner stripe, red inner shadow - the corner pieces of royal frames and title tabs."""
+    R = ROYAL
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    layers = [R['out'], R['gold_hi'], R['gold'], R['gold_lt'], R['red'], R['out']][:max(3, t + 1)]
+    # two legs drawn stripe by stripe from the outside in
+    for i, c in enumerate(layers[:t]):
+        d.line((i, i, w - 1, i), fill=rgba(c))                 # horizontal leg stripe
+        d.line((i, i, i, h - 1), fill=rgba(c))                 # vertical leg stripe
+    d.line((t, t, w - 1, t), fill=rgba(R['out']))              # inner outline
+    d.line((t, t, t, h - 1), fill=rgba(R['out']))
+    d.line((w - 1, 0, w - 1, t), fill=rgba(R['out']))          # leg ends
+    d.line((0, h - 1, t, h - 1), fill=rgba(R['out']))
+    d.point((w - 2, 1), fill=rgba(R['gold_dk']))
+    d.point((1, h - 2), fill=rgba(R['gold_dk']))
+    if corner in ('tr', 'br'):
+        im = im.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    if corner in ('bl', 'br'):
+        im = im.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+    return im
+
+
+def gem(w=7, h=9, color='#439950', **_):
+    """Faceted rhombus gem (outline outside the body): light upper-left facet, base, darker lower-right facet,
+    a white glint."""
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    px = im.load()
+    cx, cy = (w - 1) / 2, (h - 1) / 2
+    rw, rh = (w - 2) / 2, (h - 2) / 2
+    for y in range(h):
+        for x in range(w):
+            u, v = abs(x - cx) / (rw + 0.01), abs(y - cy) / (rh + 0.01)
+            if u + v <= 1.0:
+                c = base(color)
+                if y < cy and x <= cx:
+                    c = step(color, 1)
+                elif y > cy and x >= cx:
+                    c = step(color, -1)
+                px[x, y] = c
+    _outline(im, '#1c1b2b')
+    gx, gy = int(cx) - 1, int(cy) - 1
+    if px[gx, gy][3]:
+        px[gx, gy] = rgba('#fffef8')
+    return im
+
+
+def crystals(w, h, color='#ebcc5b', side='left', seed=2, **_):
+    """Cluster of chunky golden crystal shards fanning out from the inner edge (side = which side of the window
+    the cluster sits on; shards point away from it). Each shard: light upper facet, darker lower facet, a white
+    glint, its own dark outline so overlapping shards stay readable."""
+    rnd = random.Random(seed)
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    ax, ay = w - 3, h // 2
+    for k, (ang, kl) in enumerate(((132, 0.75), (212, 0.7), (152, 1.0), (186, 0.95))):
+        a = math.radians(ang + rnd.randint(-5, 5))
+        L = (w - 6) * kl
+        wd = max(3.0, h * 0.13)
+        tip = (ax + L * math.cos(a), ay - L * math.sin(a))
+        nx, ny = -math.sin(a), -math.cos(a)
+        mid = (ax + L * 0.4 * math.cos(a), ay - L * 0.4 * math.sin(a))
+        p_up = (mid[0] + nx * wd, mid[1] + ny * wd)
+        p_dn = (mid[0] - nx * wd, mid[1] - ny * wd)
+        shard = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+        d = ImageDraw.Draw(shard)
+        d.polygon([(ax, ay), p_up, tip], fill=step(color, 1))
+        d.polygon([(ax, ay), p_dn, tip], fill=step(color, -1))
+        d.line([(ax, ay), tip], fill=base(color))
+        g0 = (p_up[0] * 0.7 + tip[0] * 0.3, p_up[1] * 0.7 + tip[1] * 0.3)
+        g1 = (p_up[0] * 0.3 + tip[0] * 0.7, p_up[1] * 0.3 + tip[1] * 0.7)
+        d.line([g0, g1], fill=rgba('#fffef8'))
+        _outline(shard, '#33182a')
+        im.alpha_composite(shard)
+    if side == 'right':
+        im = im.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    return im
+
+
+def streamer(w, h, color='#8a3337', side='left', **_):
+    """A ribbon tail running out and down from the window side, with a V cut and a fold - goes under crystals."""
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    px = im.load()
+    band = max(5, h // 2)
+    for x in range(w):
+        t = x / max(1, w - 1)                                      # 0 inner edge .. 1 outer end
+        y0 = int((1 - t) * 0 + t * (h - band))
+        cut = 0
+        if t > 0.8:                                                # V notch at the outer end
+            cut = int((t - 0.8) / 0.2 * (band // 2))
+        for y in range(band):
+            if cut and band // 2 - cut <= y <= band // 2 + cut - 1 + (band % 2):
+                continue
+            c = base(color)
+            if y == 0:
+                c = step(color, 1)
+            elif y >= band - 2:
+                c = step(color, -1)
+            px[w - 1 - x, y0 + y] = c
+    _outline(im, ROYAL['red_dk'] if art._enabled else '#33182a', inside=True)
+    if side == 'right':
+        im = im.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    return im
+
+
+def meander(w, h=6, color='#d9893f', **_):
+    """Gold key ornament strip: hollow squares, dots and bars, outlined (decorates the top corners)."""
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    o = rgba('#1c1b2b')
+    x = 0
+    seq = [('sq', h), ('dot', h - 2), ('bar', 2 * h), ('dot', h - 2)]
+    i = 0
+    while True:
+        kind, pw = seq[i % len(seq)]
+        if x + pw > w:
+            break
+        if kind == 'sq':
+            d.rectangle((x, 0, x + pw - 1, h - 1), fill=o)
+            d.rectangle((x + 1, 1, x + pw - 2, h - 2), fill=rgba(color))
+            d.line((x + 1, 1, x + pw - 2, 1), fill=step(color, 1))
+            d.rectangle((x + 2, 2, x + pw - 3, h - 3), fill=o)
+        elif kind == 'dot':
+            yy = (h - pw) // 2 + 1
+            d.rectangle((x, yy - 1, x + pw - 1, yy + pw - 2), fill=o)
+            d.rectangle((x + 1, yy, x + pw - 2, yy + pw - 3), fill=rgba(color))
+        else:
+            d.rectangle((x, h - 4, x + pw - 1, h - 1), fill=o)
+            d.line((x + 1, h - 3, x + pw - 2, h - 3), fill=step(color, 1))
+            d.line((x + 1, h - 2, x + pw - 2, h - 2), fill=rgba(color))
+        x += pw + 1
+        i += 1
+    return im
+
+
+def rail(w, h, color='#d9893f', gem_color='#439950', **_):
+    """Thin vertical gold rail with hooked ends and an optional gem in the middle (runs beside a window side)."""
+    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    cx = w // 2
+    o = rgba('#1c1b2b')
+    d.rectangle((cx - 1, 0, cx + 1, h - 1), fill=o)
+    d.line((cx, 1, cx, h - 2), fill=rgba(color))
+    for y0, dy in ((0, 1), (h - 1, -1)):                          # hooks
+        d.rectangle((cx - 1, min(y0, y0 + 2 * dy), min(w - 1, cx + 3), max(y0, y0 + 2 * dy)), fill=o)
+        d.line((cx, y0 + dy, min(w - 2, cx + 2), y0 + dy), fill=rgba(color))
+    if gem_color and h > 12:
+        g = gem(min(7, w), 9, gem_color)
+        im.alpha_composite(g, ((w - g.width) // 2, h // 2 - 4))
+    return im
+
+
 PROPS = {'wall': wall, 'planks': planks, 'pillar': pillar, 'brazier': brazier, 'banner': banner, 'ribbon': ribbon,
-         'rubble': rubble, 'hay': hay, 'flourish': flourish, 'note': note, 'divider': divider, 'frame': frame}
+         'rubble': rubble, 'hay': hay, 'flourish': flourish, 'note': note, 'divider': divider, 'frame': frame,
+         'bracket': bracket, 'gem': gem, 'crystals': crystals, 'streamer': streamer, 'meander': meander,
+         'rail': rail}
 
 
 def render(name, w, h, **opts):

@@ -10,7 +10,9 @@ Paths are relative to the spec file.
 | `id` | required | glyph id, file names, DeluxeMenus menu name |
 | `namespace` | `gui` | pack namespace -> `assets/<ns>/textures/gui/<id>.png` |
 | `rows` | 6 | 1-6 chest rows |
-| `theme` | `oak` | `vanilla` (exact Minecraft), `oak`, `spruce`, `birch`, `stone`, `cobble`, `nether`, `dark`, `meadow` - textured frame band + calm body; or a dict |
+| `theme` | `oak` | `vanilla` (exact Minecraft), `oak`, `spruce`, `birch`, `stone`, `cobble`, `nether`, `dark`, `meadow` - textured frame band + calm body; `royal` - dark slate body, thin gold line, rimmed slot wells (pair with `bracket_tab`, `section_divider`, `hotbar_frame`, `brackets`); or a dict |
+| `section_divider` | none | `{"gem": "#439950", "color": "#d9893f", "overhang": 4, "brackets": true}` gold bar with a faceted gem between the container rows and the player inventory (covers the client's "Инвентарь" label - use with `hide_inventory_label`) |
+| `hotbar_frame` | none | `{"color": "#a83333", "corner": "#d9893f"}` thin frame with gold corners around the hotbar |
 | `palette` | `endesga32` | shading model: `endesga32` (palette ramps + hue-shifted shading for custom colours), `endesga32-strict` (snap every colour), `none` |
 | `theme_overrides` | {} | override single theme colours: `fill` (list), `seam`, `hi`, `hi2`, `sh`, `sh2`, `slot_dk`, `slot_lt`, `slot_in`, `text`, `recess` |
 | `header` | none | title plaque, see below. Without it `title` is drawn as plain text at (8,5) |
@@ -40,6 +42,11 @@ Paths are relative to the spec file.
 - `size: 2` = double-size letters on a tab that sticks out ~10px above the window (texture gets taller, ascent rises accordingly - handled automatically).
 - `plaque` (size 1) = small plate inside the 17px top strip with rivets left/right.
 - `style: block` + `depth: 3` (+ `side_color`) extrudes the letters into a 3D slab like Redstone-Labs logos.
+- `style: bracket_tab` = dark royal plate straddling the top edge with gold L brackets on its corners; text in
+  material lettering (`material` steel/gold/wood/emerald/crimson/stone/snow, `size` 2) or `font: "pixel"`;
+  `rise` px above the window (10), `width`, `height`.
+- `style: lettering` = only material letters over the window top (`material`, `size`, `y`).
+- `font: "material"` + `material` also works for `ribbon` headers (gold letters on a red ribbon).
 - `style: ribbon` = cloth ribbon with folded, V-cut tails across the top edge (quest boards, castle scenes):
   `color`, `width` (px, default text + 76), `y` (px from the window top, default `9 - band height`), `size` 1|2,
   `spacing`, `case: "keep"` for mixed case. White text with a dark outline in the ribbon's hue.
@@ -89,14 +96,14 @@ squeezing letters.
 | `awning` | `colors` (stripe colours), `stripe` px, `scallop` px | striped market awning with rail and wavy edge |
 | `post` | `color` | wooden posts/pillars |
 | `image` | `path`, `colors` | an illustration covering the box |
-| `sprite` | `name`, `x`,`y` or `slot`, `opts`, `flip` | props: `crate` (w,h,color), `arrow` (w,h,color), `sack`, `wheat`, `coin`, `hourglass`, `ledger`, `carrot`, `pumpkin`, `emerald`, `fish`, `check`, `quest_new`, `quest_done`, `quest_locked`, `arrow_gold`, `page` |
+| `sprite` | `name`, `x`,`y` or `slot`, `opts`, `flip` | props: `crate` (w,h,color), `arrow` (w,h,color), `sack`, `wheat`, `coin`, `hourglass`, `ledger`, `carrot`, `pumpkin`, `emerald`, `fish`, `check`, `quest_new`, `quest_done`, `quest_locked`, `arrow_gold`, `page`, `crest` |
 | `slot_frame` | `slot` or `slot_list`, `color`, `inner`, `outline` | framed highlighted slots for quest steps, rewards, inputs (real items go there) |
 | `slot_bar` | `slots: [col,row,w,h]`, `kind` gold/wood/stone/iron, `rim`, `inner`, `well`, `pad` (4) | one metal/wood frame around a group of slots, each slot a dark recessed well - quest rows, reward rows, page navigation |
 | `wall` | `color`, `coping`, `seed` | castle wall of staggered stone blocks with per-block tones, chips and a lit cap ledge |
 | `planks` | `color`, `seed` | barn wall: vertical boards with a top beam |
 | `pillar` | `color` | stone column with capital and base |
 | `brazier` | `kind` bowl/torch/lantern, `color` | fire bowl, torch or lantern (put it on a pillar/post top) |
-| `banner` | `color`, `trim`, `rod`, `tail` point/swallow, `emblem` (sprite name), `folds` swag/vertical, `age` 0..1 (0.5), `torn` 0..3 (1), `seed` | hanging cloth banner on a rod: sagging drape folds, worn lower part, gaps in the gold trim, small tears in the edges and a ragged tip |
+| `banner` | `color`, `trim`, `rod`, `rod_ball` left/right (rod runs on 8px to a gold ball), `tail` point/swallow, `emblem` (sprite name, e.g. `crest`, `wheat`), `folds` swag/vertical, `age` 0..1 (0.5), `torn` 0..3 (1), `seed` | hanging cloth banner on a rod: sagging drape folds, worn lower part, gaps in the gold trim, small tears in the edges and a ragged tip |
 | `ribbon` | `color` | a ribbon anywhere (the header style uses the same drawing) |
 | `rubble` | `color`, `leaves`, `flowers`, `seed`, `density`, `shape` band/left/right/mound/valley, `round_bottom`, `size` [min,max] radius | pile of outlined boulders with plants on the surface; green `color` = bushes/hedge. Side mounds: `left`/`right`; foreground piles: `round_bottom: true` + `"above": true` |
 | `hay` | `color`, `seed` | hay bales with twine - farm scenes |
@@ -104,6 +111,13 @@ squeezing letters.
 | `note` | `color`, `seal` (null = none), `age` 0..1 (0.7), `torn` 0..2 (1), `pin`, `shadow`, `seed` | old parchment: yellowed rim, stains, faded ink, nibbled edges, a torn-off corner, ragged bottom, 1px shadow on the wall |
 | `divider` | `color`, `gem` | ornamental line with arrow tips, beads and a centre gem |
 | `frame` | `kind`, `inner`, `rim` | empty framed panel (like slot_bar without wells) |
+| `brackets` | `size` (16), `t` (5) | gold L brackets on the 4 corners of the box - put the box 2px outside the window or a section |
+| `bracket` | `corner` tl/tr/bl/br, `t` | one bracket |
+| `meander` | `color` | gold key strip (squares, dots, bars) - beside a title tab |
+| `rail` | `color`, `gem_color` | thin vertical gold rail with hooked ends and a gem - beside a window side |
+| `crystals` | `color`, `side` left/right, `seed` | fan of golden crystal shards pointing away from the window, at the divider level |
+| `streamer` | `color`, `side` | red ribbon tail with a V cut running out under the crystals |
+| `gem` | `color` | faceted rhombus gem |
 
 Box layers take `"flip": true` to mirror them. `"above": true` paints a layer after the player-inventory panel and
 the buttons, so props come to the foreground (stones over the panel's corners). The builder warns if such a layer
@@ -116,4 +130,14 @@ the user sees how slots with real items will look; it is not written to the Delu
 See `assets/examples/market_menu/spec.json` (market stall with 4 order steps, arrows, reward slot, hand-in button),
 `assets/examples/quest_menu/spec.json` (castle quest board: wall wider than the window, pillars with fire, banners,
 ribbon title, gold slot bars with real quest-card items, rubble with plants, vanilla player inventory) and
-`assets/examples/quest_menu_farm/spec.json` (the same board as a barn: planks, lanterns, wheat banners, hedge, hay).
+`assets/examples/quest_menu_farm/spec.json` (the same board as a barn: planks, lanterns, wheat banners, hedge, hay),
+`assets/examples/royal_chest/spec.json` (6-row royal chest: slate + gold, bracket title tab with steel letters,
+crest banners, rails, crystals and streamers at the gem divider, framed hotbar).
+
+## Material lettering (pixfont.draw_material_text)
+
+Big titles in a material instead of flat pixel text: `draw_material_text(img, x, y, "Сундук", "gold", scale=2)`.
+Each letter is a light upper block over a mid-tone lower block, sheen lines, a dark 2px base and a 1px near-black
+outline with dark counters; corners are cut. Materials: `steel`, `gold`, `wood`, `emerald`, `crimson`, `stone`,
+`snow` or a tuple (outline, dark, mid, light, sheen). `outline=False` = soft engraved text, `condensed=True` =
+narrower letters when space is tight. Scale 2 = 10x14 capitals (Latin + Cyrillic); keep `gap` >= 2.

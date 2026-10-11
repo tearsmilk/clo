@@ -78,7 +78,8 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
 - Tile looks: `style` = `sunburst` | `gradient` | `flat` | `pattern` (+ `pattern`: grass, planks_v, planks_h,
   bricks, stone, checker, stripes, dots, noise) | `image` (+ `image`: a scene that covers the tile).
 - Headers: `header.size: 2` (double-size plate on a tab) or `header.style: "block"` (Minecraft-logo letters,
-  great for the server name). Pixel text at x2 or bolder needs wider gaps - the builder handles that; do not
+  great for the server name), `"bracket_tab"` (royal tab with steel/gold material letters) or `"ribbon"`.
+  Material lettering (`pixfont.draw_material_text`, steel/gold/wood/emerald/crimson) is the go-to for titles. Pixel text at x2 or bolder needs wider gaps - the builder handles that; do not
   fake bold by smearing pixels, letters with 1px counters (М, Ю, Ж) turn into blobs.
 - Labels: pixel font with lowercase and Cyrillic, `\n` for two lines, `label_style` `shadow` | `plaque` | `bar` |
   `wood` | `stone` (UI-kit plates with nails/chips).
@@ -94,6 +95,9 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
   Keys: `canvas`, `container_panel: false`, `inventory_panel: "vanilla"`, `header.style: "ribbon"`, scene layers
   (`wall`, `planks`, `pillar`, `brazier`, `banner`, `rubble`, `hay`, `flourish`, `note`, `divider`, `slot_bar`),
   buttons with `style: "none"`, and `nexo_items` for real items whose state changes (quest cards).
+- Royal/fantasy chest skins (dark slate + gold, like premium GUI packs): `assets/examples/royal_chest/spec.json` -
+  `theme: "royal"`, `bracket_tab` header, `section_divider`, `hotbar_frame`, layers `brackets`, `banner`
+  (`emblem: crest`, `rod_ball`), `rail`, `crystals`, `streamer`, `meander`.
 - Illustrations for `image` tiles: generate a small scene (or crop one from art the user already has) - a
   pond for fishing, a market stall for the shop. They are posterized to a pixel palette automatically.
 

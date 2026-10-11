@@ -272,3 +272,150 @@ def draw_block_text(img, x, y, text, top="#D8D8D8", bottom="#6E6A68", outline="#
                 c = tuple(max(0, v - 38) for v in c[:3]) + (255,)
             fp[xx, yy] = c
     img.paste(face, (x, y), full)
+
+
+# ----------------------------------------------------------------------------- material lettering
+
+# Ramps per material: outline, dark, mid, light, sheen. Style taken from pixel "slab" title fonts: every letter
+# is a stacked pair of blocks - a light upper block and a mid-tone lower block - with lit top edges, shaded
+# bottom edges, a sheen line and a dark base, inside a 1px near-black outline.
+MATERIALS = {
+    'steel':   ('#1c1b2b', '#506275', '#6c8294', '#859aa9', '#b3c2ca'),
+    'gold':    ('#33182a', '#b55a41', '#d9893f', '#ebcc5b', '#faec82'),
+    'wood':    ('#2a1810', '#733e39', '#b86f50', '#e4a672', '#ead4aa'),
+    'emerald': ('#102a24', '#265c42', '#3e8948', '#63c74d', '#c5e07c'),
+    'crimson': ('#2a0e18', '#662031', '#a83333', '#e43b44', '#f6a08a'),
+    'stone':   ('#181425', '#3a4466', '#5a6988', '#8b9bb4', '#c0cbdc'),
+    'snow':    ('#262b44', '#8b9bb4', '#c0cbdc', '#e8eef5', '#ffffff'),
+}
+
+
+def _slab_glyph(ch, scale, condensed=False):
+    """Glyph rows at `scale`. condensed=True narrows letters like slab title fonts: only columns that carry a
+    vertical stroke (a run of >= 3 pixels) stay `scale` px wide, the rest become `scale - 1` (a 5x7 capital ->
+    ~7x14 at scale 2). Narrower but diagonals get thin - use it only when the title does not fit."""
+    rows = _glyph(ch)
+    w = len(rows[0])
+    if scale == 1:
+        return rows
+    if not condensed:
+        return [''.join(c * scale for c in r) for r in rows for _ in range(scale)]
+    widths = []
+    for c in range(w):
+        run = best = 0
+        for r in rows:
+            run = run + 1 if r[c] == '#' else 0
+            best = max(best, run)
+        widths.append(scale if best >= 3 else max(1, scale - 1))
+    out = []
+    for r in rows:
+        line = ''.join(r[c] * widths[c] for c in range(w))
+        out += [line] * scale
+    return out
+
+
+def _slab_mask(text, scale, gap, condensed=False):
+    lines = text.split("\n")
+    glyphs = [[_slab_glyph(ch, scale, condensed) for ch in line] for line in lines]
+    widths = [sum(len(g[0]) for g in gl) + gap * max(0, len(gl) - 1) for gl in glyphs]
+    W = max(widths, default=0)
+    H = ((len(lines) - 1) * LINE_H + GLYPH_H) * scale
+    m = Image.new("L", (max(1, W), H), 0)
+    mp = m.load()
+    for li, gl in enumerate(glyphs):
+        cx = (W - widths[li]) // 2
+        for g in gl:
+            for j, row in enumerate(g):
+                for i, c in enumerate(row):
+                    if c == "#":
+                        mp[cx + i, li * LINE_H * scale + j] = 255
+            cx += len(g[0]) + gap
+    return m
+
+
+def _round_corners(mask):
+    """Cut the outer pixel of every convex corner of a >= 2x2 block (slab letters look cut, not stamped)."""
+    src = mask.copy().load()
+    mp = mask.load()
+    W, H = mask.size
+    on = lambda x, y: 0 <= x < W and 0 <= y < H and src[x, y] > 0
+    for y in range(H):
+        for x in range(W):
+            if not on(x, y):
+                continue
+            for dx, dy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
+                if (not on(x + dx, y) and not on(x, y + dy) and not on(x + dx, y + dy)
+                        and on(x - dx, y) and on(x, y - dy) and on(x - dx, y - dy)):
+                    mp[x, y] = 0
+                    break
+    return mask
+
+
+def material_text_size(text, scale=2, outline=True, gap=None, condensed=False):
+    g = gap if gap is not None else (2 if outline else 1)
+    m = _slab_mask(text, scale, g, condensed)
+    o = 1 if outline else 0
+    return m.width + 2 * o + 1, m.height + 2 * o + 1
+
+
+def material_text_height(text, scale=2, outline=True):
+    """Height without empty descender rows (for vertical centring)."""
+    o = 1 if outline else 0
+    return text_height(text, scale) + 2 * o + 1
+
+
+def draw_material_text(img, x, y, text, material='steel', scale=2, outline=True, shadow=True, gap=None,
+                       condensed=False):
+    """Title lettering in a material (steel, gold, wood, emerald, crimson, stone, snow or a 5-colour tuple
+    outline, dark, mid, light, sheen). (x, y) is the top-left of the outline box. scale 2 = 10x14 capitals with
+    2px strokes (Latin + Cyrillic). Each letter is a light upper block over a mid-tone lower block with a sheen line
+    under each block top, a sheen line above a dark 2px base, and shaded undersides, inside a 1px near-black
+    outline (dark counters). outline=False gives the soft engraved variant (light top, mid, dark base).
+    gap: px between letter bodies (2 = the two outlines meet; keep >= 2 with outline so letters never merge)."""
+    def rgba(c):
+        if isinstance(c, tuple):
+            return c if len(c) == 4 else tuple(c) + (255,)
+        c = c.lstrip('#')
+        return (int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16), 255)
+
+    O, D, M, L, S = [rgba(c) for c in (MATERIALS[material] if isinstance(material, str) else material)]
+    g = gap if gap is not None else (2 if outline else 1)
+    m = _slab_mask(text, scale, g, condensed)
+    if scale > 1:
+        m = _round_corners(m)
+    o = 1 if outline else 0
+    full = Image.new('L', (m.width + 2 * o, m.height + 2 * o), 0)
+    full.paste(m, (o, o))
+    fp = full.load()
+    W, H = full.size
+    face = Image.new('RGBA', full.size, (0, 0, 0, 0))
+    px = face.load()
+    cap = 7 * scale
+    half = cap // 2
+    for yy in range(H):
+        rel = (yy - o) % (LINE_H * scale)
+        for xx in range(W):
+            if not fp[xx, yy]:
+                continue
+            down = yy == H - 1 or not fp[xx, yy + 1]
+            inner = 0 < xx < W - 1 and fp[xx - 1, yy] and fp[xx + 1, yy]
+            if outline:
+                c = L if rel < half else M
+                if down or (scale > 1 and cap - 2 <= rel < cap) or (scale == 1 and rel == cap - 1):
+                    c = D                                    # shaded underside / dark base
+                elif scale > 1 and rel == cap - 3:
+                    c = S                                    # sheen above the base
+                elif scale > 1 and inner and rel in (1, half + 1):
+                    c = S                                    # sheen just under each block's top
+            else:
+                c = S if rel < cap * 0.4 else (L if rel < cap - scale else D)
+            px[xx, yy] = c
+    if outline:
+        from PIL import ImageFilter
+        ring = full.filter(ImageFilter.MaxFilter(3))
+        if shadow:
+            img.paste(O, (x + 1, y + 1), ring)
+        img.paste(O, (x, y), ring)
+    elif shadow:
+        img.paste(D, (x + 1, y + 1), full)
+    img.alpha_composite(face, (x, y))

@@ -1,0 +1,154 @@
+{
+ "id": "hokaria_royal_chest",
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "royal",
+ "canvas": {
+  "left": 40,
+  "right": 40,
+  "top": 16,
+  "bottom": 3
+ },
+ "header": {
+  "text": "Сундук",
+  "style": "bracket_tab",
+  "material": "steel",
+  "size": 2,
+  "rise": 10
+ },
+ "section_divider": {
+  "gem": "#439950"
+ },
+ "hotbar_frame": {
+  "color": "#a83333"
+ },
+ "hide_inventory_label": true,
+ "open_commands": [
+  "royalchest"
+ ],
+ "layers": [
+  {
+   "type": "brackets",
+   "box": [
+    -2,
+    -2,
+    180,
+    226
+   ],
+   "size": 16
+  },
+  {
+   "type": "meander",
+   "box": [
+    3,
+    -9,
+    33,
+    6
+   ]
+  },
+  {
+   "type": "meander",
+   "box": [
+    140,
+    -9,
+    33,
+    6
+   ],
+   "flip": true
+  },
+  {
+   "type": "banner",
+   "box": [
+    -34,
+    -6,
+    26,
+    62
+   ],
+   "color": "#8a3337",
+   "trim": "#d9893f",
+   "emblem": "crest",
+   "age": 0,
+   "torn": 0,
+   "rod_ball": "left",
+   "rod": "#5a6988"
+  },
+  {
+   "type": "banner",
+   "box": [
+    177,
+    -6,
+    26,
+    62
+   ],
+   "color": "#8a3337",
+   "trim": "#d9893f",
+   "emblem": "crest",
+   "age": 0,
+   "torn": 0,
+   "rod_ball": "left",
+   "rod": "#5a6988",
+   "flip": true
+  },
+  {
+   "type": "rail",
+   "box": [
+    -9,
+    62,
+    7,
+    58
+   ]
+  },
+  {
+   "type": "rail",
+   "box": [
+    178,
+    62,
+    7,
+    58
+   ]
+  },
+  {
+   "type": "streamer",
+   "box": [
+    -34,
+    131,
+    32,
+    16
+   ],
+   "side": "left"
+  },
+  {
+   "type": "streamer",
+   "box": [
+    178,
+    131,
+    32,
+    16
+   ],
+   "side": "right"
+  },
+  {
+   "type": "crystals",
+   "box": [
+    -38,
+    108,
+    43,
+    44
+   ],
+   "side": "left",
+   "seed": 2
+  },
+  {
+   "type": "crystals",
+   "box": [
+    171,
+    108,
+    43,
+    44
+   ],
+   "side": "right",
+   "seed": 2
+  }
+ ],
+ "buttons": []
+}
