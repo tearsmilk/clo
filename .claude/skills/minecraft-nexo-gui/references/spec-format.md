@@ -33,7 +33,7 @@ Paths are relative to the spec file.
 | `background` / `window_at` | none | use a ready-made PNG (bought pack) as the texture; `window_at: [x, y]` = vanilla window origin inside it. Turns off panel/slot/inventory drawing and turns on `preview_vanilla_under`. Layers and buttons still apply (relabel with `patch`/`text`/`nameplate`) |
 | `preview_vanilla_under` | false | preview draws the vanilla chest under the texture (what shows through in game) |
 | `variants` | none | list of dicts with `id`: one menu per entry, `${key}` placeholders anywhere in the spec (+ `${index}`, `${prev_id}`, `${next_id}`, `${prev_label}`, `${next_label}`); output `OUT/<id>/` + merged `OUT/_all/` |
-| `variant_defaults` | {} | values shared by all variants (overridden per variant) |
+| `variant_defaults` | {} | values shared by all variants (overridden per variant); a default may use other keys, e.g. `"icon_png": "pack/icons/${tex}.png"` with one variant setting its own `icon_png` |
 | `hint_glyphs` | false | `true` = our mouse icons, or `{"lmb": "x.png", "rmb": "y.png"}`; Nexo glyphs `<ns>_lmb`/`<ns>_rmb` for lore (`%nexo_<ns>_lmb%` with PlaceholderAPI); the preview tooltip renders them |
 | `nexo_items` | [] | real icon items for slots: `{"id": "hokaria_quest_new", "icon": "sprite:quest_new" or "icons/x.png", "name": "<gold>Новый квест"}` -> 16x16 texture + `Nexo/items/<id>_items.yml`; use them with `material: nexo-<id>` in `extra_items` |
 | `open_commands` | [id] | DeluxeMenus open commands |

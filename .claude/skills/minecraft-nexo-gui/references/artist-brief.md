@@ -37,7 +37,12 @@ bucket, single pixels and the Outline command - and let Aseprite execute them:
 ```bash
 python3 assets/examples/aseprite_baker/make_ops.py baker_ops.json
 python3 scripts/aseprite_draw.py baker_ops.json art/baker.png --aseprite art/baker.aseprite --preview p.png
+python3 scripts/aseprite_draw.py assets/examples/aseprite_baker/bread_icon.json art/bread_icon.png  # 16x16 item icon
 ```
+Small ops lists can be written by hand (`bread_icon.json`: 9 ops); big pictures are easier to generate from
+a Python script that loops over repeated parts (`make_ops.py`: bricks, loaves on shelves).
+For 16x16 icons: one silhouette ellipse/shape, a lighter top, a darker bottom strip, 2-3 detail strokes,
+highlight pixels top-left, then `outline` in the darkest shade - the vanilla item look.
 Draw each part on its own layer and outline that layer in a darker shade of its own colour (skin -> rosy brown,
 white cloth -> warm grey, bread -> dark crust) - that is how pack characters get coloured outlines instead of black.
 Keep the chibi proportions of the set (head ~16 px wide, 2x2 eyes with a white highlight, blush, body ~24 px),

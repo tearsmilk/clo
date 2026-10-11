@@ -43,10 +43,12 @@ L("shelves")
 for sy in (16, 30):
     rect("#6b2f25", 86, sy, 118, sy + 2)
     line("#c58b55", [86, sy], [118, sy])
-    for bx in (88, 98, 108):
-        ell("#c78540", bx, sy - 6, bx + 8, sy - 1)
-        line("#e1ae4f", [bx + 2, sy - 5], [bx + 6, sy - 5])
-        px("#a25b30", [bx + 3, sy - 3], [bx + 5, sy - 3])
+    for bx in (87, 97, 107):
+        ell("#c78540", bx, sy - 5, bx + 9, sy - 1)                                  # loaf
+        line("#a25b30", [bx + 1, sy - 1], [bx + 8, sy - 1])                          # baked bottom
+        line("#e1ae4f", [bx + 2, sy - 5], [bx + 7, sy - 5])                          # lit crust
+        for k in range(3):                                                         # scoring cuts
+            px("#f8f088", [bx + 2 + k * 3, sy - 3], [bx + 3 + k * 3, sy - 4])
 outline("#683429")
 # counter
 L("counter")
@@ -58,32 +60,34 @@ for x in range(10, 120, 22):
 
 # ---- baker, centred on x = 60, waist-up
 L("body")
-shape("#ebe5df", [50, 24], [70, 24], [74, 28], [75, 40], [45, 40], [46, 28])       # jacket
-line("#d7cfc6", [69, 26], [72, 39])
-rect("#d7cfc6", 66, 27, 72, 39)
+shape("#ebe5df", [51, 24], [69, 24], [73, 27], [74, 40], [46, 40], [47, 27])       # jacket
+rect("#d7cfc6", 67, 27, 73, 39)
+line("#d7cfc6", [60, 29], [60, 39])
 shape("#e8421e", [56, 23], [65, 23], [61, 28], [60, 28])                            # neckerchief
 for y in (29, 33):
     px("#4a5a82", [57, y], [64, y])
-rect("#ebe5df", 42, 27, 47, 36)                                                     # sleeves
-rect("#d7cfc6", 74, 27, 78, 36)
-ell("#fad5c9", 42, 33, 48, 38)                                                      # hands
-ell("#f6c4b4", 73, 31, 79, 36)
+shape("#ebe5df", [47, 26], [44, 30], [41, 35], [45, 37], [48, 32])                 # sleeves (bent arms)
+shape("#d7cfc6", [73, 26], [76, 29], [79, 31], [76, 34], [72, 31])
+ell("#fad5c9", 38, 33, 43, 37)                                                      # hands on the bread
+ell("#f6c4b4", 76, 27, 81, 31)
 outline("#7e7973")
 L("bread")
-shape("#c78540", [41, 34], [77, 26], [80, 29], [44, 37])                            # baguette across
-line("#e1ae4f", [45, 34], [77, 27])
-for x in (50, 58, 66, 73):
-    pen("#f8f088", [x, 33 - (x - 44) // 4], [x + 2, 31 - (x - 44) // 4])
+shape("#c78540", [40, 35], [77, 28], [80, 31], [43, 38])                            # baguette across
+line("#e1ae4f", [44, 35], [76, 29])
+line("#a25b30", [45, 37], [78, 31])
+for x in (49, 57, 65, 72):
+    pen("#f8f088", [x, 35 - (x - 44) // 5], [x + 3, 33 - (x - 44) // 5])
 outline("#a25b30")
 L("head")
 rect("#fad5c9", 52, 12, 69, 22)
 rect("#f6c4b4", 67, 13, 69, 22)
 line("#fad5c9", [53, 23], [68, 23])
-rect("#6b2f25", 52, 12, 69, 14)                                                     # fringe
-rect("#6b2f25", 52, 12, 53, 19)
-rect("#6b2f25", 68, 12, 69, 19)
-px("#8c3f2b", [55, 12], [59, 12], [63, 12], [66, 13])
-px("#6b2f25", [56, 15], [61, 15], [65, 15])
+rect("#6b2f25", 52, 12, 69, 13)                                                     # fringe with tufts
+for x in range(52, 70, 3):
+    px("#6b2f25", [x, 14], [x + 1, 14], [x, 15])
+rect("#6b2f25", 52, 12, 53, 20)
+rect("#6b2f25", 68, 12, 69, 20)
+px("#8c3f2b", [55, 12], [59, 12], [63, 12], [66, 12], [57, 13], [64, 13])
 for ex in (56, 63):                                                                 # eyes 2x2 + highlight
     px("#333e5a", [ex, 17], [ex + 1, 17], [ex, 18], [ex + 1, 18])
     px("#ffffff", [ex, 17])
@@ -92,12 +96,17 @@ px("#f07179", [54, 20], [55, 20], [66, 20], [67, 20])                           
 px("#b57669", [60, 20], [61, 20])                                                   # mouth
 outline("#b57669")
 L("hat")
-ell("#ffffff", 49, 0, 60, 9)
-ell("#ffffff", 55, -1, 66, 8)
-ell("#ffffff", 61, 0, 72, 9)
-rect("#ebe5df", 51, 7, 70, 12)
-line("#d7cfc6", [51, 11], [70, 11])
-px("#d7cfc6", [57, 3], [63, 2], [67, 5], [53, 5])
+ell("#ffffff", 48, 1, 59, 10)
+ell("#ffffff", 62, 1, 73, 10)
+ell("#ffffff", 54, -1, 67, 9)
+curve("#ebe5df", [50, 8], [52, 10], [56, 10], [58, 8])                              # lobe shadows
+curve("#ebe5df", [63, 8], [66, 10], [70, 10], [72, 8])
+pen("#d7cfc6", [58, 3], [57, 5], [57, 7])                                          # lobe folds
+pen("#d7cfc6", [64, 3], [65, 5], [65, 7])
+px("#ffffff", [52, 3], [53, 3], [59, 1], [60, 1])
+rect("#ebe5df", 51, 8, 70, 12)                                                      # band
+line("#ffffff", [51, 8], [70, 8])
+line("#d7cfc6", [51, 12], [70, 12])
 outline("#b5a99d")
 
 json.dump({"w": 120, "h": 48, "ops": ops}, open(sys.argv[1], "w"), indent=0)

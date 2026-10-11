@@ -8,7 +8,8 @@ Aseprite is a human pixel editor; here it is used headless (`aseprite -b`, Lua s
     sheet      export all frames as a horizontal sprite sheet + JSON (animated glyphs / item frames)
     palette    convert any PNG to a palette (.gpl / .aseprite palette) without dithering - AI pictures,
                photos or our drafts into the pack's colours
-    rotate     rotate pixel art cleanly with RotSprite (angled icons) - no blur, no lost pixels
+    rotate     rotate pixel art cleanly with RotSprite (angled icons) - no blur, no new colours (pure Python:
+               the headless build has no editor, so Aseprite's own Rotate command does nothing there)
 
     python3 aseprite_tools.py template OUT.aseprite W H [--palette pal.gpl] [--cover cover.png] [--name art]
     python3 aseprite_tools.py export IN.aseprite OUT.png [--layer art]
@@ -61,16 +62,6 @@ spr:flatten()
 spr:saveCopyAs(app.params.out)
 '''
 
-LUA_ROTATE = r'''
-local spr = app.open(app.params.inp)
-app.command.CanvasSize{ ui=false, left=spr.width//2, right=spr.width//2, top=spr.height//2, bottom=spr.height//2 }
-app.command.SelectAll()
-app.command.Rotate{ ui=false, target="mask", angle=tonumber(app.params.angle) }
-app.command.AutocropSprite()
-spr:saveCopyAs(app.params.out)
-'''
-
-
 def binary():
     exe = os.environ.get('ASEPRITE') or shutil.which('aseprite')
     if not exe or not os.path.exists(exe):
@@ -114,8 +105,11 @@ def main(a):
     elif cmd == 'palette':
         subprocess.run([binary(), '-b', pos[0], '--palette', pos[1], '--color-mode', 'indexed',
                         '--dithering-algorithm', 'none', '--save-as', pos[2]], check=True)
-    elif cmd == 'rotate':
-        run_lua(LUA_ROTATE, inp=os.path.abspath(pos[0]), angle=pos[1], out=os.path.abspath(pos[2]))
+    elif cmd == 'rotate':                     # headless Aseprite cannot run Rotate (needs the editor): RotSprite
+        from PIL import Image                 # is implemented in pixelstyle.rotsprite, no Aseprite needed
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import pixelstyle
+        pixelstyle.rotsprite(Image.open(pos[0]), float(pos[1])).save(pos[2])
     else:
         sys.exit(__doc__)
     print('ok')

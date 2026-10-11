@@ -202,3 +202,44 @@ def stylize(img, size=24, colors=10, outline='auto', light=True, palette=None,
     if sparkle:
         icon = add_sparkles(icon)
     return icon
+
+
+def _scale2x(img):
+    """EPX / Scale2x: doubles pixel art, rounding diagonal steps instead of making blocks."""
+    w, h = img.size
+    src = img.load()
+    out = Image.new('RGBA', (w * 2, h * 2))
+    o = out.load()
+    for y in range(h):
+        for x in range(w):
+            p = src[x, y]
+            a = src[x, y - 1] if y > 0 else p
+            b = src[x + 1, y] if x < w - 1 else p
+            c = src[x - 1, y] if x > 0 else p
+            d = src[x, y + 1] if y < h - 1 else p
+            o[2 * x, 2 * y] = a if (c == a and c != d and a != b) else p
+            o[2 * x + 1, 2 * y] = b if (a == b and a != c and b != d) else p
+            o[2 * x, 2 * y + 1] = c if (d == c and d != b and c != a) else p
+            o[2 * x + 1, 2 * y + 1] = d if (b == d and b != a and d != c) else p
+    return out
+
+
+def rotsprite(img, degrees):
+    """RotSprite: Scale2x three times (8x), rotate nearest-neighbour, scale back by taking the most common colour
+    of each 8x8 block - rotated pixel art keeps clean 1px lines and its own colours (no blur, no new colours)."""
+    from collections import Counter
+    img = img.convert('RGBA')
+    pad = Image.new('RGBA', (img.width + 4, img.height + 4), (0, 0, 0, 0))
+    pad.alpha_composite(img, (2, 2))
+    big = _scale2x(_scale2x(_scale2x(pad)))
+    rot = big.rotate(-degrees, resample=Image.NEAREST, expand=True)
+    w, h = rot.width // 8, rot.height // 8
+    rp = rot.load()
+    out = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    op = out.load()
+    for y in range(h):
+        for x in range(w):
+            block = [rp[x * 8 + i, y * 8 + j] for j in range(2, 6) for i in range(2, 6)]
+            c, n = Counter(block).most_common(1)[0]
+            op[x, y] = c if c[3] else (0, 0, 0, 0)
+    return out.crop(out.getbbox()) if out.getbbox() else out

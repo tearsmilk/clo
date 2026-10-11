@@ -66,7 +66,7 @@
  "nexo_items": [
   {
    "id": "hokaria_job_${id}",
-   "icon": "pack/icons/${tex}.png",
+   "icon": "${icon_png}",
    "name": "<yellow>${label}"
   }
  ],
@@ -107,7 +107,7 @@
    "left_click_commands": [
     "[player] jobs join ${job}"
    ],
-   "preview": "pack/icons/${tex}.png"
+   "preview": "${icon_png}"
   },
   {
    "id": "info",
@@ -260,11 +260,13 @@
    "label": "Пекарь",
    "job": "Baker",
    "about": "Пеки хлеб и пироги",
-   "picture": "art/baker.png"
+   "picture": "art/baker.png",
+   "icon_png": "art/bread_icon.png"
   }
  ],
  "variant_defaults": {
   "title": "Работы",
-  "picture": ""
+  "picture": "",
+  "icon_png": "pack/icons/${tex}.png"
  }
 }
