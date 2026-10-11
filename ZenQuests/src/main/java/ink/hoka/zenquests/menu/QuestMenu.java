@@ -56,7 +56,7 @@ public final class QuestMenu implements Listener {
             37, 38, 39, 40, 41, 42, 43};
     private static final int[] CAT_SLOTS = {19, 21, 23, 25};
     private static final int HEADER = 4, PREV = 48, BACK = 49, NEXT = 50;
-    private static final int PROFILE = 4, PREMIUM_MAIN = 40, CLOSE = 49;
+    private static final int PROFILE = 4, PREMIUM_MAIN = 48, CLOSE = 50;
 
     private final ZenQuests plugin;
 
@@ -152,7 +152,9 @@ public final class QuestMenu implements Listener {
             inv.setItem(slot, item(catMat(c, "icon", Material.PAPER), catName(c), lore, ready > 0, Math.max(1, Math.min(64, ready))));
             h.actions.put(slot, () -> { click(p); openCategory(p, c, 0); });
 
-            // индикатор под категорией: есть награды / в процессе / всё сделано
+            // индикатор под категорией: есть награды / в процессе / всё сделано (на нарисованном фоне не нужен —
+            // готовые награды и так видны по свечению и числу на иконке)
+            if (textured()) continue;
             String state = ready > 0 ? "ready" : total > 0 && done >= total ? "done" : total == 0 ? "empty" : "progress";
             Material ind = mat(plugin.getConfig().getString("gui.indicator." + state + ".icon"), Material.GRAY_STAINED_GLASS_PANE);
             inv.setItem(slot + 9, item(ind, gui("indicator." + state + ".name"), List.of(), false, 1));
