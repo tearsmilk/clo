@@ -33,6 +33,8 @@ Five popular styles, all built on the same grid trick:
 | "Select Language" | vanilla grey | two big framed paintings (Kremlin, Statue of Liberty) | text + small flag under the picture | lots of breathing room - few, large choices |
 | profile strip | vanilla grey | big player face, rank badges (coloured plates), equipment slots | short caps badges | **real items** (armour, head) live in normal slots next to the art |
 
+| castle "Квесты" board | no window frame: the whole upper part is a scene (stone wall wider than the window, pillars with braziers, red banners, rubble with plants) | a gold-framed row of 5 dark slot wells holding real quest-card items (! new, check done, empty), a gold divider, a gold-framed 3-slot page navigation | red cloth ribbon with V-cut tails across the top, white outlined text | gold winged ornament under the title, pinned parchment notes, vanilla player inventory below |
+
 Takeaways baked into the builder:
 - vary tile sizes: one hero tile (3x4 / 3x5), mid tiles (3x3, 3x2), strips (3x1) for secondary actions, 1x1 icons for socials/close
 - give tiles material (`style: pattern`) or a scene (`style: image`) - flat colour only for small utility buttons
@@ -40,6 +42,12 @@ Takeaways baked into the builder:
 - a dark recessed `panel` under all tiles produces the thin separator lines seen in every example
 - the header deserves size: `header.size: 2` puts a double-size title on a tab above the window
 - keep slots that hold real items (`slots_visible`) drawn as slots so players see where items go
+- **scene menus**: the art can be a place, not a window - `container_panel: false` + `canvas` margins + scene
+  layers (wall/planks, pillars/posts, braziers/lanterns, banners, rubble/hedge/hay, notes) and functional parts as
+  framed `slot_bar`s with real items inside. Quests, rewards and page lists change at runtime, so their items are
+  real Nexo items (`nexo_items`), not paint; only the static frame is painted
+- build a scene back to front: wall -> pillars -> fire -> banners -> ornaments/notes -> frames -> piles in front;
+  then let the vanilla-looking inventory panel sit on top of the pile so the scene "grows" around it
 
 ## Polish checklist (what separates "drawn" from "generated")
 

@@ -22,7 +22,8 @@ Geometry (vanilla generic chest screen):
     (ChestMenu puts the items at 103 + (rows-4)*18 and 161 + (rows-4)*18)
     title text origin is (8, 6) and a glyph line's top sits at 13 - ascent,
     so ascent 13 + shift -8 puts the texture's top-left on the window's top-left.
-    A header "tab" that sticks out above the window adds `top` px of canvas and raises ascent by the same.
+    A header "tab" that sticks out above the window adds `top` px of canvas and raises ascent by the same;
+    art that sticks out on the left (`canvas.left`) moves the shift left by the same (-8 - left).
 See references/gui-geometry.md for the derivation and for non-chest containers.
 """
 import json, math, os, random, re, sys
@@ -33,6 +34,10 @@ from pixfont import draw_text, text_width, text_height, draw_block_text, block_t
 import pixelstyle  # noqa: E402
 import sprites  # noqa: E402
 import art  # noqa: E402
+import props  # noqa: E402
+
+# x of the window's left edge inside the texture (> 0 when scene art sticks out on the left: spec canvas.left)
+OX = 0
 
 
 # ----------------------------------------------------------------------------- colours / themes
@@ -91,15 +96,15 @@ def window_size(rows):
 
 
 def slot_xy(col, row):
-    return 7 + col * 18, 17 + row * 18
+    return OX + 7 + col * 18, 17 + row * 18
 
 
 def inv_slot_xy(col, row, rows):
-    return 7 + col * 18, rows * 18 + 30 + row * 18
+    return OX + 7 + col * 18, rows * 18 + 30 + row * 18
 
 
 def hotbar_xy(col, rows):
-    return 7 + col * 18, rows * 18 + 88
+    return OX + 7 + col * 18, rows * 18 + 88
 
 
 # ----------------------------------------------------------------------------- primitives
@@ -123,9 +128,9 @@ def bevel_box(img, box, fill, outline=None, hi=None, sh=None, chamfer=0):
             img.putpixel((cx, cy), (0, 0, 0, 0))
 
 
-def draw_framed_panel(img, oy, rows, th):
+def draw_framed_panel(img, box, th):
     """Palette themes: dark outline with cut corners, 4px textured frame band, carved inner line, smooth body."""
-    W, Hh = window_size(rows)
+    bx, by, W, Hh = box
     fr = th['frame']
     band = Image.new('RGBA', (W, Hh), (0, 0, 0, 0))
     tex = art.texture(th.get('frame_tex') or 'planks', W, Hh, fr, seed=11)
@@ -151,15 +156,15 @@ def draw_framed_panel(img, oy, rows, th):
         band.putpixel((cx, cy), (0, 0, 0, 0))
     for cx, cy in ((1, 1), (W - 2, 1), (1, Hh - 2), (W - 2, Hh - 2)):
         band.putpixel((cx, cy), o)
-    img.alpha_composite(band, (0, oy))
+    img.alpha_composite(band, (bx, by))
 
 
-def draw_panel(img, oy, rows, th, seed=7):
-    """Window body with a chamfered black outline and 2px bevel, like vanilla windows."""
+def draw_panel(img, box, th, seed=7):
+    """Window body with a chamfered black outline and 2px bevel, like vanilla windows. box = (x, y, w, h)."""
     if 'frame' in th:
-        return draw_framed_panel(img, oy, rows, th)
+        return draw_framed_panel(img, box, th)
     rnd = random.Random(seed)
-    W, Hh = window_size(rows)
+    bx, by, W, Hh = box
     px = img.load()
     fill = [H(c) for c in th['fill']]
     seam = H(th['seam']) if th['seam'] else None
@@ -183,20 +188,20 @@ def draw_panel(img, oy, rows, th, seed=7):
                 c = seam
             else:
                 c = fill[(row + x // 11) % len(fill)] if rnd.random() > 0.08 else fill[rnd.randrange(len(fill))]
-            px[x, y + oy] = c
+            px[bx + x, by + y] = c
     hi, hi2, sh, sh2 = H(th['hi']), H(th['hi2']), H(th['sh']), H(th['sh2'])
     for y in range(Hh):
         for x in range(W):
             if not inside(x, y):
                 continue
             if not all(inside(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
-                px[x, y + oy] = (0, 0, 0, 255)
+                px[bx + x, by + y] = (0, 0, 0, 255)
                 continue
             d_tl, d_br = min(x, y), min(W - 1 - x, Hh - 1 - y)
             if d_tl in (1, 2) and d_tl <= d_br:
-                px[x, y + oy] = hi if d_tl == 1 else hi2
+                px[bx + x, by + y] = hi if d_tl == 1 else hi2
             elif d_br in (1, 2):
-                px[x, y + oy] = sh if d_br == 1 else sh2
+                px[bx + x, by + y] = sh if d_br == 1 else sh2
 
 
 def draw_slot(img, x0, y0, th, size=18):
@@ -364,7 +369,7 @@ def draw_decor(img, oy, items):
             for i, ch in enumerate(row):
                 if ch in pal:
                     c = H(col) if (col and ch in '#') and it['type'].startswith(('sparkle', 'star')) else H(pal[ch])
-                    x, y = it['x'] + i, oy + it['y'] + j
+                    x, y = OX + it['x'] + i, oy + it['y'] + j
                     if 0 <= x < img.width and 0 <= y < img.height:
                         img.putpixel((x, y), c)
 
@@ -380,7 +385,7 @@ def layer_box(L):
         p = L.get('pad', 0)
         return x0 - p, y0 - p, x0 + w * 18 - 1 + p, y0 + h * 18 - 1 + p
     x, y, w, h = L['box']
-    return x, y, x + w - 1, y + h - 1
+    return OX + x, y, OX + x + w - 1, y + h - 1
 
 
 def draw_layers(img, oy, layers, sdir, th):
@@ -393,7 +398,9 @@ def draw_layers(img, oy, layers, sdir, th):
                 sx, sy = slot_xy(L['slot'] % 9, L['slot'] // 9)
                 x, y = sx + (18 - spr.width) // 2, sy + (18 - spr.height) // 2
             else:
-                x, y = L['x'], L['y']
+                x, y = OX + L['x'], L['y']
+            if L.get('flip'):
+                spr = spr.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
             img.alpha_composite(spr, (x, y + oy))
             continue
         if t != 'slot_frame':
@@ -421,6 +428,24 @@ def draw_layers(img, oy, layers, sdir, th):
             img.alpha_composite(sprites.post(w, h, L.get('color', '#8A5A2E')), (x0, y0))
         elif t == 'image':
             im = cover(resolve(L['path'], sdir), w, h, L.get('colors', 48))
+            img.alpha_composite(im, (x0, y0))
+        elif t == 'slot_bar':            # framed bar around a group of slots, each slot a dark recessed well
+            pad = L.get('pad', 4)
+            kind = L.get('kind', 'gold')
+            inner = L.get('inner') or props.FRAME_KINDS.get(kind, props.FRAME_KINDS['gold'])['inner']
+            fr = props.frame(w + 2 * pad, h + 2 * pad, kind, inner, L.get('rim'))
+            art.drop_shadow(img, (x0 - pad, y0 - pad, x1 + pad, y1 + pad))
+            img.alpha_composite(fr, (x0 - pad, y0 - pad))
+            c0, r0, cw, ch = L['slots']
+            for r in range(ch):
+                for c in range(cw):
+                    sx, sy = slot_xy(c0 + c, r0 + r)
+                    img.alpha_composite(props.well(18, L.get('well', inner)), (sx, sy + oy))
+        elif t in props.PROPS:            # scene props sized to the box: wall, banner, pillar, rubble, ...
+            opts = {k: v for k, v in L.items() if k not in ('type', 'box', 'slots', 'pad', 'above', 'flip')}
+            im = props.render(t, w, h, **opts)
+            if L.get('flip'):
+                im = im.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
             img.alpha_composite(im, (x0, y0))
         elif t == 'slot_frame':          # a framed, highlighted item slot (quest steps, reward, input)
             for idx in L.get('slot_list', [L.get('slot')]):
@@ -477,6 +502,15 @@ def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
     style = b.get('style', 'sunburst')
     x0, y0 = slot_xy(b['x'], b['y'])
     y0 += oy
+    if style == 'none':                  # clickable area over scene art: no tile, just the icon (if any)
+        ic = b.get('icon')
+        if ic:
+            spr = sprites.render(ic[7:]) if ic.startswith('sprite:') else load_icon(resolve(ic, sdir), 16, 16)
+            if b.get('icon_flip'):
+                spr = spr.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+            w, h = b.get('w', 1) * 18, b.get('h', 1) * 18
+            img.alpha_composite(spr, (x0 + (w - spr.width) // 2, y0 + (h - spr.height) // 2))
+        return
     w, h = b.get('w', 1) * 18, b.get('h', 1) * 18
     inset = b.get('inset', 1)              # 1px gap to neighbours; 0 = tiles touch (bento look)
     x0, y0, w, h = x0 + inset, y0 + inset, w - 2 * inset, h - 2 * inset
@@ -621,6 +655,9 @@ def header_top(spec):
     if hd.get('style') == 'block':
         txt = hd['text'] if hd.get('case') == 'keep' else hd['text'].upper()
         return max(0, block_text_size(txt, hd.get('size', 3))[1] + hd.get('depth', 0) - 15)
+    if hd.get('style') == 'ribbon':
+        bh = 7 * hd.get('size', 1) + 8
+        return max(0, -hd.get('y', 9 - bh))
     if hd.get('size', 1) == 2:
         return 10
     return 8 if hd.get('style') == 'tab' else 0
@@ -641,17 +678,32 @@ def draw_header(img, oy, spec, th):
     if style == 'block':                 # Minecraft-logo lettering sticking out above the window
         bw, bh = block_text_size(text, hd.get('size', 3))
         bh += hd.get('depth', 0)
-        draw_block_text(img, (176 - bw) // 2, oy + 15 - bh, text, scale=hd.get('size', 3),
+        draw_block_text(img, OX + (176 - bw) // 2, oy + 15 - bh, text, scale=hd.get('size', 3),
                         top=hd.get('top_color', '#D8D8D8'), bottom=hd.get('bottom_color', '#6E6A68'),
                         outline=hd.get('outline_color', '#111111'), depth=hd.get('depth', 0),
                         side=hd.get('side_color'))
         return
     if style == 'text':
-        draw_text(img, (176 - tw) // 2 if hd.get('center', True) else 8, oy + 5, text,
+        draw_text(img, OX + ((176 - tw) // 2 if hd.get('center', True) else 8), oy + 5, text,
                   H(hd.get('text_color', th['text'])), scale=sc)
         return
+    if style == 'ribbon':                # cloth ribbon with folded, V-cut tails (quest boards, castle scenes)
+        sc = hd.get('size', 1)
+        sp = hd.get('spacing', 1)
+        tw = text_width(text, scale=sc, spacing=sp)
+        bh = 7 * sc + 8
+        rw = hd.get('width', tw + 2 * 14 + 48)
+        rib = props.ribbon(rw, bh + 5, hd.get('color', '#c42f3c'))
+        rx = OX + (176 - rw) // 2
+        ry = oy + hd.get('y', 9 - bh)
+        art.drop_shadow(img, (rx + 14, ry, rx + rw - 15, ry + bh - 1))
+        img.alpha_composite(rib, (rx, ry))
+        tcol = H(hd.get('text_color', '#FFFFFF'))
+        draw_text(img, rx + (rw - tw) // 2, ry + (bh - 7 * sc) // 2, text, tcol, scale=sc, spacing=sp,
+                  outline=art.outline_of(hd.get('color', '#c42f3c')))
+        return
     pw = tw + 6 * sc + 2
-    x0 = (176 - pw) // 2
+    x0 = OX + (176 - pw) // 2
     if sc == 2:
         y1 = oy + 15
         y0 = y1 - (7 * sc + 7)
@@ -683,7 +735,29 @@ def strip_codes(t):
 
 # ----------------------------------------------------------------------------- build
 
+def write_nexo_items(spec, sdir, out, ns):
+    """`nexo_items`: small icon items (quest cards, rewards, page arrows) that show up as REAL items in slots.
+    Each gets a 16x16 texture (sprite or PNG) and a Nexo item entry; DeluxeMenus uses `material: nexo-<id>`."""
+    items = spec.get('nexo_items', [])
+    if not items:
+        return
+    tdir = os.path.join(out, f'Nexo/pack/assets/{ns}/textures/item/gui')
+    os.makedirs(tdir, exist_ok=True)
+    os.makedirs(os.path.join(out, 'Nexo/items'), exist_ok=True)
+    lines = [f"# Icon items for the '{spec['id']}' menu - generated by minecraft-nexo-gui"]
+    for it in items:
+        src = it['icon']
+        im = sprites.render(src[7:]) if src.startswith('sprite:') else load_icon(resolve(src, sdir), 16, 16)
+        canvas = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+        canvas.alpha_composite(im, ((16 - im.width) // 2, (16 - im.height) // 2))
+        canvas.save(os.path.join(tdir, f"{it['id']}.png"))
+        lines += [f"{it['id']}:", f"  itemname: \"{it.get('name', it['id'])}\"", "  material: PAPER",
+                  "  excludeFromInventory: true", "  Pack:", f"    texture: {ns}:item/gui/{it['id']}"]
+    open(os.path.join(out, f"Nexo/items/{spec['id']}_items.yml"), 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
+
+
 def build(spec_path, out):
+    global OX
     spec = json.load(open(spec_path, encoding='utf-8'))
     sdir = os.path.dirname(os.path.abspath(spec_path))
     gid, ns, rows = spec['id'], spec.get('namespace', 'gui'), int(spec.get('rows', 6))
@@ -694,9 +768,20 @@ def build(spec_path, out):
     th.update(spec.get('theme_overrides', {}))
     label_case = spec.get('label_case', 'keep')
     W, Hh = window_size(rows)
-    top = header_top(spec)
-    tex = Image.new('RGBA', (W, Hh + top), (0, 0, 0, 0))
-    draw_panel(tex, top, rows, th)
+    cv = spec.get('canvas', {})                       # scene art may stick out of the 176px window
+    OX = int(cv.get('left', 0))
+    TW = OX + W + int(cv.get('right', 0))
+    top = max(header_top(spec), int(cv.get('top', 0)))
+    TH = Hh + top + int(cv.get('bottom', 0))
+    if TW > 256 or TH > 256:
+        raise SystemExit(f'texture {TW}x{TH} is over the 256x256 glyph limit - shrink canvas margins')
+    tex = Image.new('RGBA', (TW, TH), (0, 0, 0, 0))
+    inv_y = top + rows * 18 + 23                      # top of a separate player-inventory panel
+    inv_th = th
+    if isinstance(spec.get('inventory_panel'), str):
+        inv_th = dict(THEMES[spec['inventory_panel']])
+    if spec.get('container_panel', True):
+        draw_panel(tex, (OX, top, W, Hh), th)
 
     used = set()
     for b in spec.get('buttons', []):
@@ -720,47 +805,62 @@ def build(spec_path, out):
     draw_layers(tex, top, [L for L in spec.get('layers', []) if not L.get('above')], sdir, th)
 
     keep_slots = set(spec.get('slots_visible', []))
-    if spec.get('draw_free_slots', True):
+    if spec.get('draw_free_slots', spec.get('container_panel', True)):   # scenes paint their own slots
         keep_slots |= {i for i in range(rows * 9) if i not in used}
     for i in sorted(keep_slots):
         x, y = slot_xy(i % 9, i // 9)
         draw_slot(tex, x, y + top, th)
     if spec.get('draw_player_inventory', True):
+        if not spec.get('container_panel', True) or spec.get('inventory_panel'):
+            draw_panel(tex, (OX, inv_y, W, Hh + top - inv_y), inv_th)
         for r in range(3):
             for c in range(9):
                 x, y = inv_slot_xy(c, r, rows)
-                draw_slot(tex, x, y + top, th)
+                draw_slot(tex, x, y + top, inv_th)
         for c in range(9):
             x, y = hotbar_xy(c, rows)
-            draw_slot(tex, x, y + top, th)
+            draw_slot(tex, x, y + top, inv_th)
     for b in spec.get('buttons', []):
         draw_button(tex, top, b, sdir, th, label_case, spec.get('icon_style'))
     draw_layers(tex, top, [L for L in spec.get('layers', []) if L.get('above')], sdir, th)
 
     title_col = H(spec.get('title_color', th['text']))
     if spec.get('title') and not spec.get('header'):
-        draw_text(tex, 8, top + (7 if 'frame' in th else 5), spec['title'], title_col)
+        draw_text(tex, OX + 8, top + (7 if 'frame' in th else 5), spec['title'], title_col)
     draw_header(tex, top, spec, th)
     draw_decor(tex, top, spec.get('decor', []))
-    inv_label = spec.get('inventory_label', 'Инвентарь')
-    if inv_label and spec.get('draw_player_inventory', True):
-        draw_text(tex, 8, top + rows * 18 + 20, inv_label, title_col)
+
+    # The client draws the "Инвентарь"/"Inventory" label itself at (8, 18r+20) on top of the glyph, so it is
+    # never baked into the texture (that would double it). hide_inventory_label ships a lang override instead.
+    hide_label = spec.get('hide_inventory_label', False)
+    # Wherever the texture is transparent inside the window, the vanilla grey chest background shows through.
+    win = tex.crop((OX, top, OX + W, top + Hh)).getchannel('A')
+    corner = lambda x, y: min(x, W - 1 - x) + min(y, Hh - 1 - y) < 3     # vanilla corners are cut too
+    holes = sum(1 for y in range(Hh) for x in range(W) if not win.getpixel((x, y)) and not corner(x, y))
+    if holes and not spec.get('container_panel', True):
+        print(f'warning: {holes} px inside the window are transparent - the vanilla chest background will show '
+              f'there (check preview_holes.png)', file=sys.stderr)
 
     for sub in ('texture', 'Nexo/glyphs', f'Nexo/pack/assets/{ns}/textures/gui', 'DeluxeMenus/gui_menus'):
         os.makedirs(os.path.join(out, sub), exist_ok=True)
+    write_nexo_items(spec, sdir, out, ns)
+    if hide_label:
+        ldir = os.path.join(out, 'Nexo/pack/assets/minecraft/lang')
+        os.makedirs(ldir, exist_ok=True)
+        for lang in ('ru_ru', 'en_us', 'uk_ua'):
+            json.dump({'container.inventory': ''}, open(os.path.join(ldir, f'{lang}.json'), 'w'))
     tex.save(os.path.join(out, 'texture', f'{gid}.png'))
     tex.save(os.path.join(out, f'Nexo/pack/assets/{ns}/textures/gui/{gid}.png'))
 
     # --- Nexo glyph: height = texture height keeps it 1:1; ascent 13 (+top) aligns the window top ---
     ascent = 13 + top + int(spec.get('ascent_nudge', 0))
-    TH = Hh + top
     open(os.path.join(out, f'Nexo/glyphs/{gid}.yml'), 'w', encoding='utf-8').write(
-        f"# Nexo glyph for the '{gid}' menu background. Texture is {W}x{TH}, drawn 1:1.\n"
+        f"# Nexo glyph for the '{gid}' menu background. Texture is {TW}x{TH}, drawn 1:1.\n"
         f"{gid}:\n  texture: {ns}:gui/{gid}\n  ascent: {ascent}\n  height: {TH}\n")
 
     # --- DeluxeMenus menu ---
-    shift = -8 + int(spec.get('shift_nudge', 0))
-    back = W + 1
+    shift = -8 - OX + int(spec.get('shift_nudge', 0))
+    back = TW + 1 - OX
     title_text = spec.get('title_text', '')
     menu_title = f"<white><shift:{shift}><glyph:{gid}>" + (f"<shift:-{back}><dark_gray>{title_text}" if title_text else '')
     lines = [
@@ -797,7 +897,11 @@ def build(spec_path, out):
 
     # --- previews ---
     S = int(spec.get('preview_scale', 4))
-    big = tex.resize((W * S, TH * S), Image.NEAREST)
+    big = tex.resize((TW * S, TH * S), Image.NEAREST)
+    if hide_label is False and spec.get('draw_player_inventory', True) and spec.get('inventory_label', 'Инвентарь'):
+        # preview only: the label the client prints at (8, 18r+20)
+        draw_text(big, (OX + 8) * S, (top + rows * 18 + 20) * S, spec.get('inventory_label', 'Инвентарь'),
+                  H('#404040'), scale=S)
     tip, tb = None, None
     if spec.get('preview_tooltip'):
         tb = next(x for x in spec['buttons'] if x['id'] == spec['preview_tooltip'])
@@ -812,7 +916,7 @@ def build(spec_path, out):
             draw_text(tip, 4, 4 + i * 10, l, col, shadow=darken(col, 0.75))
         tip = tip.resize((tw * S, th_ * S), Image.NEAREST)
     pad_r = (tip.width + 56) if tip else 40
-    canvas = Image.new('RGBA', (W * S + 40 + pad_r, TH * S + 80), H('#20161E'))
+    canvas = Image.new('RGBA', (TW * S + 40 + pad_r, TH * S + 80), H('#20161E'))
     bgp = spec.get('preview_background')
     if bgp:
         bg = Image.open(resolve(bgp, sdir)).convert('RGBA')
@@ -840,7 +944,7 @@ def build(spec_path, out):
     if tip:
         sx, sy = slot_xy(tb['x'], tb['y'])
         canvas.alpha_composite(Image.new('RGBA', (16 * S, 16 * S), (255, 255, 255, 80)), (40 + (sx + 1) * S, 40 + (sy + 1 + top) * S))
-        canvas.alpha_composite(tip, (40 + W * S + 16, 40 + (sy + top) * S))
+        canvas.alpha_composite(tip, (40 + TW * S + 16, 40 + (sy + top) * S))
     canvas.convert('RGB').save(os.path.join(out, 'preview.png'))
 
     grid = big.copy()
@@ -850,6 +954,14 @@ def build(spec_path, out):
         ImageDraw.Draw(grid).rectangle((x * S, y * S, (x + 18) * S - 1, (y + 18) * S - 1), outline=(255, 0, 255, 255))
         draw_text(grid, x * S + 3, y * S + 3, str(i), (255, 255, 255, 255), scale=2, outline=(0, 0, 0, 255))
     grid.convert('RGB').save(os.path.join(out, 'preview_grid.png'))
+    if holes and not spec.get('container_panel', True):
+        hv = tex.copy()
+        hp = hv.load()
+        for y in range(top, top + Hh):
+            for x in range(OX, OX + W):
+                if hp[x, y][3] == 0 and not corner(x - OX, y - top):
+                    hp[x, y] = (255, 0, 255, 255)
+        hv.resize((TW * S, TH * S), Image.NEAREST).save(os.path.join(out, 'preview_holes.png'))
 
     open(os.path.join(out, 'INSTALL.md'), 'w', encoding='utf-8').write(
         f"# Install '{gid}'\n\n"
@@ -858,8 +970,13 @@ def build(spec_path, out):
         f"3. `/nexo reload all` (rebuilds and resends the pack), then `/dm reload`.\n"
         f"4. Open with `/{spec.get('open_commands', [gid])[0]}`. If the art is off by a few pixels, adjust\n"
         f"   `shift_nudge` (horizontal) / `ascent_nudge` (vertical, + moves up) in the spec and rebuild,\n"
-        f"   or edit `<shift:{shift}>` / `ascent: {ascent}` directly.\n")
-    print(json.dumps({'texture': f'{W}x{TH}', 'ascent': ascent, 'height': TH, 'shift': shift,
+        f"   or edit `<shift:{shift}>` / `ascent: {ascent}` directly.\n"
+        + (f"5. `Nexo/items/{gid}_items.yml` adds the icon items used in the menu (`material: nexo-<id>`); check one\n"
+           f"   with `/nexo give <player> {spec['nexo_items'][0]['id']}`.\n" if spec.get('nexo_items') else '')
+        + ("6. `Nexo/pack/assets/minecraft/lang/*.json` blanks the \"Inventory\" label of ALL chest menus (the art sits\n"
+           "   where the client would print it). Leave these files out if other menus need the label; if the pack\n"
+           "   already has lang files, merge the `container.inventory` key into them.\n" if hide_label else ''))
+    print(json.dumps({'texture': f'{TW}x{TH}', 'ascent': ascent, 'height': TH, 'shift': shift,
                       'buttons': {b['id']: button_slots(b) for b in spec.get('buttons', [])}}, ensure_ascii=False))
 
 

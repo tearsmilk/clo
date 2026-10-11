@@ -1,0 +1,379 @@
+{
+ "id": "hokaria_quests_farm",
+ "namespace": "hokaria",
+ "rows": 5,
+ "theme": "oak",
+ "container_panel": false,
+ "inventory_panel": "vanilla",
+ "hide_inventory_label": true,
+ "canvas": {
+  "left": 30,
+  "right": 30,
+  "top": 17
+ },
+ "header": {
+  "text": "Квесты",
+  "style": "ribbon",
+  "case": "keep",
+  "width": 150,
+  "color": "#c8553d"
+ },
+ "open_commands": [
+  "quests_farm"
+ ],
+ "preview_tooltip": "info",
+ "layers": [
+  {
+   "type": "planks",
+   "box": [
+    -14,
+    0,
+    204,
+    116
+   ],
+   "color": "#b86f50",
+   "seed": 5
+  },
+  {
+   "type": "post",
+   "box": [
+    -24,
+    -4,
+    10,
+    112
+   ],
+   "color": "#8A5A2E"
+  },
+  {
+   "type": "post",
+   "box": [
+    190,
+    -4,
+    10,
+    112
+   ],
+   "color": "#8A5A2E"
+  },
+  {
+   "type": "brazier",
+   "kind": "lantern",
+   "box": [
+    -25,
+    -16,
+    12,
+    13
+   ]
+  },
+  {
+   "type": "brazier",
+   "kind": "lantern",
+   "box": [
+    189,
+    -16,
+    12,
+    13
+   ]
+  },
+  {
+   "type": "banner",
+   "box": [
+    -31,
+    8,
+    26,
+    82
+   ],
+   "color": "#3e8948",
+   "tail": "swallow",
+   "emblem": "wheat"
+  },
+  {
+   "type": "banner",
+   "box": [
+    181,
+    8,
+    26,
+    82
+   ],
+   "color": "#3e8948",
+   "tail": "swallow",
+   "emblem": "wheat"
+  },
+  {
+   "type": "flourish",
+   "box": [
+    38,
+    13,
+    100,
+    18
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "note",
+   "box": [
+    10,
+    24,
+    15,
+    19
+   ],
+   "seed": 2
+  },
+  {
+   "type": "note",
+   "box": [
+    3,
+    56,
+    13,
+    15
+   ],
+   "seed": 5,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    33,
+    76,
+    10,
+    12
+   ],
+   "seed": 8,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    151,
+    24,
+    15,
+    19
+   ],
+   "seed": 3
+  },
+  {
+   "type": "note",
+   "box": [
+    160,
+    56,
+    13,
+    15
+   ],
+   "seed": 6,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    133,
+    76,
+    10,
+    12
+   ],
+   "seed": 9,
+   "seal": null
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    2,
+    1,
+    5,
+    1
+   ],
+   "kind": "gold"
+  },
+  {
+   "type": "divider",
+   "box": [
+    36,
+    59,
+    104,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    3,
+    3,
+    3,
+    1
+   ],
+   "kind": "gold"
+  },
+  {
+   "type": "rubble",
+   "box": [
+    -30,
+    93,
+    236,
+    30
+   ],
+   "color": "#3e8948",
+   "leaves": "#63c74d",
+   "flowers": "#f6757a",
+   "seed": 4
+  },
+  {
+   "type": "hay",
+   "box": [
+    -30,
+    100,
+    44,
+    26
+   ],
+   "seed": 3
+  },
+  {
+   "type": "hay",
+   "box": [
+    162,
+    100,
+    44,
+    26
+   ],
+   "seed": 8
+  },
+  {
+   "type": "sprite",
+   "name": "pumpkin",
+   "x": -26,
+   "y": 104
+  },
+  {
+   "type": "sprite",
+   "name": "pumpkin",
+   "x": 188,
+   "y": 104
+  }
+ ],
+ "buttons": [
+  {
+   "id": "prev",
+   "x": 3,
+   "y": 3,
+   "style": "none",
+   "icon": "sprite:arrow_gold",
+   "icon_flip": true,
+   "name": "&6« Назад",
+   "lore": [
+    "&7Предыдущая страница квестов"
+   ],
+   "commands": [
+    "[openguimenu] hokaria_quests"
+   ]
+  },
+  {
+   "id": "info",
+   "x": 4,
+   "y": 3,
+   "style": "none",
+   "icon": "sprite:page",
+   "name": "&e&lДоска квестов",
+   "lore": [
+    "&7Бери задания у жителей деревни,",
+    "&7сдавай урожай и получай награды.",
+    "",
+    "&a» Квест открывается каждый день"
+   ]
+  },
+  {
+   "id": "next",
+   "x": 5,
+   "y": 3,
+   "style": "none",
+   "icon": "sprite:arrow_gold",
+   "name": "&6Вперёд »",
+   "lore": [
+    "&7Следующая страница квестов"
+   ],
+   "commands": [
+    "[openguimenu] hokaria_quests"
+   ]
+  }
+ ],
+ "nexo_items": [
+  {
+   "id": "hokaria_quest_new",
+   "icon": "sprite:quest_new",
+   "name": "<gold>Новый квест"
+  },
+  {
+   "id": "hokaria_quest_done",
+   "icon": "sprite:quest_done",
+   "name": "<green>Квест выполнен"
+  },
+  {
+   "id": "hokaria_quest_locked",
+   "icon": "sprite:quest_locked",
+   "name": "<gray>Квест закрыт"
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "quest_1",
+   "material": "nexo-hokaria_quest_done",
+   "slot": 11,
+   "display_name": "&a✔ Первый урожай",
+   "lore": [
+    "&7Собери 32 пшеницы",
+    "",
+    "&aВыполнено"
+   ],
+   "preview": "sprite:quest_done"
+  },
+  {
+   "id": "quest_2",
+   "material": "nexo-hokaria_quest_new",
+   "slot": 12,
+   "display_name": "&6! Рыбный день",
+   "lore": [
+    "&7Поймай 10 рыб",
+    "&7Награда: &e50 монет"
+   ],
+   "left_click_commands": [
+    "[player] quests start fish"
+   ],
+   "preview": "sprite:quest_new"
+  },
+  {
+   "id": "quest_3",
+   "material": "nexo-hokaria_quest_new",
+   "slot": 13,
+   "display_name": "&6! Охота",
+   "lore": [
+    "&7Добудь 5 шкур",
+    "&7Награда: &e80 монет"
+   ],
+   "left_click_commands": [
+    "[player] quests start hunt"
+   ],
+   "preview": "sprite:quest_new"
+  },
+  {
+   "id": "quest_4",
+   "material": "nexo-hokaria_quest_new",
+   "slot": 14,
+   "display_name": "&6! Ярмарка",
+   "lore": [
+    "&7Продай 3 тыквы на рынке",
+    "&7Награда: &e40 монет"
+   ],
+   "left_click_commands": [
+    "[player] quests start fair"
+   ],
+   "preview": "sprite:quest_new"
+  },
+  {
+   "id": "quest_5",
+   "material": "nexo-hokaria_quest_locked",
+   "slot": 15,
+   "display_name": "&7Закрыто",
+   "lore": [
+    "&7Откроется на 5 уровне"
+   ],
+   "preview": "sprite:quest_locked"
+  }
+ ]
+}

@@ -35,6 +35,16 @@ glyph left = 8 + sum of preceding <shift:N>
 
 So a texture whose (0,0) should coincide with the window's (0,0) uses **`ascent: 13` and `<shift:-8>`**.
 If the texture has `p` transparent rows above the window art, use `ascent: 13 + p`. `ascent` must be <= `height`.
+If the art sticks out `L` px to the left of the window (banners, pillars), shift `-8 - L`: the texture's x = L is
+the window's left edge. Width and height still max out at 256, e.g. 30 + 176 + 30 = 236.
+
+### Scenes that replace the window
+The vanilla chest background is drawn first and stays visible wherever the glyph is transparent, so a scene
+must be opaque over the whole 176 x (114 + 18r) rectangle (except the 3 cut corner pixels vanilla also has).
+Typical split: scene art from y = 0 to 18r + 23, then a separate panel for the player inventory from 18r + 23 to
+the bottom (7px border above the first inventory row, like the sides). The client prints the "Инвентарь" label at
+(8, 18r + 20) **on top of the glyph** - either keep that spot calm or hide the label with a lang override
+(`container.inventory` = "" in the pack's lang files; this affects every chest menu).
 Treat 13/-8 as the computed starting point and confirm in-game: the Nexo GUI Visualizer
 (https://nexomc.com/tools/gui-visualizer) or the Glypher client mod show the exact fit; nudge by 1px if needed.
 

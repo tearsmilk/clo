@@ -18,10 +18,15 @@ Paths are relative to the spec file.
 | `title_text` | none | live text printed after the glyph in the real title (placeholders allowed) |
 | `label_case` | `keep` | `upper` turns every label to capitals (Quick-menu look) |
 | `panels` | [] | recessed areas under buttons: `{x,y,w,h, color, pad}` - put one under a group of tiles to get dark separator lines |
-| `draw_free_slots` | true | draw normal slots where no button is |
+| `draw_free_slots` | true (false in scenes) | draw normal slots where no button is |
 | `slots_visible` | [] | slot indexes to draw as normal slots even if covered/hidden - for real items (player head, armour) |
-| `draw_player_inventory` | true | draw the 4 player rows + "Инвентарь" label |
-| `inventory_label` | `Инвентарь` | text above the player inventory (`""` to hide) |
+| `draw_player_inventory` | true | draw the 4 player rows |
+| `inventory_label` | `Инвентарь` | preview only: the client itself prints this label at (8, 18r+20) over the art, so it is never baked into the texture |
+| `hide_inventory_label` | false | ship `assets/minecraft/lang/{ru_ru,en_us,uk_ua}.json` with `container.inventory: ""` (hides the label in **every** chest menu of the server) - for scenes whose art sits where the label would be |
+| `canvas` | {} | `{"left": 30, "right": 30, "top": 17, "bottom": 0}` px of art outside the 176px window (banners, pillars, torches). Texture must stay <= 256x256; the title shift becomes `-8 - left` automatically |
+| `container_panel` | true | false = no window panel above the player inventory: the `layers` paint the whole upper part (scene menus). The builder warns and writes `preview_holes.png` if any window pixel stays transparent (vanilla grey would show there) |
+| `inventory_panel` | theme | theme name for a separate player-inventory panel (`"vanilla"` keeps it looking like Minecraft under a painted scene) |
+| `nexo_items` | [] | real icon items for slots: `{"id": "hokaria_quest_new", "icon": "sprite:quest_new" or "icons/x.png", "name": "<gold>Новый квест"}` -> 16x16 texture + `Nexo/items/<id>_items.yml`; use them with `material: nexo-<id>` in `extra_items` |
 | `open_commands` | [id] | DeluxeMenus open commands |
 | `extra_items` | [] | raw DeluxeMenus items, e.g. `{"id":"head","material":"head-%player_name%","slot":10}` |
 | `ascent_nudge` / `shift_nudge` | 0 | 1px corrections after testing in game |
@@ -35,6 +40,9 @@ Paths are relative to the spec file.
 - `size: 2` = double-size letters on a tab that sticks out ~10px above the window (texture gets taller, ascent rises accordingly - handled automatically).
 - `plaque` (size 1) = small plate inside the 17px top strip with rivets left/right.
 - `style: block` + `depth: 3` (+ `side_color`) extrudes the letters into a 3D slab like Redstone-Labs logos.
+- `style: ribbon` = cloth ribbon with folded, V-cut tails across the top edge (quest boards, castle scenes):
+  `color`, `width` (px, default text + 76), `y` (px from the window top, default `9 - band height`), `size` 1|2,
+  `spacing`, `case: "keep"` for mixed case. White text with a dark outline in the ribbon's hue.
 - `style: block` = chunky "Minecraft logo" letters (light top, darker bottom third, outline, crack pixels) above
   the window. `size` 3 (default) or 4; size 2 merges letters - avoid. Colours: `top_color`, `bottom_color`, `outline_color`.
 
@@ -44,7 +52,7 @@ Paths are relative to the spec file.
 |-----|---------|---------|
 | `id` | required | DeluxeMenus item id |
 | `x,y,w,h` | w=h=1 | slot rect |
-| `style` | `sunburst` | `sunburst`, `gradient` (banded), `flat`, `button` (two-tone body), `pattern`, `image` |
+| `style` | `sunburst` | `sunburst`, `gradient` (banded), `flat`, `button` (two-tone body), `pattern`, `image`, `none` (no tile: an invisible clickable area over scene art; only `icon` is drawn, `icon_flip` mirrors it) |
 | `color` | `#5DAA3A` | base colour (also tints frame, plaque) |
 | `pattern` | `noise` | for `style: pattern`: `planks`/`planks_h`, `planks_v`, `bricks`, `cobble`/`stone`, `grass`, `meadow` (grass + flowers), `cloth`, `dirt`/`noise`, `sky`, `checker`, `stripes`, `dots` |
 | `image` | - | for `style: image`: illustration that covers the tile (centre-cropped, posterized to `colors`, default 48) |
@@ -81,10 +89,29 @@ squeezing letters.
 | `awning` | `colors` (stripe colours), `stripe` px, `scallop` px | striped market awning with rail and wavy edge |
 | `post` | `color` | wooden posts/pillars |
 | `image` | `path`, `colors` | an illustration covering the box |
-| `sprite` | `name`, `x`,`y` or `slot`, `opts` | props: `crate` (w,h,color), `arrow` (w,h,color), `sack`, `wheat`, `coin`, `hourglass`, `ledger`, `carrot`, `pumpkin`, `emerald`, `fish`, `check` |
+| `sprite` | `name`, `x`,`y` or `slot`, `opts`, `flip` | props: `crate` (w,h,color), `arrow` (w,h,color), `sack`, `wheat`, `coin`, `hourglass`, `ledger`, `carrot`, `pumpkin`, `emerald`, `fish`, `check`, `quest_new`, `quest_done`, `quest_locked`, `arrow_gold`, `page` |
 | `slot_frame` | `slot` or `slot_list`, `color`, `inner`, `outline` | framed highlighted slots for quest steps, rewards, inputs (real items go there) |
+| `slot_bar` | `slots: [col,row,w,h]`, `kind` gold/wood/stone/iron, `rim`, `inner`, `well`, `pad` (4) | one metal/wood frame around a group of slots, each slot a dark recessed well - quest rows, reward rows, page navigation |
+| `wall` | `color`, `coping`, `seed` | castle wall of staggered stone blocks with per-block tones, chips and a lit cap ledge |
+| `planks` | `color`, `seed` | barn wall: vertical boards with a top beam |
+| `pillar` | `color` | stone column with capital and base |
+| `brazier` | `kind` bowl/torch/lantern, `color` | fire bowl, torch or lantern (put it on a pillar/post top) |
+| `banner` | `color`, `trim`, `rod`, `tail` point/swallow, `emblem` (sprite name) | hanging cloth banner on a rod with folds and gold trim |
+| `ribbon` | `color` | a ribbon anywhere (the header style uses the same drawing) |
+| `rubble` | `color`, `leaves`, `flowers`, `seed`, `density` | pile of outlined boulders with leaf sprigs and flowers; green `color` = bushes/hedge |
+| `hay` | `color`, `seed` | hay bales with twine - farm scenes |
+| `flourish` | `color`, `gem` | symmetric gold ornament with feathered wings, under a title |
+| `note` | `color`, `seal` (null = none), `seed` | pinned parchment note with scribbles |
+| `divider` | `color`, `gem` | ornamental line with arrow tips, beads and a centre gem |
+| `frame` | `kind`, `inner`, `rim` | empty framed panel (like slot_bar without wells) |
+
+Box layers take `"flip": true` to mirror them. Boxes may have negative x/y or reach past 176 - that is the
+`canvas` margin. Order matters: layers are painted in list order (wall first, props, then piles in front).
 
 Button icons can be sprites: `"icon": "sprite:hourglass"`.
 `extra_items[].preview: "sprite:carrot"` (or a PNG) draws a stand-in item with its amount in preview.png only, so
 the user sees how slots with real items will look; it is not written to the DeluxeMenus file.
-See `assets/examples/market_menu/spec.json` (market stall with 4 order steps, arrows, reward slot, hand-in button).
+See `assets/examples/market_menu/spec.json` (market stall with 4 order steps, arrows, reward slot, hand-in button),
+`assets/examples/quest_menu/spec.json` (castle quest board: wall wider than the window, pillars with fire, banners,
+ribbon title, gold slot bars with real quest-card items, rubble with plants, vanilla player inventory) and
+`assets/examples/quest_menu_farm/spec.json` (the same board as a barn: planks, lanterns, wheat banners, hedge, hay).

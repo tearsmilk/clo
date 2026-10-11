@@ -84,10 +84,16 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
   `wood` | `stone` (UI-kit plates with nails/chips).
 - Scenes: when the reference is a picture-like GUI (stall, workshop, shop counter) use `layers` (rect/pattern,
   awning, post, sprite, slot_frame) instead of tiles; real items sit in framed slots. No image model needed -
-  `scripts/sprites.py` has hand-made props and you can add more grid sprites there.
+  `scripts/sprites.py` has hand-made grid sprites, `scripts/props.py` draws sized scene props (walls, banners,
+  pillars, fire, rubble, hay, ornaments, notes, frames); add new ones there rather than in a spec.
 - Decor: `decor` puts sparkles, stars, clouds, moons, leaves anywhere (px coordinates, negative y = above window).
   Fit is ~8-9 letters per line on a 3-wide button, ~5 on 2-wide; the builder refuses labels that do not fit
   rather than squeezing letters (squeezed pixel letters merge into an unreadable blob).
+- Scene menus (quest boards, castles, barns - art wider than the window, no window frame): copy
+  `assets/examples/quest_menu/spec.json` (castle) or `quest_menu_farm/spec.json` (barn) and change texts/colours.
+  Keys: `canvas`, `container_panel: false`, `inventory_panel: "vanilla"`, `header.style: "ribbon"`, scene layers
+  (`wall`, `planks`, `pillar`, `brazier`, `banner`, `rubble`, `hay`, `flourish`, `note`, `divider`, `slot_bar`),
+  buttons with `style: "none"`, and `nexo_items` for real items whose state changes (quest cards).
 - Illustrations for `image` tiles: generate a small scene (or crop one from art the user already has) - a
   pond for fishing, a market stall for the shop. They are posterized to a pixel palette automatically.
 
@@ -95,12 +101,15 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
 python3 scripts/gui_builder.py spec.json out/
 ```
 Outputs: `out/texture/<id>.png` (the glyph), `out/preview.png` (in-game look, with tooltip),
-`out/preview_grid.png` (slot numbers over the art), `out/Nexo/...` (glyph yml + pack texture, ready to merge into
-`plugins/Nexo/`), `out/DeluxeMenus/gui_menus/<id>.yml`, `out/INSTALL.md`.
+`out/preview_grid.png` (slot numbers over the art), `out/Nexo/...` (glyph yml + pack texture, plus `items/` and
+item textures when the spec has `nexo_items`, ready to merge into `plugins/Nexo/`),
+`out/DeluxeMenus/gui_menus/<id>.yml`, `out/INSTALL.md`; `out/preview_holes.png` when a scene leaves window pixels
+transparent (fix them - vanilla grey would show through).
 
 ### 4. Check before handing over
 Look at `preview.png` and `preview_grid.png` yourself:
 - every button sits exactly on its slots, labels are readable and not touching the tile edge
+- the grey "Инвентарь" in the preview is drawn by the client, not the texture - keep its spot calm or hide it
 - icons are recognisable at icon size (if mush, regenerate with a simpler subject)
 - nothing important sits where a single 16x16 slot highlight would hide it
 Then send the user the preview first (they judge visually), then the files.
