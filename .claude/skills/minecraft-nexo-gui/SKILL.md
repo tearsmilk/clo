@@ -152,6 +152,11 @@ Then send the user the preview first (they judge visually), then the files.
   counter; all five are in `assets/examples/shop_market/`, layouts and DeluxeMenus logic (meta counter, money,
   sell caveat) in `references/shop-flow.md`. Read it whenever the user asks for a shop / market / store menu.
 
+- **Safe / vault kit** (brushed steel window, door with hinges, keypad, LCD with lamps, handle wheel, brass
+  plates, bolts): `theme: "steel"` + layers `{"type": "safe", "part": ...}` from `scripts/safe.py`; code lock,
+  change-code and 54-slot storage skin in `assets/examples/safe/`; the code-entry logic (DeluxeMenus meta +
+  regex requirements) in `references/safe-lock.md` - reuse it for any numeric input.
+
 ## Rebuilding a reference "1 in 1"
 When the user shows a finished GUI and asks for an exact copy, measure it instead of eyeballing:
 `scripts/ref_tools.py` (palette, charmap, boxes, compare) finds the window, stripe orders, offsets and colours;
@@ -193,4 +198,5 @@ reference is a pixel off. Full method and the measured royal kit: `references/re
 - `references/bought-packs.md` - building menus on top of a pack the user owns (background, relabel, variants)
 - `references/item-icons.md` - measured rules for 16x16 item icons, ramps, recipes of item_icons.py
 - `references/shop-flow.md` - the screens of a shop, measured stall layout, shop kit, DeluxeMenus amount/sell logic
+- `references/safe-lock.md` - safe code lock + storage skin, steel kit, code entry with DeluxeMenus meta
 - `references/artist-brief.md` - artist hand-off kit and brief

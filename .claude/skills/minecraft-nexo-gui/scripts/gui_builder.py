@@ -39,6 +39,7 @@ import props  # noqa: E402
 import royal  # noqa: E402
 import rustic  # noqa: E402
 import shop  # noqa: E402
+import safe  # noqa: E402
 import scenes  # noqa: E402
 import icons16  # noqa: E402
 
@@ -100,6 +101,9 @@ THEMES = {
     # layers bookmark / card / grid_frame, slots shown via slots_visible
     'rustic': dict(frame_style='rustic', slot_style='well', text='#371621', recess='#4d1b22',
                    slot_in='#4d1b22', slot_dk='#371621', slot_lt='#8c3f2b'),
+    # brushed steel safe / vault (safe.py): rivets, light band under the client's Inventory label, steel wells
+    'steel':  dict(frame_style='steel', slot_style='steel', text='#101219', recess='#191c24',
+                   slot_in='#262a34', slot_dk='#101219', slot_lt='#76829a'),
     'royal':  dict(body='#2b3545', frame_style='royal', gold='#d9893f', gold_dk='#b55a41', outline='#1c1b2b',
                    slot_style='rim', slot_in='#2b3545', slot_dk='#1f2432', slot_lt='#3a4959', rim_hi='#859aa9',
                    rim_mid='#6c8294', rim_lo='#506275', text='#b3c2ca', recess='#1f2432'),
@@ -208,6 +212,8 @@ def draw_panel(img, box, th, seed=7):
         return
     if th.get('frame_style') == 'royal':
         return draw_royal_panel(img, box, th)
+    if th.get('frame_style') == 'steel':
+        return safe.panel(img, box, th.get('_rows', 6), th.get('seed', 3))
     if 'frame' in th:
         return draw_framed_panel(img, box, th)
     rnd = random.Random(seed)
@@ -277,6 +283,8 @@ def draw_slot(img, x0, y0, th, size=18):
         return rustic.well_slot(img, x0, y0)
     if th.get('slot_style') == 'rim' and size == 18:
         return draw_rim_slot(img, x0, y0, th)
+    if th.get('slot_style') == 'steel' and size == 18:
+        return safe.slot(img, x0, y0)
     d = ImageDraw.Draw(img)
     d.rectangle((x0, y0, x0 + size - 1, y0 + size - 1), fill=H(th['slot_in']))
     d.line((x0, y0, x0 + size - 2, y0), fill=H(th['slot_dk']))
@@ -383,6 +391,8 @@ def small_icon(src, sdir):
         return item_icons.render(src[5:]).image()
     if src.startswith('shop:'):                       # shop kit plaques: shop:back, shop:next:green, shop:alert
         return shop.render_icon(src[5:])
+    if src.startswith('safe:'):                       # safe kit: safe:lamp, safe:lamp:red
+        return safe.render_icon(src[5:])
     return load_icon(resolve(src, sdir), 16, 16)
 
 
@@ -500,6 +510,9 @@ def draw_layers(img, oy, layers, sdir, th):
             continue
         if t == 'shop':                   # market-stall kit (shop.py): stall, window, wells, group, button, ...
             draw_shop(img, oy, L, sdir)
+            continue
+        if t == 'safe':                   # steel safe kit (safe.py): door, hinge, keypad, display, wheel, ...
+            draw_safe(img, oy, L)
             continue
         if t == 'nameplate':              # green ribbon label (rustic kit) centred on x
             rustic.nameplate(img, OX + L['x'], oy + L['y'], L['text'], L.get('min_w', 60))
@@ -634,6 +647,43 @@ def draw_shop(img, oy, L, sdir):
         raise SystemExit(f"unknown shop part '{p}'")
 
 
+def draw_safe(img, oy, L):
+    """Safe kit parts. x / y / box are window px, slots are [col, row, ...] like other layers."""
+    p, ox = L['part'], OX
+    if p == 'body':                       # box volume: side + bottom faces and feet outside the window
+        safe.body(img, ox, oy, 176, 114 + 18 * L.get('rows', 6), L.get('depth', 4), L.get('feet', True))
+    elif p == 'door':
+        x0, y0, x1, y1 = L.get('box', [4, 4, 171, 121])
+        safe.door(img, ox + x0, oy + y0, ox + x1, oy + y1, L.get('seed', 5))
+    elif p == 'hinges':
+        for y in L.get('ys', [16, 84]):
+            safe.hinge(img, ox + L.get('x', -2), oy + y, L.get('h', 26), L.get('leaf', 12))
+    elif p == 'bolts':                   # bars sticking out of the right side (spec canvas right >= length - 3)
+        safe.bolts(img, ox + L.get('x', 171), [oy + y for y in L.get('ys', [30, 60, 90])], L.get('length', 10))
+    elif p == 'bolt_slots':              # retracted: slots cut into the frame
+        safe.bolt_receivers(img, ox + L.get('x', 170), [oy + y for y in L.get('ys', [30, 60, 90])])
+    elif p == 'nameplate':
+        safe.nameplate(img, ox + L.get('x', 88), oy + L['y'], L['text'], L.get('w'))
+    elif p == 'plate':
+        safe.small_plate(img, ox + L['x'], oy + L['y'], L['text'])
+    elif p == 'display':
+        c, r, n = L['slots'][:3]
+        safe.display(img, ox, oy, c, r, n, L.get('lamps', []), L.get('lock'))
+    elif p == 'keypad':
+        c, r = L['slots'][:2]
+        safe.keypad(img, ox, oy, c, r, L['labels'], {int(k): v for k, v in L.get('colors', {}).items()},
+                    {int(k): v for k, v in L.get('glyphs', {}).items()})
+    elif p == 'wheel':
+        safe.wheel(img, ox + L['x'], oy + L['y'], L.get('r', 20), L.get('spokes', 4))
+    elif p == 'keyhole':
+        safe.keyhole(img, ox + L['x'], oy + L['y'])
+    elif p == 'recess':
+        x0, y0, x1, y1 = L['box']
+        safe.recess(img, ox + x0, oy + y0, ox + x1, oy + y1)
+    else:
+        raise SystemExit(f"unknown safe part '{p}'")
+
+
 # ----------------------------------------------------------------------------- buttons
 
 def resolve(path, sdir):
@@ -739,7 +789,7 @@ def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
         fpad = 3 if b.get('icon_frame') else 0
         size = b.get('icon_size') or min(avail_w, avail_h) - 2 * fpad
         icon_src = b['icon']
-        is_sprite = icon_src.startswith(('sprite:', 'item:', 'shop:'))
+        is_sprite = icon_src.startswith(('sprite:', 'item:', 'shop:', 'safe:'))
         if is_sprite:
             spr = small_icon(icon_src, sdir)
             import tempfile
@@ -1067,6 +1117,7 @@ def build_spec(spec, sdir, out):
                      ('preview_vanilla_under', True)):
             spec.setdefault(k, v)
     th['_bookmarks'] = [L for L in spec.get('layers', []) if L['type'] == 'bookmark']
+    th['_rows'] = rows
     inv_y = top + rows * 18 + 23                      # top of a separate player-inventory panel
     inv_th = th
     if isinstance(spec.get('inventory_panel'), str):
@@ -1207,7 +1258,13 @@ def build_spec(spec, sdir, out):
         f"#   menu_title: '%nexo_shift_{shift}%%nexo_{gid}%'",
         f"menu_title: '{menu_title}'",
         "open_command:",
-    ] + [f"  - {c}" for c in spec.get('open_commands', [gid])] + [f"size: {rows * 9}", "items:"]
+    ] + [f"  - {c}" for c in spec.get('open_commands', [gid])] + [f"size: {rows * 9}"]
+    for k, v in spec.get('dm_menu', {}).items():   # raw menu-level DeluxeMenus keys (open_requirement, update...)
+        lines.append(f"{k}: {json.dumps(v, ensure_ascii=False)}")
+    if spec.get('on_open'):                  # DeluxeMenus actions run when the menu opens (reset a counter...)
+        lines.append("open_commands:")
+        lines += [f"  - '{c}'" for c in spec['on_open']]
+    lines.append("items:")
     for b in spec.get('buttons', []):
         slots = button_slots(b)
         lines += [f"  '{b['id']}':"]

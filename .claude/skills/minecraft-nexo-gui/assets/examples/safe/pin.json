@@ -1,0 +1,485 @@
+{
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "steel",
+ "canvas": {
+  "left": 6,
+  "right": 9,
+  "top": 6,
+  "bottom": 7
+ },
+ "draw_free_slots": false,
+ "id": "hokaria_safe_pin",
+ "open_commands": [
+  "safe_pin"
+ ],
+ "layers": [
+  {
+   "type": "safe",
+   "part": "body",
+   "depth": 4
+  },
+  {
+   "type": "safe",
+   "part": "door",
+   "box": [
+    4,
+    4,
+    171,
+    121
+   ]
+  },
+  {
+   "type": "safe",
+   "part": "hinges",
+   "x": -4,
+   "ys": [
+    12,
+    78
+   ]
+  },
+  {
+   "type": "safe",
+   "part": "nameplate",
+   "x": 88,
+   "y": -5,
+   "text": "НОВЫЙ КОД"
+  },
+  {
+   "type": "safe",
+   "part": "display",
+   "slots": [
+    2,
+    0,
+    5
+   ],
+   "lamps": [
+    2,
+    3,
+    5,
+    6
+   ],
+   "lock": 4
+  },
+  {
+   "type": "safe",
+   "part": "keypad",
+   "slots": [
+    3,
+    1
+   ],
+   "labels": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "",
+    "0",
+    ""
+   ],
+   "colors": {
+    "9": "red",
+    "11": "green"
+   },
+   "glyphs": {
+    "9": "close",
+    "11": "ok"
+   }
+  },
+  {
+   "type": "safe",
+   "part": "plate",
+   "x": 34,
+   "y": 40,
+   "text": "4\nЦИФРЫ"
+  },
+  {
+   "type": "safe",
+   "part": "keyhole",
+   "x": 34,
+   "y": 84
+  },
+  {
+   "type": "safe",
+   "part": "wheel",
+   "x": 142,
+   "y": 70,
+   "r": 20
+  }
+ ],
+ "on_open": [
+  "[meta] set code STRING -"
+ ],
+ "buttons": [
+  {
+   "id": "k1",
+   "x": 3,
+   "y": 1,
+   "style": "none",
+   "name": "&f1",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%1",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k2",
+   "x": 4,
+   "y": 1,
+   "style": "none",
+   "name": "&f2",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%2",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k3",
+   "x": 5,
+   "y": 1,
+   "style": "none",
+   "name": "&f3",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%3",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k4",
+   "x": 3,
+   "y": 2,
+   "style": "none",
+   "name": "&f4",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%4",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k5",
+   "x": 4,
+   "y": 2,
+   "style": "none",
+   "name": "&f5",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%5",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k6",
+   "x": 5,
+   "y": 2,
+   "style": "none",
+   "name": "&f6",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%6",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k7",
+   "x": 3,
+   "y": 3,
+   "style": "none",
+   "name": "&f7",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%7",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k8",
+   "x": 4,
+   "y": 3,
+   "style": "none",
+   "name": "&f8",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%8",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k9",
+   "x": 5,
+   "y": 3,
+   "style": "none",
+   "name": "&f9",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%9",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "k0",
+   "x": 4,
+   "y": 4,
+   "style": "none",
+   "name": "&f0",
+   "hide_tooltip": true,
+   "commands": [
+    "[meta] set code STRING %deluxemenus_meta_code_STRING_-%0",
+    "[sound] BLOCK_STONE_BUTTON_CLICK_ON",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "max4": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{0,3}$"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "clear",
+   "x": 3,
+   "y": 4,
+   "style": "none",
+   "name": "&cСтереть",
+   "commands": [
+    "[meta] set code STRING -",
+    "[sound] UI_BUTTON_CLICK",
+    "[refresh]"
+   ]
+  },
+  {
+   "id": "ok",
+   "x": 5,
+   "y": 4,
+   "style": "none",
+   "name": "&aСохранить код",
+   "lore": [
+    "&7Нужно 4 цифры"
+   ],
+   "commands": [
+    "[meta] set safe_pin STRING %deluxemenus_meta_code_STRING_-%",
+    "[meta] set code STRING -",
+    "[meta] set safe_unlocked BOOLEAN false",
+    "[message] &aНовый код сохранён",
+    "[sound] ENTITY_PLAYER_LEVELUP",
+    "[close]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "four": {
+       "type": "regex matches",
+       "input": "%deluxemenus_meta_code_STRING_-%",
+       "regex": "^-[0-9]{4}$"
+      }
+     },
+     "deny_commands": [
+      "[message] &cНужно ровно 4 цифры",
+      "[sound] BLOCK_ANVIL_LAND"
+     ]
+    }
+   }
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "lamp1",
+   "material": "nexo-hokaria_safe_lamp",
+   "slot": 2,
+   "display_name": "&aВведено цифр: 1",
+   "view_requirement": {
+    "requirements": {
+     "len": {
+      "type": "regex matches",
+      "input": "%deluxemenus_meta_code_STRING_-%",
+      "regex": "^-[0-9]{1,}$"
+     }
+    }
+   },
+   "preview": "safe:lamp"
+  },
+  {
+   "id": "lamp2",
+   "material": "nexo-hokaria_safe_lamp",
+   "slot": 3,
+   "display_name": "&aВведено цифр: 2",
+   "view_requirement": {
+    "requirements": {
+     "len": {
+      "type": "regex matches",
+      "input": "%deluxemenus_meta_code_STRING_-%",
+      "regex": "^-[0-9]{2,}$"
+     }
+    }
+   },
+   "preview": "safe:lamp"
+  },
+  {
+   "id": "lamp3",
+   "material": "nexo-hokaria_safe_lamp",
+   "slot": 5,
+   "display_name": "&aВведено цифр: 3",
+   "view_requirement": {
+    "requirements": {
+     "len": {
+      "type": "regex matches",
+      "input": "%deluxemenus_meta_code_STRING_-%",
+      "regex": "^-[0-9]{3,}$"
+     }
+    }
+   }
+  },
+  {
+   "id": "lamp4",
+   "material": "nexo-hokaria_safe_lamp",
+   "slot": 6,
+   "display_name": "&aВведено цифр: 4",
+   "view_requirement": {
+    "requirements": {
+     "len": {
+      "type": "regex matches",
+      "input": "%deluxemenus_meta_code_STRING_-%",
+      "regex": "^-[0-9]{4,}$"
+     }
+    }
+   }
+  }
+ ],
+ "dm_menu": {
+  "open_requirement": {
+   "requirements": {
+    "unlocked": {
+     "type": "has meta",
+     "key": "safe_unlocked",
+     "meta_type": "BOOLEAN",
+     "value": "true"
+    }
+   },
+   "deny_commands": [
+    "[message] &cСначала открой сейф своим кодом: /safe"
+   ]
+  }
+ },
+ "comment": "uses the hokaria_safe_lamp item defined by lock.json"
+}

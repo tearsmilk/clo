@@ -1,0 +1,57 @@
+{
+ "id": "hokaria_safe",
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "steel",
+ "canvas": {
+  "left": 6,
+  "right": 9,
+  "top": 6,
+  "bottom": 7
+ },
+ "layers": [
+  {
+   "type": "safe",
+   "part": "body",
+   "depth": 4
+  },
+  {
+   "type": "safe",
+   "part": "recess",
+   "box": [
+    6,
+    16,
+    169,
+    125
+   ]
+  },
+  {
+   "type": "safe",
+   "part": "hinges",
+   "x": -4,
+   "ys": [
+    16,
+    84
+   ],
+   "leaf": 3
+  },
+  {
+   "type": "safe",
+   "part": "bolts",
+   "x": 171,
+   "ys": [
+    26,
+    62,
+    98
+   ],
+   "length": 11
+  },
+  {
+   "type": "safe",
+   "part": "nameplate",
+   "x": 88,
+   "y": -5,
+   "text": "СЕЙФ"
+  }
+ ]
+}

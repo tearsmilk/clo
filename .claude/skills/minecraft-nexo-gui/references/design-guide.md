@@ -78,6 +78,12 @@ The builder applies these automatically through `scripts/art.py`; keep them when
   (`plaque`, `wood`, `stone`) for busy art. Outlined labels may overlap the bottom of the icon - icons get bigger.
 - **Depth:** plates, rivets and headers cast a 1px shadow; recessed panels are carved (dark top/left, lit
   bottom/right); windows have a textured frame band around a calm, flat body so content stays readable.
+- **Volume from parts that stick out.** Let hardware leave the window: hinges, locking bolts, signs and
+  nameplates on the top edge, eave beams, hanging signs, feet, and a 3-4 px dark side + bottom face (the window
+  as a box, light from the top-left). Users read it as depth - a flat rectangle looks like a sticker. Each part
+  must be attached: it starts inside or behind the frame (a slot, a leaf plate, a post, a rafter under the
+  awning), casts a shadow, and is drawn before whatever overlaps it. Floating or glued-on parts, or a straight
+  gap where two timbers should meet, read as broken (`scripts/safe.py` body/hinge/bolts, `scripts/shop.py` eave).
 - **Calm body, loud buttons.** Window body and slots low-contrast and light (parchment/vanilla grey); colour
   and texture go into the buttons and the scene.
 - **Soft effects.** Sunburst rays and "gradients" are half a ramp step, banded - not a jump to a new hue.

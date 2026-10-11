@@ -141,9 +141,28 @@ Shop kit parts (`{"type": "shop", "part": ...}`; spec `canvas` 40/40/34/0, `them
 | `icon` | `slot` / `slot_list`, `icon` | any 16px icon painted into the texture (e.g. `shop:home`) |
 | `well` | `slot` / `slot_list` | single wells |
 
+Safe kit parts (`{"type": "safe", "part": ...}`; pair with `theme: "steel"` - brushed steel window, steel
+slot wells, a light band under the client's "Inventory" label; window px `x`/`y`/`box`, slots `[col, row, ...]`):
+
+| part | keys | draws |
+|------|------|-------|
+| `door` | `box` [x0,y0,x1,y1] (4,4,171,121) | raised steel door with heavy bevel, engraved groove, rivets |
+| `hinges` | `x` (-2), `ys`, `h` (26), `leaf` (12; 3 = frame only, for storage screens) | knuckle + leaf screwed to the door |
+| `bolts` | `x` (171), `ys`, `length` (10) | locking bolts sticking out of the right side (needs canvas `right` >= length - 3) |
+| `bolt_slots` | `x`, `ys` | retracted bolt slots in the frame |
+| `nameplate` | `x` (centre), `y`, `text`, `w` | brass plate with engraved letters |
+| `plate` | `x` (centre), `y`, `text` (thin, `\n`) | small brass instruction plate (warns if wider than 50 px) |
+| `display` | `slots: [c, r, n]`, `lamps` (columns), `lock` (column) | sunken LCD with lamp sockets centred in slots; lit lamps are items (`safe:lamp`) |
+| `keypad` | `slots: [c, r]`, `labels` (3 per row), `colors` {index: red/green}, `glyphs` {index: close/ok} | 16x16 keys in the slots' item areas on a sunken plate |
+| `wheel` | `x`, `y` (centre), `r`, `spokes` | spoked handle wheel with brass hub and knobs, shadow on the door |
+| `keyhole` | `x`, `y` | brass escutcheon with keyhole |
+| `recess` | `box` | sunken area (e.g. the inside of an open safe around the slot grid) |
+
 16px icon sources accepted wherever an icon or `preview` is read: PNG path, `sprite:<name>`, `item:<recipe>:<ramp>`
-(`scripts/item_icons.py`), `shop:back|next|home|close|ok[:color]`, `shop:alert`.
-Buttons take `dm: {...}` for raw DeluxeMenus keys (requirements, `dynamic_amount`, `priority`).
+(`scripts/item_icons.py`), `shop:back|next|home|close|ok[:color]`, `shop:alert`, `safe:lamp[:red|amber]`.
+Buttons take `dm: {...}` for raw DeluxeMenus keys (requirements, `dynamic_amount`, `priority`); the spec takes
+`on_open: [...]` (DeluxeMenus `open_commands`, actions when the menu opens) and `dm_menu: {...}` (raw menu-level
+keys such as `open_requirement`).
 | `nameplate` | `x` (centre), `y`, `text`, `min_w` | green ribbon label (rustic) |
 
 Any layer takes `"if": "${var}"` - skipped when the value is empty (variants).
