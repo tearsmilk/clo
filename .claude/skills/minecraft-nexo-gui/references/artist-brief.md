@@ -30,7 +30,21 @@ python3 scripts/aseprite_tools.py sheet anim.aseprite anim_sheet.png            
 The `.aseprite` template opens with the palette loaded, an `art` layer to paint on, the covered pixels (plate,
 frame corners) on a locked layer above and hidden centre guides - the artist sees exactly what the menu hides.
 Ask the artist to send `.aseprite` files back; `export` takes the `art` layer, so guides never leak in.
-Aseprite does not make generated art better by itself - it is the artist's tool and a reliable converter.
+### Drawing with Aseprite's tools (scripts/aseprite_draw.py)
+For pictures we draw ourselves (placeholder cards, new entries for a bought pack) describe the drawing as a list
+of Aseprite tool operations - layers, filled rect/ellipse, contour shapes, curves, pixel-perfect pencil, paint
+bucket, single pixels and the Outline command - and let Aseprite execute them:
+```bash
+python3 assets/examples/aseprite_baker/make_ops.py baker_ops.json
+python3 scripts/aseprite_draw.py baker_ops.json art/baker.png --aseprite art/baker.aseprite --preview p.png
+```
+Draw each part on its own layer and outline that layer in a darker shade of its own colour (skin -> rosy brown,
+white cloth -> warm grey, bread -> dark crust) - that is how pack characters get coloured outlines instead of black.
+Keep the chibi proportions of the set (head ~16 px wide, 2x2 eyes with a white highlight, blush, body ~24 px),
+2-3 tones per material, and keep the covered zones empty. The `.aseprite` output keeps the layers, so an artist
+can polish it instead of starting from zero.
+Aseprite is a precise pen, not a painter: the result is as good as the shapes we describe - for hero art an
+artist still wins.
 Never ship the Aseprite binary (EULA: compile for your own use only).
 
 When the files arrive: drop them in `art/`, add the variants, build. Art at the exact size is pasted 1:1

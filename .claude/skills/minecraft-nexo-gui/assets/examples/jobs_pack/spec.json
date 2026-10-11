@@ -43,6 +43,18 @@
    "above": true
   },
   {
+   "type": "image",
+   "box": [
+    28,
+    20,
+    120,
+    48
+   ],
+   "path": "${picture}",
+   "if": "${picture}",
+   "above": true
+  },
+  {
    "type": "nameplate",
    "x": 88,
    "y": 57,
@@ -241,9 +253,18 @@
    "label": "Чародей",
    "job": "Enchanter",
    "about": "Зачаровывай предметы"
+  },
+  {
+   "id": "baker",
+   "tex": "farmer",
+   "label": "Пекарь",
+   "job": "Baker",
+   "about": "Пеки хлеб и пироги",
+   "picture": "art/baker.png"
   }
  ],
  "variant_defaults": {
-  "title": "Работы"
+  "title": "Работы",
+  "picture": ""
  }
 }
