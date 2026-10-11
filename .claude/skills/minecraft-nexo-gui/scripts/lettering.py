@@ -154,7 +154,7 @@ def _holes(M, W, H):
     return {(x, y) for x in range(W) for y in range(H)} - M - outside
 
 
-def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, pad=2, gap=None):
+def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, pad=2, gap=None, font=None):
     """Volumetric title letters (3D block letters), clean:
     - shape: pixfont slab capitals at `scale`, grown by `weight` px all round (chunky, even strokes), convex
       corners rounded by 1 px - no nib cuts, no checker, nothing that reads as noise
@@ -164,17 +164,24 @@ def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, p
       faces shadow, the back edge darkest - shaded by which way each side faces, visible inside counters too
     - one outline round everything in the darkest tone; a small glint on the upper left of each letter
     - accent: None | 'sparkle' (tiny 4-point stars in the highlight tone) | 'cracks' (the tutorial's blood)"""
-    g = gap if gap is not None else scale + 2 * weight      # air between letters grows with the size
-    m = _slab_mask(text, scale, g)
-    mp = m.load()
-    M = {(x, y) for y in range(m.height) for x in range(m.width) if mp[x, y]}
-    holes = _holes(M, m.width, m.height)                   # counters: never filled by growing / smoothing
-    for _ in range(weight):
-        M = M | ({(x + dx, y + dy) for x, y in M for dx, dy in N8} - holes)
-    near = {(x + dx, y + dy) for x, y in M for dx, dy in N8} - M - holes
-    M |= {p for p in near if sum((p[0] + dx, p[1] + dy) in M for dx, dy in N8) >= 5}   # smooth stair notches
+    if font:                                           # a converted pixel font (font_pixel.py): its own
+        import font_pixel                              # shapes, no growing / smoothing
+        M = font_pixel.text_mask(font, text, spacing=gap if gap is not None else 2)
+        y_min = min(y for _, y in M)
+        M = {(x, y - y_min) for x, y in M}
+        weight = 0
+    else:
+        g = gap if gap is not None else scale + 2 * weight      # air between letters grows with the size
+        m = _slab_mask(text, scale, g)
+        mp = m.load()
+        M = {(x, y) for y in range(m.height) for x in range(m.width) if mp[x, y]}
+        holes = _holes(M, m.width, m.height)                   # counters: never filled by growing / smoothing
+        for _ in range(weight):
+            M = M | ({(x + dx, y + dy) for x, y in M for dx, dy in N8} - holes)
+        near = {(x + dx, y + dy) for x, y in M for dx, dy in N8} - M - holes
+        M |= {p for p in near if sum((p[0] + dx, p[1] + dy) in M for dx, dy in N8) >= 5}   # smooth stair notches
     corners = set()
-    for (x, y) in M:
+    for (x, y) in (M if not font else ()):             # a real font keeps its sharp corners and spurs
         for dx, dy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
             if ((x + dx, y) not in M and (x, y + dy) not in M and (x + dx, y + dy) not in M
                     and (x - dx, y) in M and (x, y - dy) in M):

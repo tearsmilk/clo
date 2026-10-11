@@ -58,3 +58,32 @@ any two accent tones.
 - Three readable layers: light outline (silhouette), gradient body (volume), dark extrusion (depth).
 - The gradient runs top -> bottom like the light; the inner shadow and the extrusion agree with it.
 - The accent is rare: a few small clusters on edges, never a second fill colour.
+
+## Real fonts as pixel fonts (`scripts/font_pixel.py`)
+When the user brings a TTF / OTF (e.g. a blackletter): `python3 scripts/font_pixel.py FONT.otf OUT --cap 16`.
+- Rasterised by AREA COVERAGE at an exact cap height (rendered 8x, each pixel on at >= 45 % cover), baseline on
+  the grid, lone pixels removed, pinholes filled - not the blurry or uneven freetype output.
+- Cap 14-16 keeps a blackletter's spurs and flares; at cap 10 they turn to mush - use the slab pixfont there.
+- **Cyrillic the font does not have is drawn from its own Latin parts**, so weight, flares and spurs match:
+  lookalikes (А В Е К Н О Р С Т У Х, З from 3), mirrors (И from N, Я from R, Э from C + bar), marks (Ё, Й);
+  recipes: Г = F without its middle arm, П = H without crossbar + top bar, Д = П on a base with feet, Л = П
+  with the left leg bent out, Ь = B without its upper bowl, Б = Ь + top bar, Ъ = arm + Ь, Ы = Ь + I,
+  Ж = mirrored K arms + stem + K arms, Ш = U + one more stem, Щ / Ц = Ш / U + tail, Ч = U with the left stem
+  cut at the middle + bar, Ф = P bowls on both sides of its stem, Ю = I + bar + O, and М = two stems of H
+  with a V (the blackletter M is an uncial "m" that Russian readers take for "т"). Lowercase Cyrillic = the
+  same capitals drawn at x-height (small caps), Latin lookalikes (а е о р с у х) stay real lowercase.
+  Always look at the preview: a recipe can misfire on an unusual font - fix that letter by hand.
+- **Fixed cells** (the usual Minecraft font textures): `--cells 16,32` picks the biggest cap height whose
+  glyphs, marks (Ё, Й) and descenders (Д, Ц, Щ, у) fit a 16x16 / 32x32 cell (cap 11 / 24 for a blackletter),
+  writes `pack/assets/<ns>/font/<name>_<cell>.json` (height = cell, 1:1; lower it for a finer HD font) and a
+  gridded preview. Area coverage beat FreeType's hinted 1-bit renderer (`--method mono`) even at 16: mono
+  came out thin and uneven. From cap 18 up the edges are smoothed (1 px notches filled, 1 px bumps cut).
+- The user judged a cap-10 test "worse" - below cap 11 a blackletter loses its shape; say so instead of
+  shipping it.
+- Output: glyph PNGs, `font.json`, `sheet.png`, `preview.png` and a Minecraft bitmap provider
+  (`pack/assets/<ns>/font/<name>.json` + texture) - in titles / lore `<font:hokaria:title>Текст</font>`.
+- Volumetric titles in that font: `lettering.volume(text, ramp, font=OUT_DIR)` (no growing / rounding: the
+  font keeps its own shape).
+- **Licences**: read the font's README. "Personal use only" fonts cannot go on a server with a shop or
+  donations without the commercial licence. Never commit a third-party font or its converted glyphs into
+  the skill or the repo - they go only into the user's own pack.
