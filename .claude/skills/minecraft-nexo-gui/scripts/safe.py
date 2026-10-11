@@ -36,6 +36,94 @@ KEY = {
 }
 
 
+# ------------------------------------------------------------------ metal shading
+# A long ramp + ordered dithering between neighbouring steps gives smooth gradients; flat plates get a vertical
+# gradient (lit top), a diagonal sheen (a wide soft band + a thin bright line + a faint second band), darker
+# edges and fine horizontal brushing; chrome cylinders get a bright highlight, a DARK reflection band in the
+# middle and a lighter bounce at the far side - that band is what makes chrome read as chrome.
+METAL = [H(c) for c in ('#0c0e13', '#14171e', '#1b1f27', '#232832', '#2c323d', '#363d4a', '#414958', '#4e5768',
+                        '#5d687b', '#6f7b91', '#8691a8', '#9fabbf', '#bcc6d5', '#d9e0ea', '#f3f6fa')]
+BRASS_RAMP = [H(c) for c in ('#2a1808', '#45290c', '#663e12', '#875519', '#a66d22', '#c2892e', '#d9a640',
+                             '#ebc35e', '#f7df92', '#fff4cf')]
+_BAYER = ((0.2, 0.6), (0.8, 0.4))
+
+
+def tone(t, x=0, y=0, ramp=METAL, dither=True):
+    """0..1 -> ramp colour; with dither the fraction between two steps becomes a 2x2 ordered pattern."""
+    n = len(ramp)
+    f = max(0.0, min(1.0, t)) * (n - 1)
+    i = int(f)
+    fr = f - i
+    if i < n - 1 and (fr > _BAYER[y % 2][x % 2] if dither else fr >= 0.5):
+        i += 1
+    return ramp[i]
+
+
+def chrome(side):
+    """Tone across a chrome cylinder, side -1 (lit edge) .. 1 (far edge)."""
+    if side < -0.55:
+        return 0.98
+    if side < -0.2:
+        return 0.8
+    if side < 0.15:
+        return 0.3                       # reflection of the dark surroundings
+    if side < 0.55:
+        return 0.5
+    return 0.7                           # bounce light
+
+
+def sphere(nx, ny):
+    """Tone on a chrome ball / dome, nx, ny = position / radius (-1..1)."""
+    dh = math.hypot(nx + 0.38, ny + 0.42)
+    if dh < 0.28:
+        return 1.0
+    if dh < 0.55:
+        return 0.84
+    if -0.08 < ny + nx * 0.3 < 0.35:
+        return 0.3
+    if ny + nx * 0.3 >= 0.35:
+        return 0.62
+    return 0.7
+
+
+def metal_plate(img, x0, y0, x1, y1, base=0.45, grad=0.22, sheen=0.3, seed=1, edge=0.1, brushed=0.035,
+                sheen_at=0.3, ramp=METAL):
+    """Fill a box with brushed metal: vertical gradient, diagonal sheen, darker edges, brushed rows."""
+    rnd = random.Random(seed)
+    w, h = x1 - x0 + 1, y1 - y0 + 1
+    for y in range(y0, y1 + 1):
+        v = (y - y0) / max(1, h - 1)
+        segs, x = [], x0
+        while x <= x1:
+            ln = rnd.randint(10, 46)
+            segs.append((x + ln, rnd.uniform(-1, 1) * brushed))
+            x += ln
+        si = 0
+        for x in range(x0, x1 + 1):
+            while segs[si][0] < x:
+                si += 1
+            s_ = ((x - x0) + (y - y0)) / max(1, w + h)
+            t = base + grad * (0.5 - v)
+            t += sheen * (0.55 * math.exp(-((s_ - sheen_at) / 0.085) ** 2)
+                          + 0.5 * math.exp(-((s_ - sheen_at - 0.065) / 0.016) ** 2)
+                          + 0.22 * math.exp(-((s_ - sheen_at - 0.4) / 0.05) ** 2))
+            t += segs[si][1]
+            de = min(x - x0, x1 - x, y - y0, y1 - y)
+            if de < 3:
+                t -= edge * (3 - de) / 3
+            _px(img, x, y, tone(t, x, y, ramp))
+
+
+def bevel(img, x0, y0, x1, y1, lit=(0.95, 0.78), dark=(0.1, 0.22), ramp=METAL):
+    """Crisp 2 px bevel inside a box: lit top/left, dark bottom/right."""
+    for i, t in enumerate(lit):
+        _hline(img, x0 + i, x1 - i, y0 + i, tone(t, dither=False, ramp=ramp))
+        _vline(img, x0 + i, y0 + i, y1 - i, tone(t - 0.08, dither=False, ramp=ramp))
+    for i, t in enumerate(dark):
+        _hline(img, x0 + i + 1, x1 - i, y1 - i, tone(t, dither=False, ramp=ramp))
+        _vline(img, x1 - i, y0 + i + 1, y1 - i, tone(t + 0.05, dither=False, ramp=ramp))
+
+
 # ------------------------------------------------------------------ window theme
 
 def _brushed(img, x0, y0, x1, y1, seed=3, light=None, dark=None, density=0.08):
@@ -56,14 +144,16 @@ def _brushed(img, x0, y0, x1, y1, seed=3, light=None, dark=None, density=0.08):
 
 
 def rivet(img, x, y):
-    """3x3 dome rivet with a dark ring: lit top-left, dark bottom-right."""
-    S = STEEL
-    for dx, dy, c in ((0, -1, S['out']), (-1, 0, S['out']), (1, 0, S['out']), (0, 1, S['out']),
-                      (-1, -1, S['d2']), (1, -1, S['d1']), (-1, 1, S['d1']), (1, 1, S['out'])):
-        _px(img, x + dx, y + dy, c)
-    _px(img, x, y, S['l2'])
-    _px(img, x - 1, y - 1, S['hi'])
-    _px(img, x + 1, y + 1, S['d2'])
+    """3x3 chrome dome rivet with a dark ring and a specular dot."""
+    ring = METAL[0]
+    for dx, dy in ((0, -1), (-1, 0), (1, 0), (0, 1)):
+        _px(img, x + dx, y + dy, ring)
+    _px(img, x - 1, y - 1, METAL[3])
+    _px(img, x + 1, y - 1, METAL[2])
+    _px(img, x - 1, y + 1, METAL[2])
+    _px(img, x + 1, y + 1, METAL[1])
+    _px(img, x, y, METAL[11])
+    _px(img, x - 1, y - 1, METAL[14])
 
 
 def panel(img, box, rows=6, seed=3):
@@ -99,23 +189,16 @@ def panel(img, box, rows=6, seed=3):
 
 
 def case(img, ox, oy, rows=6, seed=3, h=None):
-    """The safe as a steel box over the container part of the window only (x 0..175, y 0..17 + 18*rows); the
-    player inventory below stays vanilla (the client always draws it - it cannot be removed, only left out of
-    our texture). Chamfered outline, 2 px bevel, brush streaks, corner rivets."""
-    S = STEEL
+    """The safe as a steel box over the container part of the window only (x 0..175, y 0..17 + 18*rows, or `h`);
+    the player inventory below stays vanilla (the client always draws it - it cannot be removed, only left out
+    of our texture). Brushed metal with gradient and sheen, crisp bevel, chamfered top corners, rivets."""
     W, Hh = 176, h or 18 + 18 * rows
     bx, by = ox, oy
     d = ImageDraw.Draw(img)
-    d.rectangle((bx, by, bx + W - 1, by + Hh - 1), fill=S['out'])
-    d.rectangle((bx + 1, by + 1, bx + W - 2, by + Hh - 2), fill=S['base'])
-    _brushed(img, bx + 3, by + 3, bx + W - 4, by + Hh - 4, seed)
-    _hline(img, bx + 1, bx + W - 2, by + 1, S['l2'])
-    _hline(img, bx + 1, bx + W - 3, by + 2, S['l1'])
-    _vline(img, bx + 1, by + 1, by + Hh - 2, S['l2'])
-    _vline(img, bx + 2, by + 1, by + Hh - 3, S['l1'])
-    _hline(img, bx + 2, bx + W - 2, by + Hh - 2, S['d3'])
-    _vline(img, bx + W - 2, by + 2, by + Hh - 2, S['d3'])
-    _vline(img, bx + W - 3, by + 3, by + Hh - 3, S['d2'])
+    d.rectangle((bx, by, bx + W - 1, by + Hh - 1), fill=METAL[0])
+    metal_plate(img, bx + 1, by + 1, bx + W - 2, by + Hh - 2, base=0.4, grad=0.2, sheen=0.22, seed=seed, edge=0.0,
+                sheen_at=0.22)
+    bevel(img, bx + 1, by + 1, bx + W - 2, by + Hh - 2, lit=(0.86, 0.66), dark=(0.08, 0.18))
     for cx in (0, W - 1):                                   # only the top corners are window corners (vanilla
         for ddx in range(2):                                # cuts them too); the bottom joins the vanilla panel
             for ddy in range(2 - ddx):
@@ -151,18 +234,20 @@ def body(img, ox, oy, W=176, Hh=222, depth=4, feet=True, bottom_depth=None):
 
 
 def slot(img, x0, y0):
-    """18x18 steel slot well (slot_style 'steel'): dark recess, lit bottom/right lip, a faint inner rim."""
-    S = STEEL
-    d = ImageDraw.Draw(img)
-    d.rectangle((x0, y0, x0 + 17, y0 + 17), fill=H('#262a34'))
-    _hline(img, x0, x0 + 16, y0, S['out'])
-    _vline(img, x0, y0, y0 + 16, S['out'])
-    _hline(img, x0 + 1, x0 + 16, y0 + 1, S['d3'])
-    _vline(img, x0 + 1, y0 + 1, y0 + 16, S['d3'])
-    _hline(img, x0 + 1, x0 + 17, y0 + 17, S['l1'])
-    _vline(img, x0 + 17, y0 + 1, y0 + 17, S['l1'])
-    _px(img, x0 + 16, y0 + 16, H('#30353f'))
-
+    """18x18 steel slot well (slot_style 'steel'): shadowed top, dark interior getting lighter downward, lit
+    bottom/right lip with a specular corner."""
+    for y in range(y0, y0 + 18):
+        for x in range(x0, x0 + 18):
+            if y == y0 or x == x0:
+                t = 0.0
+            elif y == y0 + 1 or x == x0 + 1:
+                t = 0.06
+            elif y == y0 + 17 or x == x0 + 17:
+                t = 0.62 if y == y0 + 17 else 0.54
+            else:
+                t = 0.12 + 0.1 * (y - y0) / 17 + 0.03 * (x - x0) / 17
+            _px(img, x, y, tone(t, x, y))
+    _px(img, x0 + 17, y0 + 17, tone(0.8, dither=False))
 
 # ------------------------------------------------------------------ door and hardware
 
@@ -256,25 +341,24 @@ def bolt_receivers(img, x, ys):
 
 
 def nameplate(img, cx, y, text, w=None):
-    """Brass plate with engraved letters (dark cut, light lower-right edge) and a screw on each end."""
-    B = BRASS
+    """Polished brass plate: gradient + sheen, crisp bevel, engraved letters (dark cut with a lit lower edge),
+    a screw on each end, a shadow under it."""
     tw, th = text_size(text)
     w = w or tw + 18
     x0, x1 = cx - w // 2, cx - w // 2 + w - 1
     d = ImageDraw.Draw(img)
-    d.rectangle((x0 + 1, y + 12, x1 + 1, y + 12), fill=STEEL['d3'])
-    d.rectangle((x0, y, x1, y + 11), fill=B['out'])
-    d.rectangle((x0 + 1, y + 1, x1 - 1, y + 10), fill=B['base'])
-    _hline(img, x0 + 1, x1 - 1, y + 1, B['hi'])
-    _hline(img, x0 + 1, x1 - 1, y + 2, B['l1'])
-    _hline(img, x0 + 1, x1 - 1, y + 10, B['d1'])
-    _vline(img, x1 - 1, y + 2, y + 10, B['d1'])
+    d.rectangle((x0 + 1, y + 12, x1 + 1, y + 13), fill=METAL[1])
+    d.rectangle((x0, y, x1, y + 11), fill=BRASS_RAMP[0])
+    metal_plate(img, x0 + 1, y + 1, x1 - 1, y + 10, base=0.58, grad=0.36, sheen=0.4, seed=7, edge=0.0,
+                brushed=0.03, sheen_at=0.25, ramp=BRASS_RAMP)
+    bevel(img, x0 + 1, y + 1, x1 - 1, y + 10, lit=(0.95, 0.8), dark=(0.2, 0.32), ramp=BRASS_RAMP)
     for sx in (x0 + 3, x1 - 3):
-        _px(img, sx, y + 5, B['d2'])
-        _px(img, sx, y + 6, B['hi'])
+        _px(img, sx, y + 5, BRASS_RAMP[1])
+        _px(img, sx - 1, y + 5, BRASS_RAMP[2])
+        _px(img, sx, y + 6, BRASS_RAMP[8])
     tx = cx - tw // 2
-    letters(img, tx + 1, y + 3, text, B['hi'], B['hi'])      # light edge of the engraving
-    letters(img, tx, y + 2, text, B['d2'], B['d2'])
+    letters(img, tx + 1, y + 3, text, BRASS_RAMP[9], BRASS_RAMP[9])     # lit lower edge of the engraving
+    letters(img, tx, y + 2, text, BRASS_RAMP[1], BRASS_RAMP[2])
     return x0, x1
 
 
@@ -298,16 +382,16 @@ def small_plate(img, cx, y, text):
 
 
 def recess(img, x0, y0, x1, y1, fill=None):
-    """Sunken panel: dark top/left, light bottom/right (inverse bevel)."""
-    S = STEEL
-    d = ImageDraw.Draw(img)
-    d.rectangle((x0, y0, x1, y1), fill=fill or S['d1'])
-    _hline(img, x0, x1, y0, S['out'])
-    _vline(img, x0, y0, y1, S['out'])
-    _hline(img, x0 + 1, x1, y0 + 1, S['d3'])
-    _vline(img, x0 + 1, y0 + 1, y1, S['d3'])
-    _hline(img, x0, x1, y1, S['l2'])
-    _vline(img, x1, y0, y1, S['l2'])
+    """Sunken panel: dark top/left, light bottom/right (inverse bevel), dark gradient inside."""
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            _px(img, x, y, fill or tone(0.14 + 0.08 * (y - y0) / max(1, y1 - y0), x, y))
+    _hline(img, x0, x1, y0, METAL[0])
+    _vline(img, x0, y0, y1, METAL[0])
+    _hline(img, x0 + 1, x1, y0 + 1, METAL[2])
+    _vline(img, x0 + 1, y0 + 1, y1, METAL[2])
+    _hline(img, x0, x1, y1, METAL[11])
+    _vline(img, x1, y0, y1, METAL[10])
 
 
 def socket(img, cx, cy, r=5):
@@ -597,179 +681,189 @@ def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=9, 
         return xh + (xf - xh) * u, top(u) + (bot(u) - top(u)) * v
 
     rnd = random.Random(9)
-    streak = [rnd.random() for _ in range(121)]              # brush streaks in door space (follow perspective)
-    # top face (thickness seen from above), behind the face's top border
+    brush = [rnd.uniform(-1, 1) * 0.035 for _ in range(241)]   # brushed rows in door space (follow perspective)
+    # top face (thickness seen from above), behind the face's top border: brightest, it faces the sky
     for x in range(xf - thick + 1, xh + 1):
         u = min(1.0, (xh - x) / max(1, width))
         t = round(top(u)) if x >= xf else round(ytf + (xf - x) * 0.35)
         for k in range(1, top_thick + 1):
-            c = S['out'] if k == top_thick else S['hi'] if k == 1 else S['l2']
+            c = METAL[0] if k == top_thick else tone(0.95 - 0.14 * (k - 1) - 0.12 * (1 - u), x, t - k)
             _px(img, x, t - k, c)
-    # free-edge face (the door's thickness), lit: it faces the light
+    # free-edge face (the door's thickness), lit: it faces the light; bright near the face, darker outward
     for x in range(xf - thick, xf):
         k = xf - x                                           # 1..thick, away from the face
         t0 = round(ytf + k * 0.35)
         b0 = round(ybf - k * 0.25)
         for y in range(t0, b0 + 1):
             if k == thick or y in (t0, b0):
-                c = S['out']
+                c = METAL[0]
             elif k == 1:
-                c = S['m2']                                  # the corner where edge meets face
+                c = METAL[6]                                 # the corner where edge meets face
             elif k == 2:
-                c = S['hi']
-            elif k >= thick - 2:
-                c = S['l1']
+                c = METAL[14]                                # glint along the corner
             else:
-                c = S['l2']
-            if k not in (1, thick) and (y - t0) % 23 == 11:
-                c = S['m2']                                  # edge seams
+                vv = (y - t0) / max(1, b0 - t0)
+                c = tone(0.82 - 0.3 * (k - 3) / max(1, thick - 3) - 0.18 * vv, x, y)
+            if 2 < k < thick and (y - t0) % 23 == 11:
+                c = METAL[6]                                 # edge seams
             _px(img, x, y, c)
-    # inner face
+    # inner face: brushed metal in door space - gradient, sheen, darker toward the body
     pl, pr, pt, pb = 0.14, 0.86, 0.08, 0.92                  # plug panel (u from hinge, v from top)
     for x in range(xf, xh + 1):
         u = (xh - x) / max(1, width)
-        t, b = round(top(u)), round(bot(u))
-        for y in range(t, b + 1):
-            v = (y - t) / max(1, b - t)
-            if x in (xf, xh) or y in (t, b):
-                c = S['out']
-            elif y == t + 1 or x == xf + 1:
-                c = S['l2']
-            elif y == b - 1 or x == xh - 1:
-                c = S['d2']
+        t_, b_ = round(top(u)), round(bot(u))
+        for y in range(t_, b_ + 1):
+            v = (y - t_) / max(1, b_ - t_)
+            if x in (xf, xh) or y in (t_, b_):
+                c = METAL[0]
+            elif y == t_ + 1 or x == xf + 1:
+                c = METAL[12]
+            elif y == b_ - 1 or x == xh - 1:
+                c = METAL[3]
             else:
-                c = S['m1'] if u > 0.3 else S['base'] if u > 0.1 else S['d1']      # darker near the body
+                s_ = ((1 - u) * 0.45 + v * 0.55)
+                t = 0.5 + 0.2 * (0.5 - v) - max(0.0, 0.3 - u) * 0.9
+                t += 0.3 * (0.55 * math.exp(-((s_ - 0.3) / 0.08) ** 2) + 0.5 * math.exp(-((s_ - 0.36) / 0.016) ** 2))
+                t += brush[round(v * 240)]
                 ytp, ybp = top(u) + (bot(u) - top(u)) * pt, top(u) + (bot(u) - top(u)) * pb
                 xl_p, xr_p = xh + (xf - xh) * pr, xh + (xf - xh) * pl
+                c = None
                 if pl <= u <= pr and ytp <= y <= ybp:                              # raised plug
-                    c = S['m2'] if u > 0.3 else S['m1']
-                    si = round(v * 120)
-                    if streak[si] < 0.1 and (round(u * 30) + si) % 7:
-                        c = S['l1']
+                    t += 0.08
                     if y - ytp < 1 or x - xl_p < 1:
-                        c = S['hi']                                                # lit top / free side
+                        c = METAL[13]                                              # lit top / free side
                     elif y - ytp < 2 or x - xl_p < 2:
-                        c = S['l2']
+                        c = METAL[11]
                     elif ybp - y < 1 or xr_p - x < 1:
-                        c = S['out']                                               # dark bottom / hinge side
+                        c = METAL[0]                                               # dark bottom / hinge side
                     elif ybp - y < 2 or xr_p - x < 2:
-                        c = S['d1']
+                        c = METAL[3]
                 elif pl <= u <= pr + 0.05 and ybp < y <= ybp + 2.5:
-                    c = S['d1']                                                    # plug shadow below
+                    t -= 0.22                                                      # plug shadow below
                 elif pr < u <= pr + 0.05 and ytp + 2 <= y <= ybp + 2.5:
-                    c = S['d1']                                                    # plug shadow, hinge side
+                    t -= 0.22                                                      # plug shadow, hinge side
+                if c is None:
+                    c = tone(t, x, y)
             _px(img, x, y, c)
     for hy in hinge_ys:                                       # hinge straps on the face at the hinge edge: the
         v0 = (hy + 4 - y0) / (y1 - y0)                        # same hinges as on the closed screen, seen from
         v1 = (hy + hinge_h - 5 - y0) / (y1 - y0)              # inside - they meet the knuckles on the joint
-        for x in range(round(at(0.3, 0)[0]), xh + 1):
+        x_end = round(at(0.3, 0)[0])
+        for x in range(x_end, xh + 1):
             u = (xh - x) / max(1, width)
             ya, yb = round(top(u) + (bot(u) - top(u)) * v0), round(top(u) + (bot(u) - top(u)) * v1)
             for y in range(ya, yb + 1):
-                edge = y in (ya, yb) or x == round(at(0.3, 0)[0])
-                c = S['out'] if edge else S['hi'] if y == ya + 1 else S['d1'] if y == yb - 1 else S['m2']
+                if y in (ya, yb) or x == x_end:
+                    c = METAL[0]
+                elif y == ya + 1:
+                    c = METAL[13]
+                elif y == yb - 1:
+                    c = METAL[3]
+                else:
+                    c = tone(0.66 - 0.3 * (y - ya) / max(1, yb - ya) + 0.1 * (1 - u * 3), x, y)
                 _px(img, x, y, c)
-            _px(img, x + 1, yb + 1, S['d2'])
+            _px(img, x + 1, yb + 1, METAL[3])
         for uu in (0.08, 0.2):
             rx_, ry_ = at(uu, (v0 + v1) / 2)
             rivet(img, round(rx_), round(ry_))
     for uu, vv in ((0.06, 0.035), (0.94, 0.035), (0.06, 0.965), (0.94, 0.965)):   # rivets on the face corners
         rx_, ry_ = at(uu, vv)
         rivet(img, round(rx_), round(ry_))
-    # rods from the mechanism to the bolts (horizontal in door space -> slanted on screen)
+    # chrome rods from the mechanism to the bolts (horizontal in door space -> slanted on screen)
     gx, gy = at(0.45, 0.5)
     for v in bolt_v:
         for x in range(xf + 2, round(gx) + 1):
             u = (xh - x) / max(1, width)
             y = round(top(u) + (bot(u) - top(u)) * v)
-            _px(img, x, y - 1, S['hi'])
-            _px(img, x, y, S['l1'])
-            _px(img, x, y + 1, S['out'])
-            _px(img, x + 1, y + 2, S['d1'])                  # rod shadow on the plug
+            _px(img, x, y - 1, METAL[14])
+            _px(img, x, y, METAL[8])
+            _px(img, x, y + 1, METAL[0])
+            _px(img, x + 1, y + 2, METAL[3])                 # rod shadow on the plug
     vx = round(gx)                                           # vertical connecting rod
     for y in range(round(at(0.45, bolt_v[0])[1]), round(at(0.45, bolt_v[-1])[1]) + 1):
-        _px(img, vx - 1, y, S['hi'])
-        _px(img, vx, y, S['l1'])
-        _px(img, vx + 1, y, S['out'])
-        _px(img, vx + 2, y + 1, S['d1'])
-    # brass mechanism cover with a rim, sunk disc and spindle, shadow on the plug
+        _px(img, vx - 1, y, METAL[14])
+        _px(img, vx, y, METAL[8])
+        _px(img, vx + 1, y, METAL[0])
+        _px(img, vx + 2, y + 1, METAL[3])
+    # polished brass mechanism cover: dome shading, rim, screws, spindle, shadow on the plug
     rx, ry = 6.5, 8.0
     for y in range(round(gy - ry) - 1, round(gy + ry) + 3):
         for x in range(round(gx - rx) - 1, round(gx + rx) + 3):
             if ((x - 2 - gx) / rx) ** 2 + ((y - 2 - gy) / ry) ** 2 <= 1 and ((x - gx) / rx) ** 2 + ((y - gy) / ry) ** 2 > 1:
-                _px(img, x, y, S['d1'])
+                _px(img, x, y, METAL[3])
     for y in range(round(gy - ry) - 1, round(gy + ry) + 2):
         for x in range(round(gx - rx) - 1, round(gx + rx) + 2):
             dd = ((x - gx) / rx) ** 2 + ((y - gy) / ry) ** 2
             if dd <= 1:
-                lit = (x - gx) + (y - gy)
                 if dd > 0.82:
-                    c = B['out']
+                    c = BRASS_RAMP[0]
                 elif dd > 0.5:
-                    c = B['hi'] if lit < -3 else B['l1'] if lit < 3 else B['d1']
+                    c = tone(chrome(((x - gx) / rx + (y - gy) / ry) / 1.3) * 0.95, ramp=BRASS_RAMP, dither=False)
                 else:
-                    c = B['d1'] if lit < -2 else B['base'] if lit < 4 else B['l1']
+                    c = tone(sphere((x - gx) / (rx * 0.7), (y - gy) / (ry * 0.7)) * 0.9, ramp=BRASS_RAMP,
+                             dither=False)
                 _px(img, x, y, c)
     for dx, dy in ((0, -5), (-4, 0), (4, 0), (0, 5)):
-        _px(img, round(gx) + dx, round(gy) + dy, B['d2'])
-    for dx, dy, c in ((0, 0, STEEL['l2']), (-1, 0, STEEL['out']), (1, 0, STEEL['out']), (0, -1, STEEL['out']),
-                      (0, 1, STEEL['out'])):
+        _px(img, round(gx) + dx, round(gy) + dy, BRASS_RAMP[1])
+    for dx, dy, c in ((0, 0, METAL[12]), (-1, 0, METAL[0]), (1, 0, METAL[0]), (0, -1, METAL[0]), (0, 1, METAL[0])):
         _px(img, round(gx) + dx, round(gy) + dy, c)
     # bolts out of the middle of the thick edge
     x0 = xf - thick
-    rows = (S['out'], S['hi'], S['l2'], S['l1'], S['m1'], S['d2'], S['out'])
+    rows = [METAL[0]] + [tone(chrome(-1 + 2 * (k + 0.5) / 5), dither=False) for k in range(5)] + [METAL[0]]
     for v in bolt_v:
         by = round(ytf + (ybf - ytf) * v) - 3
         for k in range(7):                                   # slot in the edge face
-            _px(img, x0 + 1, by + k, S['out'] if k in (0, 6) else S['d3'])
-            _px(img, x0 + 2, by + k, S['out'] if k in (0, 6) else S['d2'])
+            _px(img, x0 + 1, by + k, METAL[0] if k in (0, 6) else METAL[2])
+            _px(img, x0 + 2, by + k, METAL[0] if k in (0, 6) else METAL[3])
         for i in range(0, 8):
             xx = x0 - i
             for k, c in enumerate(rows):
                 if i == 7 and k in (0, 6):
                     continue
-                _px(img, xx, by + k, S['out'] if (i == 7 and 0 < k < 6) else c)
+                _px(img, xx, by + k, METAL[0] if (i == 7 and 0 < k < 6) else c)
 
 
 # ------------------------------------------------------------------ classic safe (front view, box seen from the left)
 
 def box3d(img, ox, oy, W=176, Hh=126, side=5, top=5, base=2):
-    """The safe body as a box seen from the front-left-above: a top face above the front (lit) and a left face
-    (in shadow), both receding up-left. The front itself is `case`. Needs canvas left >= side, top >= top."""
-    S = STEEL
+    """The safe body as a box seen from the front-left-above: a top face (lit, with a sheen running along it)
+    and a left face (in shadow, lighter at the top), both receding up-left; a dark base strip under the front.
+    The front itself is `case`. Needs canvas left >= side, top >= top."""
     for k in range(1, top + 1):                               # top face: row oy-k, shifted left by k
         y = oy - k
         for x in range(ox - k, ox + W - k + 1):
-            c = S['out'] if k == top or x == ox + W - k else S['hi'] if k == 1 else S['l2'] if k < top - 1 else S['l1']
+            if k == top or x == ox + W - k:
+                c = METAL[0]
+            else:
+                u = (x - ox + k) / W
+                t = 0.86 - 0.16 * (k - 1) / max(1, top - 1) + 0.12 * math.exp(-((u - 0.3) / 0.12) ** 2) - 0.1 * u
+                c = tone(t, x, y)
             _px(img, x, y, c)
     for k in range(base):                                     # dark base strip under the front: separates the
         for x in range(ox - side, ox + W):                    # safe from the vanilla inventory below
-            _px(img, x, oy + Hh + k, S['d2'] if k < base - 1 else S['out'])
+            _px(img, x, oy + Hh + k, METAL[3] if k < base - 1 else METAL[0])
     for k in range(1, side + 1):                              # left face: column ox-k, shifted up by k
         x = ox - k
         for y in range(oy - k, oy + Hh - k + 1):
-            c = S['out'] if k == side or y == oy + Hh - k else S['d1'] if k == 1 else S['d2']
-            if 1 < k < side and (y - oy) % 31 == 15:
-                c = S['base']
+            if k == side or y == oy + Hh - k:
+                c = METAL[0]
+            else:
+                v = (y - oy + k) / Hh
+                c = tone(0.36 - 0.18 * v - 0.04 * k, x, y)
             _px(img, x, y, c)
 
 
 def door_inset(img, x0, y0, x1, y1, seed=5):
-    """A plain door set into the front: dark seam all round, slightly raised face (bevel), brushed - no groove."""
-    S = STEEL
+    """A plain door set into the front: dark seam all round (lit lower lip of the frame), brushed metal face
+    with a strong gradient and diagonal sheen, crisp bevel - the door is the shiniest part of the safe."""
     d = ImageDraw.Draw(img)
-    d.rectangle((x0 - 2, y0 - 2, x1 + 2, y1 + 2), fill=S['d3'])           # the gap round the door
-    _hline(img, x0 - 2, x1 + 2, y1 + 2, S['l1'])                             # lit lower lip of the frame
-    _vline(img, x1 + 2, y0 - 2, y1 + 2, S['l1'])
-    d.rectangle((x0, y0, x1, y1), fill=S['out'])
-    d.rectangle((x0 + 1, y0 + 1, x1 - 1, y1 - 1), fill=S['m1'])
-    _brushed(img, x0 + 3, y0 + 3, x1 - 3, y1 - 3, seed, light=S['m2'], dark=S['base'], density=0.06)
-    for i, c in enumerate((S['hi'], S['l2'])):
-        _hline(img, x0 + 1 + i, x1 - 1 - i, y0 + 1 + i, c)
-        _vline(img, x0 + 1 + i, y0 + 1 + i, y1 - 1 - i, c)
-    for i, c in enumerate((S['d3'], S['d1'])):
-        _hline(img, x0 + 1 + i, x1 - 1 - i, y1 - 1 - i, c)
-        _vline(img, x1 - 1 - i, y0 + 1 + i, y1 - 1 - i, c)
+    d.rectangle((x0 - 2, y0 - 2, x1 + 2, y1 + 2), fill=METAL[1])          # the gap round the door
+    _hline(img, x0 - 2, x1 + 2, y1 + 2, METAL[9])                          # lit lower lip of the frame
+    _vline(img, x1 + 2, y0 - 2, y1 + 2, METAL[8])
+    d.rectangle((x0, y0, x1, y1), fill=METAL[0])
+    metal_plate(img, x0 + 1, y0 + 1, x1 - 1, y1 - 1, base=0.5, grad=0.26, sheen=0.34, seed=seed, edge=0.06,
+                sheen_at=0.28)
+    bevel(img, x0 + 1, y0 + 1, x1 - 1, y1 - 1, lit=(0.97, 0.8), dark=(0.08, 0.2))
 
 
 def dial(img, cx, cy, r=13):
@@ -778,7 +872,7 @@ def dial(img, cx, cy, r=13):
     for y in range(cy - r - 3, cy + r + 4):                   # shadow on the door
         for x in range(cx - r - 3, cx + r + 4):
             if math.hypot(x - cx - 2, y - cy - 2) <= r and math.hypot(x - cx, y - cy) > r:
-                _px(img, x, y, S['d1'])
+                _px(img, x, y, METAL[3])
     for y in range(cy - r - 1, cy + r + 2):
         for x in range(cx - r - 1, cx + r + 2):
             dd = math.hypot(x - cx, y - cy)
@@ -787,8 +881,8 @@ def dial(img, cx, cy, r=13):
                 continue
             if dd > r - 0.6:
                 c = S['out']
-            elif dd > r - 3:                                  # chrome ring
-                c = S['spec'] if lit < -r * 0.9 else S['hi'] if lit < -2 else S['l2'] if lit < r * 0.6 else S['m2']
+            elif dd > r - 3:                                  # chrome ring with the dark reflection band
+                c = tone(chrome(lit / (r * 1.1)), dither=False)
             elif dd > r - 6:                                  # black scale
                 c = H('#15171c')
             elif dd > r - 7:
@@ -807,7 +901,7 @@ def dial(img, cx, cy, r=13):
             dd = math.hypot(x - cx, y - cy)
             if dd <= 3.2:
                 lit = (x - cx) + (y - cy)
-                _px(img, x, y, S['out'] if dd > 2.5 else S['spec'] if lit < -1 else S['l2'] if lit < 2 else S['m2'])
+                _px(img, x, y, METAL[0] if dd > 2.5 else tone(sphere((x - cx) / 2.6, (y - cy) / 2.6), dither=False))
     for dy, w in ((r + 2, 2), (r + 3, 1)):                    # index mark above the dial
         for dx in range(-w + 1, w):
             _px(img, cx + dx, cy - dy, BRASS['l1'] if dy == r + 2 else BRASS['out'])
@@ -840,28 +934,28 @@ def handle3(img, cx, cy, length=30, angle=0.0, spokes=3):
         for x in range(cx - hub_r - 1, cx + hub_r + 2):
             if math.hypot(x - cx, y - cy) <= hub_r:
                 pts[(x, y)] = ('hub', None)
-    for (x, y) in pts:                                        # shadow
-        _px(img, x + 3, y + 3, S['d2'])
+    for (x, y) in pts:                                        # soft shadow on the door
+        _px(img, x + 3, y + 3, METAL[3])
+        _px(img, x + 2, y + 2, METAL[4])
     for (x, y), (kind, info) in pts.items():
         edge = any((x + dx, y + dy) not in pts for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
         if edge:
-            c = S['out']
+            c = METAL[0]
         elif kind == 'ball':
             bx, by = info
-            lit = (x - bx) + (y - by)
-            c = S['spec'] if lit < -4 else S['hi'] if lit < -1 else S['l2'] if lit < 3 else S['m2']
+            c = tone(sphere((x - bx) / ball_r, (y - by) / ball_r), dither=False)
         elif kind == 'hub':
             dd = math.hypot(x - cx, y - cy)
-            lit = (x - cx) + (y - cy)
-            if dd > hub_r - 2.5:                              # outer ring
-                c = S['spec'] if lit < -hub_r else S['hi'] if lit < 0 else S['l1'] if lit < hub_r * 0.8 else S['m1']
-            elif dd > hub_r - 4:
-                c = S['m1']                                   # groove
-            else:                                             # cap
-                c = S['spec'] if lit < -3 else S['hi'] if lit < 0 else S['l2'] if lit < 3 else S['l1']
+            nx, ny = (x - cx) / hub_r, (y - cy) / hub_r
+            if dd > hub_r - 2.6:                              # outer ring: chrome band round the hub
+                t = chrome((nx + ny) / 1.3)
+            elif dd > hub_r - 3.6:
+                t = 0.18                                      # groove
+            else:                                             # domed cap
+                t = sphere(nx / 0.66, ny / 0.66)
+            c = tone(t, dither=False)
         else:
-            side = info                                       # -1 .. 1 across the spoke
-            c = S['spec'] if side < -0.3 else S['hi'] if side < 0.2 else S['l1'] if side < 0.7 else S['m2']
+            c = tone(chrome(info), dither=False)              # -1 .. 1 across the spoke
         _px(img, x, y, c)
 
 
@@ -878,37 +972,42 @@ def hinge_block(img, x_edge, y, h=24, side='right', leaf=True, leaf_w=6, door_st
     if lx0 is None:
         pass
     else:
-        d.rectangle((lx0 + 1, y + 1 + 2, lx1 + 1, y + h - 4 + 2), fill=S['d2'])   # leaf shadow
-        d.rectangle((lx0, y + 2, lx1, y + h - 3), fill=S['out'])
-        d.rectangle((lx0 + 1, y + 3, lx1 - 1, y + h - 4), fill=S['m2'])
-        _hline(img, lx0 + 1, lx1 - 1, y + 3, S['hi'])
-        _hline(img, lx0 + 1, lx1 - 1, y + h - 4, S['d1'])
+        d.rectangle((lx0 + 1, y + 1 + 2, lx1 + 1, y + h - 4 + 2), fill=METAL[2])  # leaf shadow
+        d.rectangle((lx0, y + 2, lx1, y + h - 3), fill=METAL[0])
+        metal_plate(img, lx0 + 1, y + 3, lx1 - 1, y + h - 4, base=0.55, grad=0.3, sheen=0.2, seed=y, edge=0.0)
+        _hline(img, lx0 + 1, lx1 - 1, y + 3, METAL[13])
+        _hline(img, lx0 + 1, lx1 - 1, y + h - 4, METAL[3])
         for ry in (y + 7, y + h - 8):
             rivet(img, (lx0 + lx1) // 2, ry)
     if door_strap:                                                # closed door: a strap from the knuckle across
         sx0, sx1 = (x_edge - door_strap, x_edge - 1) if side == 'right' else (x_edge, x_edge + door_strap - 1)
-        d.rectangle((sx0 + 1, y + 5, sx1 + 1, y + h - 4), fill=S['d2'])          # the seam onto the door,
-        d.rectangle((sx0, y + 4, sx1, y + h - 5), fill=S['out'])                 # screwed to the door - the
-        d.rectangle((sx0 + 1, y + 5, sx1 - 1, y + h - 6), fill=S['m2'])          # door visibly hangs on it
-        _hline(img, sx0 + 1, sx1 - 1, y + 5, S['hi'])
-        _hline(img, sx0 + 1, sx1 - 1, y + h - 6, S['d1'])
+        d.rectangle((sx0 + 1, y + 5, sx1 + 1, y + h - 4), fill=METAL[2])         # the seam onto the door,
+        d.rectangle((sx0, y + 4, sx1, y + h - 5), fill=METAL[0])                 # screwed to the door - the
+        metal_plate(img, sx0 + 1, y + 5, sx1 - 1, y + h - 6, base=0.58, grad=0.34, sheen=0.3, seed=y + 1,
+                    edge=0.0, sheen_at=0.25)                                     # door visibly hangs on it
+        _hline(img, sx0 + 1, sx1 - 1, y + 5, METAL[13])
+        _hline(img, sx0 + 1, sx1 - 1, y + h - 6, METAL[3])
         end = sx0 if side == 'right' else sx1                     # rounded free end
         for yy in (y + 4, y + h - 5):
-            _px(img, end, yy, img.getpixel((end - s, yy)) if False else S['d2'])
+            _px(img, end, yy, METAL[2])
         for k, sx in enumerate((sx0 + 3, sx0 + 8) if side == 'right' else (sx1 - 3, sx1 - 8)):
             rivet(img, sx, y + h // 2 - (2 if k else -2) - 1 + 1)
     kx0 = x_edge if side == 'right' else x_edge - 7               # knuckle: a vertical cylinder past the edge
-    cols = (S['out'], S['hi'], S['spec'], S['l2'], S['l1'], S['m1'], S['d1'], S['out'])
-    for i, c in enumerate(cols):
-        _vline(img, kx0 + i, y + 1, y + h - 2, c)
+    cols = (0.0, 0.74, 0.98, 0.84, 0.3, 0.46, 0.68, 0.0)          # chrome cylinder: glint, dark band, bounce
+    for i, t in enumerate(cols):
+        for yy in range(y + 1, y + h - 1):
+            fall = 0.06 * abs((yy - y) / h - 0.4)                 # a little darker toward the ends
+            _px(img, kx0 + i, yy, METAL[0] if t == 0 else tone(t - fall, dither=False))
     for i in range(1, 7):
-        _px(img, kx0 + i, y, S['out'])
-        _px(img, kx0 + i, y + h - 1, S['out'])
+        _px(img, kx0 + i, y, METAL[0])
+        _px(img, kx0 + i, y + h - 1, METAL[0])
+        _px(img, kx0 + i, y + 1, tone(cols[i] + 0.12, dither=False))           # lit rim of the top cap
     for py in (y - 2, y - 1, y + h, y + h + 1):                    # pin ends
-        for i in (3, 4):
-            _px(img, kx0 + i, py, S['l2'] if i == 3 else S['m1'])
-    _hline(img, kx0 + 1, kx0 + 6, y + h // 2, S['d2'])            # split between the two knuckle halves
-    _hline(img, kx0 + 1, kx0 + 6, y + h // 2 + 1, S['l1'])
+        _px(img, kx0 + 3, py, METAL[13])
+        _px(img, kx0 + 4, py, METAL[7])
+    _hline(img, kx0 + 1, kx0 + 6, y + h // 2, METAL[1])           # split between the two knuckle halves
+    for i in range(1, 7):
+        _px(img, kx0 + i, y + h // 2 + 1, tone(cols[i] + 0.15, dither=False))
 
 
 def feet(img, pts, w=12, h=3):

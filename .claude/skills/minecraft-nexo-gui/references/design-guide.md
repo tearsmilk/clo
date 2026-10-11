@@ -87,6 +87,13 @@ The builder applies these automatically through `scripts/art.py`; keep them when
   Volume means depth, not size: when a part looks "small" or flat, keep its size and add thickness (edge and
   top faces, lit on the light side), raised panels with a shadow under them, shadows under rods and plates.
   Making the part bigger instead turns it into a different, oversized object.
+- **Metal that reads as metal** (`scripts/safe.py` `metal_plate`, `chrome`, `sphere`, `tone`): a long ramp
+  (15 steps, blue-ish darks, near-white lights) with 2x2 ordered dithering between neighbouring steps for
+  smooth gradients; flat plates = vertical gradient (lit top) + a diagonal sheen (wide soft band + thin bright
+  line + a faint second band) + darker edges + fine horizontal brushing; chrome cylinders and spokes = glint,
+  bright, a DARK reflection band in the middle, mid, lighter bounce at the far side; balls and domes = an offset
+  white spot, a dark band below the middle, a bounce rim; brass the same way on its own ramp. Crisp 2 px bevels
+  (no dithering on edges), soft drop shadows 2-3 px under raised parts.
 - **Calm body, loud buttons.** Window body and slots low-contrast and light (parchment/vanilla grey); colour
   and texture go into the buttons and the scene.
 - **Soft effects.** Sunburst rays and "gradients" are half a ramp step, banded - not a jump to a new hue.

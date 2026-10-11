@@ -18,6 +18,10 @@ Kit: `scripts/safe.py`, `theme: "steel"`, layers `{"type": "safe", ...}` (keys i
 - Door set into the front with a dark seam (`door_inset`), a combination dial on top (`dial`), a big 3-spoke
   chrome handle with ball ends below (`handle`). Keep the handle's reach clear of the dial at every angle.
 
+Shading: everything goes through the metal helpers in `safe.py` - brushed plates with gradient and diagonal
+sheen (`metal_plate`, the door is the shiniest part), chrome with a dark reflection band (handle spokes, hub,
+dial ring, hinge knuckles, bolts, rods), domes with a white spot (balls, rivets), polished brass (`BRASS_RAMP`).
+
 ## Turning the handle (no code)
 A texture cannot rotate inside a menu, so every handle angle is its own menu: `lock.json` has `variants`
 0 / 40 / 80 deg -> menus `hokaria_safe_lock_0/_1/_2`. The handle is one invisible button over its slots
