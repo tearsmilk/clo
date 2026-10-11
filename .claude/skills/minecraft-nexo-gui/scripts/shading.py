@@ -123,18 +123,20 @@ def check(path, tile=False, quiet=False, ramps=None):
     res['single_pixel_ratio'] = round(lone / max(1, len(opaque)), 3)
     if res['single_pixel_ratio'] > 0.08:
         warn.append(f"{res['single_pixel_ratio']:.0%} single pixels - use clusters (streaks, chips) instead of noise")
-    # checker dithering: 2x2 windows a b / b a
+    # checker dithering: 3x3 windows a b a / b a b / a b a (a dithered AREA - a single 1 px diagonal line
+    # also makes 2x2 a b / b a windows, but that is clean line art, not dithering)
     chk = tot = 0
-    for y in range(H - 1):
-        for x in range(W - 1):
-            a, b, c, d = px[x, y], px[x + 1, y], px[x, y + 1], px[x + 1, y + 1]
-            if a[3] == b[3] == c[3] == d[3] == 255:
+    for y in range(H - 2):
+        for x in range(W - 2):
+            win = [px[x + i, y + j] for j in range(3) for i in range(3)]
+            if all(c[3] == 255 for c in win):
                 tot += 1
-                if a == d and b == c and a != b:
+                a, b = win[0], win[1]
+                if a != b and all(win[k] == (a if k % 2 == 0 else b) for k in range(9)):
                     chk += 1
     res['checker_ratio'] = round(chk / max(1, tot), 3)
     if res['checker_ratio'] > 0.03:
-        warn.append(f"{res['checker_ratio']:.0%} checker 2x2 windows - dithered gradient; use stepped bands")
+        warn.append(f"{res['checker_ratio']:.0%} checker 3x3 windows - dithered gradient; use stepped bands")
     # light direction, measured on the outer silhouette only (recesses are lit the other way on purpose):
     # for every pixel next to transparency, step inward past the outline and record the first real tone
     sides = {k: [] for k in ('top', 'bottom', 'left', 'right')}

@@ -102,5 +102,6 @@ palette; crisp pixels without blur; a natural spread of lights, midtones and sha
   counts as that material; only colours outside all ramps are grouped by hue - use it for scenes with several
   materials of similar hue (light wood, walnut, brass), where plain hue groups would add them up.
 - `shading.py check` reports: colours per hue group (> 6 tones per group = too many), single-pixel noise,
-  checker dithering, semi-transparent pixels, light direction (are top-left-facing edges lighter?), and with
+  checker dithering (3x3 a-b-a areas - a lone 1 px diagonal line is line art, not dithering),
+  semi-transparent pixels, light direction (are top-left-facing edges lighter?), and with
   `--tile` the edge mismatch. Fix everything it flags before handing over.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Kitchen kit: stone counter, cutting board with a grid of shallow cells and a handle sticking out of the
-window, felt-lined walnut tool case, glazed ceramic dish with compartments, arrow, chef's knife, plank sign and
-a 16x16 cutting-board item icon. Used by gui_builder.py as `{"type": "kitchen", "part": ...}` layers; example
+"""Kitchen kit: stone counter, thick cutting board with a grid of shallow cells and a handle sticking out of
+the window, felt-lined walnut tool case, white plate whose well holds the result slots, arrow, small chef's
+knife, plank sign, and cutting-board item icons (32x32 with volume, 16x16 flat). Used by gui_builder.py as `{"type": "kitchen", "part": ...}` layers; example
 assets/examples/cutting_board/ (5x5 board, 3x2 tools, 3x2 result, references/kitchen.md).
 
 Shading follows references/texture-shading.md: five tones per material from shading.ramp5 (index 0 outline,
@@ -10,7 +10,7 @@ tone, clusters instead of noise, no dithering. Objects on the counter are seen f
 shop's buttons: light far edge and left side, base top face, darker front face (thickness), 1 px outline and
 a hard projected shadow on the counter (down-right, one tone).
 
-    python3 kitchen.py icon out.png [--scale 16]      the 16x16 cutting-board item (+ a zoomed copy)
+    python3 kitchen.py icon out.png [cutting_board32|cutting_board|knife]   item icon (+ a zoomed copy)
 """
 import random
 import sys
@@ -28,8 +28,8 @@ STONE = _r5('#7b818c')        # cool grey counter
 BOARD = _r5('#c4925a')        # light beech board
 WALNUT = _r5('#6e4428')       # dark wood: tool case, knife handle
 FELT = _r5('#3e7048')         # green felt lining
-CERAMIC = _r5('#e6dcc6')      # cream glaze inside the dish
-GLAZE = _r5('#3f72a6')        # blue glaze on the dish rim
+CERAMIC = _r5('#e6dcc6')      # white-cream glazed plate
+GLAZE = _r5('#3f72a6')        # blue band on the plate brim
 STEEL = _r5('#8f98a6')        # knife blade
 BRASS = _r5('#b9862c')        # rivets, case corners
 
@@ -39,9 +39,17 @@ N4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
 
 # ------------------------------------------------------------------ masks
 
+def _cut(r):
+    if r in _CUT:
+        return _CUT[r]
+    import math
+    out = [round(r - math.sqrt(r * r - (r - k - 0.5) ** 2)) for k in range(r)]
+    return [c for c in out if c > 0]
+
+
 def rrect(x0, y0, x1, y1, r=3):
     """Rounded rectangle as a set of pixels (pixel-art corners from a cut table, not a soft circle)."""
-    cut = _CUT[min(r, 6)]
+    cut = _cut(r)
     pts = set()
     for y in range(y0, y1 + 1):
         k = y - y0 if y - y0 < len(cut) else (y1 - y if y1 - y < len(cut) else None)
@@ -73,21 +81,33 @@ def projected_shadow(img, solid, dx=2, dy=2, c=None):
             img.putpixel(q, c)
 
 
-def raised(img, top, thick, ramp, shadow=True, lit_edges=True):
+def raised(img, top, thick, ramp, shadow=True, lit_edges=True, shadow_off=(2, 2), front_grain=0.0, seed=1):
     """A slab seen from the front-above: `top` = top-face pixels; the front face is the top face pushed down
-    `thick` px. Returns (solid, inner top face). Draw details on the returned top face afterwards."""
+    `thick` px. The front face is banded like a rounded edge: base right under the lit nose, dark mid, shadow
+    in the last row at the counter; front_grain adds dark streaks along it (long-grain wood). Returns
+    (solid, inner top face). Draw details on the returned top face afterwards."""
     solid = set(top)
     for k in range(1, thick + 1):
         solid |= {(x, y + k) for x, y in top}
     if shadow:
-        projected_shadow(img, solid)
+        projected_shadow(img, solid, *shadow_off)
     out = edge(solid)
     front = solid - top
     face = top - out
-    _paint(img, front - out, ramp[2])
-    for x, y in front - out:                       # last visible row of the front face: shadow
-        if (x, y + 1) in out:
-            _px(img, x, y, ramp[1])
+    depth = {}
+    for x, y in front - out:
+        k = next(k for k in range(1, thick + 1) if (x, y - k) in top)
+        depth[(x, y)] = k
+        last = (x, y + 1) in out
+        _px(img, x, y, ramp[1] if last else ramp[3] if k == 1 and thick > 3 else ramp[2])
+    if front_grain:
+        rnd = random.Random(seed)
+        mid = sorted(p for p, k in depth.items() if 2 <= k <= thick - 2 and (p[0], p[1] + 1) not in out)
+        for (x, y) in mid:
+            if rnd.random() < front_grain:
+                run = [(x + i, y) for i in range(rnd.randint(4, 12)) if (x + i, y) in depth]
+                if len(run) >= 3:
+                    _paint(img, run, ramp[1])
     _paint(img, face, ramp[3])
     if lit_edges:
         for x, y in face:
@@ -117,7 +137,7 @@ def grain(img, face, ramp, seed=1, density=0.05, vertical=False, light=0.3, leng
 
 # ------------------------------------------------------------------ counter
 
-def counter(img, ox, oy, y0=-1, y_front=115, front=3, x0=-1, x1=176, seed=4):
+def counter(img, ox, oy, y0=-1, y_front=116, front=3, x0=-1, x1=176, seed=4):
     """Stone worktop under the whole container part: one flat base tone with granite clusters, a lit front
     edge, a darker front face and an outline. The player inventory below stays vanilla."""
     d = ImageDraw.Draw(img)
@@ -164,7 +184,7 @@ def cells(img, x0, y0, n, m, ramp, floor=None, deep=False, wall_lit=None, wall_d
                     _px(img, fx + 1, fy + i, f[2])
 
 
-def board(img, ox, oy, c0=0, r0=0, n=5, m=5, rim=(5, 3, 5, 3), thick=3, handle=22, handle_h=14, seed=2):
+def board(img, ox, oy, c0=0, r0=0, n=5, m=5, rim=(5, 3, 5, 2), thick=6, handle=22, handle_h=14, seed=2):
     """Cutting board under n x m slots (c0, r0 = first slot), a handle with a hanging hole sticking out of
     the window on the left (needs canvas left >= handle - 2), front face `thick` px, shadow on the counter."""
     fx0, fy0 = ox + 7 + 18 * c0, oy + 17 + 18 * r0
@@ -180,8 +200,11 @@ def board(img, ox, oy, c0=0, r0=0, n=5, m=5, rim=(5, 3, 5, 3), thick=3, handle=2
     hole = {(x, y) for y in range(cy - 2, cy + 2) for x in range(hx0 + 4, hx0 + 8)
             if not ((x in (hx0 + 4, hx0 + 7)) and (y in (cy - 2, cy + 1)))}
     top -= hole                                    # the hanging hole goes through: its far wall is the front
-    solid, face = raised(img, top, thick, BOARD)   # face pushed down, the rest shows what is under the board
+    solid, face = raised(img, top, thick, BOARD, shadow_off=(3, 2), front_grain=0.05, seed=seed)
     grain(img, face, BOARD, seed=seed, density=0.016, length=(5, 14))
+    ring2 = {(x, y) for x, y in face if ((x, y - 2) not in solid or (x - 2, y) not in solid)
+             and (x, y - 1) in face and (x - 1, y) in face}
+    _paint(img, ring2, BOARD[4])                   # 2 px bevel band on the lit edges: a rounded, thick edge
     rnd = random.Random(seed + 7)                  # knife marks: short diagonal scratches, fresh (light) / old
     for _ in range(14):
         x, y = rnd.randint(fx0 + 2, fx1 - 6), rnd.randint(fy0 + 2, fy1 - 6)
@@ -189,12 +212,13 @@ def board(img, ox, oy, c0=0, r0=0, n=5, m=5, rim=(5, 3, 5, 3), thick=3, handle=2
         _paint(img, [(x + i, y + i) for i in range(ln)], c)
     # slot cells: shallow squares cut into the board
     cells(img, fx0, fy0, n, m, BOARD, wall_lit=BOARD[4], wall_dark=BOARD[1])
-    for (x, y) in [(bx0 + 1, by0 + 2), (bx0 + 2, by0 + 1), (bx0 + 3, by0 + 1), (bx0 + 1, by0 + 3)]:
-        _px(img, x, y, BOARD[5])                   # glint on the lit corner
+    for (x, y) in ([(bx0 + 3 + i, by0 + 1) for i in range(9)] + [(bx0 + 1, by0 + 3 + i) for i in range(6)]
+                   + [(bx0 + 2, by0 + 2)]):
+        _px(img, x, y, BOARD[5])                   # highlight along the lit corner of the edge
     return solid
 
 
-# ------------------------------------------------------------------ tool case and dish
+# ------------------------------------------------------------------ tool case and plate
 
 def tool_case(img, ox, oy, c0=6, r0=0, n=3, m=2, rim=4, thick=3):
     """Walnut case with felt-lined compartments under n x m slots, brass corners, shadow on the counter."""
@@ -212,69 +236,96 @@ def tool_case(img, ox, oy, c0=6, r0=0, n=3, m=2, rim=4, thick=3):
     return solid
 
 
-def dish(img, ox, oy, c0=6, r0=3, n=3, m=2, rim=4, thick=3):
-    """Ceramic dish with n x m compartments: blue glazed rim, cream glaze inside, a glossy glint on the lower
-    right wall of each compartment (a concave surface lit from the top-left), shadow on the counter."""
+def plate(img, ox, oy, c0=6, r0=3, n=3, m=2, brim=5, thick=3):
+    """Serving plate under n x m slots: white glazed brim with a blue band and a rolled lit edge, a sunken well
+    (shadowed far wall, lit near wall) whose flat floor holds the slots - no grid, the whole well is the slot
+    area; glossy streaks on the brim and the floor, the near underside and a shadow on the counter."""
     fx0, fy0 = ox + 7 + 18 * c0, oy + 17 + 18 * r0
     fx1, fy1 = fx0 + 18 * n - 1, fy0 + 18 * m - 1
-    top = rrect(fx0 - rim, fy0 - rim, fx1 + rim, fy1 + rim - 1, 4)
-    solid, face = raised(img, top, thick, GLAZE)
-    cells(img, fx0, fy0, n, m, CERAMIC, floor=CERAMIC, deep=True, wall_lit=CERAMIC[5], wall_dark=CERAMIC[1])
-    for r in range(m):
-        for c in range(n):
-            gx, gy = fx0 + 18 * c + 14, fy0 + 18 * r + 12
-            _paint(img, [(gx, gy), (gx, gy + 1), (gx - 1, gy + 2)], CERAMIC[5])
-    _paint(img, [(fx0 - rim + 3, fy0 - rim + 1), (fx0 - rim + 4, fy0 - rim + 1), (fx0 - rim + 5, fy0 - rim + 1),
-                 (fx0 - rim + 1, fy0 - rim + 3), (fx0 - rim + 1, fy0 - rim + 4)], GLAZE[5])
+    well = rrect(fx0 - 1, fy0 - 1, fx1 + 1, fy1 + 1, 4)
+    top = rrect(fx0 - 1 - brim, fy0 - 1 - brim, fx1 + 1 + brim, fy1 + brim, brim + 4)
+    solid, face = raised(img, top, thick, CERAMIC, shadow_off=(2, 2), lit_edges=False)
+    layers, rest = [], set(face) - well             # brim rings from the outside in
+    while rest:
+        ring = {p for p in rest if any((p[0] + dx, p[1] + dy) not in rest and (p[0] + dx, p[1] + dy) not in well
+                                       for dx, dy in N4)}
+        if not ring:
+            break
+        layers.append(ring)
+        rest -= ring
+    cx, cy = (fx0 + fx1) / 2, (fy0 + fy1) / 2
+    for i, ring in enumerate(layers):
+        for (x, y) in ring:
+            lit = (x - cx) / (fx1 - fx0) + (y - cy) / (fy1 - fy0) < 0.15      # far / left half
+            if i == 0:
+                c = CERAMIC[5] if lit else CERAMIC[3]                        # rolled rim
+            elif i == 2:
+                c = GLAZE[4] if lit else GLAZE[3]                            # blue band
+            else:
+                c = CERAMIC[4]
+            _px(img, x, y, c)
+    _paint(img, rest, CERAMIC[4])
+    _paint(img, well, CERAMIC[3])
+    wedge = edge(well)
+    for (x, y) in wedge:
+        far = (x, y - 1) not in well or (x - 1, y) not in well
+        _px(img, x, y, CERAMIC[2] if far else CERAMIC[5])
+    for (x, y) in well - wedge:                                              # soft shadow under the far wall
+        if (x, y - 1) in wedge and (x, y - 1) not in edge(well - wedge) and y - 1 == min(
+                yy for xx, yy in wedge if xx == x):
+            _px(img, x, y, CERAMIC[2] if (x - 1, y) in well else CERAMIC[3])
+    x0b, y0b = fx0 - 1 - brim, fy0 - 1 - brim
+    _paint(img, [(x0b + 6 + i, y0b + 2) for i in range(7)] + [(x0b + 2, y0b + 6 + i) for i in range(4)]
+           + [(x0b + 3, y0b + 4), (x0b + 4, y0b + 3)], CERAMIC[5])          # glint on the brim
+    _paint(img, [(fx1 - 3 - i, fy1 - 2 - i) for i in range(4)] + [(fx1 - 3 - i, fy1 - 1 - i) for i in range(3)],
+           CERAMIC[5])                                                       # reflection on the floor
     return solid
 
 
 # ------------------------------------------------------------------ arrow, knife, sign
 
-ARROW = ("....#...",
-         "....##..",
-         "#######.",
-         "########",
-         "#######.",
-         "....##..",
-         "....#...")
+ARROW = ("...#..",
+         "...##.",
+         "######",
+         "...##.",
+         "...#..")
 
 
 def arrow(img, x, y, fill=None):
-    """Right-pointing arrow (8x7 + outline) painted on the counter: x, y = top-left of the shape."""
+    """Right-pointing arrow (6x5 + outline) painted on the counter: x, y = top-left of the shape."""
     fill = fill or CERAMIC
     m = {(x + i, y + j) for j, row in enumerate(ARROW) for i, ch in enumerate(row) if ch == '#'}
     ring = {(px + dx, py + dy) for px, py in m for dx in (-1, 0, 1) for dy in (-1, 0, 1)} - m
     projected_shadow(img, m | ring, 1, 1)
     _paint(img, ring, STONE[0])
     for (px, py) in m:
-        _px(img, px, py, fill[4] if (px, py - 1) not in m or py - y < 3 else fill[3])
+        _px(img, px, py, fill[4] if (px, py - 1) not in m or py - y < 2 else fill[3])
 
 
-def knife(img, x, y, blade=36, handle=26):
-    """Chef's knife lying on the counter, tip at the left (x), spine at y; the handle may stick out of the
-    window on the right. Blade: lit spine, base face with a polished band, bright edge; walnut handle with
-    brass rivets."""
+def knife(img, x, y, blade=20, handle=14, bh=5):
+    """Small chef's knife lying on the counter, tip at the left (x), spine at y, blade `bh` px tall; the handle
+    may stick out of the window on the right. Lit spine, base face, dark grind line, bright edge, steel
+    bolster, walnut handle with two brass rivets. Keep it small next to the slots (blade ~ one slot)."""
     pts = {}
+    tip = max(4, blade // 3)
     for i in range(blade):                                     # spine straight at y, the belly curves up to
-        h = 7 if i >= 12 else 1 + round(6 * (i / 12) ** 0.55)  # the tip at the spine
+        h = bh if i >= tip else 1 + round((bh - 1) * (i / tip) ** 0.55)   # the tip at the spine
         for k in range(h):
-            j = y + k
             c = (STEEL[4] if k == 0 else STEEL[5] if k == h - 1 else STEEL[2] if k == h - 2 and h > 3
-                 else STEEL[4] if k == 2 and 6 < i < blade - 4 else STEEL[3])
-            pts[(x + i, j)] = c
+                 else STEEL[3])
+            pts[(x + i, y + k)] = c
     bx = x + blade
-    for i in range(3):                                         # bolster, a bit taller than the blade
-        for j in range(y - 1, y + 8):
-            pts[(bx + i, j)] = STEEL[4] if j == y - 1 else STEEL[2] if j > y + 5 else STEEL[3]
-    hx = bx + 3
+    for i in range(2):                                         # bolster, a bit taller than the blade
+        for j in range(y - 1, y + bh + 1):
+            pts[(bx + i, j)] = STEEL[4] if j == y - 1 else STEEL[2] if j >= y + bh - 1 else STEEL[3]
+    hx = bx + 2
+    hh = max(3, bh - 2)
     for i in range(handle):
-        for j in range(y + 1, y + 6):
-            c = WALNUT[4] if j == y + 1 else WALNUT[2] if j == y + 5 else WALNUT[3]
+        for j in range(y + 1, y + 1 + hh):
+            c = WALNUT[4] if j == y + 1 else WALNUT[2] if j == y + hh else WALNUT[3]
             pts[(hx + i, j)] = c
-    for rx in (hx + 4, hx + handle // 2, hx + handle - 5):    # brass rivets
-        pts[(rx, y + 3)] = BRASS[5]
-        pts[(rx + 1, y + 3)] = BRASS[3]
+    for rx in (hx + 3, hx + handle - 4):                       # brass rivets
+        pts[(rx, y + 1 + hh // 2)] = BRASS[5]
     solid = set(pts)
     projected_shadow(img, solid | edge_ring(solid), 1, 2)
     _paint(img, edge_ring(solid), STEEL[0])
@@ -371,7 +422,80 @@ def icon_knife():
     return img
 
 
-ICONS = {'cutting_board': icon_board, 'knife': icon_knife}
+def icon_board32(T=4):
+    """32x32 cutting board item with volume: a paddle board lying at 45 deg (handle up-right with a hanging
+    hole), seen from above with its T px thickness below - 1:1 diagonals stay clean in pixel art. Top face:
+    rounded lit edge band, juice groove, long grain along the board; sides: the left-front one lit (base),
+    the right-front one dark, a contact shadow row at the bottom; outline in the wood's darkest tone."""
+    import math
+    r2 = math.sqrt(2)
+
+    def box(p, q, pc, qc, hp, hq, rr):            # rounded box sdf in board units (p along, q across)
+        a_, b_ = abs(p - pc) - hp + rr, abs(q - qc) - hq + rr
+        return math.hypot(max(a_, 0), max(b_, 0)) + min(max(a_, b_), 0) - rr
+
+    def sdf(bx, by):                               # base position (height 0) -> distance in pixels
+        by -= 2.5
+        p, q = (bx - by) / r2, (bx + by) / r2
+        body = box(p, q, -3.0, 22.6, 8.6, 6.0, 2.2)
+        hand = box(p, q, 9.6, 22.6, 4.6, 2.0, 2.0)
+        hole = math.hypot(p - 10.8, q - 22.6) - 1.5
+        return max(min(body, hand), -hole), p, q
+
+    def in_hole(sx, sy):                           # the hanging hole as seen on the top face
+        by = sy + 0.5 + T - 2.5
+        p, q = (sx + 0.5 - by) / r2, (sx + 0.5 + by) / r2
+        return math.hypot(p - 10.8, q - 22.6) < 1.5
+
+    kind = {}
+    for sy in range(32):
+        for sx in range(32):
+            for h in range(T, -1, -1):             # the highest solid layer under this pixel
+                d, p, q = sdf(sx + 0.5, sy + 0.5 + h)
+                if d <= 0:
+                    kind[(sx, sy)] = (h, d, p, q)
+                    break
+
+    def grad(bx, by):
+        e = 0.05
+        gx = sdf(bx + e, by)[0] - sdf(bx - e, by)[0]
+        gy = sdf(bx, by + e)[0] - sdf(bx, by - e)[0]
+        n = math.hypot(gx, gy) or 1
+        return gx / n, gy / n
+
+    img = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+    for (sx, sy), (h, d, p, q) in kind.items():
+        nx, ny = grad(sx + 0.5, sy + 0.5 + h)
+        lit = -nx - ny                             # > 0: the edge faces the top-left light
+        if h == T:
+            c = BOARD[3]
+            if d > -1.1:
+                c = BOARD[4] if lit > 0.3 else BOARD[3] if lit > -0.3 else BOARD[2]
+            elif -3.2 < d <= -2.2 and p < 5.0:     # juice groove: dark far wall, lit near wall
+                c = BOARD[2] if lit > -0.2 else BOARD[4]
+            elif d <= -3.2 and any(abs(q - g) < 0.36 and a0 < p < a1 for g, a0, a1 in
+                                   ((20.5, -9.0, -1.0), (22.6, -4.0, 3.0), (25.0, -8.0, -3.5))):
+                c = BOARD[2]                       # long grain: clean 45 deg lines
+        else:
+            if in_hole(sx, sy):
+                c = BOARD[1]                       # far inner wall of the hole, seen through it
+            else:
+                c = BOARD[3] if nx < ny else BOARD[2]           # left-front side lit, right-front side dark
+                if h == 0:
+                    c = BOARD[2] if nx < ny else BOARD[1]       # contact shadow at the bottom
+                elif h == T - 1 and nx < ny:
+                    c = BOARD[4]                   # the rounded nose under the lit edge
+        img.putpixel((sx, sy), c)
+    for (x, y) in edge_ring(set(kind)):
+        if 0 <= x < 32 and 0 <= y < 32:
+            img.putpixel((x, y), BOARD[0])
+    for (sx, sy), (h, d, p, q) in kind.items():   # highlight along the far-left corner of the edge
+        if h == T and d > -1.1 and p < -6.0 and q < 19.5:
+            img.putpixel((sx, sy), BOARD[5])
+    return img
+
+
+ICONS = {'cutting_board': icon_board, 'cutting_board32': icon_board32, 'knife': icon_knife}
 
 
 def render_icon(name):
@@ -383,7 +507,7 @@ if __name__ == '__main__':
         name = sys.argv[3] if len(sys.argv) > 3 and not sys.argv[3].startswith('--') else 'cutting_board'
         im = render_icon(name)
         im.save(sys.argv[2])
-        im.resize((256, 256), Image.NEAREST).save(sys.argv[2].replace('.png', '_x16.png'))
+        im.resize((256, 256), Image.NEAREST).save(sys.argv[2].replace('.png', '_zoom.png'))
         print('saved', sys.argv[2])
     else:
         print(__doc__)

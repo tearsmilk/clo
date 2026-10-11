@@ -517,7 +517,7 @@ def draw_layers(img, oy, layers, sdir, th):
         if t == 'safe':                   # steel safe kit (safe.py): door, hinge, keypad, display, wheel, ...
             draw_safe(img, oy, L)
             continue
-        if t == 'kitchen':                # kitchen kit (kitchen.py): counter, board, tool case, dish, knife, ...
+        if t == 'kitchen':                # kitchen kit (kitchen.py): counter, board, tool case, plate, knife, ...
             draw_kitchen(img, oy, L)
             continue
         if t == 'nameplate':              # green ribbon label (rustic kit) centred on x
@@ -723,22 +723,22 @@ def draw_kitchen(img, oy, L):
     """Kitchen kit parts. slots = [col, row, w, h] like other layers, x / y are window px."""
     p, ox = L['part'], OX
     if p == 'counter':                    # stone worktop under the container part (vanilla inventory below)
-        kitchen.counter(img, ox, oy, L.get('y0', -1), L.get('front_y', 115), L.get('front', 3),
+        kitchen.counter(img, ox, oy, L.get('y0', -1), L.get('front_y', 116), L.get('front', 3),
                         L.get('x0', -1), L.get('x1', 176), L.get('seed', 4))
     elif p == 'board':                    # cutting board with a cell per slot, handle out of the window
         c, r, w, h = L.get('slots', [0, 0, 5, 5])
-        kitchen.board(img, ox, oy, c, r, w, h, tuple(L.get('rim', (5, 3, 5, 3))), L.get('thick', 3),
+        kitchen.board(img, ox, oy, c, r, w, h, tuple(L.get('rim', (5, 3, 5, 2))), L.get('thick', 6),
                       L.get('handle', 22), L.get('handle_h', 14), L.get('seed', 2))
     elif p == 'tool_case':
         c, r, w, h = L.get('slots', [6, 0, 3, 2])
         kitchen.tool_case(img, ox, oy, c, r, w, h, L.get('rim', 4), L.get('thick', 3))
-    elif p == 'dish':
+    elif p == 'plate':                    # serving plate: brim with a blue band, the well holds the slots
         c, r, w, h = L.get('slots', [6, 3, 3, 2])
-        kitchen.dish(img, ox, oy, c, r, w, h, L.get('rim', 4), L.get('thick', 3))
+        kitchen.plate(img, ox, oy, c, r, w, h, L.get('brim', 5), L.get('thick', 3))
     elif p == 'arrow':
         kitchen.arrow(img, ox + L['x'], oy + L['y'])
     elif p == 'knife':
-        kitchen.knife(img, ox + L['x'], oy + L['y'], L.get('blade', 36), L.get('handle', 26))
+        kitchen.knife(img, ox + L['x'], oy + L['y'], L.get('blade', 20), L.get('handle', 14), L.get('bh', 5))
     elif p == 'sign':
         kitchen.sign(img, ox + L.get('x', 88), oy + L['y'], L['text'])
     else:

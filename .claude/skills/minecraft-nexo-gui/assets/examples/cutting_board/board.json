@@ -3,7 +3,7 @@
  "namespace": "hokaria",
  "rows": 5,
  "theme": "vanilla",
- "comment": "cutting board: 5x5 food on the board (slots 0-4, 9-13, 18-22, 27-31, 36-40), 3x2 tools in the case (6-8, 15-17), 3x2 result in the dish (33-35, 42-44); column 5 and row 2 on the right stay empty; the arrow (32, 41) is the cut button",
+ "comment": "cutting board: 5x5 food on the board (slots 0-4, 9-13, 18-22, 27-31, 36-40), 3x2 tools in the case (6-8, 15-17), 3x2 result on the plate (33-35, 42-44); column 5 and row 2 on the right stay empty; the arrow (32, 41) is the cut button",
  "canvas": {
   "left": 24,
   "right": 16,
@@ -48,7 +48,7 @@
   },
   {
    "type": "kitchen",
-   "part": "dish",
+   "part": "plate",
    "slots": [
     6,
     3,
@@ -60,12 +60,12 @@
    "type": "kitchen",
    "part": "arrow",
    "x": 102,
-   "y": 86
+   "y": 87
   },
   {
    "type": "kitchen",
    "part": "knife",
-   "x": 118,
+   "x": 150,
    "y": 4
   }
  ],

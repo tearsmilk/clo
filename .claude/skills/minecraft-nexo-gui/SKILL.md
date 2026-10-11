@@ -179,8 +179,8 @@ Then send the user the preview first (they judge visually), then the files.
   `references/safe-lock.md`.
 
 - **Kitchen / workstation kit** (cutting board, stove... - input grid + tools + result + "go" arrow on a stone
-  counter; board with a cell per slot and a handle out of the window, walnut tool case with felt compartments,
-  ceramic dish, chef's knife, plank sign; 16x16 `kitchen:cutting_board` item): layers
+  counter; thick board with a cell per slot and a handle out of the window, walnut tool case with felt
+  compartments, white plate, small chef's knife, plank sign; 32x32 `kitchen:cutting_board32` item): layers
   `{"type": "kitchen", "part": ...}` from `scripts/kitchen.py`; example `assets/examples/cutting_board/`
   (5x5 food, 3x2 tools, 3x2 result in a 5-row chest). Players put items in, so the logic is a plugin, not
   DeluxeMenus - slot map and what the plugin does in `references/kitchen.md`. Read it for any crafting
