@@ -33,6 +33,12 @@ drawing any texture:
 - light anatomy: highlight + reflection, light, base, a narrow dark terminator, volume shadow lifted by
   bounce light, rim light, hard projected shadow, soft self-cast shadow; hue-shift the tones; compress the
   bands; flat faces stay one solid tone (`scripts/shading.py demo chart.png` shows the 5 stages)
+- line and form craft (`references/pixel-art-craft.md`, read it too): no doubles (L-corners) in 1 px lines
+  (`shading.pixel_perfect`), curves with steadily changing step lengths (no jaggies), no pillow shading or
+  bands parallel to the outline, value first (`shading.py gray` - it must read in greyscale), the strongest
+  contrast and saturation on what the player must look at, one outline style chosen per job, inner
+  anti-aliasing only (outer AA halos on the changing slot / tooltip backgrounds), one pixel size per set and
+  every size drawn at that size, never auto-shrunk
 - check with `python3 scripts/shading.py check OUT.png` (`--tile` for tiles) and fix what it flags
 
 ## Workflow
@@ -248,4 +254,5 @@ reference is a pixel off. Full method and the measured royal kit: `references/re
 - `references/main-menu.md` - main menu in the house style: measured layout, material slabs, player head, hub kit
 - `references/lettering.md` - a beautiful title letter in five steps (shape, outline, gradient, shadows, accent)
 - `references/texture-shading.md` - hand-painted texture shading rules (5-tone ramps, light, AO, materials, tiles)
+- `references/pixel-art-craft.md` - lines (doubles, jaggies), 8 outline styles, value test, focus, AA, sizes
 - `references/artist-brief.md` - artist hand-off kit and brief

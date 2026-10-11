@@ -17,7 +17,7 @@ import sys
 from PIL import Image, ImageDraw
 
 from shop import _px, letters, text_size
-from shading import ramp5
+from shading import ramp5, pixel_perfect
 
 
 def _r5(hexc, **kw):
@@ -385,6 +385,7 @@ def arrow(img, x, y, fill=None):
     _paint(img, ring, STONE[0])
     for (px, py) in m:
         _px(img, px, py, fill[4] if (px, py - 1) not in m or py - y < 2 else fill[3])
+    pixel_perfect(img, box=(x - 1, y - 1, x + 8, y + 7))   # no doubles in the outline at the head
 
 
 def knife(img, x, y, blade=20, handle=14, bh=5):

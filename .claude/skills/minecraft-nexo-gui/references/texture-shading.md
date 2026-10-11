@@ -89,6 +89,8 @@ replicated 1:1) wins over this rule; anything new follows it.
   lettering gradient (`references/lettering.md`), never as an all-over blend between two tones.
 - Stepped transitions typical of good pixel art.
 - Readable at the original size and when enlarged.
+- Line work, outline styles, the value test, focus, anti-aliasing and sizes: `references/pixel-art-craft.md`
+  (clean 1 px lines without doubles, steady curves, no pillow shading / banding, inner AA only).
 
 ## 5. Material-specific shading
 | material | how |
@@ -125,4 +127,8 @@ palette; crisp pixels without blur; a natural spread of lights, midtones and sha
 - `shading.py check` reports: colours per hue group (> 6 tones per group = too many), single-pixel noise,
   checker dithering (3x3 a-b-a areas - a lone 1 px diagonal line is line art, not dithering),
   semi-transparent pixels, light direction (are top-left-facing edges lighter?), and with
-  `--tile` the edge mismatch. Fix everything it flags before handing over.
+  `--tile` the edge mismatch; plus the craft checks of `references/pixel-art-craft.md` - doubles in dark
+  1 px lines, jaggies on sprite silhouettes, tones in rings round the outline (pillow shading / banding),
+  value spread. Fix everything it flags before handing over (look first: a deliberate feature stays).
+- `shading.py gray IN OUT` - colour + greyscale side by side (value test); `shading.py craft chart.png` - the
+  bad / good pairs; `shading.pixel_perfect(img, only, box)` - removes doubles from a finished picture.

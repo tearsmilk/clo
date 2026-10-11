@@ -25,6 +25,7 @@ import sys
 from PIL import Image
 
 from pixfont import _slab_mask
+from shading import pixel_perfect
 
 
 def _hex(c):
@@ -329,6 +330,7 @@ def arcade(text, palette='gold', scale=2, drop=1, gap=None, px=1):
         if y > top and (x, y - 1) not in M and any((x, yy) in M for yy in range(top, y - 1)):
             c = inner                                   # the row under a counter / an overhang: inner shadow
         img.putpixel((x, y), c)
+    pixel_perfect(img, only={img.getpixel(next(iter(ring)))})   # outline without doubles at the corners
     return img.resize((img.width * px, img.height * px), Image.NEAREST) if px > 1 else img
 
 
@@ -362,6 +364,7 @@ def bands(text, palette='sunset', scale=2, drop=2, gap=None, px=1):
     for (x, y) in M:                                     # glints on top-left corners
         if (x - 1, y) not in M and (x, y - 1) not in M and (x + 1, y) in M and (x, y + 1) in M:
             img.putpixel((x + 1, y + 1), glint) if (x + 1, y + 1) in M else None
+    pixel_perfect(img, only={img.getpixel(next(iter(ring)))})
     return img.resize((img.width * px, img.height * px), Image.NEAREST) if px > 1 else img
 
 
@@ -468,6 +471,8 @@ def bubble(text, palette='candy', scale=2, gap=None, px=1):
                 for q in ((x + 1, y + 1), (x + 2, y + 1), (x + 1, y + 2)):
                     if q in M:
                         img.putpixel(q, glint)
+    if out:
+        pixel_perfect(img, only={img.getpixel(next(iter(ring)))})
     return img.resize((img.width * px, img.height * px), Image.NEAREST) if px > 1 else img
 
 

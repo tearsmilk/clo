@@ -125,6 +125,9 @@ bitmap font, a maze-like block font). Our glyphs, their methods; all work with C
   twice (soft blobs, small counters), one fill tone, the lower-right edge one step darker, a white shine
   (an L of 3 px) on the top-left of each letter, outline optional (none on white like the reference, one on
   a dark GUI).
+- The outline of arcade / bands / bubble is the letter grown by 8 neighbours (an even bold ring); its
+  rounded corners would get doubles (L-corners), so `shading.pixel_perfect` cleans the outline colour before
+  upscaling (`references/pixel-art-craft.md`).
 - `px=2..3` (arcade / bands / bubble) upscales AFTER styling - big "art pixels" like the references; at 1:1 in a GUI
   keep px=1.
 - In a spec: `{"type": "lettering", "style": "arcade" | "bands" | "maze" | "bubble", "palette": "gold", "text": ...,

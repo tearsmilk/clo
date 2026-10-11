@@ -20,6 +20,7 @@ from PIL import Image, ImageDraw
 from kitchen import (_r5, _px, _paint, rrect, edge, edge_ring, raised, grain, sheen, counter, sign,
                      WALNUT, STEEL, N4)
 from pixfont import draw_text, text_width, text_height
+from shading import pixel_perfect
 from safe import _STEEL5 as SAFE_STEEL   # the settings plate is brushed with safe.metal_plate
 
 # ------------------------------------------------------------------ palettes (outline, shadow, dark, base, light, hi)
@@ -243,6 +244,7 @@ def medallion(img, cx, cy, R, under):
     for p in edge_ring(disc):                             # outline: softer on the lit side
         lit = (p[0] + p[1]) < (cx + cy)
         _px(img, *p, GOLD[1] if lit else GOLD[0])
+    pixel_perfect(img, box=(cx - R - 1, cy - R - 1, cx + R + 2, cy + R + 2))   # clean 1 px rings, no doubles
 
 
 def portrait(img, ox, oy, slot, under):
