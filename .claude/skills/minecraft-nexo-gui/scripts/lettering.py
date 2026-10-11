@@ -160,8 +160,9 @@ def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, p
       corners rounded by 1 px - no nib cuts, no checker, nothing that reads as noise
     - front face: two flat bands (light top, base below) - a bevel: lit 1 px on every top / left-facing edge
       (highlight), dark 1 px on every bottom / right-facing edge (also round the counters)
-    - extrusion `depth` px down-right (light from the top-left): right-facing side faces dark mid, bottom
-      faces shadow, the back edge darkest - shaded by which way each side faces, visible inside counters too
+    - extrusion `depth` px down-right (light from the top-left): right-facing side faces shadow, bottom
+      faces and the back edge darkest - the sides must sit clearly below the face (the user: "darker there"),
+      a mid tone on the sides flattens the letter - shaded by which way each side faces, visible inside counters too
     - one outline round everything in the darkest tone; a small glint on the upper left of each letter
     - accent: None | 'sparkle' (tiny 4-point stars in the highlight tone) | 'cracks' (the tutorial's blood)"""
     if font:                                           # a converted pixel font (font_pixel.py): its own
@@ -214,7 +215,7 @@ def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, p
     put = img.putpixel
     for q, (face, i) in E.items():
         back = (q[0] + 1, q[1] + 1) not in solid and i == depth
-        put(q, ramp[0] if back else ramp[1] if face == 'bottom' else ramp[2])
+        put(q, ramp[0] if back or face == 'bottom' else ramp[1])   # sides two steps below the face
     top, bot = min(y for _, y in M), max(y for _, y in M)
     split = top + round(0.42 * (bot - top))
     for (x, y) in M:
