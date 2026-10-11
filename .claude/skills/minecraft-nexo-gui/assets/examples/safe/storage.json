@@ -4,7 +4,7 @@
  "rows": 6,
  "theme": "steel",
  "canvas": {
-  "left": 6,
+  "left": 60,
   "right": 9,
   "top": 6,
   "bottom": 7
@@ -24,6 +24,16 @@
     169,
     125
    ]
+  },
+  {
+   "type": "safe",
+   "part": "open_door",
+   "x": -3,
+   "y0": 4,
+   "y1": 121,
+   "width": 44,
+   "grow": 7,
+   "thick": 4
   },
   {
    "type": "safe",

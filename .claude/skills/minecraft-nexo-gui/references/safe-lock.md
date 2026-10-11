@@ -33,6 +33,11 @@ The same pattern makes any numeric input: amounts, page numbers, a lottery numbe
 Meta data is stored per player (persistent). Test regex / meta syntax once on the server's DeluxeMenus version.
 
 ## Storage
+The storage screen shows the safe OPEN: `open_door` draws the door swung out on the left hinges in perspective
+(inner face, mechanism, rods, bolts out of the free edge - its far edge is taller because it is closer to the
+viewer), then `hinges` sit on the joint. Same door size as the closed one, so the two screens feel like one
+object being opened. Canvas `{"left": 60, "right": 9, "top": 6, "bottom": 7}` -> texture 245x235.
+
 DeluxeMenus cannot hold items. The storage screen is a skin: use the `menu_title` string from
 `DeluxeMenus/gui_menus/hokaria_safe.yml` as the inventory title of the vault plugin (PlayerVaults, AxVaults,
 ...). If the plugin does not parse `<glyph:...>` tags, use the PlaceholderAPI form from the file's comment.

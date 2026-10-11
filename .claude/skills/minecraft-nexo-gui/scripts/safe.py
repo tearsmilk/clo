@@ -466,3 +466,113 @@ def render_icon(name):
     if kind == 'lamp':
         return lamp_icon(color or 'green')
     raise SystemExit(f'unknown safe icon {name}')
+
+
+def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=4, bolt_v=(0.2, 0.5, 0.8)):
+    """The door swung open to the left of the window (storage screens), in perspective: its inner face is a
+    quad from the hinge edge (x_hinge, y0..y1 - same size as the closed door) to the free edge `width` px
+    further left, which is closer to the viewer so it is `grow` px taller at both ends. On the face: brushed
+    steel, a recessed panel, a brass mechanism with rods running to the free edge (the rods follow the
+    perspective lines); the free edge shows the door's thickness with the locking bolts sticking out.
+    Draw it before the hinges so the knuckles sit on the joint. Needs canvas left >= width + thick + 9 - x_hinge."""
+    S, B = STEEL, BRASS
+    xh, xf = ox + x_hinge, ox + x_hinge - width
+    yth, ybh = oy + y0, oy + y1
+    ytf, ybf = oy + y0 - grow, oy + y1 + grow
+
+    def top(u):
+        return yth + (ytf - yth) * u
+
+    def bot(u):
+        return ybh + (ybf - ybh) * u
+
+    def at(u, v):
+        return xh + (xf - xh) * u, top(u) + (bot(u) - top(u)) * v
+
+    rnd = random.Random(9)
+    streak = [rnd.random() for _ in range(121)]              # brush streaks in door space (follow perspective)
+    # free-edge thickness first (it is behind the face's left border)
+    for x in range(xf - thick, xf):
+        k = xf - x                                           # 1..thick
+        t0, b0 = round(ytf + k * 0.4), round(ybf - k * 0.4)
+        for y in range(t0, b0 + 1):
+            c = S['out'] if (k == thick or y in (t0, b0)) else (S['l2'] if k == thick - 1 else S['l1'])
+            _px(img, x, y, c)
+    # inner face
+    for x in range(xf, xh + 1):
+        u = (xh - x) / max(1, width)
+        t, b = round(top(u)), round(bot(u))
+        for y in range(t, b + 1):
+            v = (y - t) / max(1, b - t)
+            if x in (xf, xh) or y in (t, b):
+                c = S['out']
+            elif y == t + 1 or x == xf + 1:
+                c = S['l2']
+            elif y == b - 1 or x == xh - 1:
+                c = S['d2']
+            else:
+                c = S['m2'] if u > 0.35 else S['m1'] if u > 0.12 else S['base']     # darker near the body
+                si = round(v * 120)
+                if streak[si] < 0.1 and 0.1 < u < 0.95 and (round(u * 30) + si) % 7:
+                    c = S['l1'] if u > 0.35 else S['m2']
+                # recessed panel: carved border 2 px, dark on the top and free side, lit on the bottom and hinge side
+                pt, pb = 0.07, 0.93
+                pl, pr = 0.12, 0.88                             # u range (hinge side .. free side)
+                ytp, ybp = top(u) + (bot(u) - top(u)) * pt, top(u) + (bot(u) - top(u)) * pb
+                if pl <= u <= pr and ytp - 0.5 <= y <= ybp + 0.5:
+                    xl_panel, xr_panel = xh + (xf - xh) * pr, xh + (xf - xh) * pl
+                    if abs(y - ytp) < 1.0 or abs(x - xl_panel) < 1.0:
+                        c = S['d3']
+                    elif abs(y - ytp - 1) < 1.0 or abs(x - xl_panel - 1) < 1.0:
+                        c = S['d1']
+                    elif abs(y - ybp) < 1.0 or abs(x - xr_panel) < 1.0:
+                        c = S['hi']
+            _px(img, x, y, c)
+    for uu, vv in ((0.06, 0.035), (0.94, 0.035), (0.06, 0.965), (0.94, 0.965)):   # rivets on the face corners
+        rx, ry = at(uu, vv)
+        rivet(img, round(rx), round(ry))
+    # rods from the mechanism to the bolts (horizontal in door space -> slanted on screen)
+    gx, gy = at(0.42, 0.5)
+    for v in bolt_v:
+        for x in range(xf + 2, round(gx) + 1):
+            u = (xh - x) / max(1, width)
+            y = round(top(u) + (bot(u) - top(u)) * v)
+            _px(img, x, y - 1, S['hi'])
+            _px(img, x, y, S['l1'])
+            _px(img, x, y + 1, S['d3'])
+    vx = round(gx)                                           # vertical connecting rod
+    for y in range(round(at(0.42, bolt_v[0])[1]), round(at(0.42, bolt_v[-1])[1]) + 1):
+        _px(img, vx - 1, y, S['hi'])
+        _px(img, vx, y, S['l1'])
+        _px(img, vx + 1, y, S['d3'])
+    # brass mechanism cover (slightly squashed by the perspective)
+    for y in range(round(gy) - 9, round(gy) + 10):
+        for x in range(round(gx) - 8, round(gx) + 9):
+            dd = ((x - gx) / 6.5) ** 2 + ((y - gy) / 8) ** 2
+            if dd <= 1:
+                lit = (x - gx) + (y - gy)
+                if dd > 0.82:
+                    c = B['out']
+                elif dd > 0.5:                                   # rim lit top-left
+                    c = B['hi'] if lit < -3 else B['l1'] if lit < 3 else B['d1']
+                else:                                            # inner disc, slightly sunk
+                    c = B['d1'] if lit < -2 else B['base'] if lit < 4 else B['l1']
+                _px(img, x, y, c)
+    for dx, dy in ((0, -5), (-4, 0), (4, 0), (0, 5)):              # screws on the rim
+        _px(img, round(gx) + dx, round(gy) + dy, B['d2'])
+    for dx, dy, c in ((0, 0, STEEL['l2']), (-1, 0, STEEL['out']), (1, 0, STEEL['out']), (0, -1, STEEL['out']),
+                      (0, 1, STEEL['out'])):                     # centre spindle
+        _px(img, round(gx) + dx, round(gy) + dy, c)
+    # bolts sticking out of the free edge
+    for v in bolt_v:
+        by = round(ytf + (ybf - ytf) * v) - 3
+        x0 = xf - thick
+        rows = (S['out'], S['hi'], S['l2'], S['l1'], S['m1'], S['d2'], S['out'])
+        for i in range(1, 8):
+            xx = x0 - i
+            for k, c in enumerate(rows):
+                if i == 7 and k in (0, 6):
+                    continue
+                _px(img, xx, by + k, S['out'] if (i == 7 and 0 < k < 6) else c)
+        for k in range(7):
+            _px(img, x0, by + k, S['out'] if k in (0, 6) else S['d3'])
