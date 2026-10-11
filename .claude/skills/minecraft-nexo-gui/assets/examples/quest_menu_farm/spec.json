@@ -80,11 +80,12 @@
     -31,
     8,
     26,
-    82
+    74
    ],
    "color": "#3e8948",
    "tail": "swallow",
-   "emblem": "wheat"
+   "emblem": "wheat",
+   "seed": 1
   },
   {
    "type": "banner",
@@ -92,11 +93,12 @@
     181,
     8,
     26,
-    82
+    74
    ],
    "color": "#3e8948",
    "tail": "swallow",
-   "emblem": "wheat"
+   "emblem": "wheat",
+   "seed": 2
   },
   {
    "type": "flourish",
@@ -206,46 +208,71 @@
    "type": "rubble",
    "box": [
     -30,
-    93,
-    236,
-    30
+    78,
+    80,
+    42
    ],
+   "shape": "left",
    "color": "#3e8948",
    "leaves": "#63c74d",
-   "flowers": "#f6757a",
+   "size": [
+    5,
+    9
+   ],
    "seed": 4
+  },
+  {
+   "type": "rubble",
+   "box": [
+    126,
+    78,
+    80,
+    42
+   ],
+   "shape": "right",
+   "color": "#3e8948",
+   "leaves": "#63c74d",
+   "size": [
+    5,
+    9
+   ],
+   "seed": 7
   },
   {
    "type": "hay",
    "box": [
     -30,
-    100,
-    44,
-    26
+    96,
+    58,
+    23
    ],
-   "seed": 3
+   "seed": 3,
+   "above": true
   },
   {
    "type": "hay",
    "box": [
-    162,
-    100,
-    44,
-    26
+    148,
+    96,
+    58,
+    23
    ],
-   "seed": 8
+   "seed": 8,
+   "above": true
   },
   {
    "type": "sprite",
    "name": "pumpkin",
-   "x": -26,
-   "y": 104
+   "x": -24,
+   "y": 104,
+   "above": true
   },
   {
    "type": "sprite",
    "name": "pumpkin",
-   "x": 188,
-   "y": 104
+   "x": 186,
+   "y": 104,
+   "above": true
   }
  ],
  "buttons": [

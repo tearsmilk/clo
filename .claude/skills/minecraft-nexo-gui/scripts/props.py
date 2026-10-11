@@ -7,13 +7,15 @@
   planks    wooden wall (vertical boards) with a top beam            color, seed
   pillar    stone column with capital and base                       color
   brazier   iron bowl with a fire (torch: thin pole + flame)         color, kind ('bowl'|'torch'|'lantern')
-  banner    hanging cloth banner on a rod, folds, trim, V or swallow tail, optional emblem sprite
-                                                                     color, trim, rod, tail, emblem
+  banner    hanging cloth banner on a rod: drape folds, trim, V or swallow tail, emblem, wear and small tears
+                                                                     color, trim, rod, tail, emblem, folds, age, torn
   ribbon    title ribbon: a band with folded tails (header style 'ribbon' uses it)   color
-  rubble    pile of rounded boulders with leaves and flowers         color, leaves, flowers, seed, density
+  rubble    pile of rounded boulders with plants and flowers         color, leaves, flowers, seed, density,
+                                                                     shape (band/left/right/mound/valley), round_bottom
   hay       hay bales / sacks pile for farm scenes                   color, seed
   flourish  symmetric gold ornament (wings + swoops), for under titles   color, gem
-  note      pinned parchment note with scribbles and a seal          color, seal, seed
+  note      old parchment: yellowed rim, stains, faded ink, torn corner/edges, seal, shadow
+                                                                     color, seal, age, torn, pin, shadow, seed
   divider   ornamental line with arrow tips and a centre gem         color, gem
   frame     framed panel (gold/wood/stone/iron rim) - slot bars use it   kind, inner
 
@@ -245,8 +247,22 @@ def brazier(w, h, color='#3a4466', kind='bowl', **_):
 
 # ----------------------------------------------------------------------------- cloth
 
-def banner(w, h, color='#a22633', trim=GOLD, rod='#3e2731', tail='point', emblem=None, **_):
-    """Hanging banner: rod with knobs, cloth with vertical folds, gold inner trim, V (point) or swallow tail."""
+def _tear(px, w, h, x, y, size, rnd):
+    """Cut a small ragged triangular tear into a shape at (x, y), pointing inward from the nearest side."""
+    for k in range(size):
+        for j in range(-(size - 1 - k), size - k):
+            xx = x + k if x < w // 2 else x - k
+            yy = y + j
+            if 0 <= xx < w and 0 <= yy < h and rnd.random() < 0.9:
+                px[xx, yy] = (0, 0, 0, 0)
+
+
+def banner(w, h, color='#a22633', trim=GOLD, rod='#3e2731', tail='point', emblem=None, folds='swag',
+           age=0.5, torn=1, seed=1, **_):
+    """Hanging banner: rod with gold knobs, cloth with sagging drape folds (or vertical folds), cylinder shading,
+    gold inner trim, V (point) or swallow tail. age 0..1 = wear spots, faded lower part, gaps in the trim;
+    torn 0..3 = number of small tears in the edges and a ragged tip."""
+    rnd = random.Random(seed)
     im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
     px = im.load()
     x0, x1 = 2, w - 3
@@ -254,38 +270,70 @@ def banner(w, h, color='#a22633', trim=GOLD, rod='#3e2731', tail='point', emblem
     cx = (x0 + x1) / 2
     notch = max(3, cw // 2)
     top = 3
+    sh = art.hue_step                                     # gentle steps: cloth needs soft folds, not ramp jumps
 
     def bottom(x):
         t = abs(x - cx) / (cw / 2)
         return (h - 2 - notch * t) if tail == 'point' else (h - 2 - notch * (1 - t))
 
-    fold = max(4, cw // 4)
+    period = max(8, (h - top) // 6)
+    nf = (h - top) // period + 1
+    amps = [rnd.choice((1.5, 2, 2.5, 3)) for _ in range(nf + 2)]     # every fold sags a little differently
     for x in range(x0, x1 + 1):
+        u = (x - cx) / (cw / 2)
         for y in range(top, int(bottom(x)) + 1):
-            k = (x - x0) % fold
-            c = base(color)
-            if k == fold - 1:
-                c = step(color, -1)
-            elif k == 0 and x > x0:
-                c = step(color, 1)
-            if y < top + 2:                                   # cloth wrapped over the rod
-                c = step(color, -2) if y == top else step(color, -1)
-            px[x, y] = c
-    # gold trim 2px inside the edges
+            if folds == 'swag':                           # soft drape: lit crest, body, shadow under the next crest
+                f0 = (y - top) // period
+                yy = y - top - amps[min(f0, nf)] * (1 - u * u)
+                f, t = int(yy // period), int(yy) % period
+                k = 1 if t == 0 else (-1 if t >= period - 2 else 0)
+            else:
+                f = 0
+                t = (x - x0) % max(4, cw // 4)
+                k = -1 if t == max(4, cw // 4) - 1 else (1 if t == 0 and x > x0 else 0)
+            if x == x0:
+                k += 1                                    # lit left edge, shaded right edge (round cloth)
+            elif x >= x1 - 1:
+                k -= 1
+            if age and folds == 'swag' and f >= nf * (1 - 0.45 * age) and k <= 0:
+                k -= 1                                    # older, dirtier lower folds
+            if y < top + 2:                               # cloth wrapped over the rod
+                k = -2 if y == top else -1
+            px[x, y] = base(color) if k == 0 else sh(color, k)
+    # gold trim 2px inside the edges, with worn gaps
+    gaps = {rnd.randint(top + 6, h - 6) for _ in range(int(age * 3))}
     for x in range(x0 + 2, x1 - 1):
         yb = int(bottom(x)) - 2
         if yb > top + 3:
             px[x, yb] = rgba(trim)
     for y in range(top + 3, h):
         for x in (x0 + 2, x1 - 2):
-            if y <= int(bottom(x)) - 2:
-                px[x, y] = rgba(trim)
+            if y <= int(bottom(x)) - 2 and not any(g <= y < g + 2 for g in gaps if (g + x) % 2 == 0):
+                px[x, y] = rgba(trim) if (y % 9) else sh(trim, -1)
+    # wear spots
+    for _ in range(int(age * cw * h / 120)):
+        wx, wy = rnd.randint(x0 + 3, x1 - 3), rnd.randint(top + 4, int(h * 0.85))
+        if px[wx, wy][3] and px[wx, wy][:3] != rgba(trim)[:3]:
+            px[wx, wy] = sh(color, -1)
+            if wx + 1 <= x1 - 3:
+                px[wx + 1, wy] = sh(color, 1)
     if emblem:
         import sprites
         e = sprites.render(emblem)
         if e.width > cw - 6:
             e = e.resize((cw - 6, max(1, round(e.height * (cw - 6) / e.width))), Image.NEAREST)
         im.alpha_composite(e, (int(cx - e.width / 2 + 0.5), top + 6))
+    # small tears: notches in the side edges + a ragged tip
+    for i in range(int(torn)):
+        side = x0 if (i + seed) % 2 == 0 else x1
+        _tear(px, w, h, side, rnd.randint(top + (h - top) // 3, int(h * 0.75)), rnd.randint(2, 3), rnd)
+    if torn:
+        for _ in range(2):
+            bx = int(cx) + rnd.randint(-cw // 3, cw // 3)
+            by = int(bottom(bx))
+            for yy in range(by - rnd.randint(0, 2), by + 1):
+                if 0 <= yy < h:
+                    px[bx, yy] = (0, 0, 0, 0)
     _outline(im, outline_of(color))
     d = ImageDraw.Draw(im)
     d.rectangle((0, 1, w - 1, 3), fill=rgba(rod))                             # rod with knobs
@@ -382,24 +430,40 @@ def _sprite(rows, pal):
     return im
 
 
-def rubble(w, h, color='#5a6988', leaves='#3e8948', flowers='#f6757a', seed=5, density=1.0, **_):
+def rubble(w, h, color='#5a6988', leaves='#3e8948', flowers='#f6757a', seed=5, density=1.0, shape='band',
+           round_bottom=False, size=(5, 9), **_):
     """Pile of rounded boulders (back rows first, each with its own outline so stones read separately),
-    with leaf sprigs and small flowers tucked between them."""
+    with plants on the surface and small flowers tucked between them.
+    shape: 'band' (even strip), 'left' / 'right' (mound high at that side, tapering away), 'mound' (high in the
+    middle), 'valley' (high at both sides). round_bottom: stones end with rounded bottoms instead of a straight cut
+    - use it for foreground piles drawn `above` other art (e.g. over the inventory panel's corners)."""
     rnd = random.Random(seed)
     im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
     o = outline_of(color)
+
+    def top(x):
+        u = min(1, max(0, x / max(1, w - 1)))
+        k = {'band': 0, 'left': u ** 1.3, 'right': (1 - u) ** 1.3, 'mound': abs(2 * u - 1) ** 1.6,
+             'valley': (1 - abs(2 * u - 1)) ** 1.2}[shape]
+        return 0.72 * h * k
+
     rows = []
     y = 3
     while y < h + 4:
         rows.append(y)
         y += rnd.randint(4, 6)
     spots = []
-    for ri, cy in enumerate(rows):
+    for ri, cy0 in enumerate(rows):
         x = rnd.randint(-4, 3)
         while x < w + 4:
-            rx, ry = rnd.randint(5, 9), rnd.randint(4, 6)
-            if ri == 0 and rnd.random() > 0.75 * density:
-                x += rx * 2
+            rx, ry = rnd.randint(size[0], size[1]), rnd.randint(max(3, size[0] - 2), max(4, size[1] - 3))
+            cy = min(cy0, h - 2 - ry) if round_bottom else cy0      # bottom row rests on the box floor
+            t = top(min(w - 1, max(0, x)))
+            skip = cy - ry < t - 2 or (round_bottom and cy0 > h - 2 - ry + 3)
+            if not skip and cy - ry < t + 3 and rnd.random() > 0.8 * density:
+                skip = True                                         # ragged surface
+            if skip:
+                x += rx + 2
                 continue
             tone = color if rnd.random() < 0.7 else (step(color, -1) if rnd.random() < 0.6 else step(color, 1))
             b = _blob(rx, ry, tone, rnd.randint(0, 9999))
@@ -407,20 +471,20 @@ def rubble(w, h, color='#5a6988', leaves='#3e8948', flowers='#f6757a', seed=5, d
             layer.alpha_composite(b, (1, 1))
             _outline(layer, o)
             im.alpha_composite(layer, (x - rx - 1, cy - ry - 1))
-            spots.append((x, cy - ry))
+            spots.append((x, cy - ry, cy - ry < t + 7))            # (x, stone top, on the surface?)
             x += int(rx * 1.6) + rnd.randint(0, 3)
     if leaves:
         leaf = _outline(_pad(_sprite(LEAF, {'#': step(leaves, -2), 'G': step(leaves, 1), 'g': base(leaves)})),
                         step(leaves, -3) if art._enabled else '#193c3e')
         leaf_r = leaf.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-        for (x, y) in spots:                                       # sprigs: 3 leaves fanned out from a joint
-            if rnd.random() < 0.22 * density:
+        for (x, y, surf) in spots:                                 # sprigs: leaves fanned out from a joint
+            if rnd.random() < (0.45 if surf else 0.08) * density:
                 for dx, dy, lf in ((-5, -1, leaf), (1, -1, leaf_r), (-2, -4, leaf if rnd.random() < 0.5 else leaf_r)):
                     im.alpha_composite(lf, (max(0, min(w - lf.width, x + dx)), max(0, min(h - lf.height, y + dy))))
     if flowers:
         fl = _sprite(FLOWER, {'p': flowers, 'y': '#fee761'})
-        for (x, y) in spots:
-            if rnd.random() < 0.12:
+        for (x, y, surf) in spots:
+            if rnd.random() < (0.25 if surf else 0.05):
                 im.alpha_composite(fl, (max(0, min(w - 3, x + rnd.randint(-3, 3))), max(0, min(h - 3, y + 1))))
     return im
 
@@ -439,6 +503,10 @@ def hay(w, h, color='#feae34', seed=4, **_):
         x = rnd.randint(-8, -2) + row * 7
         while x < w:
             bw, bh = rnd.randint(17, 22), rnd.randint(*bh_rng)
+            if x + bw + 1 > w:                               # never cut a bale at the box edge
+                if w - x < 12:
+                    break
+                bw = w - x - 2
             if row == 0 and rnd.random() < 0.35:
                 x += bw
                 continue
@@ -514,41 +582,81 @@ def flourish(w, h, color=GOLD, gem='#e43b44', **_):
     return im
 
 
-def note(w, h, color='#ead4aa', seal='#a22633', seed=1, **_):
-    """Pinned parchment: uneven edges, folded corner, scribbled lines, wax seal, pin."""
+def note(w, h, color='#e6c896', seal='#a22633', seed=1, age=0.7, torn=1, pin=False, shadow=True, **_):
+    """Old pinned parchment: yellowed with darker edges and stains, faded ink marks, nibbled edges, a torn corner
+    and ragged bottom (torn 0..2), optional wax seal and pin, 1px drop shadow on the wall."""
     rnd = random.Random(seed)
-    im = Image.new('RGBA', (w, h), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    d.rectangle((1, 2, w - 2, h - 2), fill=base(color))
-    d.line((w - 2, 3, w - 2, h - 2), fill=step(color, -1))
-    d.line((2, h - 2, w - 2, h - 2), fill=step(color, -1))
-    for y in range(2, h - 1, 3):                                     # torn edge bites
-        if rnd.random() < 0.3:
-            im.putpixel((1 if rnd.random() < 0.5 else w - 2, y), (0, 0, 0, 0))
-    ink = '#733e39' if art._enabled else '#5a3a28'
-    y = 5
-    while y < h - (6 if seal else 3):
-        lw = rnd.randint(max(2, (w - 6) // 2), w - 6)
-        x = 3
-        while x < 3 + lw:
-            seg = rnd.randint(2, 4)
-            d.line((x, y, min(3 + lw, x + seg - 1), y), fill=rgba(ink))
-            x += seg + 1
-        y += 2 if rnd.random() < 0.7 else 3
-    if seal and h > 10:
-        d.rectangle((w - 7, h - 6, w - 5, h - 4), fill=rgba(seal))
-        d.point((w - 7, h - 6), fill=step(seal, 1))
-    # folded corner (bottom-left)
-    im.putpixel((1, h - 2), (0, 0, 0, 0))
-    im.putpixel((2, h - 2), step(color, -2))
-    im.putpixel((1, h - 3), step(color, -2))
-    out = _outline(im.crop((0, 1, w, h)), '#3e2731', inside=True)
-    full = Image.new('RGBA', (w, h), (0, 0, 0, 0))
-    full.alpha_composite(out, (0, 1))
-    # pin
-    ImageDraw.Draw(full).rectangle((w // 2 - 1, 0, w // 2, 1), fill=rgba('#e43b44'))
-    full.putpixel((w // 2 - 1, 0), rgba('#f6757a'))
-    return full
+    pw, ph = (w - 1, h - 1) if shadow else (w, h)
+    paper = Image.new('RGBA', (pw, ph), (0, 0, 0, 0))
+    px = paper.load()
+    for y in range(ph):
+        for x in range(pw):
+            edge = min(x, y, pw - 1 - x, ph - 1 - y)
+            k = 0
+            if age and edge == 0:
+                k = -1                                    # yellowed, darker rim
+            elif age > 0.5 and edge == 1 and (x * 7 + y * 3 + seed) % 5 == 0:
+                k = -1
+            px[x, y] = base(color) if k == 0 else step(color, k)
+    for _ in range(int(age * 4)):                         # stains
+        sx, sy = rnd.randint(1, pw - 3), rnd.randint(1, ph - 3)
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1), (2, 0)):
+            if rnd.random() < 0.75 and sx + dx < pw - 1 and sy + dy < ph - 1:
+                px[sx + dx, sy + dy] = step(color, -1)
+    ink, faded = rgba('#5c3a2a'), rgba('#8a6440')
+    y = 2
+    while y < ph - (5 if seal else 3):                    # old text: dashes and blots, some faded
+        x = 2 + rnd.randint(0, 1)
+        while x < pw - 3:
+            seg = rnd.choice((1, 2, 2, 3))
+            c = faded if rnd.random() < age * 0.35 else ink
+            for i in range(seg):
+                if x + i < pw - 2:
+                    px[x + i, y] = c
+            if seg == 2 and rnd.random() < 0.3 and y + 1 < ph - 2:
+                px[x, y + 1] = c                          # blot
+            x += seg + rnd.randint(1, 2)
+        y += rnd.choice((2, 3))
+    if seal and ph > 10:
+        sx, sy = pw - 6, ph - 6
+        for dx, dy in ((1, 0), (0, 1), (1, 1), (2, 1), (1, 2)):
+            px[sx + dx, sy + dy] = rgba(seal)
+        px[sx + 1, sy] = step(seal, 1)
+    # torn: nibbled edges, a missing corner, ragged bottom
+    if torn:
+        for _ in range(int(torn * (pw + ph) / 8)):
+            side = rnd.randint(0, 3)
+            if side == 0:
+                px[rnd.randint(1, pw - 2), 0] = (0, 0, 0, 0)
+            elif side == 1:
+                px[0, rnd.randint(1, ph - 2)] = (0, 0, 0, 0)
+            elif side == 2:
+                px[pw - 1, rnd.randint(1, ph - 2)] = (0, 0, 0, 0)
+            else:
+                px[rnd.randint(1, pw - 2), ph - 1] = (0, 0, 0, 0)
+        cx = rnd.choice((0, pw - 1))
+        cy = rnd.choice((0, ph - 1))
+        for k in range(1 + int(torn)):                    # torn-off corner (a small stepped triangle)
+            for j in range(1 + int(torn) - k):
+                xx = cx + k if cx == 0 else cx - k
+                yy = cy + j if cy == 0 else cy - j
+                px[xx, yy] = (0, 0, 0, 0)
+        for x in range(1, pw - 1, 2):
+            if rnd.random() < 0.35 * torn:
+                px[x, ph - 1] = (0, 0, 0, 0)
+    for x, y in ((0, 0), (pw - 1, 0), (0, ph - 1), (pw - 1, ph - 1)):
+        px[x, y] = (0, 0, 0, 0)
+    _outline(paper, '#4e3524', inside=True)               # dark sepia edge, not a coloured outline
+    out = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    if shadow:
+        sh = Image.new('RGBA', paper.size, (0, 0, 0, 0))
+        sh.putalpha(paper.getchannel('A').point(lambda v: 110 if v else 0))
+        out.alpha_composite(sh, (1, 1))
+    out.alpha_composite(paper, (0, 0))
+    if pin:
+        ImageDraw.Draw(out).rectangle((pw // 2 - 1, 0, pw // 2, 1), fill=rgba('#e43b44'))
+        out.putpixel((pw // 2 - 1, 0), rgba('#f6757a'))
+    return out
 
 
 def divider(w, h=7, color=GOLD, gem='#e43b44', **_):

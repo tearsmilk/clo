@@ -46,8 +46,13 @@ Takeaways baked into the builder:
   layers (wall/planks, pillars/posts, braziers/lanterns, banners, rubble/hedge/hay, notes) and functional parts as
   framed `slot_bar`s with real items inside. Quests, rewards and page lists change at runtime, so their items are
   real Nexo items (`nexo_items`), not paint; only the static frame is painted
-- build a scene back to front: wall -> pillars -> fire -> banners -> ornaments/notes -> frames -> piles in front;
-  then let the vanilla-looking inventory panel sit on top of the pile so the scene "grows" around it
+- build a scene back to front: wall -> pillars -> fire -> banners -> ornaments/notes -> frames -> back piles
+  (side mounds behind the banner tips) -> inventory panel -> **foreground piles** (`above`) over the panel's top
+  corners and beside it, so stones/hay/bushes come forward and the window looks embedded in the place
+- **age and wear** make it look hand-made and lived-in: parchment is yellowed with a darker rim, stains, faded ink
+  and nibbled, slightly torn edges; banners have soft sagging folds, a dirtier lower part, gaps in the trim and one
+  or two small tears. "Slightly" is the point - a few pixels, never holes that break the silhouette
+- the middle of the scene stays calm (wall down to the panel) - clutter goes to the sides
 
 ## Polish checklist (what separates "drawn" from "generated")
 

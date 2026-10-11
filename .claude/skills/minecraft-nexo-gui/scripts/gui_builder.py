@@ -822,7 +822,13 @@ def build(spec_path, out):
             draw_slot(tex, x, y + top, inv_th)
     for b in spec.get('buttons', []):
         draw_button(tex, top, b, sdir, th, label_case, spec.get('icon_style'))
+    # foreground layers (piles over the inventory corners...) must not cover the player's slots
+    inv_box = (OX + 7, top + rows * 18 + 30, OX + 7 + 162, top + rows * 18 + 106)
+    before = tex.crop(inv_box).tobytes()
     draw_layers(tex, top, [L for L in spec.get('layers', []) if L.get('above')], sdir, th)
+    if spec.get('draw_player_inventory', True) and tex.crop(inv_box).tobytes() != before:
+        print('warning: an "above" layer paints over the player inventory slots - keep foreground props on the '
+              'panel border (y < 18*rows+30, x < 7 or x > 168)', file=sys.stderr)
 
     title_col = H(spec.get('title_color', th['text']))
     if spec.get('title') and not spec.get('header'):

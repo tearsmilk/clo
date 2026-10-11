@@ -96,16 +96,18 @@ squeezing letters.
 | `planks` | `color`, `seed` | barn wall: vertical boards with a top beam |
 | `pillar` | `color` | stone column with capital and base |
 | `brazier` | `kind` bowl/torch/lantern, `color` | fire bowl, torch or lantern (put it on a pillar/post top) |
-| `banner` | `color`, `trim`, `rod`, `tail` point/swallow, `emblem` (sprite name) | hanging cloth banner on a rod with folds and gold trim |
+| `banner` | `color`, `trim`, `rod`, `tail` point/swallow, `emblem` (sprite name), `folds` swag/vertical, `age` 0..1 (0.5), `torn` 0..3 (1), `seed` | hanging cloth banner on a rod: sagging drape folds, worn lower part, gaps in the gold trim, small tears in the edges and a ragged tip |
 | `ribbon` | `color` | a ribbon anywhere (the header style uses the same drawing) |
-| `rubble` | `color`, `leaves`, `flowers`, `seed`, `density` | pile of outlined boulders with leaf sprigs and flowers; green `color` = bushes/hedge |
+| `rubble` | `color`, `leaves`, `flowers`, `seed`, `density`, `shape` band/left/right/mound/valley, `round_bottom`, `size` [min,max] radius | pile of outlined boulders with plants on the surface; green `color` = bushes/hedge. Side mounds: `left`/`right`; foreground piles: `round_bottom: true` + `"above": true` |
 | `hay` | `color`, `seed` | hay bales with twine - farm scenes |
 | `flourish` | `color`, `gem` | symmetric gold ornament with feathered wings, under a title |
-| `note` | `color`, `seal` (null = none), `seed` | pinned parchment note with scribbles |
+| `note` | `color`, `seal` (null = none), `age` 0..1 (0.7), `torn` 0..2 (1), `pin`, `shadow`, `seed` | old parchment: yellowed rim, stains, faded ink, nibbled edges, a torn-off corner, ragged bottom, 1px shadow on the wall |
 | `divider` | `color`, `gem` | ornamental line with arrow tips, beads and a centre gem |
 | `frame` | `kind`, `inner`, `rim` | empty framed panel (like slot_bar without wells) |
 
-Box layers take `"flip": true` to mirror them. Boxes may have negative x/y or reach past 176 - that is the
+Box layers take `"flip": true` to mirror them. `"above": true` paints a layer after the player-inventory panel and
+the buttons, so props come to the foreground (stones over the panel's corners). The builder warns if such a layer
+touches the player's slots (keep it on the panel border: y < 18*rows + 30, x < 7 or x > 168). Boxes may have negative x/y or reach past 176 - that is the
 `canvas` margin. Order matters: layers are painted in list order (wall first, props, then piles in front).
 
 Button icons can be sprites: `"icon": "sprite:hourglass"`.
