@@ -17,15 +17,18 @@ Every clickable thing covers whole slots; nothing important sits between slots.
 
 ## Measured geometry (texture 256x256, window at (40, 35) in the pack; we use top 34 so 222 px fit)
 - art outside the window: x -29..205, y -30..106 -> spec `canvas: {"left": 40, "right": 40, "top": 34}`
-- awning: roof y -15..5 (x 2..173 at the top, -10..186 at the bottom), valance y 6..14, 7 stripes of 28 px with one
+- awning: roof y -15..5 (x 2..173 at the top, -10..186 at the bottom), valance y 6..15, 7 stripes of 28 px with one
   rounded scallop each, light line on the valance top, dark outline under the scallops
 - sign 70x11 at x 53..122, y -23..-13 (green, gold frame); vine mounds left and right of it on the awning
 - corner supports (left measured, right mirrored) - three timbers, so the eave visibly holds: a rafter that
-  comes out from UNDER the valance (inner end x -6..1, y 16) and arches down to a blunt tip at x -29, y 26..34;
+  comes out from UNDER the valance (inner end x -6..2, y 16) and arches down to a blunt tip at x -29, y 26..34;
   a 45 deg brace from its underside into the wall corner (x -6, y 23 -> x 6, y 35); a corner post from under the
-  awning (x 3..10, y 16) into the wall top with a dark notch (x 8..13, y 28..29). Draw them before the awning,
-  never on top of it, or the bracket looks glued on. The left rafter carries a 14 px vertical sign on one twisted
-  4 px rope (board x -19..-6, y 42..105); vines sit on the right rafter and hang under it
+  awning (x 3..11, y 16) into the wall top with a dark notch (x 8..13, y 28..29). The rafter's inner end touches
+  the post (right edge x 2 at y 16..18, then 1, 0, -1) so the window border only shows as a V below - a straight
+  white gap from the awning down makes the support look broken. Order: valance shadow, supports, awning -
+  never the bracket on top of the awning (looks glued on), never the shadow over the post tops. The left
+  rafter carries a 14 px vertical sign on one twisted 4 px rope (board x -19..-6, y 42..105); vines sit on the
+  right rafter and hang under it
 - wall x 7..168 (the vanilla window border and grey panel stay visible at x 0..6 / 169..175), planks 18 px wide
   with seams at x = 7 + 18c - exactly one plank per slot column, so the grid and the wall agree
 - planks end at staggered heights y 119..125; the client writes "Inventory" at y 128 - keep it clear

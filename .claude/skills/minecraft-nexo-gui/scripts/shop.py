@@ -3,7 +3,7 @@ item list), all parts drawn here. Used by gui_builder.py through `{"type": "shop
 
 Measured layout (6-row chest, texture 256x256, window at (40, 35), canvas 40/40/35/0):
   * striped awning in perspective: top edge y -15 (x 2..173), sloped part to y 5 (x -10..186), valance
-    y 6..14 with one rounded scallop per stripe, 7 stripes (28 px each at the valance)
+    y 6..15 with one rounded scallop per stripe, 7 stripes (28 px each at the valance)
   * green sign 70x11 on the awning (x 53..122, y -23..-13) in a gold frame, flowering vines on both sides
   * corner supports left/right (x -29..-1 / 176..205): rafter from under the awning, 45 deg brace and corner
     post into the wall - drawn before the awning; a hanging vertical sign on the left rafter
@@ -112,8 +112,8 @@ def letters_centered(img, cx, y, text, top, bottom, shadow=None):
 
 # ------------------------------------------------------------------ awning
 
-def awning(img, ox, oy, colors=('red', 'white'), stripes=7, seed=1):
-    """Perspective striped awning over the window at (ox, oy): sloped roof y oy-15..oy+5, valance to oy+14."""
+def awning(img, ox, oy, colors=('red', 'white'), stripes=7, seed=1, shadow=True):
+    """Perspective striped awning over the window at (ox, oy): sloped roof y oy-15..oy+5, valance to oy+15."""
     rnd = random.Random(seed)
     yt, yb = oy - 15, oy + 5
     xl_t, xr_t, xl_b, xr_b = ox + 2, ox + 173, ox - 10, ox + 186
@@ -140,27 +140,33 @@ def awning(img, ox, oy, colors=('red', 'white'), stripes=7, seed=1):
         P = STRIPE[colors[k % 2]]
         sx0 = round(xl_b + k * seg)
         sx1 = round(xl_b + (k + 1) * seg) - 1
-        for y in range(yb + 1, yb + 10):
-            r = y - yb                                       # 1..9
-            inset = max(0, r - 5)                           # rows 6..9 round the bottom corners
+        for y in range(yb + 1, yb + 11):
+            r = y - yb                                       # 1..10 (pack: valance y 6..15)
+            inset = max(0, r - 6)                           # rows 7..10 round the bottom corners
             x0, x1 = sx0 + inset, sx1 - inset
             for x in range(x0, x1 + 1):
                 edge_x = x in (x0, x1)
                 if r == 1:
                     c = P['hi']
-                elif r == 9:
+                elif r == 10:
                     c = P['bot']
                 elif edge_x and (k == 0 and x == x0 or k == stripes - 1 and x == x1 or inset):
                     c = P['bot']
-                elif inset and x in (x0 + 1, x1 - 1) or r == 8:
+                elif inset and x in (x0 + 1, x1 - 1) or r == 9:
                     c = P['rim']
                 else:
                     c = P['dark'] if r > 2 else P['base']
                 _px(img, x, y, c)
-    # shadow on the wall right under the valance (only where there is wall, never in the air)
+    if shadow:
+        awning_shadow(img, ox, oy)
+
+
+def awning_shadow(img, ox, oy):
+    """Shadow of the valance on the wall (only where there is wall, never in the air). The stall draws it before
+    the corner posts so it does not cut their tops off."""
     for x in range(ox + 7, ox + 169):
-        _px(img, x, yb + 10, WOOD['out'])
-        _px(img, x, yb + 11, WOOD['d1'])
+        _px(img, x, oy + 16, WOOD['out'])
+        _px(img, x, oy + 17, WOOD['d1'])
 
 
 # ------------------------------------------------------------------ sign, vines, eaves, hanging sign
@@ -230,59 +236,67 @@ def vines(img, x0, y0, x1, y1, seed=1, flowers=3, hang=0):
 
 
 def eave(img, ox, oy, side='left'):
-    """Corner support of the stall, measured from the pack (window coords, left side; the right one is mirrored):
-      * rafter: comes out from under the awning (inner end x -6..1 at y 16, ends at the window edge x -1 lower
-        down), arches down and out to a blunt tip at x -29, y 26..34; ~9 px thick: outline, 4 rows of light wood,
-        a light streak, dark underside, dark outline
+    """Corner support of the stall, measured from the pack (window coords, left side; the right one is an exact
+    mirror):
+      * rafter: comes out from under the awning (inner end x -6..2 at y 16..18), arches down and out to a blunt
+        tip at x -29, y 26..34; ~9 px thick: outline, 4 rows of light wood, a light streak, dark underside
+      * its inner end meets the corner post: right edge x 2 at y 16..18, then 1, 0, -1 - the vanilla window
+        border only opens below in a V (y 19+), never a straight white gap from the awning down
       * brace: 8 px wide, from the rafter's underside (x -6, y 23) down at 45 deg into the wall corner (x 6, y 35)
-      * corner post: from under the awning (x 3..10, y 16) slanting into the wall top corner (x 8..13, y 27) with
-        a dark notch where it meets the wall
-    Draw it before the awning so the valance hides the upper ends. Returns the rafter's bottom y per x (window
-    coords) so ropes / vines can hang from it."""
+      * corner post: 9 px wide, x 3..11 at y 16..19, then 1 px further right every 2 rows into the wall top
+        corner, a dark notch (x 8..13, y 28..29) where it meets the wall
+    Draw it after the awning shadow and before the awning itself (the valance hides the upper ends).
+    Returns the rafter's bottom y per x (window coords) for ropes / vines."""
     def P(x, y, c):
         _px(img, ox + (x if side == 'left' else 175 - x), oy + y, c)
 
     W = WOOD
+    dk, dk2, rim, top_c = H('#5e3028'), H('#522821'), H('#3d1816'), H('#603620')
+    right = {16: 2, 17: 2, 18: 2, 19: 1, 20: 0, 21: -1, 22: 0}      # inner end, row by row
     bottom = {}
-    for x in range(-29, 2):                               # rafter
+    for x in range(-29, 3):                               # rafter
         top = 16 if x >= -6 else 16 + round(10 * math.sqrt((-6 - x) / 23))
-        if x >= -1:
-            bot = 18                                      # under the valance it only reaches the post
-        else:
-            bot = round(35 - (x + 27) * 8 / 20) if x < -7 else 27 + (x + 7)
+        bot = round(35 - (x + 27) * 8 / 20) if x < -7 else max(22, 27 - (x + 7))   # underside rises into the brace
         bot = max(bot, top + 3)
         bottom[x] = bot
         for y in range(top, bot + 1):
+            edge = right.get(y, -1)
+            if x > edge:
+                continue
             k = y - top
-            if x == -29 or y == top:
-                c = W['m2'] if (y == top and x != -29) else W['out']
-                c = W['out'] if x == -29 else H('#603620')
+            if x == -29:
+                c = W['out']
+            elif y == top:
+                c = top_c
+            elif x == edge:
+                c = rim
+            elif x >= edge - 2 and x > -8:
+                c = dk2 if x >= edge - 2 and x != edge - 2 else dk
             elif y == bot:
-                c = H('#3d1816')
+                c = rim
             elif y == bot - 1:
-                c = H('#522821')
+                c = dk2
             elif k <= 4:
                 c = W['m2'] if x < -10 else W['base']
             elif k == 5:
                 c = W['side']
             else:
-                c = H('#5e3028')
+                c = dk
             P(x, y, c)
     for y in range(23, 36):                               # brace into the wall corner
         xl = -6 + (y - 23)
-        for i, c in enumerate((H('#603620'), H('#603620'), W['m2'], W['side'], H('#5e3028'), H('#5e3028'),
-                               H('#5e3028'), H('#3d1816'))):
+        for i, c in enumerate((top_c, top_c, W['m2'], W['side'], dk, dk, dk, rim)):
             x = xl + i
             if x <= 6:
                 P(x, y, c)
     for y in range(16, 28):                               # corner post into the wall top
-        xl = 3 + round((y - 16) * 0.45)
-        for i, c in enumerate((W['edge'], W['base'], W['base'], W['side'], H('#5e3028'), H('#5e3028'),
-                               H('#5e3028'), W['edge'])):
+        xl = 3 + max(0, y - 18) // 2
+        for i, c in enumerate((W['edge'], W['m2'], W['m2'], W['side'], dk, dk, W['grain'], W['grain'],
+                               W['edge'])):
             P(xl + i, y, c)
     for y in (28, 29):
         for x in range(8, 14):
-            P(x, y, H('#522821'))
+            P(x, y, dk2)
     return bottom
 
 
@@ -572,9 +586,10 @@ def stall(img, ox, oy, sign_text='МАГАЗИН', hanging='ОТКРЫТО', sil
     plank_ends(img, ox, oy, 112, seed=seed)
     if sill_y:
         sill(img, ox, oy, sill_y)
+    awning_shadow(img, ox, oy)                            # shadow first: the corner posts stand in front of it
     bl = eave(img, ox, oy, 'left')                        # before the awning: it comes out from under the valance
-    br = eave(img, ox, oy, 'right')
-    awning(img, ox, oy, awning_colors, seed=seed)
+    eave(img, ox, oy, 'right')
+    awning(img, ox, oy, awning_colors, seed=seed, shadow=False)
     vines(img, ox + 25, oy - 31, ox + 53, oy - 9, seed=seed, flowers=2)
     vines(img, ox + 122, oy - 31, ox + 150, oy - 9, seed=seed + 1, flowers=2)
     vines(img, ox + 183, oy + 11, ox + 199, oy + 21, seed=seed + 2, flowers=2)            # sitting on the right rafter
