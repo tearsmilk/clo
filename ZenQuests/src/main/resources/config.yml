@@ -28,9 +28,12 @@ menu:
     story:    { name: "&dСюжет",        icon: WRITABLE_BOOK }
 
 # ── Подписка Ферма+ ──
-# Подписчик = игрок с правом из permission. Выдавай его донат-плагином или LuckPerms:
-#   /lp user <ник> permission set zenquests.premium true
-#   /lp user <ник> permission settemp zenquests.premium true 30d   (на 30 дней)
+# Подписчик = игрок с правом из permission ИЛИ с подпиской, выданной командой.
+#   Командой (оп / zenquests.admin, работает и для игроков не в сети):
+#     /квесты premium give <ник> [срок]   срок: 30d, 12h, 1w, 1d12h, forever (по умолчанию навсегда)
+#     /квесты premium take <ник>          /квесты premium check <ник>
+#   Правом — донат-плагином или LuckPerms:
+#     /lp user <ник> permission settemp zenquests.premium true 30d
 # Что даёт: доп. квесты (premium-quests в quests.yml, premium: true у сезонных/сюжетных)
 # и бонусные награды (premium-rewards у любого квеста).
 premium:
@@ -73,9 +76,19 @@ messages:
   reloaded: "&aКвесты перезагружены."
   reset: "&aКвесты игрока &f{player}&a сброшены: &f{what}"
   player-not-found: "&cИгрок &f{player}&c не в сети."
-  usage-admin: "&7/квесты reload &8— &fперезагрузить конфиги\n&7/квесты reset <игрок> [daily|weekly|seasonal|story|all] &8— &fсбросить прогресс\n&7/квесты progress <игрок> <тип> [цель|-] [кол-во] &8— &fзасчитать действие"
+  usage-admin: "&7/квесты reload &8— &fперезагрузить конфиги\n&7/квесты reset <игрок> [daily|weekly|seasonal|story|all] &8— &fсбросить прогресс\n&7/квесты progress <игрок> <тип> [цель|-] [кол-во] &8— &fзасчитать действие\n&7/квесты premium give|take|check <игрок> [срок] &8— &fвыдать / забрать / проверить подписку"
   unknown-type: "&cНеизвестный тип: &f{type}"
   progress-added: "&aИгроку &f{player}&a засчитано {type} ×{amount}"
+  player-unknown: "&cИгрок &f{player}&c ещё ни разу не заходил на сервер."
+  premium-given: "&aИгроку &f{player}&a выдана подписка Ферма+ — осталось: &f{time}"
+  premium-received: "&6✦ Тебе выдана подписка Ферма+! &7Осталось: &f{time}"
+  premium-taken: "&aУ игрока &f{player}&a забрана выданная подписка."
+  premium-lost: "&7Твоя подписка Ферма+ закончилась."
+  premium-none: "&7У игрока &f{player}&7 нет выданной подписки."
+  premium-check: "&7Подписка &f{player}&7: осталось &f{time}"
+  premium-check-perm: "&7У &f{player}&7 подписка через право (LuckPerms/донат), командой не управляется."
+  premium-bad-term: "&cНепонятный срок: &f{term}&c. Примеры: 30d, 12h, 1w, 1d12h, forever"
+  premium-forever: "навсегда"
 
 # Тексты в меню
 gui:
@@ -91,3 +104,4 @@ gui:
   story-step: "&7Шаг &f{step}/{total}"
   story-done: "&aЦепочка пройдена"
   empty: "&7Здесь пока пусто"
+  premium-left: "&7Осталось: &f{time}"

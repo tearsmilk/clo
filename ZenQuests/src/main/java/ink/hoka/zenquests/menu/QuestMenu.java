@@ -227,6 +227,11 @@ public final class QuestMenu implements Listener {
         Material m = Material.matchMaterial(plugin.getConfig().getString(base + ".icon", prem ? "GOLDEN_HOE" : "WHEAT"));
         List<String> lore = new ArrayList<>();
         for (String l : plugin.getConfig().getStringList(base + ".lore")) lore.add(l.replace("{premium}", plugin.getConfig().getString("premium.name", "&6Ферма+")));
+        Long until = prem ? plugin.premium().expires(p.getUniqueId()) : null;
+        if (until != null && until != ink.hoka.zenquests.PremiumStore.FOREVER) {
+            lore.add("");
+            lore.add(gui("premium-left", "time", fmt(Duration.ofMillis(until - System.currentTimeMillis()))));
+        }
         return item(m == null ? Material.WHEAT : m, premiumText(base + ".name"), lore, prem);
     }
 
@@ -292,11 +297,5 @@ public final class QuestMenu implements Listener {
         return "&a" + "■".repeat(Math.max(0, filled)) + "&8" + "■".repeat(Math.max(0, 10 - filled));
     }
 
-    private String fmt(Duration d) {
-        long m = Math.max(0, d.toMinutes());
-        long days = m / 1440, hours = (m % 1440) / 60, mins = m % 60;
-        if (days > 0) return days + " д " + hours + " ч";
-        if (hours > 0) return hours + " ч " + mins + " мин";
-        return mins + " мин";
-    }
+    private String fmt(Duration d) { return Text.duration(d); }
 }

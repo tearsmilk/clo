@@ -18,12 +18,15 @@ public final class ZenQuests extends JavaPlugin {
     private QuestRegistry registry;
     private QuestManager quests;
     private QuestMenu menu;
+    private PremiumStore premium;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         if (!new File(getDataFolder(), "quests.yml").exists()) saveResource("quests.yml", false);
 
+        premium = new PremiumStore(this);
+        premium.load();
         registry = new QuestRegistry(this);
         quests = new QuestManager(this);
         menu = new QuestMenu(this);
@@ -61,6 +64,7 @@ public final class ZenQuests extends JavaPlugin {
 
     public void reloadAll() {
         reloadConfig();
+        premium.load();
         loadQuests();
         for (Player p : Bukkit.getOnlinePlayers()) quests.refresh(p, false);
     }
@@ -68,10 +72,11 @@ public final class ZenQuests extends JavaPlugin {
     public QuestRegistry registry() { return registry; }
     public QuestManager quests() { return quests; }
     public QuestMenu menu() { return menu; }
+    public PremiumStore premium() { return premium; }
 
     public void msg(CommandSender to, String key, Object... kv) {
-        String s = getConfig().getString("messages." + key, "");
-        if (s.isEmpty()) return;
+        String s = getConfig().getString("messages." + key);
+        if (s == null || s.isEmpty()) return;
         for (int i = 0; i + 1 < kv.length; i += 2) s = s.replace("{" + kv[i] + "}", String.valueOf(kv[i + 1]));
         String prefix = getConfig().getString("messages.prefix", "");
         for (String line : s.split("\n")) to.sendMessage(Text.parse(prefix + line));

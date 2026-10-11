@@ -72,7 +72,8 @@ public final class QuestManager {
     // ── подписка Ферма+ ──
 
     public boolean isPremium(Player p) {
-        return p.hasPermission(plugin.getConfig().getString("premium.permission", "zenquests.premium"));
+        return p.hasPermission(plugin.getConfig().getString("premium.permission", "zenquests.premium"))
+                || plugin.premium().active(p.getUniqueId());
     }
 
     /** Видит ли игрок квест: премиум-квесты — только с подпиской. */

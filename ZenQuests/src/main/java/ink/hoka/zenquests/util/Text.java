@@ -115,6 +115,15 @@ public final class Text {
         };
     }
 
+    /** Оставшееся время: «3 д 4 ч», «5 ч 10 мин», «7 мин». */
+    public static String duration(java.time.Duration d) {
+        long m = Math.max(0, d.toMinutes());
+        long days = m / 1440, hours = (m % 1440) / 60, mins = m % 60;
+        if (days > 0) return days + " д " + hours + " ч";
+        if (hours > 0) return hours + " ч " + mins + " мин";
+        return mins + " мин";
+    }
+
     /** Красивое число: целое без дробной части, иначе до 2 знаков без хвостовых нулей. */
     public static String num(double d) {
         if (Double.isNaN(d) || Double.isInfinite(d)) return "0";

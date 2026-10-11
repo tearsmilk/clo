@@ -12,7 +12,7 @@ chmod +x gradlew      # один раз, если после распаковк�
 ./gradlew build
 ```
 
-Готовый плагин: `build/libs/ZenQuests-1.0.0.jar` → кинуть в `plugins/` сервера.
+Готовый плагин: `build/libs/ZenQuests-1.1.0.jar` → кинуть в `plugins/` сервера.
 В VSCode: открыть папку `ZenQuests`, поставить Extension Pack for Java + Gradle for Java
 (предложит сам), сборка — вкладка Gradle → `build → build`.
 Байткод собирается под Java 21 (минимум Paper 1.21.11), работает и на Java 25.
@@ -34,7 +34,17 @@ chmod +x gradlew      # один раз, если после распаковк�
 ## Подписка Ферма+
 
 Подписчик — игрок с правом `zenquests.premium` (имя права меняется в `config.yml → premium.permission`).
-Выдавать донат-плагином или LuckPerms:
+Выдавать командой (для опов / `zenquests.admin`, работает и для игроков не в сети, если они уже заходили):
+
+```
+/квесты premium give <ник> [срок]   # 30d, 12h, 1w, 1d12h, forever (по умолчанию — навсегда); продлевает текущую
+/квесты premium take <ник>          # забрать выданную командой подписку
+/квесты premium check <ник>         # сколько осталось
+```
+
+Выданные командой подписки хранятся в `plugins/ZenQuests/premium.yml`. Срок виден игроку в меню.
+
+Или донат-плагином / LuckPerms (право работает вместе с командой):
 
 ```
 /lp user <ник> permission settemp zenquests.premium true 30d
