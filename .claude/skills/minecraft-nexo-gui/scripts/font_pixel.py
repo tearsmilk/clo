@@ -68,7 +68,52 @@ def _rasterize(font_big, ch, k, threshold, base_big, height):
     small = big.resize((W, height), Image.BOX)              # mean of each k x k block = coverage
     px = small.load()
     on = {(x, y) for y in range(height) for x in range(W) if px[x, y] >= threshold * 255}
+    _rasterize.ink = {(x, y) for y in range(height) for x in range(W) if px[x, y] > 0}
     return on, max(1, round(adv / k))
+
+
+def repair(on, ink):
+    """Hairlines thinner than the threshold break a glyph apart (Lion King's U, fraktur strokes): while the
+    glyph has more pieces than its ink, join two pieces by the shortest 1 px path through inked pixels."""
+    on = set(on)
+    target = components(ink)
+    for _ in range(12):
+        if components(on) <= target:
+            break
+        start = set()                                   # one piece, grown through the ink to the nearest other
+        todo = [next(iter(on))]
+        while todo:
+            p = todo.pop()
+            if p in start or p not in on:
+                continue
+            start.add(p)
+            todo += [(p[0] + dx, p[1] + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)]
+        prev, frontier, hit = {p: None for p in start}, list(start), None
+        while frontier and not hit:
+            nxt = []
+            for p in frontier:
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        q = (p[0] + dx, p[1] + dy)
+                        if q in prev or (q not in ink and q not in on):
+                            continue
+                        prev[q] = p
+                        if q in on:
+                            hit = q
+                            break
+                        nxt.append(q)
+                    if hit:
+                        break
+                if hit:
+                    break
+            frontier = nxt
+        if not hit:
+            break
+        p = prev[hit]
+        while p is not None and p not in start:
+            on.add(p)
+            p = prev[p]
+    return on
 
 
 def clean(on, smooth=False):
@@ -175,6 +220,10 @@ def _tail(G, rows=3):
     return {(x1, y1 + 1), (x1 - 1, y1 + 1), (x1, y1 + 2), (x1 - 1, y1 + 2)} | ({(x1, y1 + 3)} if rows > 2 else set())
 
 
+RECIPE_SOURCES = {'Г': 'F', 'П': 'H', 'Д': 'H', 'Л': 'H', 'М': 'H', 'Ь': 'B', 'Б': 'B', 'Ъ': 'B', 'Ы': 'BI',
+                  'Ж': 'K', 'Ш': 'U', 'Щ': 'U', 'Ц': 'U', 'Ч': 'U', 'Ф': 'P', 'Ю': 'IO'}
+
+
 def cyrillic_from_parts(g):
     """g: char -> pixel set of the Latin glyphs at one size. Returns char -> pixel set for the missing capitals."""
     out = {}
@@ -250,7 +299,8 @@ def cyrillic_from_parts(g):
             arms = _norm({(x, y) for x, y in K if x > sr})
             stem = {(x, y) for x, y in K if x <= sr}
             aw = max(x for x, _ in arms)
-            out['Ж'] = {(aw - x, y) for x, y in arms} | _shift(stem, aw + 1) | _shift(arms, aw + 2 + sr)
+            sl = _stem_left(K)
+            out['Ж'] = {(aw - x, y) for x, y in arms} | _shift(stem, aw + 1 - sl) | _shift(arms, aw + 2 + sr - sl)
     except (ValueError, IndexError, KeyError):   # a part not found at this size: skip the letter
         pass
     try:
@@ -293,7 +343,66 @@ def cyrillic_from_parts(g):
     return out
 
 
-def build(font_path, cap=16, threshold=0.45, k=8, chars=LATIN + CYR_UP + CYR_LOW, _small=True, method='coverage'):
+def cyrillic_fallback(g):
+    """Plainer recipes for when the U-based ones fall apart (serif / display fonts whose U has a thin right
+    stem or a round bottom): Ш / Щ = three I stems on L's bottom bar (+ tail), Ц = two stems on the bar + tail."""
+    out = {}
+    g = {c: _norm(v) for c, v in g.items() if v}
+    if not all(c in g for c in 'ILH'):
+        return out
+    I_, L = g['I'], g['L']
+    iw = max(x for x, _ in I_) + 1
+    _, ly0, lx1, ly1 = _box(L)
+    lsr = _stem_right(L)
+    r = _rows(L)
+    bar_rows = [y for y in r if r[y][-1] > lsr + 2 and y > (ly0 + ly1) // 2]
+    if not bar_rows:
+        return out
+    gap = max(3, _right_stem_left(g['H']) - _stem_right(g['H']) - 1)
+    def stems(n):
+        G = set()
+        for i in range(n):
+            G |= _shift(I_, i * (iw + gap))
+        x_end = (n - 1) * (iw + gap) + iw - 1
+        G |= {(x, y) for y in bar_rows for x in range(0, x_end + 1)}
+        return G
+    out['Ш'] = stems(3)
+    out['Щ'] = out['Ш'] | _tail(out['Ш'])
+    out['Ц'] = stems(2) | _tail(stems(2))
+    return out
+
+
+def components(G):
+    """Number of 8-connected pieces of a glyph (a hairline that broke = more pieces)."""
+    G, n = set(G), 0
+    while G:
+        n += 1
+        todo = [G.pop()]
+        while todo:
+            x, y = todo.pop()
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    q = (x + dx, y + dy)
+                    if q in G:
+                        G.remove(q)
+                        todo.append(q)
+    return n
+
+
+def _auto_threshold(font_big, k, base_big, height, test='HUONAVnmou'):
+    """Highest coverage threshold that keeps the test letters in one piece - fonts with hairlines (serif
+    display, fraktur) need a lower one, or thin strokes break into dots."""
+    test = [ch for ch in test if _has(font_big, ch)]
+    true = {ch: components(clean(_rasterize(font_big, ch, k, 0.12, base_big, height)[0])) for ch in test}
+    for t in (0.45, 0.38, 0.32, 0.26, 0.2):              # pieces the design really has (inner curls,
+        ok = all(components(clean(_rasterize(font_big, ch, k, t, base_big, height)[0])) <= true[ch]
+                 for ch in test)                          # dots) are counted at a very low threshold
+        if ok:
+            return t
+    return 0.2
+
+
+def build(font_path, cap=16, threshold='auto', k=8, chars=LATIN + CYR_UP + CYR_LOW, _small=True, method='coverage'):
     probe = ImageFont.truetype(font_path, 400)
     hb = probe.getbbox('H', anchor='ls')
     cap_ratio = (hb[3] - hb[1]) / 400                        # cap height / font size
@@ -306,6 +415,8 @@ def build(font_path, cap=16, threshold=0.45, k=8, chars=LATIN + CYR_UP + CYR_LOW
     base_big = above * k
     xb = font_big.getbbox('x', anchor='ls')
     xh = round((xb[3] - xb[1]) / k)
+    if threshold == 'auto':
+        threshold = _auto_threshold(font_big, k, base_big, height)
     glyphs, missing, built = {}, [], []
     for ch in chars:
         if _has(font_big, ch):
@@ -313,6 +424,9 @@ def build(font_path, cap=16, threshold=0.45, k=8, chars=LATIN + CYR_UP + CYR_LOW
                 on, adv = _rasterize_mono(font_small, ch, above, height)
             else:
                 on, adv = _rasterize(font_big, ch, k, threshold, base_big, height)
+                on = repair(clean(on, smooth=cap >= 18), _rasterize.ink)
+                glyphs[ch] = (on, adv)
+                continue
             glyphs[ch] = (clean(on, smooth=cap >= 18), adv)
     for ch, (rule, src) in FROM_LATIN.items():
         if ch in glyphs or ch not in chars or src not in glyphs:
@@ -333,12 +447,22 @@ def build(font_path, cap=16, threshold=0.45, k=8, chars=LATIN + CYR_UP + CYR_LOW
             on |= {(mid - 2, top - 3), (mid - 1, top - 2), (mid, top - 2), (mid + 1, top - 3)}
         glyphs[ch] = (on, adv)
         built.append(ch)
+    rejected = []
     for ch, on in cyrillic_from_parts({c: v[0] for c, v in glyphs.items()}).items():
         if ch in chars and ch not in glyphs:
+            # quality gate: a composed letter must hold together (Ы is two pieces by design) - on ornate
+            # fonts (fraktur) the parts are not stems and bars and the recipe makes debris
+            if components(on) > sum(components(glyphs[c][0]) for c in RECIPE_SOURCES.get(ch, '') if c in glyphs):
+                fb = cyrillic_fallback({c: v[0] for c, v in glyphs.items()}).get(ch)
+                if fb and components(fb) <= 2:
+                    on = fb                             # the plainer recipe holds together
+                else:
+                    rejected.append(ch)
+                    continue
             glyphs[ch] = (on, max(x for x, _ in on) + 2)
             built.append(ch)
     if _small and any(c in chars for c in CYR_LOW):     # lowercase Cyrillic = the capitals drawn at x-height
-        sm = build(font_path, cap=xh, threshold=threshold, k=k, chars=LATIN + CYR_UP, _small=False, method=method)
+        sm = build(font_path, cap=xh, threshold='auto', k=k, chars=LATIN + CYR_UP, _small=False, method=method)
         dy = above - sm['baseline']
         for up, low in zip(CYR_UP, CYR_LOW):
             if low in glyphs or low not in chars or up not in sm['glyphs']:
@@ -352,7 +476,7 @@ def build(font_path, cap=16, threshold=0.45, k=8, chars=LATIN + CYR_UP + CYR_LOW
             built.append(low)
     missing = [c for c in chars if c not in glyphs]
     return {'glyphs': glyphs, 'height': height, 'baseline': above, 'cap': cap, 'x_height': xh,
-            'built': built, 'missing': missing}
+            'built': built, 'missing': missing, 'threshold': threshold, 'rejected': rejected}
 
 
 def save(font, out, name='title', ns='hokaria'):
@@ -527,10 +651,11 @@ if __name__ == '__main__':
             method = 'coverage' if method == 'auto' else method      # coverage read better at 16 too
             f = fit_cell(a[0], cell, method)
             sq = save_cells(f, a[1], opt('--name', 'title'), opt('--ns', 'hokaria'))
-            print(f"cell {cell}: cap {f['cap']}, method {method}, glyphs {len(f['glyphs'])}, "
-                  f"missing {''.join(f['missing']) or '-'}, narrowed to fit {''.join(sq) or '-'}")
+            print(f"cell {cell}: cap {f['cap']}, threshold {f['threshold']}, glyphs {len(f['glyphs'])}, "
+                  f"missing {''.join(f['missing']) or '-'} (recipes fell apart: {''.join(f['rejected']) or '-'}), "
+                  f"narrowed to fit {''.join(sq) or '-'}")
     else:
-        f = build(a[0], cap=opt('--cap', 16), threshold=opt('--threshold', 0.45))
+        f = build(a[0], cap=opt('--cap', 16), threshold=opt('--threshold', 'auto') if '--threshold' not in a else float(a[a.index('--threshold') + 1]))
         save(f, a[1], opt('--name', 'title'), opt('--ns', 'hokaria'))
         preview(a[1], os.path.join(a[1], 'preview.png'))
         print(f"glyphs: {len(f['glyphs'])}, built from Latin: {''.join(f['built'])}")

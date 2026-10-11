@@ -530,9 +530,10 @@ def draw_layers(img, oy, layers, sdir, th):
             import lettering
             ramp = kitchen._r5(L['color']) if L.get('color') else lettering.GOTHIC
             st = L.get('style', 'volume')
-            if st in ('arcade', 'bands', 'maze'):         # the user's font references (lettering.md)
+            if st in ('arcade', 'bands', 'maze', 'bubble'):   # the user's font references (lettering.md)
                 fn = getattr(lettering, st)
-                im = fn(L['text'], L.get('palette', {'arcade': 'gold', 'bands': 'sunset', 'maze': 'snow'}[st]))
+                im = fn(L['text'], L.get('palette', {'arcade': 'gold', 'bands': 'sunset', 'maze': 'snow',
+                                                     'bubble': 'candy'}[st]))
                 img.alpha_composite(im, (OX + L['x'] - im.width // 2, oy + L['y']))
                 continue
             if st == 'volume':                             # clean 3D block letters (default)

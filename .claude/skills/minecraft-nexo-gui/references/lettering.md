@@ -88,6 +88,14 @@ When the user brings a TTF / OTF (e.g. a blackletter): `python3 scripts/font_pix
   glints) and make the BACK dark - the whole extrusion in the darkest tone, only a thin shadow-tone edge on
   the first layer of the right faces. A mid-tone back melts into the face ("всё сливается"); a sparse, plain
   version (wide spacing, one-tone face) was tried and judged worse than the old one with a dark back.
+- **Hairlines and ornate fonts** (Lion King, Berlin Fraktur): the coverage threshold is chosen per font
+  (highest of 0.45 ... 0.2 that keeps H U O N A V n m o u in as many pieces as the design really has -
+  counted at threshold 0.12, so an inner curl is not a "break"); strokes thinner than any threshold are
+  re-joined by the shortest 1 px path through inked pixels (`repair`). Composed Cyrillic passes a quality
+  gate: no more pieces than its source letters; if the U-based Ш / Щ / Ц fall apart (thin right stem, round
+  bottom) the fallback builds them from three I stems on L's bottom bar. On a fraktur the capitals are not
+  stems and bars - the recipes fail the gate and the letters are reported missing: they need hand drawing
+  (lookalikes А В Е К Н О Р С Т Х still work).
 - **Licences**: read the font's README. "Personal use only" fonts cannot go on a server with a shop or
   donations without the commercial licence. Never commit a third-party font or its converted glyphs into
   the skill or the repo - they go only into the user's own pack.
@@ -95,9 +103,11 @@ When the user brings a TTF / OTF (e.g. a blackletter): `python3 scripts/font_pix
 ## Title styles from the user's font references (`lettering.arcade / bands / maze`)
 Measured on five references the user sent (arcade "GAME", a pink-purple banded alphabet, a classic small
 bitmap font, a maze-like block font). Our glyphs, their methods; all work with Cyrillic.
-- **Base for chunky styles**: the bold small pixfont (2-column stems, 1-row bars) scaled x2 - 4 px stems,
-  2 px bars, corners rounded 1 px, 4 px between letters. Growing slab letters instead closed the counters
-  of G, A, M and made the words unreadable.
+- **Base for chunky styles** (`bold_units`): every unit of the 5x7 pixfont glyph also fills the unit to
+  its right and the one below, unless that closes a 1-unit gap - stems, bars AND diagonals 2 units thick
+  (~1/4 of the letter height like the arcade references), Ж / Ш / М keep their slots; scaled x2 = 4 px
+  strokes, corners rounded. Two earlier bases failed: growing slab letters closed the counters of G, A, M,
+  and the pixfont "bold" (only stems doubled) left Х, К, Ж, З thin next to fat stems.
 - **arcade** (`ARCADE` palettes gold, sky, mint, ruby): light face, the bottom quarter in a darker warmer
   band, the same dark tone as a 1 px inner shadow on the row under every counter / overhang, a 1 px
   near-black outline that is 1 px thicker at the bottom (the letter stands on it).
@@ -111,7 +121,11 @@ bitmap font, a maze-like block font). Our glyphs, their methods; all work with C
   opening if the area is open to the edge (slots), along its long side if it is a counter; a lone empty
   corner unit is a light chamfer pixel; an area open on two sides gets the dead-area tone. Decorative:
   short words only, it is the hardest style to read.
-- `px=2..3` (arcade / bands) upscales AFTER styling - big "art pixels" like the references; at 1:1 in a GUI
+- **bubble** (`BUBBLE` ink, candy, grape, lime, sky; the user's black bubble font): the same base rounded
+  twice (soft blobs, small counters), one fill tone, the lower-right edge one step darker, a white shine
+  (an L of 3 px) on the top-left of each letter, outline optional (none on white like the reference, one on
+  a dark GUI).
+- `px=2..3` (arcade / bands / bubble) upscales AFTER styling - big "art pixels" like the references; at 1:1 in a GUI
   keep px=1.
-- In a spec: `{"type": "lettering", "style": "arcade" | "bands" | "maze", "palette": "gold", "text": ...,
+- In a spec: `{"type": "lettering", "style": "arcade" | "bands" | "maze" | "bubble", "palette": "gold", "text": ...,
   "x": 88, "y": -20}`. Chart of all styles: `python3 -c "import lettering; lettering.styles_chart('out.png')"`.

@@ -252,16 +252,50 @@ def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, p
     return img
 
 
+def bold_units(text, gap=2):
+    """Uniformly bold letters on the 5x7 pixfont grid: every glyph unit also fills the unit to its right and
+    the one below - unless that would close a 1-unit gap (Ж, Ш, М keep their slots, Е keeps its bars apart).
+    Stems AND bars AND diagonals become 2 units thick (the arcade references: uniform strokes, ~1/4 of the
+    letter height). Returns a pixel set in units; scale it yourself."""
+    from pixfont import _glyph
+    out, x0 = set(), 0
+    for ch in text:
+        rows = _glyph(ch)
+        fg = {(c, r) for r, row in enumerate(rows) for c, v in enumerate(row) if v == '#'}
+        if not fg:
+            x0 += 4
+            continue
+        B = set(fg)
+        for c, r in fg:
+            if (c + 2, r) not in fg:
+                B.add((c + 1, r))
+        for c, r in list(B):
+            if (c, r + 2) not in B and (c, r + 2) not in fg:
+                B.add((c, r + 1))
+        w = max(c for c, _ in B) + 1
+        out |= {(x0 + c, r) for c, r in B}
+        x0 += w + gap
+    return out
+
+
+def _scaled(units, scale):
+    return {(x * scale + i, y * scale + j) for x, y in units for i in range(scale) for j in range(scale)}
+
+
+def _round(M, times=1):
+    for _ in range(times):
+        cut = {(x, y) for (x, y) in M for dx, dy in ((-1, -1), (1, -1), (-1, 1), (1, 1))
+               if (x + dx, y) not in M and (x, y + dy) not in M and (x + dx, y + dy) not in M
+               and (x - dx, y) in M and (x, y - dy) in M and (x - dx, y - dy) in M}
+        M = M - cut
+    return M
+
+
 def chunky(text, scale=2, weight=None, gap=None):
-    """Chunky letter mask (the base of the arcade / bands styles): the bold small pixfont capitals (2-column
-    stems, 1-row bars) scaled x`scale` - 4 px stems, 2 px bars at scale 2 - with convex corners rounded by
-    1 px. Growing slab letters instead closed the counters of G, A, M (unreadable). Returns a pixel set."""
-    from pixfont import _round_corners
-    m = _slab_mask(text, 1, gap if gap is not None else 2, 'bold')
-    m = m.resize((m.width * scale, m.height * scale), Image.NEAREST)
-    m = _round_corners(m)
-    mp = m.load()
-    return {(x, y) for y in range(m.height) for x in range(m.width) if mp[x, y]}
+    """Chunky letter mask (base of the arcade / bands / bubble styles): uniformly bold units (bold_units)
+    scaled x`scale` - 4 px strokes at scale 2, diagonals included - with convex corners rounded by 1 px.
+    (Doubling only the stems left Х, К, Ж thin; growing slab letters closed the counters.)"""
+    return _round(_scaled(bold_units(text, gap if gap is not None else 2), scale), 1)
 
 
 def _canvas(pts, pad=1):
@@ -401,6 +435,40 @@ def maze(text, palette='snow', k=3, gutter=2):
                 for y in range(ya, yb + 1):
                     img.putpixel((xx, y), groove)
     return img
+
+
+BUBBLE = {'ink': ('#16141c', '#000000', '#ffffff', None),           # face, lower-right edge, glint, outline
+          'candy': ('#ff7ab0', '#d0407a', '#ffffff', '#3a0e22'),
+          'grape': ('#9a6ae0', '#6a3ab0', '#f4ecff', '#1e0e38'),
+          'lime': ('#9ae04a', '#4aa030', '#f8ffe0', '#0e2a0e'),
+          'sky': ('#5ab8ff', '#2a70d0', '#ffffff', '#0a1e3a')}
+
+
+def bubble(text, palette='candy', scale=2, gap=None, px=1):
+    """Bubble letters (the user's black bubble font): the chunky base with every convex corner rounded twice
+    (soft blobs), one fill tone, the lower-right edge one step darker, a white shine on the top-left of each
+    letter (an L of three pixels set 1 px in from the corner), an optional outline (None = none, like the
+    reference on white; use one on a dark GUI)."""
+    from pixfont import _round_corners
+    face, edge, glint, out = [(_hex(c) if c else None) for c in (BUBBLE.get(palette, palette)
+                                                                if isinstance(palette, str) else palette)]
+    M = {(x + 1, y + 1) for x, y in _round(_scaled(bold_units(text, gap if gap is not None else 2), scale), 2)}
+    ring = {(x + dx, y + dy) for x, y in M for dx, dy in N8} - M
+    img = _canvas(M | ring)
+    if out:
+        for p in ring:
+            img.putpixel(p, out)
+    for (x, y) in M:
+        lower_right = (x + 1, y) not in M or (x, y + 1) not in M
+        img.putpixel((x, y), edge if lower_right else face)
+    for (x, y) in sorted(M, key=lambda p: (p[0] + p[1])):  # shine on the top-left of each letter
+        if (x - 1, y) not in M and (x, y - 1) not in M and (x + 2, y + 2) in M and (x + 1, y + 1) in M:
+            if all(img.getpixel(q) != glint for q in ((x + dx, y + dy) for dx in range(-4, 5) for dy in range(-4, 5))
+                   if 0 <= q[0] < img.width and 0 <= q[1] < img.height):
+                for q in ((x + 1, y + 1), (x + 2, y + 1), (x + 1, y + 2)):
+                    if q in M:
+                        img.putpixel(q, glint)
+    return img.resize((img.width * px, img.height * px), Image.NEAREST) if px > 1 else img
 
 
 def styles_chart(path, k=3):

@@ -101,9 +101,9 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
   For a show-piece title (server name, big header) draw VOLUMETRIC letters: `scripts/lettering.py volume`
   (chunky 3D block letters - extrusion shaded by side direction, bevel, flat two-band face, one outline),
   layer `{"type": "lettering", "text": ..., "color": "#hex"}`; the tutorial's gothic 5-step look
-  (`style: "tutorial"`) only for horror themes; `style: "arcade" | "bands" | "maze"` - chunky arcade letters
-  with an outline and a bottom band, three hard colour bands with a rim light, block letters with 1 px
-  grooves (from the user's font references) - `references/lettering.md`.
+  (`style: "tutorial"`) only for horror themes; `style: "arcade" | "bands" | "maze" | "bubble"` - chunky arcade
+  letters with an outline and a bottom band, three hard colour bands with a rim light, block letters with 1 px
+  grooves, soft bubble letters with a shine (from the user's font references) - `references/lettering.md`.
   A font file from the user (TTF / OTF) becomes a clean pixel font with the missing Cyrillic drawn from its
   own Latin parts: `scripts/font_pixel.py FONT OUT --cap 16` (+ bitmap provider for the pack; check the
   licence; never commit the font or its glyphs). Pixel text at x2 or bolder needs wider gaps - the builder handles that; do not
