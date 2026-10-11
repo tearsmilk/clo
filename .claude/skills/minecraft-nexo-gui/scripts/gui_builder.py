@@ -36,6 +36,7 @@ import pixelstyle  # noqa: E402
 import sprites  # noqa: E402
 import art  # noqa: E402
 import props  # noqa: E402
+import royal  # noqa: E402
 
 # x of the window's left edge inside the texture (> 0 when scene art sticks out on the left: spec canvas.left)
 OX = 0
@@ -166,9 +167,11 @@ def draw_framed_panel(img, box, th):
 
 
 def draw_royal_panel(img, box, th):
-    """Dark slate body: near-black outline with cut corners, a thin gold line inside it, light top / mid left /
-    dark bottom-right bevel, a few etched lines along the top."""
+    """Royal theme. A whole chest window uses royal.panel (measured: outline outside the window, gold line,
+    grooves, 2px bottom outline); any other box gets a small slate plate with the same edge recipe."""
     bx, by, W, Hh = box
+    if W == 176 and (Hh - 114) % 18 == 0 and 1 <= (Hh - 114) // 18 <= 6:
+        return royal.panel(img, bx, by, (Hh - 114) // 18)
     d = ImageDraw.Draw(img)
     o, g, body = H(th['outline']), H(th['gold_dk']), H(th['body'])
     d.rectangle((bx, by, bx + W - 1, by + Hh - 1), fill=o)
@@ -236,6 +239,8 @@ def draw_panel(img, box, th, seed=7):
 def draw_rim_slot(img, x0, y0, th):
     """Raised rim around a recessed well (royal kits): light top/right rim, mid left, dark bottom rim, inner
     shadow top/left, lit inner bottom/right, light line above and dark gap below each slot."""
+    if th.get('frame_style') == 'royal':
+        return royal.rim_slot(img, x0, y0)
     d = ImageDraw.Draw(img)
     k, dk, lt = H(th['slot_in']), H(th['slot_dk']), H(th['slot_lt'])
     hi, mid, lo = H(th['rim_hi']), H(th['rim_mid']), H(th['rim_lo'])
@@ -716,7 +721,7 @@ def header_top(spec):
     if hd.get('style') == 'lettering':
         return max(0, -hd.get('y', 3))
     if hd.get('style') == 'bracket_tab':
-        return hd.get('rise', 10) + 4
+        return -hd.get('top', -10) + 2
     if hd.get('size', 1) == 2:
         return 10
     return 8 if hd.get('style') == 'tab' else 0
@@ -746,30 +751,24 @@ def draw_header(img, oy, spec, th):
         draw_text(img, OX + ((176 - tw) // 2 if hd.get('center', True) else 8), oy + 5, text,
                   H(hd.get('text_color', th['text'])), scale=sc)
         return
-    if style == 'bracket_tab':           # dark plate straddling the top edge, gold brackets on its corners
+    if style == 'bracket_tab':           # royal tab across the top edge with '[' ']' gold brackets
         mat = hd.get('material', 'steel')
-        sc = hd.get('size', 2)
-        if hd.get('font', 'material') == 'material':
-            tw, tht = material_text_size(text, sc)
-            tht = 7 * sc + 3
-        else:
-            tw, tht = text_width(text, scale=sc), 7 * sc
-        pw = hd.get('width', tw + 28)
-        ph = hd.get('height', tht + 10)
-        rise = hd.get('rise', 10)
-        x0, y0 = OX + (176 - pw) // 2, oy - rise
-        rt = dict(th) if 'rim_hi' in th else dict(THEMES['royal'])
-        art.drop_shadow(img, (x0, y0, x0 + pw - 1, y0 + ph - 1))
-        draw_royal_panel(img, (x0, y0, pw, ph), dict(rt, gold_dk=rt.get('gold_dk', '#b55a41')))
-        b = max(8, min(14, ph - 4))
-        for corner, (bx, by) in (('tl', (x0 - 2, y0 - 2)), ('tr', (x0 + pw - b + 2, y0 - 2)),
-                                 ('bl', (x0 - 2, y0 + ph - b + 2)), ('br', (x0 + pw - b + 2, y0 + ph - b + 2))):
-            img.alpha_composite(props.bracket(b, b, corner, t=4), (bx, by))
-        tx, ty = x0 + (pw - tw) // 2, y0 + (ph - tht) // 2
-        if hd.get('font', 'material') == 'material':
-            draw_material_text(img, tx, ty, text, mat, scale=sc)
-        else:
-            draw_text(img, tx, ty, text, H(hd.get('text_color', '#e8eef5')), scale=sc, shadow=H(rt['outline']))
+        sc = hd.get('size', 1)
+        tw = material_text_size(text, sc)[0] if text and hd.get('font', 'material') == 'material' else \
+            (text_width(text, scale=sc) if text else 0)
+        pw = hd.get('width', max(96, tw + 24))
+        ph = hd.get('height', 20 if sc == 1 else 26)
+        top_y = hd.get('top', -10 if ph <= 20 else -13)
+        royal.tab(img, OX, oy, (176 - pw) // 2, pw, top_y, ph)
+        if text:
+            tx = OX + (176 - pw) // 2 + (pw - tw) // 2
+            body_top, body_h = oy + top_y + 5, ph - 10
+            if hd.get('font', 'material') == 'material':
+                ty = body_top + (body_h - (7 * sc + 3)) // 2
+                draw_material_text(img, tx, ty, text, mat, scale=sc)
+            else:
+                ty = body_top + (body_h - 7 * sc) // 2
+                draw_text(img, tx, ty, text, H(hd.get('text_color', '#e8eef5')), scale=sc, shadow=H('#1c1b2b'))
         return
     if style == 'ribbon':                # cloth ribbon with folded, V-cut tails (quest boards, castle scenes)
         sc = hd.get('size', 1)
@@ -877,6 +876,12 @@ def build(spec_path, out):
         inv_th = dict(THEMES[spec['inventory_panel']])
     if spec.get('container_panel', True):
         draw_panel(tex, (OX, top, W, Hh), th)
+    ro = spec.get('royal_ornaments')
+    if ro:                               # banners, rails, crystals, streamers, key ornaments (measured kit)
+        ro = ro if isinstance(ro, dict) else {}
+        royal.ornaments(tex, OX, top, rows, banners=ro.get('banners', True), emblem=ro.get('emblem', True),
+                        rails=ro.get('rails', True), crystals=ro.get('crystals', True),
+                        meanders=ro.get('meanders', True))
 
     used = set()
     for b in spec.get('buttons', []):
@@ -916,7 +921,10 @@ def build(spec_path, out):
             x, y = hotbar_xy(c, rows)
             draw_slot(tex, x, y + top, inv_th)
     sd = spec.get('section_divider')
-    if sd:                               # gold bar + gem between the container rows and the player inventory
+    royal_kit = th.get('frame_style') == 'royal'
+    if sd and royal_kit:
+        royal.divider(tex, OX, top, rows, gem=(sd.get('gem', True) if isinstance(sd, dict) else True))
+    elif sd:                             # gold bar + gem between the container rows and the player inventory
         sd = sd if isinstance(sd, dict) else {}
         dy = top + rows * 18 + 22 - 5
         over = sd.get('overhang', 4)
@@ -927,7 +935,9 @@ def build(spec_path, out):
                 tex.alpha_composite(props.bracket(14, 9, corner, t=4), (bx, dy - 1))
                 tex.alpha_composite(props.bracket(14, 9, 'tl' if corner == 'bl' else 'tr', t=4), (bx, dy + 3))
     hf = spec.get('hotbar_frame')
-    if hf and spec.get('draw_player_inventory', True):   # thin coloured frame with gold corners round the hotbar
+    if hf and royal_kit and spec.get('draw_player_inventory', True):
+        royal.hotbar_frame(tex, OX, top, rows)
+    elif hf and spec.get('draw_player_inventory', True):   # thin coloured frame with gold corners round the hotbar
         hf = hf if isinstance(hf, dict) else {}
         hx, hy = hotbar_xy(0, rows)
         hy += top
@@ -938,6 +948,8 @@ def build(spec_path, out):
                                (hx + 163, hy + 19, -1, -1)):
             d.line((cx, cy, cx + 4 * sx, cy), fill=gc)
             d.line((cx, cy, cx, cy + 4 * sy), fill=gc)
+    if spec.get('corner_brackets'):     # gold L brackets on the window corners (royal kit, measured)
+        royal.corner_brackets(tex, OX, top, rows)
     for b in spec.get('buttons', []):
         draw_button(tex, top, b, sdir, th, label_case, spec.get('icon_style'))
     # foreground layers (piles over the inventory corners...) must not cover the player's slots

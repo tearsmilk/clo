@@ -96,8 +96,9 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
   (`wall`, `planks`, `pillar`, `brazier`, `banner`, `rubble`, `hay`, `flourish`, `note`, `divider`, `slot_bar`),
   buttons with `style: "none"`, and `nexo_items` for real items whose state changes (quest cards).
 - Royal/fantasy chest skins (dark slate + gold, like premium GUI packs): `assets/examples/royal_chest/spec.json` -
-  `theme: "royal"`, `bracket_tab` header, `section_divider`, `hotbar_frame`, layers `brackets`, `banner`
-  (`emblem: crest`, `rod_ball`), `rail`, `crystals`, `streamer`, `meander`.
+  `theme: "royal"`, `header.style: "bracket_tab"`, `corner_brackets`, `section_divider`, `hotbar_frame`,
+  `royal_ornaments` (crest banners, rails, crystal fans, streamers, key ornaments) - all built to measured
+  geometry by `scripts/royal.py`; works for 1-6 rows.
 - Illustrations for `image` tiles: generate a small scene (or crop one from art the user already has) - a
   pond for fishing, a market stall for the shop. They are posterized to a pixel palette automatically.
 
@@ -124,6 +125,13 @@ Then send the user the preview first (they judge visually), then the files.
 3. If the art is a pixel or two off: adjust `<shift:N>` (horizontal) or the glyph `ascent` (+ moves up), or
    use https://nexomc.com/tools/gui-visualizer. If tags show as raw text use `%nexo_shift_-8%%nexo_<id>%`.
 
+## Rebuilding a reference "1 in 1"
+When the user shows a finished GUI and asks for an exact copy, measure it instead of eyeballing:
+`scripts/ref_tools.py` (palette, charmap, boxes, compare) finds the window, stripe orders, offsets and colours;
+rebuild the simple parts to those numbers (kit module like `scripts/royal.py`), draw illustrations yourself in
+the same footprint, then `ref_tools.py compare` and fix region by region. Keep vanilla slot positions even if the
+reference is a pixel off. Full method and the measured royal kit: `references/replicate.md`.
+
 ## Beyond chest menus
 - Item / crop assets: `scripts/crop_wheat.py OUT/` draws 8 wheat growth stages at 32x32 (arching leaf blades,
   grain ears that ripen green -> gold, awns); its tables are the template for other crops. Hand-made props and
@@ -148,3 +156,4 @@ Then send the user the preview first (they judge visually), then the files.
 - `references/menu-plugins.md` - DeluxeMenus keys and actions, zMenu, writing your own plugin
 - `references/spec-format.md` - every spec key for gui_builder.py
 - `references/design-guide.md` - analysis of popular menus, visual rules, icon pipeline, colour sets
+- `references/replicate.md` - measuring a reference and rebuilding it 1:1, the measured royal kit

@@ -11,8 +11,10 @@ Paths are relative to the spec file.
 | `namespace` | `gui` | pack namespace -> `assets/<ns>/textures/gui/<id>.png` |
 | `rows` | 6 | 1-6 chest rows |
 | `theme` | `oak` | `vanilla` (exact Minecraft), `oak`, `spruce`, `birch`, `stone`, `cobble`, `nether`, `dark`, `meadow` - textured frame band + calm body; `royal` - dark slate body, thin gold line, rimmed slot wells (pair with `bracket_tab`, `section_divider`, `hotbar_frame`, `brackets`); or a dict |
-| `section_divider` | none | `{"gem": "#439950", "color": "#d9893f", "overhang": 4, "brackets": true}` gold bar with a faceted gem between the container rows and the player inventory (covers the client's "Инвентарь" label - use with `hide_inventory_label`) |
-| `hotbar_frame` | none | `{"color": "#a83333", "corner": "#d9893f"}` thin frame with gold corners around the hotbar |
+| `section_divider` | none | gold bar with a gem between the container rows and the player inventory (covers the client's "Инвентарь" label - use with `hide_inventory_label`). Royal theme: `true` / `{"gem": false}` = the measured kit divider; other themes: `{"gem": "#439950", "color": "#d9893f", "overhang": 4, "brackets": true}` |
+| `hotbar_frame` | none | royal theme: `true` = measured gold/red frame; other themes `{"color": "#a83333", "corner": "#d9893f"}` |
+| `corner_brackets` | false | gold L brackets on the window corners (royal kit; top ones stick 2px out - needs `canvas` margins >= 2) |
+| `royal_ornaments` | none | `true` or `{"banners", "emblem", "rails", "crystals", "meanders": bool}` - the royal kit's outside decoration at measured positions; needs `canvas` `{"left": 40, "right": 40, "top": 17}` |
 | `palette` | `endesga32` | shading model: `endesga32` (palette ramps + hue-shifted shading for custom colours), `endesga32-strict` (snap every colour), `none` |
 | `theme_overrides` | {} | override single theme colours: `fill` (list), `seam`, `hi`, `hi2`, `sh`, `sh2`, `slot_dk`, `slot_lt`, `slot_in`, `text`, `recess` |
 | `header` | none | title plaque, see below. Without it `title` is drawn as plain text at (8,5) |
@@ -42,9 +44,9 @@ Paths are relative to the spec file.
 - `size: 2` = double-size letters on a tab that sticks out ~10px above the window (texture gets taller, ascent rises accordingly - handled automatically).
 - `plaque` (size 1) = small plate inside the 17px top strip with rivets left/right.
 - `style: block` + `depth: 3` (+ `side_color`) extrudes the letters into a 3D slab like Redstone-Labs logos.
-- `style: bracket_tab` = dark royal plate straddling the top edge with gold L brackets on its corners; text in
-  material lettering (`material` steel/gold/wood/emerald/crimson/stone/snow, `size` 2) or `font: "pixel"`;
-  `rise` px above the window (10), `width`, `height`.
+- `style: bracket_tab` = royal tab across the top edge (96 x 20 at y -10 by default) with '[' ']' gold brackets
+  and a shadow; `text` may be "" (blank tab like the reference); text in material lettering (`material`
+  steel/gold/..., `size` 1 or 2 - size 2 makes the tab 26 high) or `font: "pixel"`; `width`, `height`, `top`.
 - `style: lettering` = only material letters over the window top (`material`, `size`, `y`).
 - `font: "material"` + `material` also works for `ribbon` headers (gold letters on a red ribbon).
 - `style: ribbon` = cloth ribbon with folded, V-cut tails across the top edge (quest boards, castle scenes):
