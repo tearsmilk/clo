@@ -1,5 +1,6 @@
 package ink.hoka.zenquests.menu;
 
+import ink.hoka.zenquests.PremiumStore;
 import ink.hoka.zenquests.QuestManager;
 import ink.hoka.zenquests.QuestRegistry;
 import ink.hoka.zenquests.ZenQuests;
@@ -9,6 +10,7 @@ import ink.hoka.zenquests.util.Text;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,50 +21,78 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Меню /квесты. Главное: 4 категории. Категория: квесты с прогрессом;
- * клик по выполненному — забрать награду.
+ * Меню /квесты.
+ *   Главное — профиль игрока, 4 категории с индикаторами, Ферма+.
+ *   Категория — квесты с прогрессом (по страницам), клик по выполненному — забрать награду.
+ *   Сюжет — список цепочек; клик по цепочке — все её шаги: пройденные, текущий и закрытые.
  */
 public final class QuestMenu implements Listener {
 
-    /** Владелец инвентаря: какая страница открыта и какой квест в каком слоте. */
+    /** Владелец инвентаря: что делать при клике по слоту. */
     private static final class Holder implements InventoryHolder {
-        final Category category;                       // null — главное меню
-        final Map<Integer, QuestManager.Entry> slots = new HashMap<>();
-        final Map<Integer, Category> catSlots = new HashMap<>();
+        final Map<Integer, Runnable> actions = new HashMap<>();
         Inventory inv;
-        Holder(Category c) { category = c; }
         @Override public Inventory getInventory() { return inv; }
     }
 
-    private static final int[] CAT_SLOTS = {10, 12, 14, 16};
-    private static final int BACK_SLOT = 49;
-    private static final int PREMIUM_SLOT_MAIN = 22;
+    /** Слоты под содержимое страницы: 4 ряда по 7 внутри рамки. */
+    private static final int[] INNER = {
+            10, 11, 12, 13, 14, 15, 16,
+            19, 20, 21, 22, 23, 24, 25,
+            28, 29, 30, 31, 32, 33, 34,
+            37, 38, 39, 40, 41, 42, 43};
+    private static final int[] CAT_SLOTS = {19, 21, 23, 25};
+    private static final int HEADER = 4, PREV = 48, BACK = 49, NEXT = 50;
+    private static final int PROFILE = 4, PREMIUM_MAIN = 40, CLOSE = 49;
 
     private final ZenQuests plugin;
 
     public QuestMenu(ZenQuests plugin) { this.plugin = plugin; }
 
+    // ── тексты из config.yml ──
+
     private String gui(String key, Object... kv) {
-        String s = plugin.getConfig().getString("gui." + key, "");
+        return fill(plugin.getConfig().getString("gui." + key, ""), kv);
+    }
+
+    private List<String> guiList(String key, Object... kv) {
+        List<String> out = new ArrayList<>();
+        for (String l : plugin.getConfig().getStringList("gui." + key)) out.add(fill(l, kv));
+        return out;
+    }
+
+    private String fill(String s, Object... kv) {
+        s = s.replace("{premium}", plugin.getConfig().getString("premium.name", "&6Ферма+"));
         for (int i = 0; i + 1 < kv.length; i += 2) s = s.replace("{" + kv[i] + "}", String.valueOf(kv[i + 1]));
         return s;
+    }
+
+    private String premiumText(String path, Object... kv) {
+        return fill(plugin.getConfig().getString(path, ""), kv);
     }
 
     private String catName(Category c) {
         return plugin.getConfig().getString("menu.categories." + c.key + ".name", c.key);
     }
 
-    private Material catIcon(Category c) {
-        Material m = Material.matchMaterial(plugin.getConfig().getString("menu.categories." + c.key + ".icon", "PAPER"));
-        return m == null ? Material.PAPER : m;
+    private Material catMat(Category c, String field, Material def) {
+        return mat(plugin.getConfig().getString("menu.categories." + c.key + "." + field), def);
+    }
+
+    private Material mat(String name, Material def) {
+        if (name == null) return def;
+        Material m = Material.matchMaterial(name.trim());
+        return m == null ? def : m;
     }
 
     // ── главное меню ──
@@ -70,110 +100,295 @@ public final class QuestMenu implements Listener {
     public void openMain(Player p) {
         QuestManager qm = plugin.quests();
         qm.refresh(p, false);
-        Holder h = new Holder(null);
-        Inventory inv = Bukkit.createInventory(h, 27, Text.parse(plugin.getConfig().getString("menu.title", "Квесты")));
+        Holder h = new Holder();
+        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(plugin.getConfig().getString("menu.title", "Квесты")));
         h.inv = inv;
-        fill(inv);
+        frame(inv, mat(plugin.getConfig().getString("menu.accent"), Material.LIGHT_BLUE_STAINED_GLASS_PANE),
+                mat(plugin.getConfig().getString("menu.corner"), Material.CYAN_STAINED_GLASS_PANE));
 
+        ItemStack bg = item(mat(plugin.getConfig().getString("menu.background"), Material.BLACK_STAINED_GLASS_PANE), " ", List.of(), false, 1);
+        for (int slot : INNER) inv.setItem(slot, bg);
+
+        int readyAll = 0;
         Category[] cats = Category.values();
-        for (int i = 0; i < cats.length; i++) {
+        for (int i = 0; i < cats.length && i < CAT_SLOTS.length; i++) {
             Category c = cats[i];
-            List<QuestManager.Entry> es = qm.entries(p, c);
-            List<String> lore = new ArrayList<>();
+            List<String> lore = new ArrayList<>(plugin.getConfig().getStringList("menu.categories." + c.key + ".description"));
+            if (!lore.isEmpty()) lore.add("");
+            int done, total, ready;
             if (c == Category.STORY) {
-                int chains = (int) plugin.registry().chains().values().stream()
-                        .filter(ch -> !ch.premium() || qm.isPremium(p)).count();
-                lore.add(gui("done-count", "done", chains - es.size(), "total", chains));
+                List<QuestRegistry.Chain> chains = visibleChains(p);
+                total = chains.size();
+                done = (int) chains.stream().filter(ch -> step(p, ch) >= ch.steps().size()).count();
+                ready = (int) qm.entries(p, c).stream().filter(e -> qm.isDone(p, e)).count();
+                lore.add(gui("chains-count", "done", done, "total", total));
             } else {
-                long done = es.stream().filter(e -> qm.isClaimed(p, e)).count();
-                lore.add(gui("done-count", "done", done, "total", es.size()));
+                List<QuestManager.Entry> es = qm.entries(p, c);
+                total = es.size();
+                done = (int) es.stream().filter(e -> qm.isClaimed(p, e)).count();
+                ready = (int) es.stream().filter(e -> qm.isDone(p, e) && !qm.isClaimed(p, e)).count();
+                lore.add(gui("done-count", "done", done, "total", total));
             }
-            long ready = es.stream().filter(e -> qm.isDone(p, e) && !qm.isClaimed(p, e)).count();
-            if (ready > 0) lore.add(gui("status-ready"));
+            lore.add(bar(done, total) + " &f" + percent(done, total) + "%");
             switch (c) {
                 case DAILY -> lore.add(gui("resets-in", "time", fmt(qm.untilDailyReset())));
                 case WEEKLY -> lore.add(gui("resets-in", "time", fmt(qm.untilWeeklyReset())));
                 case SEASONAL -> {
                     QuestRegistry.Season s = plugin.registry().activeSeason(qm.today());
                     if (s == null) lore.add(gui("no-season"));
-                    else { lore.add(s.name()); lore.add(gui("season-ends-in", "time", fmt(qm.untilSeasonEnd(s)))); }
+                    else { lore.add(gui("season-name", "season", s.name())); lore.add(gui("season-ends-in", "time", fmt(qm.untilSeasonEnd(s)))); }
                 }
                 default -> { }
             }
-            inv.setItem(CAT_SLOTS[i], item(catIcon(c), catName(c), lore, ready > 0));
-            h.catSlots.put(CAT_SLOTS[i], c);
+            lore.add("");
+            if (ready > 0) lore.add(gui("ready-count", "count", ready));
+            lore.add(gui("click-open"));
+            readyAll += ready;
+
+            int slot = CAT_SLOTS[i];
+            inv.setItem(slot, item(catMat(c, "icon", Material.PAPER), catName(c), lore, ready > 0, Math.max(1, Math.min(64, ready))));
+            h.actions.put(slot, () -> { click(p); openCategory(p, c, 0); });
+
+            // индикатор под категорией: есть награды / в процессе / всё сделано
+            String state = ready > 0 ? "ready" : total > 0 && done >= total ? "done" : total == 0 ? "empty" : "progress";
+            Material ind = mat(plugin.getConfig().getString("gui.indicator." + state + ".icon"), Material.GRAY_STAINED_GLASS_PANE);
+            inv.setItem(slot + 9, item(ind, gui("indicator." + state + ".name"), List.of(), false, 1));
+            h.actions.put(slot + 9, () -> { click(p); openCategory(p, c, 0); });
         }
-        inv.setItem(PREMIUM_SLOT_MAIN, premiumInfo(p));
+
+        inv.setItem(PROFILE, profile(p, readyAll));
+        inv.setItem(PREMIUM_MAIN, premiumInfo(p));
+        inv.setItem(CLOSE, item(Material.BARRIER, gui("close"), List.of(), false, 1));
+        h.actions.put(CLOSE, () -> { click(p); p.closeInventory(); });
         p.openInventory(inv);
+    }
+
+    private ItemStack profile(Player p, int ready) {
+        QuestManager qm = plugin.quests();
+        int stepsDone = 0, stepsTotal = 0;
+        for (QuestRegistry.Chain ch : visibleChains(p)) {
+            stepsTotal += ch.steps().size();
+            stepsDone += Math.min(step(p, ch), ch.steps().size());
+        }
+        boolean prem = qm.isPremium(p);
+        List<String> lore = guiList("profile.lore",
+                "ready", ready,
+                "story", stepsDone, "story_total", stepsTotal,
+                "story_bar", bar(stepsDone, stepsTotal),
+                "premium_state", gui(prem ? "profile.premium-on" : "profile.premium-off"));
+        ItemStack it = item(Material.PLAYER_HEAD, gui("profile.name", "player", p.getName()), lore, ready > 0, 1);
+        if (it.getItemMeta() instanceof SkullMeta sm) {
+            sm.setOwningPlayer(p);
+            it.setItemMeta(sm);
+        }
+        return it;
     }
 
     // ── категория ──
 
-    public void openCategory(Player p, Category c) {
+    public void openCategory(Player p, Category c) { openCategory(p, c, 0); }
+
+    public void openCategory(Player p, Category c, int page) {
+        if (c == Category.STORY) { openStory(p, page); return; }
         QuestManager qm = plugin.quests();
         qm.refresh(p, false);
-        Holder h = new Holder(c);
-        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(catName(c)));
-        h.inv = inv;
-        fill(inv);
 
-        List<QuestManager.Entry> es = qm.entries(p, c);
-        int slot = 10;
+        List<QuestManager.Entry> es = new ArrayList<>(qm.entries(p, c));
+        // сначала готовые к награде, потом в процессе, в конце — уже полученные
+        es.sort(Comparator.comparingInt(e -> qm.isClaimed(p, e) ? 2 : qm.isDone(p, e) ? 0 : 1));
+
+        List<Runnable> placers = new ArrayList<>();
+        List<ItemStack> items = new ArrayList<>();
         for (QuestManager.Entry e : es) {
-            while (slot < 44 && (slot % 9 == 0 || slot % 9 == 8)) slot++;   // рамка по краям
-            if (slot >= 44) break;
-            inv.setItem(slot, questItem(p, e));
-            h.slots.put(slot, e);
-            slot++;
+            items.add(questItem(p, e, null));
+            placers.add(() -> {
+                if (qm.isClaimed(p, e)) { deny(p); return; }
+                if (!qm.isDone(p, e)) { deny(p); qm.claim(p, e); return; }   // claim пишет «ещё N из M»
+                qm.claim(p, e);
+                openCategory(p, c, page);
+            });
         }
-        // без подписки — замок «ещё N заданий с Ферма+»
         int locked = lockedCount(p, c);
-        if (locked > 0 && slot < 44) {
-            while (slot < 44 && (slot % 9 == 0 || slot % 9 == 8)) slot++;
-            if (slot < 44) {
-                List<String> lore = new ArrayList<>();
-                for (String l : plugin.getConfig().getStringList("premium.locked-lore")) lore.add(l.replace("{count}", String.valueOf(locked)));
-                inv.setItem(slot, item(lockedIcon(), premiumText("premium.locked-name", "count", locked), lore, false));
-                slot++;
-            }
+        if (locked > 0) {
+            List<String> lore = new ArrayList<>();
+            for (String l : plugin.getConfig().getStringList("premium.locked-lore")) lore.add(fill(l, "count", locked));
+            items.add(item(lockedIcon(), premiumText("premium.locked-name", "count", locked), lore, false, Math.min(64, locked)));
+            placers.add(() -> deny(p));
         }
-        if (es.isEmpty() && locked == 0) {
-            String text = c == Category.SEASONAL && plugin.registry().activeSeason(qm.today()) == null
-                    ? gui("no-season") : gui("empty");
-            inv.setItem(22, item(Material.BARRIER, text, List.of(), false));
+
+        Holder h = new Holder();
+        int pages = Math.max(1, (items.size() + INNER.length - 1) / INNER.length);
+        int pg = Math.max(0, Math.min(page, pages - 1));
+        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(title(catName(c), pg, pages)));
+        h.inv = inv;
+        frame(inv, catMat(c, "pane", Material.GRAY_STAINED_GLASS_PANE), catMat(c, "corner", Material.BLACK_STAINED_GLASS_PANE));
+
+        inv.setItem(HEADER, categoryHeader(p, c, es));
+        place(h, items, placers, pg);
+        if (items.isEmpty()) {
+            String text = c == Category.SEASONAL && plugin.registry().activeSeason(qm.today()) == null ? gui("no-season") : gui("empty");
+            inv.setItem(22, item(Material.BARRIER, text, List.of(), false, 1));
         }
-        // сюжет: пройденные цепочки тоже показываем
-        if (c == Category.STORY) {
-            for (QuestRegistry.Chain ch : plugin.registry().chains().values()) {
-                if (ch.premium() && !qm.isPremium(p)) continue;
-                int step = qm.data(p).storyStep.getOrDefault(ch.id(), 0);
-                if (step < ch.steps().size()) continue;
-                while (slot < 44 && (slot % 9 == 0 || slot % 9 == 8)) slot++;
-                if (slot >= 44) break;
-                inv.setItem(slot, item(ch.icon(), ch.name(), List.of(gui("story-done")), false));
-                slot++;
-            }
-        }
-        inv.setItem(BACK_SLOT, item(Material.ARROW, gui("back"), List.of(), false));
+        nav(h, p, pg, pages, np -> openCategory(p, c, np), () -> openMain(p));
         p.openInventory(inv);
     }
 
-    private ItemStack questItem(Player p, QuestManager.Entry e) {
+    private ItemStack categoryHeader(Player p, Category c, List<QuestManager.Entry> es) {
+        QuestManager qm = plugin.quests();
+        List<String> lore = new ArrayList<>(plugin.getConfig().getStringList("menu.categories." + c.key + ".description"));
+        if (!lore.isEmpty()) lore.add("");
+        int done = (int) es.stream().filter(e -> qm.isClaimed(p, e)).count();
+        lore.add(gui("done-count", "done", done, "total", es.size()));
+        lore.add(bar(done, es.size()) + " &f" + percent(done, es.size()) + "%");
+        switch (c) {
+            case DAILY -> lore.add(gui("resets-in", "time", fmt(qm.untilDailyReset())));
+            case WEEKLY -> lore.add(gui("resets-in", "time", fmt(qm.untilWeeklyReset())));
+            case SEASONAL -> {
+                QuestRegistry.Season s = plugin.registry().activeSeason(qm.today());
+                if (s != null) { lore.add(gui("season-name", "season", s.name())); lore.add(gui("season-ends-in", "time", fmt(qm.untilSeasonEnd(s)))); }
+            }
+            default -> { }
+        }
+        return item(catMat(c, "icon", Material.PAPER), catName(c), lore, false, 1);
+    }
+
+    // ── сюжет: список цепочек ──
+
+    public void openStory(Player p, int page) {
+        QuestManager qm = plugin.quests();
+        qm.refresh(p, false);
+        boolean prem = qm.isPremium(p);
+
+        List<ItemStack> items = new ArrayList<>();
+        List<Runnable> placers = new ArrayList<>();
+        for (QuestRegistry.Chain ch : plugin.registry().chains().values()) {
+            boolean locked = ch.premium() && !prem;
+            int step = Math.min(step(p, ch), ch.steps().size()), total = ch.steps().size();
+            boolean finished = step >= total;
+            QuestManager.Entry cur = finished ? null : entry(ch, step);
+            boolean ready = cur != null && !locked && qm.isDone(p, cur);
+
+            List<String> lore = new ArrayList<>();
+            if (ch.premium()) lore.add(premiumText("premium.chain-tag"));
+            lore.addAll(ch.description());
+            if (!ch.description().isEmpty()) lore.add("");
+            lore.add(gui("story-step", "step", Math.min(step + (finished ? 0 : 1), total), "total", total));
+            lore.add(bar(step, total) + " &f" + percent(step, total) + "%");
+            if (cur != null && !locked) lore.add(gui("story-current", "quest", cur.quest().name()));
+            lore.add("");
+            if (locked) {
+                for (String l : plugin.getConfig().getStringList("premium.chain-locked-lore")) lore.add(fill(l));
+            } else if (finished) lore.add(gui("story-done"));
+            else if (ready) lore.add(gui("story-ready"));
+            lore.add(gui("click-open-chain"));
+
+            Material icon = locked ? lockedIcon() : ch.icon();
+            String name = locked ? gui("story-locked-name", "chain", Text.strip(ch.name())) : ch.name();
+            items.add(item(icon, name, lore, ready, 1));
+            placers.add(() -> { click(p); openChain(p, ch.id(), 0); });
+        }
+
+        Holder h = new Holder();
+        int pages = Math.max(1, (items.size() + INNER.length - 1) / INNER.length);
+        int pg = Math.max(0, Math.min(page, pages - 1));
+        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(title(catName(Category.STORY), pg, pages)));
+        h.inv = inv;
+        frame(inv, catMat(Category.STORY, "pane", Material.PURPLE_STAINED_GLASS_PANE),
+                catMat(Category.STORY, "corner", Material.MAGENTA_STAINED_GLASS_PANE));
+
+        List<QuestRegistry.Chain> vis = visibleChains(p);
+        int done = (int) vis.stream().filter(ch -> step(p, ch) >= ch.steps().size()).count();
+        List<String> hl = new ArrayList<>(plugin.getConfig().getStringList("menu.categories.story.description"));
+        if (!hl.isEmpty()) hl.add("");
+        hl.add(gui("chains-count", "done", done, "total", vis.size()));
+        hl.add(bar(done, vis.size()) + " &f" + percent(done, vis.size()) + "%");
+        inv.setItem(HEADER, item(catMat(Category.STORY, "icon", Material.WRITABLE_BOOK), catName(Category.STORY), hl, false, 1));
+
+        place(h, items, placers, pg);
+        if (items.isEmpty()) inv.setItem(22, item(Material.BARRIER, gui("empty"), List.of(), false, 1));
+        nav(h, p, pg, pages, np -> openStory(p, np), () -> openMain(p));
+        p.openInventory(inv);
+    }
+
+    // ── сюжет: шаги одной цепочки ──
+
+    public void openChain(Player p, String chainId, int page) {
+        QuestManager qm = plugin.quests();
+        qm.refresh(p, false);
+        QuestRegistry.Chain ch = plugin.registry().chains().get(chainId);
+        if (ch == null) { openStory(p, 0); return; }
+        boolean locked = ch.premium() && !qm.isPremium(p);
+        int step = Math.min(step(p, ch), ch.steps().size()), total = ch.steps().size();
+
+        List<ItemStack> items = new ArrayList<>();
+        List<Runnable> placers = new ArrayList<>();
+        for (int i = 0; i < total; i++) {
+            Quest q = ch.steps().get(i);
+            int n = i + 1;
+            if (i < step) {
+                List<String> lore = new ArrayList<>(q.description());
+                lore.add("");
+                lore.add(gui("step-passed"));
+                items.add(item(mat(plugin.getConfig().getString("gui.step-done-icon"), Material.LIME_STAINED_GLASS_PANE),
+                        gui("step-done-name", "step", n, "quest", Text.strip(q.name())), lore, false, Math.min(64, n)));
+                placers.add(() -> deny(p));
+            } else if (i == step && !locked) {
+                QuestManager.Entry e = entry(ch, i);
+                items.add(questItem(p, e, gui("story-step", "step", n, "total", total)));
+                placers.add(() -> {
+                    if (!qm.isDone(p, e)) { deny(p); qm.claim(p, e); return; }
+                    qm.claim(p, e);
+                    if (step(p, ch) >= ch.steps().size()) celebrate(p);
+                    openChain(p, chainId, page);
+                });
+            } else {
+                List<String> lore = locked
+                        ? new ArrayList<>(plugin.getConfig().getStringList("premium.chain-locked-lore").stream().map(this::fill).toList())
+                        : guiList("step-locked-lore", "prev", n - 1);
+                items.add(item(mat(plugin.getConfig().getString("gui.step-locked-icon"), Material.GRAY_DYE),
+                        gui("step-locked-name", "step", n), lore, false, Math.min(64, n)));
+                placers.add(() -> deny(p));
+            }
+        }
+
+        Holder h = new Holder();
+        int pages = Math.max(1, (items.size() + INNER.length - 1) / INNER.length);
+        int pg = Math.max(0, Math.min(page, pages - 1));
+        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(title(ch.name(), pg, pages)));
+        h.inv = inv;
+        frame(inv, catMat(Category.STORY, "pane", Material.PURPLE_STAINED_GLASS_PANE),
+                catMat(Category.STORY, "corner", Material.MAGENTA_STAINED_GLASS_PANE));
+
+        List<String> hl = new ArrayList<>();
+        if (ch.premium()) hl.add(premiumText("premium.chain-tag"));
+        hl.addAll(ch.description());
+        if (!ch.description().isEmpty()) hl.add("");
+        hl.add(gui("story-progress", "done", step, "total", total));
+        hl.add(bar(step, total) + " &f" + percent(step, total) + "%");
+        if (step >= total) { hl.add(""); hl.add(gui("story-done")); }
+        inv.setItem(HEADER, item(ch.icon(), ch.name(), hl, step >= total, 1));
+
+        place(h, items, placers, pg);
+        nav(h, p, pg, pages, np -> openChain(p, chainId, np), () -> openStory(p, 0));
+        p.openInventory(inv);
+    }
+
+    // ── карточка квеста ──
+
+    private ItemStack questItem(Player p, QuestManager.Entry e, String stepLine) {
         QuestManager qm = plugin.quests();
         Quest q = e.quest();
-        int prog = qm.data(p).get(e.key());
-        boolean done = prog >= q.amount(), claimed = qm.isClaimed(p, e);
+        int prog = Math.min(qm.data(p).get(e.key()), q.amount());
+        boolean claimed = qm.isClaimed(p, e), done = claimed || prog >= q.amount();
+        if (claimed) prog = q.amount();
 
         List<String> lore = new ArrayList<>();
-        if (e.chain() != null) {
-            QuestRegistry.Chain ch = plugin.registry().chains().get(e.chain());
-            lore.add(ch.name());
-            lore.add(gui("story-step", "step", ch.steps().indexOf(q) + 1, "total", ch.steps().size()));
-        }
+        if (stepLine != null) lore.add(stepLine);
         if (q.premium()) lore.add(premiumText("premium.quest-tag"));
         lore.addAll(q.description());
         lore.add("");
-        lore.add(gui("status-progress", "bar", bar(prog, q.amount()), "progress", prog, "amount", q.amount()));
+        lore.add(gui("status-progress", "progress", prog, "amount", q.amount(), "percent", percent(prog, q.amount())));
+        lore.add(bar(prog, q.amount()));
         if (!q.rewardLines().isEmpty()) {
             lore.add("");
             lore.add(gui("rewards-title"));
@@ -185,23 +400,23 @@ public final class QuestMenu implements Listener {
             lore.add(premiumText(prem ? "premium.bonus-title" : "premium.bonus-title-locked"));
             for (String l : q.premiumLines()) lore.add(prem ? l : "&8" + Text.strip(l));
         }
-        if (claimed || done) { lore.add(""); lore.add(claimed ? gui("status-claimed") : gui("status-ready")); }
-        Material icon = claimed ? Material.LIME_STAINED_GLASS_PANE : q.icon();
-        return item(icon, q.name(), lore, done && !claimed);
+        lore.add("");
+        if (claimed) lore.add(gui("status-claimed"));
+        else if (done) lore.add(gui("status-ready"));
+        else lore.add(gui("status-left", "left", q.amount() - prog));
+
+        if (claimed) {
+            return item(mat(plugin.getConfig().getString("gui.claimed-icon"), Material.LIME_STAINED_GLASS_PANE),
+                    gui("claimed-name", "quest", Text.strip(q.name())), lore, false, 1);
+        }
+        String name = done ? gui("ready-name", "quest", q.name()) : q.name();
+        return item(q.icon(), name, lore, done, 1);
     }
 
     // ── Ферма+ ──
 
-    private String premiumText(String path, Object... kv) {
-        String s = plugin.getConfig().getString(path, "");
-        s = s.replace("{premium}", plugin.getConfig().getString("premium.name", "&6Ферма+"));
-        for (int i = 0; i + 1 < kv.length; i += 2) s = s.replace("{" + kv[i] + "}", String.valueOf(kv[i + 1]));
-        return s;
-    }
-
     private Material lockedIcon() {
-        Material m = Material.matchMaterial(plugin.getConfig().getString("premium.locked-icon", "GOLD_BLOCK"));
-        return m == null ? Material.GOLD_BLOCK : m;
+        return mat(plugin.getConfig().getString("premium.locked-icon"), Material.GOLD_BLOCK);
     }
 
     /** Сколько заданий в категории скрыто без подписки. */
@@ -224,15 +439,15 @@ public final class QuestMenu implements Listener {
     private ItemStack premiumInfo(Player p) {
         boolean prem = plugin.quests().isPremium(p);
         String base = prem ? "premium.info-active" : "premium.info-inactive";
-        Material m = Material.matchMaterial(plugin.getConfig().getString(base + ".icon", prem ? "GOLDEN_HOE" : "WHEAT"));
         List<String> lore = new ArrayList<>();
-        for (String l : plugin.getConfig().getStringList(base + ".lore")) lore.add(l.replace("{premium}", plugin.getConfig().getString("premium.name", "&6Ферма+")));
+        for (String l : plugin.getConfig().getStringList(base + ".lore")) lore.add(fill(l));
         Long until = prem ? plugin.premium().expires(p.getUniqueId()) : null;
-        if (until != null && until != ink.hoka.zenquests.PremiumStore.FOREVER) {
+        if (until != null && until != PremiumStore.FOREVER) {
             lore.add("");
             lore.add(gui("premium-left", "time", fmt(Duration.ofMillis(until - System.currentTimeMillis()))));
         }
-        return item(m == null ? Material.WHEAT : m, premiumText(base + ".name"), lore, prem);
+        Material m = mat(plugin.getConfig().getString(base + ".icon"), prem ? Material.GOLDEN_HOE : Material.WHEAT);
+        return item(m, premiumText(base + ".name"), lore, prem, 1);
     }
 
     // ── клики ──
@@ -241,20 +456,10 @@ public final class QuestMenu implements Listener {
     public void onClick(InventoryClickEvent e) {
         if (!(e.getInventory().getHolder() instanceof Holder h)) return;
         e.setCancelled(true);
-        if (!(e.getWhoClicked() instanceof Player p)) return;
+        if (!(e.getWhoClicked() instanceof Player)) return;
         if (e.getClickedInventory() == null || !(e.getClickedInventory().getHolder() instanceof Holder)) return;
-        int slot = e.getSlot();
-
-        if (h.category == null) {
-            Category c = h.catSlots.get(slot);
-            if (c != null) openCategory(p, c);
-            return;
-        }
-        if (slot == BACK_SLOT) { openMain(p); return; }
-        QuestManager.Entry entry = h.slots.get(slot);
-        if (entry == null) return;
-        plugin.quests().claim(p, entry);
-        openCategory(p, h.category);   // перерисовать (сюжет мог перейти на следующий шаг)
+        Runnable r = h.actions.get(e.getSlot());
+        if (r != null) r.run();
     }
 
     @EventHandler
@@ -264,18 +469,65 @@ public final class QuestMenu implements Listener {
 
     // ── помощники ──
 
-    private void fill(Inventory inv) {
-        ItemStack pane = item(Material.GRAY_STAINED_GLASS_PANE, " ", List.of(), false);
-        for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, pane);
-        // середину — пустой
-        for (int i = 0; i < inv.getSize(); i++) {
-            int col = i % 9, row = i / 9;
-            if (row > 0 && row < inv.getSize() / 9 - 1 && col > 0 && col < 8) inv.setItem(i, null);
+    private List<QuestRegistry.Chain> visibleChains(Player p) {
+        boolean prem = plugin.quests().isPremium(p);
+        return plugin.registry().chains().values().stream().filter(ch -> !ch.premium() || prem).toList();
+    }
+
+    private int step(Player p, QuestRegistry.Chain ch) {
+        return plugin.quests().data(p).storyStep.getOrDefault(ch.id(), 0);
+    }
+
+    private QuestManager.Entry entry(QuestRegistry.Chain ch, int step) {
+        Quest q = ch.steps().get(step);
+        return new QuestManager.Entry(q, "story:" + ch.id() + ":" + q.id(), ch.id());
+    }
+
+    private String title(String name, int page, int pages) {
+        return pages > 1 ? gui("title-paged", "name", name, "page", page + 1, "pages", pages) : name;
+    }
+
+    /** Разложить предметы страницы по внутренним слотам. */
+    private void place(Holder h, List<ItemStack> items, List<Runnable> actions, int page) {
+        int from = page * INNER.length;
+        for (int i = 0; i < INNER.length && from + i < items.size(); i++) {
+            h.inv.setItem(INNER[i], items.get(from + i));
+            h.actions.put(INNER[i], actions.get(from + i));
         }
     }
 
-    private ItemStack item(Material mat, String name, List<String> lore, boolean glow) {
-        ItemStack it = new ItemStack(mat);
+    /** Нижняя панель: назад, страницы. */
+    private void nav(Holder h, Player p, int page, int pages, java.util.function.IntConsumer open, Runnable back) {
+        h.inv.setItem(BACK, item(Material.ARROW, gui("back"), List.of(), false, 1));
+        h.actions.put(BACK, () -> { click(p); back.run(); });
+        if (page > 0) {
+            h.inv.setItem(PREV, item(Material.SPECTRAL_ARROW, gui("prev-page", "page", page), List.of(), false, 1));
+            h.actions.put(PREV, () -> { turn(p); open.accept(page - 1); });
+        }
+        if (page + 1 < pages) {
+            h.inv.setItem(NEXT, item(Material.SPECTRAL_ARROW, gui("next-page", "page", page + 2), List.of(), false, 1));
+            h.actions.put(NEXT, () -> { turn(p); open.accept(page + 1); });
+        }
+    }
+
+    /** Рамка: верх и низ — акцентный цвет, углы — свой, бока и середина — тёмные. */
+    private void frame(Inventory inv, Material accent, Material corner) {
+        ItemStack dark = item(mat(plugin.getConfig().getString("menu.background"), Material.BLACK_STAINED_GLASS_PANE), " ", List.of(), false, 1);
+        ItemStack acc = item(accent, " ", List.of(), false, 1);
+        ItemStack cor = item(corner, " ", List.of(), false, 1);
+        int rows = inv.getSize() / 9;
+        for (int i = 0; i < inv.getSize(); i++) {
+            int row = i / 9, col = i % 9;
+            boolean edgeRow = row == 0 || row == rows - 1, edgeCol = col == 0 || col == 8;
+            if (edgeRow && edgeCol) inv.setItem(i, cor);
+            else if (edgeRow || (edgeCol && (row == 1 || row == rows - 2))) inv.setItem(i, acc);
+            else if (edgeCol) inv.setItem(i, dark);
+            else inv.setItem(i, null);
+        }
+    }
+
+    private ItemStack item(Material mat, String name, List<String> lore, boolean glow, int amount) {
+        ItemStack it = new ItemStack(mat, Math.max(1, Math.min(mat.getMaxStackSize(), amount)));
         ItemMeta m = it.getItemMeta();
         if (m != null) {
             m.displayName(Text.parse(name));
@@ -291,10 +543,24 @@ public final class QuestMenu implements Listener {
         return it;
     }
 
-    /** Полоска из 10 квадратиков: заполненные — зелёные. */
+    /** Полоска из 20 палочек: заполненные — зелёные. */
     private String bar(int v, int max) {
-        int filled = (int) Math.round(10.0 * v / Math.max(1, max));
-        return "&a" + "■".repeat(Math.max(0, filled)) + "&8" + "■".repeat(Math.max(0, 10 - filled));
+        int len = 20;
+        int filled = max <= 0 ? 0 : (int) Math.round((double) len * Math.min(v, max) / max);
+        String full = plugin.getConfig().getString("gui.bar-full", "&a"), empty = plugin.getConfig().getString("gui.bar-empty", "&8");
+        String ch = plugin.getConfig().getString("gui.bar-char", "|");
+        return full + ch.repeat(filled) + empty + ch.repeat(len - filled);
+    }
+
+    private int percent(int v, int max) { return max <= 0 ? 0 : (int) Math.floor(100.0 * Math.min(v, max) / max); }
+
+    private void click(Player p) { sound(p, Sound.UI_BUTTON_CLICK, 0.5f, 1.2f); }
+    private void turn(Player p) { sound(p, Sound.ITEM_BOOK_PAGE_TURN, 1f, 1f); }
+    private void deny(Player p) { sound(p, Sound.BLOCK_NOTE_BLOCK_BASS, 0.7f, 0.6f); }
+    private void celebrate(Player p) { sound(p, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f); }
+
+    private void sound(Player p, Sound s, float vol, float pitch) {
+        try { p.playSound(p.getLocation(), s, vol, pitch); } catch (Throwable ignored) { }
     }
 
     private String fmt(Duration d) { return Text.duration(d); }

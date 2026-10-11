@@ -22,7 +22,7 @@ public final class QuestRegistry {
         public boolean active(LocalDate today) { return !today.isBefore(start) && !today.isAfter(end); }
     }
 
-    public record Chain(String id, String name, Material icon, List<Quest> steps, boolean premium) {}
+    public record Chain(String id, String name, Material icon, List<String> description, List<Quest> steps, boolean premium) {}
 
     private final JavaPlugin plugin;
     private int dailyCount = 3, weeklyCount = 3, dailyPremiumCount = 2, weeklyPremiumCount = 2;
@@ -67,7 +67,8 @@ public final class QuestRegistry {
             List<Quest> steps = new ArrayList<>();
             readPool(s.getConfigurationSection("steps"), Category.STORY, steps, s.getBoolean("premium", false));
             if (steps.isEmpty()) continue;
-            chains.put(cid, new Chain(cid, s.getString("name", cid), material(s.getString("icon"), Material.WRITABLE_BOOK), steps,
+            chains.put(cid, new Chain(cid, s.getString("name", cid), material(s.getString("icon"), Material.WRITABLE_BOOK),
+                    s.getStringList("description"), steps,
                     s.getBoolean("premium", false)));
         }
 
