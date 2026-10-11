@@ -41,15 +41,21 @@ KEY = {
 # gradient (lit top), a diagonal sheen (a wide soft band + a thin bright line + a faint second band), darker
 # edges and fine horizontal brushing; chrome cylinders get a bright highlight, a DARK reflection band in the
 # middle and a lighter bounce at the far side - that band is what makes chrome read as chrome.
-METAL = [H(c) for c in ('#0c0e13', '#14171e', '#1b1f27', '#232832', '#2c323d', '#363d4a', '#414958', '#4e5768',
-                        '#5d687b', '#6f7b91', '#8691a8', '#9fabbf', '#bcc6d5', '#d9e0ea', '#f3f6fa')]
-BRASS_RAMP = [H(c) for c in ('#2a1808', '#45290c', '#663e12', '#875519', '#a66d22', '#c2892e', '#d9a640',
-                             '#ebc35e', '#f7df92', '#fff4cf')]
+from shading import ramp5 as _ramp5, sphere5 as _sphere5   # noqa: E402
+
+# Five tones per material + an outline (references/texture-shading.md): shadow, dark mid, base, light mid,
+# highlight - cool shadows, warm-neutral lights. tone() maps 0..1 onto them in stepped bands; the longer
+# index lists below only spread those 6 colours over the 0..1 range (old code indexes METAL[0..14]).
+_STEEL5 = [tuple(c) + (255,) for c in _ramp5('#5a6578')]       # outline, shadow, dark, base, light, highlight
+_BRASS5 = [tuple(c) + (255,) for c in _ramp5('#b9862c')]
+METAL = [_STEEL5[i] for i in (0, 1, 1, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5)]   # band compression: base wide
+BRASS_RAMP = [_BRASS5[i] for i in (0, 1, 1, 2, 2, 3, 3, 4, 4, 5)]
 _BAYER = ((0.2, 0.6), (0.8, 0.4))
 
 
-def tone(t, x=0, y=0, ramp=METAL, dither=True):
-    """0..1 -> ramp colour; with dither the fraction between two steps becomes a 2x2 ordered pattern."""
+def tone(t, x=0, y=0, ramp=METAL, dither=False):
+    """0..1 -> ramp colour in stepped bands. dither=True blends neighbouring steps with a 2x2 pattern - only
+    for a deliberate texture, never as a gradient (texture-shading rules)."""
     n = len(ramp)
     f = max(0.0, min(1.0, t)) * (n - 1)
     i = int(f)
@@ -62,31 +68,24 @@ def tone(t, x=0, y=0, ramp=METAL, dither=True):
 def chrome(side):
     """Tone across a chrome cylinder, side -1 (lit edge) .. 1 (far edge)."""
     if side < -0.55:
-        return 0.98
+        return 0.98                      # highlight
     if side < -0.2:
-        return 0.8
+        return 0.8                       # light mid
     if side < 0.15:
-        return 0.3                       # reflection of the dark surroundings
+        return 0.16                      # shadow: reflection of the dark surroundings
     if side < 0.55:
-        return 0.5
-    return 0.7                           # bounce light
+        return 0.5                       # base
+    return 0.74                          # light mid: bounce light
 
 
 def sphere(nx, ny):
-    """Tone on a chrome ball / dome, nx, ny = position / radius (-1..1)."""
-    dh = math.hypot(nx + 0.38, ny + 0.42)
-    if dh < 0.28:
-        return 1.0
-    if dh < 0.55:
-        return 0.84
-    if -0.08 < ny + nx * 0.3 < 0.35:
-        return 0.3
-    if ny + nx * 0.3 >= 0.35:
-        return 0.62
-    return 0.7
+    """Tone (0..1) on a chrome ball / dome with the full light anatomy (shading.sphere5): highlight and
+    reflection, light, base, a narrow dark terminator, volume shadow lifted by bounce light, rim light."""
+    t = _sphere5(max(-0.999, min(0.999, nx)), max(-0.999, min(0.999, ny)), 5)
+    return {None: 0.5, 1: 0.12, 2: 0.3, 3: 0.5, 4: 0.8, 5: 0.99}[t]
 
 
-def metal_plate(img, x0, y0, x1, y1, base=0.45, grad=0.22, sheen=0.3, seed=1, edge=0.1, brushed=0.035,
+def metal_plate(img, x0, y0, x1, y1, base=0.45, grad=0.22, sheen=0.3, seed=1, edge=0.1, brushed=0.05,
                 sheen_at=0.3, ramp=METAL):
     """Fill a box with brushed metal: vertical gradient, diagonal sheen, darker edges, brushed rows."""
     rnd = random.Random(seed)
@@ -196,7 +195,7 @@ def case(img, ox, oy, rows=6, seed=3, h=None):
     bx, by = ox, oy
     d = ImageDraw.Draw(img)
     d.rectangle((bx, by, bx + W - 1, by + Hh - 1), fill=METAL[0])
-    metal_plate(img, bx + 1, by + 1, bx + W - 2, by + Hh - 2, base=0.4, grad=0.2, sheen=0.22, seed=seed, edge=0.0,
+    metal_plate(img, bx + 1, by + 1, bx + W - 2, by + Hh - 2, base=0.44, grad=0.08, sheen=0.22, seed=seed, edge=0.0,
                 sheen_at=0.22)
     bevel(img, bx + 1, by + 1, bx + W - 2, by + Hh - 2, lit=(0.86, 0.66), dark=(0.08, 0.18))
     for cx in (0, W - 1):                                   # only the top corners are window corners (vanilla
@@ -826,8 +825,9 @@ def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=9, 
 # ------------------------------------------------------------------ classic safe (front view, box seen from the left)
 
 def box3d(img, ox, oy, W=176, Hh=126, side=5, top=5, base=2):
-    """The safe body as a box seen from the front-left-above: a top face (lit, with a sheen running along it)
-    and a left face (in shadow, lighter at the top), both receding up-left; a dark base strip under the front.
+    """The safe body as a box seen from the front-left-above: a top face (highlight, with a sheen running along
+    it) and a left face (lit - the light comes from the top-left - darker toward the bottom), both receding
+    up-left; a dark base strip under the front.
     The front itself is `case`. Needs canvas left >= side, top >= top."""
     for k in range(1, top + 1):                               # top face: row oy-k, shifted left by k
         y = oy - k
@@ -847,9 +847,9 @@ def box3d(img, ox, oy, W=176, Hh=126, side=5, top=5, base=2):
         for y in range(oy - k, oy + Hh - k + 1):
             if k == side or y == oy + Hh - k:
                 c = METAL[0]
-            else:
-                v = (y - oy + k) / Hh
-                c = tone(0.36 - 0.18 * v - 0.04 * k, x, y)
+            else:                                             # one light from the top-left: the left face is
+                v = (y - oy + k) / Hh                         # lit too (light mid, base lower down) - a dark
+                c = tone(0.8 - 0.3 * v - 0.03 * k, x, y)      # side face here would be a second light source
             _px(img, x, y, c)
 
 
@@ -861,7 +861,7 @@ def door_inset(img, x0, y0, x1, y1, seed=5):
     _hline(img, x0 - 2, x1 + 2, y1 + 2, METAL[9])                          # lit lower lip of the frame
     _vline(img, x1 + 2, y0 - 2, y1 + 2, METAL[8])
     d.rectangle((x0, y0, x1, y1), fill=METAL[0])
-    metal_plate(img, x0 + 1, y0 + 1, x1 - 1, y1 - 1, base=0.5, grad=0.26, sheen=0.34, seed=seed, edge=0.06,
+    metal_plate(img, x0 + 1, y0 + 1, x1 - 1, y1 - 1, base=0.52, grad=0.1, sheen=0.34, seed=seed, edge=0.12,
                 sheen_at=0.28)
     bevel(img, x0 + 1, y0 + 1, x1 - 1, y1 - 1, lit=(0.97, 0.8), dark=(0.08, 0.2))
 
