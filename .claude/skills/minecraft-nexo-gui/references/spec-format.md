@@ -177,6 +177,11 @@ Main-menu kit parts (`{"type": "hub", "part": ...}`; destinations as material sl
 `label`, `art` medallion|portrait|portal|chest|book, `narrow`, `head_slot`), `key` (`slot`, `brand`
 discord|youtube|tiktok) - layout and rules in `references/main-menu.md`.
 
+Mode-select kit parts (`{"type": "modes", "part": ...}`; every mode a window into its world, on the hub backdrop):
+`gate` (`slots` [c, r, w, h], `kind` blessed|farm, `name` - arcade letters on a plate, `seed`), `signpost` (`col`,
+`rows` [r0, r1] - post with arrow boards in a gap column), `soon` (`slots` [c, r, w], `text`) - concept, layout and
+how to add a mode in `references/mode-select.md`.
+
 `preview_items: [{"slot" | "slots", "icon", "amount"}]` - preview only: also writes `preview_items.png`, the
 menu with items in it (food on a board, loot in a storage skin); nothing goes into the menu config.
 

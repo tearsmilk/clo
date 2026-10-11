@@ -207,6 +207,13 @@ Then send the user the preview first (they judge visually), then the files.
   plaques, social keys, walnut header with gold letters): layers `{"type": "hub", "part": ...}` from
   `scripts/hub.py`; example `assets/examples/main_menu/`. When the user shows someone else's menu and asks for
   it "in our style", keep its slot layout (measure it) and redraw every tile this way - `references/main-menu.md`.
+- **Mode / server select** ("выбор режимов", navigator): every mode is a WINDOW into its own world, set in a
+  slab of the mode's material - Blessed: the void with one floating grass block in a holy beam, a sword stuck
+  in it, a fishing line into the void, a quantum orb; Farm: sunny wheat field, a path to a market stall, XP
+  orbs - with a keystone (skull / barn gable), the name in arcade letters, a signpost in the gap pointing to
+  both, a calm "coming soon" plank. Layers `{"type": "modes", "part": ...}` from `scripts/modes.py`; example
+  `assets/examples/mode_select/`. The concept method (turn the tooltip's words into objects in one scene) and
+  how to add a third mode: `references/mode-select.md`.
 
 ## Rebuilding a reference "1 in 1"
 When the user shows a finished GUI and asks for an exact copy, measure it instead of eyeballing:
@@ -252,6 +259,7 @@ reference is a pixel off. Full method and the measured royal kit: `references/re
 - `references/safe-lock.md` - safe code lock + storage skin, steel kit, code entry with DeluxeMenus meta
 - `references/kitchen.md` - workstation menus (cutting board): zone layout, slot map, kitchen kit, plugin logic
 - `references/main-menu.md` - main menu in the house style: measured layout, material slabs, player head, hub kit
+- `references/mode-select.md` - mode select: world windows, concept from the tooltips, signpost, modes kit
 - `references/lettering.md` - a beautiful title letter in five steps (shape, outline, gradient, shadows, accent)
 - `references/texture-shading.md` - hand-painted texture shading rules (5-tone ramps, light, AO, materials, tiles)
 - `references/pixel-art-craft.md` - lines (doubles, jaggies), 8 outline styles, value test, focus, AA, sizes

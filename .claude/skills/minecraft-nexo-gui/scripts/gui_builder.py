@@ -42,6 +42,7 @@ import shop  # noqa: E402
 import safe  # noqa: E402
 import kitchen  # noqa: E402
 import hub  # noqa: E402
+import modes  # noqa: E402
 import scenes  # noqa: E402
 import icons16  # noqa: E402
 
@@ -526,6 +527,9 @@ def draw_layers(img, oy, layers, sdir, th):
         if t == 'hub':                    # main-menu kit (hub.py): slate counter, material slabs, keys, sign
             draw_hub(img, oy, L)
             continue
+        if t == 'modes':                  # mode-select kit (modes.py): world windows, signpost, soon plank
+            draw_modes(img, oy, L)
+            continue
         if t == 'lettering':              # title letters (lettering.py): x = centre, y = top
             import lettering
             ramp = kitchen._r5(L['color']) if L.get('color') else lettering.GOTHIC
@@ -785,6 +789,22 @@ def draw_hub(img, oy, L):
         hub.key(img, ox, oy, L['slot'], L['brand'])
     else:
         raise SystemExit(f"unknown hub part '{p}'")
+
+
+def draw_modes(img, oy, L):
+    """Mode-select kit parts: gate (slots, kind blessed | farm, name, seed), signpost (col, rows), soon (slots)."""
+    p, ox = L['part'], OX
+    if p == 'gate':
+        c, r, w, h = L['slots']
+        modes.gate(img, ox, oy, c, r, w, h, L['kind'], L['name'], L.get('seed', 1))
+    elif p == 'signpost':
+        r0, r1 = L.get('rows', [1, 4])
+        modes.signpost(img, ox, oy, L.get('col', 4), r0, r1)
+    elif p == 'soon':
+        c, r, w = L['slots'][:3]
+        modes.soon(img, ox, oy, c, r, w, L.get('text', 'Скоро...'))
+    else:
+        raise SystemExit(f"unknown modes part '{p}'")
 
 
 # ----------------------------------------------------------------------------- buttons

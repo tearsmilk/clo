@@ -382,6 +382,7 @@ def header(img, cx, y, text, under):
              and (px, py - 1) in face and (px - 1, py) in face}
     _paint(img, ring2, WALNUT[4])
     draw_material_text(img, cx - tw // 2, y + 3, text, gold, scale=2)
+    pixel_perfect(img, only={GOLD[0]}, box=(x0, y, x0 + w, y + h))   # letter outlines without doubles
     for nx in (x0 + 4, x0 + w - 5):
         _px(img, nx, y + h // 2, GOLD[5])
         _px(img, nx + 1, y + h // 2, GOLD[3])
