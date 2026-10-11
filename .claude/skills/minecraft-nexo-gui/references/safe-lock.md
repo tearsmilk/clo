@@ -24,7 +24,10 @@ Turning menus reopen instantly; there is no progress indicator on purpose (the u
 ## The open safe (storage)
 `open_door` with `side: "right"` (hinges on the right like the photo): the door swung out in perspective -
 same height as the closed door, thick edge with the bolts coming out of it, raised plug, mechanism and rods;
-the hinge knuckles (`leaf: false`) sit on the joint. Bolts only on the door - not also on the body.
+the hinges are the SAME as on the closed screen (leaf on the frame x 170..175, knuckle x 176..183) and the
+open door hangs right off the knuckle (`x: -8` -> hinge edge at x 183) - if the hinge or the distance changes
+between the two screens, players see the door jump. Bolts only on the door - not also on the body.
+`box3d` draws a 2 px dark base strip under the safe that separates it from the vanilla inventory.
 Canvas `{"left": 8, "right": 66, "top": 8, "bottom": 0}` -> texture 250x230.
 DeluxeMenus cannot hold items: use the `menu_title` from `DeluxeMenus/gui_menus/hokaria_safe.yml` as the
 inventory title of the vault plugin (PlayerVaults, AxVaults...); PlaceholderAPI form in the file's comment.

@@ -714,7 +714,7 @@ def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=9, 
 
 # ------------------------------------------------------------------ classic safe (front view, box seen from the left)
 
-def box3d(img, ox, oy, W=176, Hh=126, side=5, top=5):
+def box3d(img, ox, oy, W=176, Hh=126, side=5, top=5, base=2):
     """The safe body as a box seen from the front-left-above: a top face above the front (lit) and a left face
     (in shadow), both receding up-left. The front itself is `case`. Needs canvas left >= side, top >= top."""
     S = STEEL
@@ -723,6 +723,9 @@ def box3d(img, ox, oy, W=176, Hh=126, side=5, top=5):
         for x in range(ox - k, ox + W - k + 1):
             c = S['out'] if k == top or x == ox + W - k else S['hi'] if k == 1 else S['l2'] if k < top - 1 else S['l1']
             _px(img, x, y, c)
+    for k in range(base):                                     # dark base strip under the front: separates the
+        for x in range(ox - side, ox + W):                    # safe from the vanilla inventory below
+            _px(img, x, oy + Hh + k, S['d2'] if k < base - 1 else S['out'])
     for k in range(1, side + 1):                              # left face: column ox-k, shifted up by k
         x = ox - k
         for y in range(oy - k, oy + Hh - k + 1):
@@ -843,12 +846,12 @@ def handle3(img, cx, cy, length=30, angle=0.0, spokes=3):
         _px(img, x, y, c)
 
 
-def hinge_block(img, x_edge, y, h=24, side='right', leaf=True):
+def hinge_block(img, x_edge, y, h=24, side='right', leaf=True, leaf_w=6):
     """Heavy hinge of a classic safe: a leaf on the door edge, a knuckle with a pin sticking out past the body's
     side (x_edge = the body's outer edge), caps at both ends. side='right' for the photo look."""
     S = STEEL
     s = 1 if side == 'right' else -1
-    leaf0, leaf1 = x_edge - s * 12, x_edge - s * 1                # leaf on the front
+    leaf0, leaf1 = x_edge - s * leaf_w, x_edge - s * 1            # leaf on the frame (same open and closed)
     d = ImageDraw.Draw(img)
     lx0, lx1 = min(leaf0, leaf1), max(leaf0, leaf1)
     if not leaf:                                                  # open door: the leaf is on the door, only
@@ -862,7 +865,7 @@ def hinge_block(img, x_edge, y, h=24, side='right', leaf=True):
         _hline(img, lx0 + 1, lx1 - 1, y + 3, S['hi'])
         _hline(img, lx0 + 1, lx1 - 1, y + h - 4, S['d1'])
         for ry in (y + 7, y + h - 8):
-            rivet(img, lx0 + 4 if side == 'right' else lx1 - 4, ry)
+            rivet(img, (lx0 + lx1) // 2, ry)
     kx0 = x_edge if side == 'right' else x_edge - 7               # knuckle: a vertical cylinder past the edge
     cols = (S['out'], S['hi'], S['spec'], S['l2'], S['l1'], S['m1'], S['d1'], S['out'])
     for i, c in enumerate(cols):

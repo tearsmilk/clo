@@ -683,7 +683,7 @@ def draw_safe(img, oy, L):
         safe.wheel(img, ox + L['x'], oy + L['y'], int(L.get('r', 20)), int(L.get('spokes', 4)),
                    float(L.get('angle', 0)))
     elif p == 'box3d':
-        safe.box3d(img, ox, oy, 176, L.get('h', 126), L.get('side', 5), L.get('top', 5))
+        safe.box3d(img, ox, oy, 176, L.get('h', 126), L.get('side', 5), L.get('top', 5), L.get('base', 2))
     elif p == 'door_inset':
         x0, y0, x1, y1 = L.get('box', [9, 9, 166, 116])
         safe.door_inset(img, ox + x0, oy + y0, ox + x1, oy + y1, L.get('seed', 5))
@@ -695,7 +695,7 @@ def draw_safe(img, oy, L):
     elif p == 'hinge_blocks':
         for y in L.get('ys', [14, 88]):
             safe.hinge_block(img, ox + L.get('x', 176), oy + y, L.get('h', 24), L.get('side', 'right'),
-                             L.get('leaf', True))
+                             L.get('leaf', True), L.get('leaf_w', 6))
     elif p == 'feet':
         safe.feet(img, [(ox + x, oy + y) for x, y in L['pts']], L.get('w', 12), L.get('h', 3))
     elif p == 'turn_arrows':

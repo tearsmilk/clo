@@ -20,7 +20,8 @@
    "part": "box3d",
    "h": 126,
    "side": 5,
-   "top": 5
+   "top": 5,
+   "base": 2
   },
   {
    "type": "safe",
@@ -46,7 +47,9 @@
     86
    ],
    "h": 24,
-   "side": "right"
+   "side": "right",
+   "leaf": true,
+   "leaf_w": 6
   },
   {
    "type": "safe",

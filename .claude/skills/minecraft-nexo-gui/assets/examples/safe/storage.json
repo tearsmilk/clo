@@ -18,7 +18,8 @@
    "part": "box3d",
    "h": 126,
    "side": 5,
-   "top": 5
+   "top": 5,
+   "base": 2
   },
   {
    "type": "safe",
@@ -32,14 +33,14 @@
     6,
     16,
     169,
-    125
+    124
    ]
   },
   {
    "type": "safe",
    "part": "open_door",
    "side": "right",
-   "x": -3,
+   "x": -8,
    "y0": 10,
    "y1": 115,
    "width": 44,
@@ -57,7 +58,8 @@
    ],
    "h": 24,
    "side": "right",
-   "leaf": false
+   "leaf": true,
+   "leaf_w": 6
   },
   {
    "type": "safe",
