@@ -38,6 +38,7 @@ import art  # noqa: E402
 import props  # noqa: E402
 import royal  # noqa: E402
 import rustic  # noqa: E402
+import shop  # noqa: E402
 import scenes  # noqa: E402
 import icons16  # noqa: E402
 
@@ -372,6 +373,19 @@ def cover(path, w, h, colors=48):
     return im.quantize(colors=colors, method=Image.MEDIANCUT).convert('RGBA')
 
 
+def small_icon(src, sdir):
+    """16px icon from 'sprite:<name>' (sprites.py), 'item:<recipe>:<ramp>...' (item_icons.py), 'shop:<kind>'
+    (shop.py plaques) or a PNG path."""
+    if src.startswith('sprite:'):
+        return sprites.render(src[7:])
+    if src.startswith('item:'):
+        import item_icons
+        return item_icons.render(src[5:]).image()
+    if src.startswith('shop:'):                       # shop kit plaques: shop:back, shop:next:green, shop:alert
+        return shop.render_icon(src[5:])
+    return load_icon(resolve(src, sdir), 16, 16)
+
+
 def load_icon_img(ic, size):
     k = size / max(ic.size)
     return ic.resize((max(1, round(ic.width * k)), max(1, round(ic.height * k))), Image.NEAREST)
@@ -484,6 +498,9 @@ def draw_layers(img, oy, layers, sdir, th):
             tx = OX + L['x'] - (tw // 2 if L.get('center', True) else 0)
             draw_material_text(img, tx, oy + L['y'], L['text'], mat, scale=sc, condensed=cond)
             continue
+        if t == 'shop':                   # market-stall kit (shop.py): stall, window, wells, group, button, ...
+            draw_shop(img, oy, L, sdir)
+            continue
         if t == 'nameplate':              # green ribbon label (rustic kit) centred on x
             rustic.nameplate(img, OX + L['x'], oy + L['y'], L['text'], L.get('min_w', 60))
             continue
@@ -576,6 +593,47 @@ def draw_layers(img, oy, layers, sdir, th):
             raise SystemExit(f"unknown layer type '{t}'")
 
 
+def draw_shop(img, oy, L, sdir):
+    """Shop kit parts. Positions are slots ([col, row, w, h]) or window px (x, y) like other layers."""
+    p, ox = L['part'], OX
+    if p == 'stall':
+        shop.stall(img, ox, oy, L.get('sign', 'МАГАЗИН'), L.get('hanging', 'ОТКРЫТО'), L.get('sill_y'),
+                   L.get('seed', 3), tuple(L.get('colors', ('red', 'white'))))
+    elif p == 'window':
+        c, r, w, h = L['slots']
+        items = [small_icon(i, sdir) if i else None for i in L.get('items', [])]
+        shop.shop_window(img, ox, oy, c, r, w, h, L.get('shelves', 2), L.get('seed', 1), L.get('poster'), items)
+    elif p == 'wells':
+        c, r, w, h = L['slots']
+        shop.wells(img, ox, oy, c, r, w, h, L.get('frame', True))
+        for i, ic in enumerate(L.get('icons', [])):          # icons baked into the wells (static categories)
+            if ic:
+                im = small_icon(ic, sdir)
+                cc, rr = c + i % w, r + i // w
+                img.alpha_composite(im, (ox + 8 + 18 * cc + (16 - im.width) // 2, oy + 18 + 18 * rr + (16 - im.height) // 2))
+    elif p == 'group':
+        c, r, w = L['slots'][:3]
+        shop.slot_group(img, ox, oy, c, r, w, L.get('color', 'green'), L.get('glyph'))
+    elif p == 'button':
+        c, r, w, h = L['slots']
+        sx, sy = ox + 7 + 18 * c, oy + 17 + 18 * r
+        shop.button(img, sx + 2, sy, sx + 18 * w - 4, sy + 18 * h - 2, L.get('color', 'green'), L.get('text', ''))
+    elif p == 'banner':
+        shop.banner(img, ox + L.get('x', 88), oy + L['y'], L['text'], L.get('w'), L.get('seed', 2))
+    elif p == 'badge':
+        c, r = L['slot'] % 9, L['slot'] // 9
+        shop.badge(img, ox + 8 + 18 * c, oy + 18 + 18 * r, L.get('text', ''), L.get('color', 'green'))
+    elif p == 'icon':                   # a 16px plaque / item picture painted into the texture at a slot
+        for sl in L.get('slot_list', [L.get('slot')]):
+            im = small_icon(L['icon'], sdir)
+            img.alpha_composite(im, (ox + 8 + 18 * (sl % 9) + (16 - im.width) // 2, oy + 18 + 18 * (sl // 9) + (16 - im.height) // 2))
+    elif p == 'well':
+        for sl in L.get('slot_list', [L.get('slot')]):
+            shop.well(img, ox + 8 + 18 * (sl % 9), oy + 18 + 18 * (sl // 9))
+    else:
+        raise SystemExit(f"unknown shop part '{p}'")
+
+
 # ----------------------------------------------------------------------------- buttons
 
 def resolve(path, sdir):
@@ -617,7 +675,7 @@ def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
     if style == 'none':                  # clickable area over scene art: no tile, just the icon (if any)
         ic = b.get('icon')
         if ic:
-            spr = sprites.render(ic[7:]) if ic.startswith('sprite:') else load_icon(resolve(ic, sdir), 16, 16)
+            spr = small_icon(ic, sdir)
             if b.get('icon_flip'):
                 spr = spr.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
             w, h = b.get('w', 1) * 18, b.get('h', 1) * 18
@@ -681,11 +739,11 @@ def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
         fpad = 3 if b.get('icon_frame') else 0
         size = b.get('icon_size') or min(avail_w, avail_h) - 2 * fpad
         icon_src = b['icon']
-        is_sprite = icon_src.startswith('sprite:')
+        is_sprite = icon_src.startswith(('sprite:', 'item:', 'shop:'))
         if is_sprite:
-            spr = sprites.render(icon_src[7:])
+            spr = small_icon(icon_src, sdir)
             import tempfile
-            tmp = os.path.join(tempfile.gettempdir(), f"nexo_gui_sprite_{icon_src[7:]}.png")
+            tmp = os.path.join(tempfile.gettempdir(), f"nexo_gui_sprite_{re.sub(r'[^a-z0-9_]', '_', icon_src)}.png")
             spr.save(tmp)
             b = dict(b, icon=tmp)
         style_opts = dict(spec_icon_style or {}, **(b.get('icon_style') or {}))
@@ -899,7 +957,7 @@ def write_nexo_items(spec, sdir, out, ns):
     lines = [f"# Icon items for the '{spec['id']}' menu - generated by minecraft-nexo-gui"]
     for it in items:
         src = it['icon']
-        im = sprites.render(src[7:]) if src.startswith('sprite:') else load_icon(resolve(src, sdir), 16, 16)
+        im = small_icon(src, sdir)
         canvas = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
         canvas.alpha_composite(im, ((16 - im.width) // 2, (16 - im.height) // 2))
         canvas.save(os.path.join(tdir, f"{it['id']}.png"))
@@ -1170,6 +1228,8 @@ def build_spec(spec, sdir, out):
         if b.get('right_commands'):
             lines.append("    right_click_commands:")
             lines += [f"      - '{c}'" for c in b['right_commands']]
+        for k, v in b.get('dm', {}).items():  # raw DeluxeMenus keys: requirements, dynamic_amount, priority...
+            lines.append(f"    {k}: {json.dumps(v, ensure_ascii=False)}")
     for it in spec.get('extra_items', []):   # raw DeluxeMenus items (real visible items in slots_visible etc.)
         lines.append(f"  '{it['id']}':")
         for k, v in it.items():
@@ -1263,7 +1323,7 @@ def build_spec(spec, sdir, out):
         pv = it.get('preview')
         if not pv:
             continue
-        ic = sprites.render(pv[7:]) if pv.startswith('sprite:') else load_icon(resolve(pv, sdir), 16, 16)
+        ic = small_icon(pv, sdir)
         if ic.width > 16 or ic.height > 16:
             ic = load_icon_img(ic, 16)
         if it.get('preview_flip'):

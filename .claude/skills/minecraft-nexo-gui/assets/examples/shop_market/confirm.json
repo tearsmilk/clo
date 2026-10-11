@@ -1,0 +1,281 @@
+{
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "vanilla",
+ "canvas": {
+  "left": 40,
+  "right": 40,
+  "top": 34,
+  "bottom": 0
+ },
+ "draw_free_slots": false,
+ "id": "hokaria_shop_confirm",
+ "layers": [
+  {
+   "type": "shop",
+   "part": "stall",
+   "sign": "МАГАЗИН",
+   "hanging": "ХОКАРИЯ"
+  },
+  {
+   "type": "shop",
+   "part": "banner",
+   "x": 88,
+   "y": 22,
+   "text": "ТОЧНО КУПИТЬ?"
+  },
+  {
+   "type": "shop",
+   "part": "group",
+   "slots": [
+    0,
+    2,
+    3
+   ],
+   "color": "red",
+   "glyph": "minus"
+  },
+  {
+   "type": "shop",
+   "part": "group",
+   "slots": [
+    4,
+    2,
+    1
+   ],
+   "color": "wood"
+  },
+  {
+   "type": "shop",
+   "part": "group",
+   "slots": [
+    6,
+    2,
+    3
+   ],
+   "color": "green",
+   "glyph": "plus"
+  },
+  {
+   "type": "shop",
+   "part": "button",
+   "slots": [
+    2,
+    4,
+    2,
+    1
+   ],
+   "color": "red",
+   "text": "НЕТ"
+  },
+  {
+   "type": "shop",
+   "part": "button",
+   "slots": [
+    5,
+    4,
+    2,
+    1
+   ],
+   "color": "green",
+   "text": "ДА"
+  },
+  {
+   "type": "shop",
+   "part": "badge",
+   "slot": 49,
+   "text": ""
+  }
+ ],
+ "buttons": [
+  {
+   "id": "m64",
+   "x": 0,
+   "y": 2,
+   "style": "none",
+   "name": "&cМинимум (1)",
+   "lore": [
+    "&7Сейчас: &f%deluxemenus_meta_amount_INTEGER_1%"
+   ],
+   "commands": [
+    "[meta] set amount INTEGER 1",
+    "[refresh]"
+   ]
+  },
+  {
+   "id": "m10",
+   "x": 1,
+   "y": 2,
+   "style": "none",
+   "name": "&c-10",
+   "lore": [
+    "&7Сейчас: &f%deluxemenus_meta_amount_INTEGER_1%"
+   ],
+   "commands": [
+    "[meta] subtract amount INTEGER 10",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "range": {
+       "type": ">=",
+       "input": "%deluxemenus_meta_amount_INTEGER_1%",
+       "output": 11
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "m1",
+   "x": 2,
+   "y": 2,
+   "style": "none",
+   "name": "&c-1",
+   "lore": [
+    "&7Сейчас: &f%deluxemenus_meta_amount_INTEGER_1%"
+   ],
+   "commands": [
+    "[meta] subtract amount INTEGER 1",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "range": {
+       "type": ">=",
+       "input": "%deluxemenus_meta_amount_INTEGER_1%",
+       "output": 2
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "p1",
+   "x": 6,
+   "y": 2,
+   "style": "none",
+   "name": "&a+1",
+   "lore": [
+    "&7Сейчас: &f%deluxemenus_meta_amount_INTEGER_1%"
+   ],
+   "commands": [
+    "[meta] add amount INTEGER 1",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "range": {
+       "type": "<=",
+       "input": "%deluxemenus_meta_amount_INTEGER_1%",
+       "output": 63
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "p10",
+   "x": 7,
+   "y": 2,
+   "style": "none",
+   "name": "&a+10",
+   "lore": [
+    "&7Сейчас: &f%deluxemenus_meta_amount_INTEGER_1%"
+   ],
+   "commands": [
+    "[meta] add amount INTEGER 10",
+    "[refresh]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "range": {
+       "type": "<=",
+       "input": "%deluxemenus_meta_amount_INTEGER_1%",
+       "output": 54
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "p64",
+   "x": 8,
+   "y": 2,
+   "style": "none",
+   "name": "&aМаксимум (64)",
+   "lore": [
+    "&7Сейчас: &f%deluxemenus_meta_amount_INTEGER_1%"
+   ],
+   "commands": [
+    "[meta] set amount INTEGER 64",
+    "[refresh]"
+   ]
+  },
+  {
+   "id": "no",
+   "x": 2,
+   "y": 4,
+   "w": 2,
+   "style": "none",
+   "name": "&cНет",
+   "commands": [
+    "[openguimenu] hokaria_shop_items"
+   ]
+  },
+  {
+   "id": "yes",
+   "x": 5,
+   "y": 4,
+   "w": 2,
+   "style": "none",
+   "name": "&aДа, купить",
+   "lore": [
+    "&7%deluxemenus_meta_amount_INTEGER_1% шт. за &e%math_0_{deluxemenus_meta_amount_INTEGER_1}*5% монет"
+   ],
+   "commands": [
+    "[takemoney] %math_0_{deluxemenus_meta_amount_INTEGER_1}*5%",
+    "[console] give %player_name% bread %deluxemenus_meta_amount_INTEGER_1%",
+    "[close]"
+   ],
+   "dm": {
+    "left_click_requirement": {
+     "requirements": {
+      "money": {
+       "type": "has money",
+       "amount": "%math_0_{deluxemenus_meta_amount_INTEGER_1}*5%"
+      }
+     },
+     "deny_commands": [
+      "[message] &cНе хватает монет"
+     ]
+    }
+   }
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "product",
+   "material": "BREAD",
+   "slot": 22,
+   "dynamic_amount": "%deluxemenus_meta_amount_INTEGER_1%",
+   "display_name": "&6Хлеб",
+   "lore": [
+    "&7Количество: &f%deluxemenus_meta_amount_INTEGER_1%"
+   ],
+   "preview": "item:loaf:bread"
+  },
+  {
+   "id": "counter",
+   "material": "PAPER",
+   "item_model": "nexo:empty",
+   "slot": 49,
+   "dynamic_amount": "%deluxemenus_meta_amount_INTEGER_1%",
+   "display_name": "&fКоличество: %deluxemenus_meta_amount_INTEGER_1%"
+  }
+ ]
+}

@@ -145,6 +145,13 @@ Then send the user the preview first (they judge visually), then the files.
   example `assets/examples/jobs_menu/` (8 professions from one spec). `scripts/scenes.py` draws placeholder
   scene cards, `scripts/icons16.py` 16x16 tool icons and mouse hint icons.
 
+- **Shop kit** (market stall: perspective striped awning, green sign, vines, eave brackets, hanging sign,
+  plank wall on the slot columns, glass shop windows with shelves, item wells, red/green -/+ groups, bevelled
+  buttons, parchment banners, counter plate, 16px back/next/home plaques): layers `{"type": "shop", "part": ...}`
+  from `scripts/shop.py`. A shop is a set of screens - main, item list, sell, buy stacks, confirm with an amount
+  counter; all five are in `assets/examples/shop_market/`, layouts and DeluxeMenus logic (meta counter, money,
+  sell caveat) in `references/shop-flow.md`. Read it whenever the user asks for a shop / market / store menu.
+
 ## Rebuilding a reference "1 in 1"
 When the user shows a finished GUI and asks for an exact copy, measure it instead of eyeballing:
 `scripts/ref_tools.py` (palette, charmap, boxes, compare) finds the window, stripe orders, offsets and colours;
@@ -153,6 +160,12 @@ the same footprint, then `ref_tools.py compare` and fix region by region. Keep v
 reference is a pixel off. Full method and the measured royal kit: `references/replicate.md`.
 
 ## Beyond chest menus
+- **16x16 item icons** (food, drinks, crops, drops - shop slots, Nexo items, quest rewards): `scripts/item_icons.py`
+  draws them in a style measured on a 62-icon food set - one ramp per material, outline from the ramp's dark
+  end (never black), top-left light, stroke texture, glass rules for drinks - from recipes
+  (`jar:honey`, `cup:juice_apple`, `bowl:soup_pumpkin`, `stack:pancake:honey`, `slice:cheese`...) or from your own
+  masks; `.aseprite` with one layer per part. In a spec: `"icon": "item:jar:honey"`. Read
+  `references/item-icons.md` before drawing any item icon.
 - Item / crop assets: `scripts/crop_wheat.py OUT/` draws 8 wheat growth stages at 32x32 (arching leaf blades,
   grain ears that ripen green -> gold, awns); its tables are the template for other crops. Hand-made props and
   item sprites live in `scripts/sprites.py`; wrap PNGs as Nexo items with `Pack.texture` for menu icons.
@@ -178,4 +191,6 @@ reference is a pixel off. Full method and the measured royal kit: `references/re
 - `references/design-guide.md` - analysis of popular menus, visual rules, icon pipeline, colour sets
 - `references/replicate.md` - measuring a reference and rebuilding it 1:1, the measured royal kit
 - `references/bought-packs.md` - building menus on top of a pack the user owns (background, relabel, variants)
+- `references/item-icons.md` - measured rules for 16x16 item icons, ramps, recipes of item_icons.py
+- `references/shop-flow.md` - the screens of a shop, measured stall layout, shop kit, DeluxeMenus amount/sell logic
 - `references/artist-brief.md` - artist hand-off kit and brief

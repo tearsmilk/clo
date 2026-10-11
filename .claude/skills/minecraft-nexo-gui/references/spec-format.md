@@ -125,6 +125,25 @@ squeezing letters.
 | `bookmark` | `x`, `y` (window px), `icon` (icons16 name), `w`, `h` | red ribbon tab sticking out of the window side, tucked under the parchment |
 | `patch` | `box`, `from_x` | wipe text in a background: each row filled with the colour at column `from_x` |
 | `text` | `x` (centre), `y`, `text`, `material` (name or 5 colours), `scale`, `condensed` (`"bold"` small) | material lettering anywhere |
+| `shop` | `part` + part keys (below) | market-stall shop kit (`scripts/shop.py`, `references/shop-flow.md`) |
+
+Shop kit parts (`{"type": "shop", "part": ...}`; spec `canvas` 40/40/34/0, `theme: "vanilla"`, `draw_free_slots: false`):
+
+| part | keys | draws |
+|------|------|-------|
+| `stall` | `sign`, `hanging` (vertical sign text or null), `seed`, `colors` (awning stripes, default red/white), `sill_y` | wall of 18px planks on the slot columns, staggered plank ends, perspective awning with scallops, green sign, vines, eave brackets, hanging sign |
+| `window` | `slots`, `poster` (thin text, `\n` for 2 lines), `items` (16px icon sources, 2 per shelf), `shelves`, `seed` | glass shop window with streaks and shelves over a block of slots |
+| `wells` | `slots`, `frame` (true), `icons` (baked into the wells row by row) | framed grid of recessed item wells |
+| `group` | `slots: [c, r, n]`, `color` red/green/wood/gold, `glyph` minus/plus | coloured frame around n wells in a row (-/+ amount, buy row) |
+| `button` | `slots`, `color`, `text` | bevelled button (outline, light top, 2px lip, drop shadow, two-tone letters) |
+| `banner` | `x` (centre), `y`, `text`, `w` | parchment banner with torn edges (screen title) |
+| `badge` | `slot`, `text`, `color` | small counter plate; put an invisible item with `dynamic_amount` on it to show a live number |
+| `icon` | `slot` / `slot_list`, `icon` | any 16px icon painted into the texture (e.g. `shop:home`) |
+| `well` | `slot` / `slot_list` | single wells |
+
+16px icon sources accepted wherever an icon or `preview` is read: PNG path, `sprite:<name>`, `item:<recipe>:<ramp>`
+(`scripts/item_icons.py`), `shop:back|next|home|close|ok[:color]`, `shop:alert`.
+Buttons take `dm: {...}` for raw DeluxeMenus keys (requirements, `dynamic_amount`, `priority`).
 | `nameplate` | `x` (centre), `y`, `text`, `min_w` | green ribbon label (rustic) |
 
 Any layer takes `"if": "${var}"` - skipped when the value is empty (variants).

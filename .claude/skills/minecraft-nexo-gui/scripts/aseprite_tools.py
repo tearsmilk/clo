@@ -8,6 +8,7 @@ Aseprite is a human pixel editor; here it is used headless (`aseprite -b`, Lua s
     sheet      export all frames as a horizontal sprite sheet + JSON (animated glyphs / item frames)
     palette    convert any PNG to a palette (.gpl / .aseprite palette) without dithering - AI pictures,
                photos or our drafts into the pack's colours
+    layers     stack PNGs (bottom -> top) into one layered .aseprite - item_icons.py saves its parts this way
     rotate     rotate pixel art cleanly with RotSprite (angled icons) - no blur, no new colours (pure Python:
                the headless build has no editor, so Aseprite's own Rotate command does nothing there)
 
@@ -16,6 +17,7 @@ Aseprite is a human pixel editor; here it is used headless (`aseprite -b`, Lua s
     python3 aseprite_tools.py sheet IN.aseprite OUT.png
     python3 aseprite_tools.py palette IN.png PAL.gpl OUT.png
     python3 aseprite_tools.py rotate IN.png DEGREES OUT.png
+    python3 aseprite_tools.py layers OUT.aseprite a.png=outline b.png=body c.png=highlight
 
 The binary is found via $ASEPRITE or `aseprite` on PATH. Aseprite's EULA allows compiling it for your own
 use but not redistributing it: build it locally with scripts/build_aseprite.sh, never ship the binary.
@@ -62,6 +64,25 @@ spr:flatten()
 spr:saveCopyAs(app.params.out)
 '''
 
+LUA_LAYERS = r'''
+local spr = nil
+for item in string.gmatch(app.params.files, "[^|]+") do
+  local path, name = item:match("^(.-)=(.*)$")
+  local img = Image{ fromFile = path }
+  local layer
+  if spr == nil then
+    spr = Sprite(img.width, img.height, ColorMode.RGB)
+    layer = spr.layers[1]
+  else
+    layer = spr:newLayer()
+  end
+  layer.name = name
+  spr:newCel(layer, 1, img, Point(0, 0))
+end
+spr:saveAs(app.params.out)
+'''
+
+
 def binary():
     exe = os.environ.get('ASEPRITE') or shutil.which('aseprite')
     if not exe or not os.path.exists(exe):
@@ -82,6 +103,12 @@ def run_lua(code, **params):
     if r.returncode != 0 or 'error' in (r.stderr or '').lower():
         sys.exit(f'aseprite failed: {r.stdout}\n{r.stderr}')
     return r
+
+
+def layers(out, files):
+    """files = [(png_path, layer_name), ...] bottom -> top."""
+    run_lua(LUA_LAYERS, out=os.path.abspath(out),
+            files='|'.join(f'{os.path.abspath(f)}={n}' for f, n in files))
 
 
 def main(a):
@@ -105,6 +132,9 @@ def main(a):
     elif cmd == 'palette':
         subprocess.run([binary(), '-b', pos[0], '--palette', pos[1], '--color-mode', 'indexed',
                         '--dithering-algorithm', 'none', '--save-as', pos[2]], check=True)
+    elif cmd == 'layers':
+        layers(pos[0], [tuple(x.split('=', 1)) if '=' in x else (x, os.path.splitext(os.path.basename(x))[0])
+                        for x in pos[1:]])
     elif cmd == 'rotate':                     # headless Aseprite cannot run Rotate (needs the editor): RotSprite
         from PIL import Image                 # is implemented in pixelstyle.rotsprite, no Aseprite needed
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
