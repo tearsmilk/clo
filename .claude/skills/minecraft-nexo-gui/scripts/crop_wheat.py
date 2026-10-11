@@ -9,7 +9,6 @@ Depth comes from colour (back blades darker, front lighter), not outlines.
 import sys, random
 from PIL import Image
 
-OUT = sys.argv[1]
 
 
 def C(h):
@@ -145,6 +144,8 @@ def stage_img(i):
     return im
 
 
-for i in range(8):
-    stage_img(i).save(f'{OUT}/wheat_stage_{i}.png')
-print('ok')
+if __name__ == '__main__':
+    OUT = sys.argv[1]
+    for i in range(8):
+        stage_img(i).save(f'{OUT}/wheat_stage_{i}.png')
+    print('ok')

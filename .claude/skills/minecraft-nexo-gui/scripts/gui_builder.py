@@ -37,6 +37,9 @@ import sprites  # noqa: E402
 import art  # noqa: E402
 import props  # noqa: E402
 import royal  # noqa: E402
+import rustic  # noqa: E402
+import scenes  # noqa: E402
+import icons16  # noqa: E402
 
 # x of the window's left edge inside the texture (> 0 when scene art sticks out on the left: spec canvas.left)
 OX = 0
@@ -92,6 +95,10 @@ THEMES = {
                    slot_lt='#ffffff', text='#265c42', recess='#c28569'),
     # dark slate + gold trim (royal/fantasy kits): outline + thin gold line + bevelled body, rimmed slot wells,
     # gold corner brackets. Pair with header style 'bracket_tab', section_divider and hotbar_frame.
+    # wooden board frame + old parchment + maroon wells (jobs / quest boards): header style 'sign',
+    # layers bookmark / card / grid_frame, slots shown via slots_visible
+    'rustic': dict(frame_style='rustic', slot_style='well', text='#371621', recess='#4d1b22',
+                   slot_in='#4d1b22', slot_dk='#371621', slot_lt='#8c3f2b'),
     'royal':  dict(body='#2b3545', frame_style='royal', gold='#d9893f', gold_dk='#b55a41', outline='#1c1b2b',
                    slot_style='rim', slot_in='#2b3545', slot_dk='#1f2432', slot_lt='#3a4959', rim_hi='#859aa9',
                    rim_mid='#6c8294', rim_lo='#506275', text='#b3c2ca', recess='#1f2432'),
@@ -191,6 +198,13 @@ def draw_royal_panel(img, box, th):
 
 def draw_panel(img, box, th, seed=7):
     """Window body with a chamfered black outline and 2px bevel, like vanilla windows. box = (x, y, w, h)."""
+    if th.get('frame_style') == 'rustic':      # frame 4px outside the window, parchment from 6px in
+        bx, by, W, Hh = box
+        rustic.frame(img, bx - 4, by - 4, W + 8, Hh + 6, t=10, seed=th.get('seed', 4))
+        for bm in th.get('_bookmarks', []):    # bookmarks tuck under the parchment
+            rustic.bookmark(img, bx + bm['x'], by + bm['y'], bm.get('w', 27), bm.get('h', 18), bm.get('icon'))
+        rustic.parchment(img, bx + 6, by + 6, W - 12, Hh - 14, seed=th.get('seed', 7))
+        return
     if th.get('frame_style') == 'royal':
         return draw_royal_panel(img, box, th)
     if 'frame' in th:
@@ -258,6 +272,8 @@ def draw_rim_slot(img, x0, y0, th):
 
 
 def draw_slot(img, x0, y0, th, size=18):
+    if th.get('slot_style') == 'well' and size == 18:
+        return rustic.well_slot(img, x0, y0)
     if th.get('slot_style') == 'rim' and size == 18:
         return draw_rim_slot(img, x0, y0, th)
     d = ImageDraw.Draw(img)
@@ -458,6 +474,10 @@ def draw_layers(img, oy, layers, sdir, th):
                 spr = spr.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
             img.alpha_composite(spr, (x, y + oy))
             continue
+        if t == 'bookmark':               # drawn by the rustic panel so it tucks under the parchment
+            if th.get('frame_style') != 'rustic':
+                rustic.bookmark(img, OX + L['x'], oy + L['y'], L.get('w', 27), L.get('h', 18), L.get('icon'))
+            continue
         if t != 'slot_frame':
             x0, y0, x1, y1 = layer_box(L)
             y0, y1 = y0 + oy, y1 + oy
@@ -501,6 +521,17 @@ def draw_layers(img, oy, layers, sdir, th):
                 for c in range(cw):
                     sx, sy = slot_xy(c0 + c, r0 + r)
                     img.alpha_composite(props.well(18, L.get('well', inner)), (sx, sy + oy))
+        elif t == 'card':                 # framed picture (PNG or "scene:farm") with a ribbon nameplate (rustic kit)
+            src = L.get('picture', 'scene:farm')
+            if src.startswith('scene:'):
+                pic = scenes.scene(src[6:], w - 6, h - 6, L.get('hero'), seed=L.get('seed', 1))
+            else:
+                pic = cover(resolve(src, sdir), w - 6, h - 6, L.get('colors', 48))
+            rustic.card(img, x0, y0, w, h, pic, L.get('label'))
+        elif t == 'grid_frame':           # dark/tan/dark frame around a block of slots (rustic kit)
+            c0, r0, cw, ch = L['slots']
+            sx, sy = slot_xy(c0, r0)
+            rustic.grid_frame(img, sx, sy + oy, cw, ch)
         elif t in props.PROPS:            # scene props sized to the box: wall, banner, pillar, rubble, ...
             opts = {k: v for k, v in L.items() if k not in ('type', 'box', 'slots', 'pad', 'above', 'flip')}
             im = props.render(t, w, h, **opts)
@@ -722,6 +753,8 @@ def header_top(spec):
         return max(0, -hd.get('y', 3))
     if hd.get('style') == 'bracket_tab':
         return -hd.get('top', -10) + 2
+    if hd.get('style') == 'sign':
+        return max(0, -hd.get('y', -16) + 8)
     if hd.get('size', 1) == 2:
         return 10
     return 8 if hd.get('style') == 'tab' else 0
@@ -750,6 +783,10 @@ def draw_header(img, oy, spec, th):
     if style == 'text':
         draw_text(img, OX + ((176 - tw) // 2 if hd.get('center', True) else 8), oy + 5, text,
                   H(hd.get('text_color', th['text'])), scale=sc)
+        return
+    if style == 'sign':                  # plank sign with crown, coins, pennants and crossed arrows (rustic kit)
+        rustic.header(img, OX + 88 + hd.get('dx', 0), oy + hd.get('y', -16), text, w=hd.get('width', 96),
+                      h=hd.get('height', 22))
         return
     if style == 'bracket_tab':           # royal tab across the top edge with '[' ']' gold brackets
         mat = hd.get('material', 'steel')
@@ -850,10 +887,61 @@ def write_nexo_items(spec, sdir, out, ns):
     open(os.path.join(out, f"Nexo/items/{spec['id']}_items.yml"), 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
 
 
+def write_hint_glyphs(spec, out, ns):
+    """`hint_glyphs: true`: mouse icons for tooltips (left/right click) as Nexo glyphs <ns>_lmb / <ns>_rmb.
+    Use them in lore with PlaceholderAPI: '%nexo_<ns>_lmb% &7Вступить' (or <glyph:<ns>_lmb> where MiniMessage
+    is parsed). Glyph height 8 sits on a text line."""
+    tdir = os.path.join(out, f'Nexo/pack/assets/{ns}/textures/font/hints')
+    os.makedirs(tdir, exist_ok=True)
+    os.makedirs(os.path.join(out, 'Nexo/glyphs'), exist_ok=True)
+    lines = ['# Tooltip hint glyphs - generated by minecraft-nexo-gui']
+    for side in ('left', 'right'):
+        gid = f"{ns}_{'lmb' if side == 'left' else 'rmb'}"
+        icons16.mouse(side).save(os.path.join(tdir, f'{gid}.png'))
+        lines += [f'{gid}:', f'  texture: {ns}:font/hints/{gid}', '  ascent: 8', '  height: 9']
+    open(os.path.join(out, f'Nexo/glyphs/{ns}_hints.yml'), 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
+
+
+def _subst(obj, var):
+    """Replace ${name} in every string of a spec (variants)."""
+    if isinstance(obj, dict):
+        return {k: _subst(v, var) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_subst(v, var) for v in obj]
+    if isinstance(obj, str):
+        for k, v in var.items():
+            if obj == '${' + k + '}' and not isinstance(v, str):
+                return v
+            obj = obj.replace('${' + k + '}', str(v))
+        return obj
+    return obj
+
+
 def build(spec_path, out):
-    global OX
+    """Build one menu, or one menu per entry of `variants` (same art, different picture/label/icon/commands):
+    each variant's keys fill ${key} placeholders anywhere in the spec, plus ${id}, ${index}, ${prev_id},
+    ${next_id} (cyclic). Every variant gets OUT/<variant id>/ and everything is merged into OUT/_all/."""
     spec = json.load(open(spec_path, encoding='utf-8'))
     sdir = os.path.dirname(os.path.abspath(spec_path))
+    variants = spec.pop('variants', None)
+    if not variants:
+        return build_spec(spec, sdir, out)
+    import shutil
+    ids = [v['id'] for v in variants]
+    for i, v in enumerate(variants):
+        var = dict(v, index=i, prev_id=ids[i - 1], next_id=ids[(i + 1) % len(ids)])
+        vs = _subst(json.loads(json.dumps(spec)), var)
+        vs['id'] = f"{spec['id']}_{v['id']}"
+        build_spec(vs, sdir, os.path.join(out, v['id']))
+        for sub in ('Nexo', 'DeluxeMenus'):
+            src = os.path.join(out, v['id'], sub)
+            if os.path.isdir(src):
+                shutil.copytree(src, os.path.join(out, '_all', sub), dirs_exist_ok=True)
+    print(f"{len(variants)} variants -> {out}/<id>/ and merged into {out}/_all/")
+
+
+def build_spec(spec, sdir, out):
+    global OX
     gid, ns, rows = spec['id'], spec.get('namespace', 'gui'), int(spec.get('rows', 6))
     assert 1 <= rows <= 6, 'rows must be 1..6'
     art.set_palette(spec.get('palette', 'endesga32'))
@@ -870,6 +958,7 @@ def build(spec_path, out):
     if TW > 256 or TH > 256:
         raise SystemExit(f'texture {TW}x{TH} is over the 256x256 glyph limit - shrink canvas margins')
     tex = Image.new('RGBA', (TW, TH), (0, 0, 0, 0))
+    th['_bookmarks'] = [L for L in spec.get('layers', []) if L['type'] == 'bookmark']
     inv_y = top + rows * 18 + 23                      # top of a separate player-inventory panel
     inv_th = th
     if isinstance(spec.get('inventory_panel'), str):
@@ -980,6 +1069,8 @@ def build(spec_path, out):
     for sub in ('texture', 'Nexo/glyphs', f'Nexo/pack/assets/{ns}/textures/gui', 'DeluxeMenus/gui_menus'):
         os.makedirs(os.path.join(out, sub), exist_ok=True)
     write_nexo_items(spec, sdir, out, ns)
+    if spec.get('hint_glyphs'):
+        write_hint_glyphs(spec, out, ns)
     if hide_label:
         ldir = os.path.join(out, 'Nexo/pack/assets/minecraft/lang')
         os.makedirs(ldir, exist_ok=True)

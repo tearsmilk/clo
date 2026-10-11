@@ -1,0 +1,37 @@
+{
+  "id": "hokaria_jobs",
+  "namespace": "hokaria",
+  "rows": 5,
+  "theme": "rustic",
+  "canvas": {"left": 30, "right": 30, "top": 24, "bottom": 3},
+  "header": {"text": "Профессии", "style": "sign", "width": 96, "y": -16},
+  "draw_free_slots": false,
+  "slots_visible": [29, 30, 31, 32, 33, 38, 39, 40, 41, 42],
+  "hint_glyphs": true,
+  "open_commands": ["jobs_${id}"],
+  "preview_tooltip": "join",
+  "layers": [
+    {"type": "bookmark", "x": -28, "y": 10, "icon": "${icon}"},
+    {"type": "card", "box": [28, 10, 120, 48], "picture": "scene:${scene}", "label": "${label}"},
+    {"type": "grid_frame", "slots": [2, 3, 5, 2]}
+  ],
+  "buttons": [
+    {"id": "join", "x": 2, "y": 0, "w": 5, "h": 3, "style": "none",
+     "name": "&e&l${label}", "lore": ["&7${about}", "", "%nexo_hokaria_lmb% &aВступить в профессию", "%nexo_hokaria_rmb% &7Награды за уровни"],
+     "commands": ["[player] jobs join ${job}"]},
+    {"id": "prev", "x": 0, "y": 4, "style": "none", "icon": "sprite:arrow_gold", "icon_flip": true,
+     "name": "&6« Назад", "commands": ["[openguimenu] hokaria_jobs_${prev_id}"]},
+    {"id": "next", "x": 8, "y": 4, "style": "none", "icon": "sprite:arrow_gold",
+     "name": "&6Вперёд »", "commands": ["[openguimenu] hokaria_jobs_${next_id}"]}
+  ],
+  "variants": [
+    {"id": "farmer", "label": "Фермер", "job": "farmer", "scene": "farm", "icon": "hoe", "about": "Сажай и собирай урожай"},
+    {"id": "miner", "label": "Шахтёр", "job": "miner", "scene": "mine", "icon": "pickaxe", "about": "Добывай руду в шахтах"},
+    {"id": "fisher", "label": "Рыбак", "job": "fisherman", "scene": "pond", "icon": "fishing_rod", "about": "Лови рыбу в прудах"},
+    {"id": "woodcutter", "label": "Лесоруб", "job": "woodcutter", "scene": "forest", "icon": "axe", "about": "Руби деревья"},
+    {"id": "hunter", "label": "Охотник", "job": "hunter", "scene": "hunt", "icon": "bow", "about": "Охоться на мобов"},
+    {"id": "blacksmith", "label": "Кузнец", "job": "blacksmith", "scene": "forge", "icon": "hammer", "about": "Куй инструменты и броню"},
+    {"id": "alchemist", "label": "Алхимик", "job": "alchemist", "scene": "lab", "icon": "potion", "about": "Вари зелья"},
+    {"id": "enchanter", "label": "Чародей", "job": "enchanter", "scene": "library", "icon": "book", "about": "Зачаровывай предметы"}
+  ]
+}
