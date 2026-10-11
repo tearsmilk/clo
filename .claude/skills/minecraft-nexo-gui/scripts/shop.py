@@ -5,10 +5,11 @@ Measured layout (6-row chest, texture 256x256, window at (40, 35), canvas 40/40/
   * striped awning in perspective: top edge y -15 (x 2..173), sloped part to y 5 (x -10..186), valance
     y 6..14 with one rounded scallop per stripe, 7 stripes (28 px each at the valance)
   * green sign 70x11 on the awning (x 53..122, y -23..-13) in a gold frame, flowering vines on both sides
-  * wooden eave brackets left/right (x -29..-1 / 176..205), a hanging vertical sign on the left one
+  * corner supports left/right (x -29..-1 / 176..205): rafter from under the awning, 45 deg brace and corner
+    post into the wall - drawn before the awning; a hanging vertical sign on the left rafter
     (board x -19..-6, y 42..105), vines hanging from the right one
-  * plank wall x 3..172 from y 15: planks are 18 px wide and their seams sit on the slot grid (x = 7 + 18c), so
-    every column of slots is one plank; a sill under the last used row, plank ends staggered below it
+  * plank wall x 7..168 from y 15: planks are 18 px wide and their seams sit on the slot grid (x = 7 + 18c), so
+    every column of slots is one plank; plank ends staggered at y 119..125 (optional full-width sill)
   * everything clickable is whole slots: shop windows / shelves 3x4 slots, item grid 7x4 wells, buy row 7 wells
     in a green frame, -/+ groups of 3 wells in red / green frames, buttons 2-3 slots wide x 1 row
   * buttons: 1 px dark outline, light top line, lighter sides, 2 px darker lip, outline, 2 px drop shadow;
@@ -156,8 +157,8 @@ def awning(img, ox, oy, colors=('red', 'white'), stripes=7, seed=1):
                 else:
                     c = P['dark'] if r > 2 else P['base']
                 _px(img, x, y, c)
-    # shadow on the wall right under the valance
-    for x in range(xl_b + 2, xr_b - 1):
+    # shadow on the wall right under the valance (only where there is wall, never in the air)
+    for x in range(ox + 7, ox + 169):
         _px(img, x, yb + 10, WOOD['out'])
         _px(img, x, yb + 11, WOOD['d1'])
 
@@ -218,48 +219,86 @@ def vines(img, x0, y0, x1, y1, seed=1, flowers=3, hang=0):
             if any(0 <= x + dx < img.width and 0 <= y + dy < img.height and sp[x + dx, y + dy][3]
                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
                 cl.putpixel((x, y), VINE[0])
-    for _ in range(flowers):                                # 5-pixel flowers with a light centre
-        x = int(cx + rnd.uniform(-rx * 0.6, rx * 0.6))
-        y = rnd.randint(int(y1 - ry * 0.7), y1 - 2)
-        for dx, dy, c in ((0, -1, FLOWER[1]), (-1, 0, FLOWER[1]), (1, 0, FLOWER[2]), (0, 1, FLOWER[0]),
-                          (0, 0, FLOWER[3])):
+    for _ in range(flowers):                                # 4x4 flowers (pack size): rounded, lit top-left
+        x = int(cx + rnd.uniform(-rx * 0.6, rx * 0.6)) - 1
+        y = rnd.randint(int(y1 - ry * 0.7), y1 - 3)
+        for dx, dy, c in ((1, 0, FLOWER[2]), (2, 0, FLOWER[1]), (0, 1, FLOWER[2]), (1, 1, FLOWER[3]),
+                          (2, 1, FLOWER[2]), (3, 1, FLOWER[1]), (0, 2, FLOWER[1]), (1, 2, FLOWER[2]),
+                          (2, 2, FLOWER[1]), (3, 2, FLOWER[0]), (1, 3, FLOWER[0]), (2, 3, FLOWER[0])):
             _px(cl, x + dx, y + dy, c)
     img.alpha_composite(cl)
 
 
-def eave(img, x, y, side='left', length=30, drop=10):
-    """Wooden eave bracket (pack: x -29..-1 under the awning corner): a 7 px rafter sloping down and out from
-    the wall to a blunt end, and a diagonal brace from it into the wall. (x, y) = top of the rafter at the wall."""
-    sgn = -1 if side == 'left' else 1
-    rows = [WOOD['out'], WOOD['side'], WOOD['m2'], WOOD['m2'], WOOD['base'], WOOD['d3'], WOOD['seam'], WOOD['out']]
-    for i in range(length + 1):
-        xx = x + sgn * i
-        top = y + round(i * drop / length)
-        rr = rows if i < length - 5 else rows[:-1] + [WOOD['d3'], WOOD['out']]     # blunt end block hangs lower
-        for k, c in enumerate(rr):
-            if i == length:
-                c = WOOD['out']
-            elif i == length - 1 and k > 0:
-                c = WOOD['d3']
-            _px(img, xx, top + k, c)
-        if i % 8 == 3 and i < length - 2:
-            _px(img, xx, top + 3, WOOD['grain'])
-    for i in range(16):                                   # brace: from under the rafter down into the wall
-        bx, by = x - sgn * 1 + sgn * (6 - i), y + 8 + i
-        for k, c in enumerate((WOOD['out'], WOOD['side'], WOOD['m1'], WOOD['d3'], WOOD['out'])):
-            _px(img, bx - sgn * k, by, c)
+def eave(img, ox, oy, side='left'):
+    """Corner support of the stall, measured from the pack (window coords, left side; the right one is mirrored):
+      * rafter: comes out from under the awning (inner end x -6..1 at y 16, ends at the window edge x -1 lower
+        down), arches down and out to a blunt tip at x -29, y 26..34; ~9 px thick: outline, 4 rows of light wood,
+        a light streak, dark underside, dark outline
+      * brace: 8 px wide, from the rafter's underside (x -6, y 23) down at 45 deg into the wall corner (x 6, y 35)
+      * corner post: from under the awning (x 3..10, y 16) slanting into the wall top corner (x 8..13, y 27) with
+        a dark notch where it meets the wall
+    Draw it before the awning so the valance hides the upper ends. Returns the rafter's bottom y per x (window
+    coords) so ropes / vines can hang from it."""
+    def P(x, y, c):
+        _px(img, ox + (x if side == 'left' else 175 - x), oy + y, c)
+
+    W = WOOD
+    bottom = {}
+    for x in range(-29, 2):                               # rafter
+        top = 16 if x >= -6 else 16 + round(10 * math.sqrt((-6 - x) / 23))
+        if x >= -1:
+            bot = 18                                      # under the valance it only reaches the post
+        else:
+            bot = round(35 - (x + 27) * 8 / 20) if x < -7 else 27 + (x + 7)
+        bot = max(bot, top + 3)
+        bottom[x] = bot
+        for y in range(top, bot + 1):
+            k = y - top
+            if x == -29 or y == top:
+                c = W['m2'] if (y == top and x != -29) else W['out']
+                c = W['out'] if x == -29 else H('#603620')
+            elif y == bot:
+                c = H('#3d1816')
+            elif y == bot - 1:
+                c = H('#522821')
+            elif k <= 4:
+                c = W['m2'] if x < -10 else W['base']
+            elif k == 5:
+                c = W['side']
+            else:
+                c = H('#5e3028')
+            P(x, y, c)
+    for y in range(23, 36):                               # brace into the wall corner
+        xl = -6 + (y - 23)
+        for i, c in enumerate((H('#603620'), H('#603620'), W['m2'], W['side'], H('#5e3028'), H('#5e3028'),
+                               H('#5e3028'), H('#3d1816'))):
+            x = xl + i
+            if x <= 6:
+                P(x, y, c)
+    for y in range(16, 28):                               # corner post into the wall top
+        xl = 3 + round((y - 16) * 0.45)
+        for i, c in enumerate((W['edge'], W['base'], W['base'], W['side'], H('#5e3028'), H('#5e3028'),
+                               H('#5e3028'), W['edge'])):
+            P(xl + i, y, c)
+    for y in (28, 29):
+        for x in range(8, 14):
+            P(x, y, H('#522821'))
+    return bottom
 
 
 def hanging_sign(img, cx, y_beam, y0, text, h=None):
-    """Vertical board hanging on two ropes (pack: 14 x 64 board), letters stacked top to bottom."""
+    """Vertical board hanging on a twisted rope from the eave rafter (pack: 14 x 64 board at x -19..-6, y 42..105,
+    rope 4 px wide), letters stacked top to bottom."""
     S = SLATE
     n = len(text)
     h = h or n * 9 + 7
     w = 14
     x0, x1 = cx - w // 2, cx - w // 2 + w - 1
-    for rx in (x0 + 3, x1 - 3):
-        for yy in range(y_beam, y0):
-            _px(img, rx, yy, H('#897339') if yy % 2 else H('#c1995a'))
+    rope = (H('#5f4b21'), H('#897339'), H('#b99f5e'), H('#3c2517'))
+    for yy in range(y_beam, y0):
+        for i in range(4):
+            c = rope[(i + yy) % 3] if i < 3 else rope[3]
+            _px(img, cx - 2 + i, yy, c)
     d = ImageDraw.Draw(img)
     d.rectangle((x0, y0, x1, y0 + h - 1), fill=S['out'])
     d.rectangle((x0 + 1, y0 + 1, x1 - 1, y0 + h - 2), fill=S['text'])
@@ -273,42 +312,41 @@ def hanging_sign(img, cx, y_beam, y0, text, h=None):
 
 # ------------------------------------------------------------------ wall, sill, plank ends
 
-def wall(img, ox, oy, y_top, y_bottom, x0=3, x1=172, seed=1):
-    """Vertical plank wall, seams on the slot grid (x = 7 + 18c): one plank per slot column."""
+def wall(img, ox, oy, y_top, y_bottom, x0=7, x1=168, seed=1):
+    """Vertical plank wall x 7..168 (the vanilla window border stays visible beside it), seams on the slot grid
+    (x = 7 + 18c): exactly one 18 px plank per slot column."""
     rnd = random.Random(seed)
     for y in range(oy + y_top, oy + y_bottom + 1):
         for x in range(ox + x0, ox + x1 + 1):
             _px(img, x, y, WOOD['base'])
-    for c in range(10):
+    for c in range(1, 9):
         sx = ox + 7 + 18 * c
-        if not (ox + x0 <= sx <= ox + x1):
-            continue
         _vline(img, sx, oy + y_top, oy + y_bottom, WOOD['d3'])
         _vline(img, sx - 1, oy + y_top, oy + y_bottom, WOOD['seam'])
         _vline(img, sx + 1, oy + y_top, oy + y_bottom, WOOD['seam'])
-    for c in range(-1, 10):                                 # grain strokes and knots inside each plank
+    for c in range(9):                                      # grain strokes and knots inside each plank
         px0 = ox + 7 + 18 * c + 2
         for _ in range(3):
             gx = px0 + rnd.randint(1, 12)
             gy = oy + y_top + rnd.randint(0, max(1, y_bottom - y_top - 10))
             gl = rnd.randint(6, 22)
             for yy in range(gy, min(gy + gl, oy + y_bottom)):
-                if ox + x0 <= gx <= ox + x1:
-                    _px(img, gx, yy, WOOD['grain'])
-                    if rnd.random() < 0.5 and ox + x0 <= gx + 1 <= ox + x1:
-                        _px(img, gx + 1, yy, WOOD['grain'])
+                _px(img, gx, yy, WOOD['grain'])
+                if rnd.random() < 0.5:
+                    _px(img, gx + 1, yy, WOOD['grain'])
         if rnd.random() < 0.6:
             kx = px0 + rnd.randint(3, 10)
             ky = oy + y_top + rnd.randint(4, max(5, y_bottom - y_top - 6))
-            if ox + x0 + 1 <= kx <= ox + x1 - 2:
-                for dx, dy, cc in ((0, 0, WOOD['d3']), (1, 0, WOOD['grain']), (0, 1, WOOD['grain']),
-                                   (1, 1, WOOD['d2']), (0, -1, WOOD['seam'])):
-                    _px(img, kx + dx, ky + dy, cc)
-    _vline(img, ox + x0, oy + y_top, oy + y_bottom, WOOD['edge'])
-    _vline(img, ox + x1, oy + y_top, oy + y_bottom, WOOD['edge'])
+            for dx, dy, cc in ((0, 0, WOOD['d3']), (1, 0, WOOD['grain']), (0, 1, WOOD['grain']),
+                               (1, 1, WOOD['d2']), (0, -1, WOOD['seam'])):
+                _px(img, kx + dx, ky + dy, cc)
+    _vline(img, ox + x0, oy + y_top, oy + y_bottom, H('#603620'))
+    _vline(img, ox + x0 + 1, oy + y_top, oy + y_bottom, WOOD['seam'])
+    _vline(img, ox + x1, oy + y_top, oy + y_bottom, H('#603620'))
+    _vline(img, ox + x1 - 1, oy + y_top, oy + y_bottom, WOOD['grain'])
 
 
-def sill(img, ox, oy, y, x0=3, x1=172):
+def sill(img, ox, oy, y, x0=7, x1=168):
     """Horizontal board across the wall (counter / window sill) with a shadow under it."""
     _hline(img, ox + x0, ox + x1, oy + y, WOOD['out'])
     _hline(img, ox + x0, ox + x1, oy + y + 1, WOOD['top'])
@@ -320,7 +358,7 @@ def sill(img, ox, oy, y, x0=3, x1=172):
     _hline(img, ox + x0 + 1, ox + x1 - 1, oy + y + 8, WOOD['d1'])
 
 
-def plank_ends(img, ox, oy, y_from, y_end=125, x0=3, x1=172, seed=1):
+def plank_ends(img, ox, oy, y_from, y_end=125, x0=7, x1=168, seed=1):
     """Planks continue under the sill and end at staggered heights, each end with a lit face and a shadow."""
     rnd = random.Random(seed)
     offs = [0, -4, -1, -6, 0, -5, -2, -6, -1, -3]          # stays above the client's inventory label (y 128)
@@ -534,15 +572,16 @@ def stall(img, ox, oy, sign_text='МАГАЗИН', hanging='ОТКРЫТО', sil
     plank_ends(img, ox, oy, 112, seed=seed)
     if sill_y:
         sill(img, ox, oy, sill_y)
+    bl = eave(img, ox, oy, 'left')                        # before the awning: it comes out from under the valance
+    br = eave(img, ox, oy, 'right')
     awning(img, ox, oy, awning_colors, seed=seed)
-    eave(img, ox - 4, oy + 13, 'left', 25, 8)
-    eave(img, ox + 179, oy + 13, 'right', 25, 8)
     vines(img, ox + 25, oy - 31, ox + 53, oy - 9, seed=seed, flowers=2)
     vines(img, ox + 122, oy - 31, ox + 150, oy - 9, seed=seed + 1, flowers=2)
-    vines(img, ox + 180, oy + 8, ox + 202, oy + 26, seed=seed + 2, flowers=3, hang=28)
+    vines(img, ox + 183, oy + 11, ox + 199, oy + 21, seed=seed + 2, flowers=2)            # sitting on the right rafter
+    vines(img, ox + 189, oy + 27, ox + 195, oy + 31, seed=seed + 5, flowers=1, hang=12)   # strand hanging under it
     sign(img, ox + 88, oy - 23, sign_text)
     if hanging:
-        hanging_sign(img, ox - 16, oy + 25, oy + 42, hanging)
+        hanging_sign(img, ox - 12, oy + bl[-12] + 1, oy + 42, hanging)
 
 
 # ------------------------------------------------------------------ 16x16 item icons of the set
