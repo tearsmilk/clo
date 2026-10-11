@@ -18,5 +18,20 @@ Brief (write it in the user's language), always with:
 - file names = variant ids, so the spec picks them up (`"picture": "art/${id}.png"`)
 - recommend Aseprite (or LibreSprite / Piskel) - real pixel editors with palettes and 1:1 export
 
+## Aseprite (optional, headless)
+With Aseprite built locally (`bash scripts/build_aseprite.sh`, then `export ASEPRITE=.../bin/aseprite`):
+```bash
+python3 scripts/aseprite_tools.py template kit/card.aseprite 120 48 --palette kit/palette.gpl --cover kit/card_cover.png
+python3 scripts/aseprite_tools.py export art/baker.aseprite art/baker.png        # the `art` layer only
+python3 scripts/aseprite_tools.py palette draft.png kit/palette.gpl draft_pal.png  # any picture -> pack colours
+python3 scripts/aseprite_tools.py rotate icon.png 30 icon_30.png                  # RotSprite, no blur
+python3 scripts/aseprite_tools.py sheet anim.aseprite anim_sheet.png              # frames -> sheet + JSON
+```
+The `.aseprite` template opens with the palette loaded, an `art` layer to paint on, the covered pixels (plate,
+frame corners) on a locked layer above and hidden centre guides - the artist sees exactly what the menu hides.
+Ask the artist to send `.aseprite` files back; `export` takes the `art` layer, so guides never leak in.
+Aseprite does not make generated art better by itself - it is the artist's tool and a reliable converter.
+Never ship the Aseprite binary (EULA: compile for your own use only).
+
 When the files arrive: drop them in `art/`, add the variants, build. Art at the exact size is pasted 1:1
 (no posterize/resize); anything else is fitted and posterized, which loses detail - ask for the right size.

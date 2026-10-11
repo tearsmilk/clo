@@ -6,6 +6,7 @@
 
 Writes into OUT:
     <name>_template.png       W x H, transparent with the covered pixels marked (paint on a copy of it)
+    <name>_cover.png          the pixels the menu draws over the art (frame corners, --plate nameplate)
     <name>_guide_x4.png       4x enlarged guide: safe zones in red, centre lines, size label
     <name>_mockup.png         (with --frame) the guide placed into the real menu art at X,Y, 3x
     palette.png / .txt / .gpl (with --palette) the colours used in those areas of the reference art, by frequency;
@@ -33,6 +34,8 @@ def main():
                     help='single pixel hidden by the frame (rounded corners)')
     ap.add_argument('--frame', nargs=3, metavar=('BG', 'X', 'Y'))
     ap.add_argument('--palette', nargs=5, action='append', default=[], metavar=('IMG', 'X', 'Y', 'W', 'H'))
+    ap.add_argument('--plate', type=int, nargs=3, metavar=('CX', 'Y', 'MINW'),
+                    help='rustic ribbon nameplate covering the art (centre x, top y, width) - drawn into the cover')
     ap.add_argument('--name', default='card')
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
@@ -42,6 +45,14 @@ def main():
     for (x, y) in a.covered:
         tpl.putpixel((x, y), (255, 0, 255, 255))
     tpl.save(os.path.join(a.out, f'{a.name}_template.png'))
+    # what the menu draws over the art (plate, frame corners) - the locked layer of the .aseprite template
+    cover = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    for (x, y) in a.covered:
+        cover.putpixel((x, y), (104, 52, 41, 255))
+    if a.plate:
+        import rustic
+        rustic.nameplate(cover, a.plate[0], a.plate[1], '', a.plate[2])
+    cover.save(os.path.join(a.out, f'{a.name}_cover.png'))
 
     k = 4
     g = Image.new('RGBA', (W * k, H * k), (0, 0, 0, 0))
