@@ -1,0 +1,291 @@
+{
+  "id": "hokaria_market",
+  "namespace": "hokaria",
+  "rows": 6,
+  "theme": "oak",
+  "header": {
+    "text": "Рынок",
+    "size": 2,
+    "color": "#8A5A2E"
+  },
+  "draw_free_slots": false,
+  "open_commands": [
+    "market",
+    "rynok"
+  ],
+  "preview_tooltip": "hand_in",
+  "layers": [
+    {
+      "type": "rect",
+      "slots": [
+        0,
+        0,
+        9,
+        6
+      ],
+      "pad": 1,
+      "pattern": "grass",
+      "color": "#5E9A36",
+      "outline": "#1E3A12"
+    },
+    {
+      "type": "post",
+      "box": [
+        9,
+        50,
+        7,
+        57
+      ],
+      "color": "#8A5A2E"
+    },
+    {
+      "type": "post",
+      "box": [
+        160,
+        50,
+        7,
+        57
+      ],
+      "color": "#8A5A2E"
+    },
+    {
+      "type": "rect",
+      "slots": [
+        1,
+        2,
+        2,
+        3
+      ],
+      "pattern": "planks_v",
+      "color": "#A86A3A",
+      "outline": "#3A1E0C"
+    },
+    {
+      "type": "rect",
+      "slots": [
+        6,
+        2,
+        2,
+        3
+      ],
+      "pattern": "planks_v",
+      "color": "#A86A3A",
+      "outline": "#3A1E0C"
+    },
+    {
+      "type": "rect",
+      "slots": [
+        3,
+        2,
+        3,
+        3
+      ],
+      "color": "#B83A2E",
+      "outline": "#3A1E0C",
+      "bevel": true
+    },
+    {
+      "type": "rect",
+      "box": [
+        10,
+        99,
+        156,
+        6
+      ],
+      "pattern": "planks_h",
+      "color": "#C08040",
+      "outline": "#3A1E0C"
+    },
+    {
+      "type": "awning",
+      "box": [
+        8,
+        18,
+        160,
+        40
+      ],
+      "colors": [
+        "#C2453A",
+        "#F2E4C8"
+      ],
+      "stripe": 10,
+      "scallop": 5
+    },
+    {
+      "type": "slot_frame",
+      "slot_list": [
+        10,
+        12,
+        14,
+        16
+      ],
+      "color": "#FBF3DC",
+      "inner": "#7C5A33"
+    },
+    {
+      "type": "sprite",
+      "name": "arrow",
+      "x": 45,
+      "y": 39,
+      "opts": {
+        "color": "#5DAA3A"
+      }
+    },
+    {
+      "type": "sprite",
+      "name": "arrow",
+      "x": 81,
+      "y": 39,
+      "opts": {
+        "color": "#E0AE22"
+      }
+    },
+    {
+      "type": "sprite",
+      "name": "arrow",
+      "x": 117,
+      "y": 39,
+      "opts": {
+        "color": "#C2453A"
+      }
+    },
+    {
+      "type": "slot_frame",
+      "slot": 31,
+      "color": "#F2C94C",
+      "inner": "#7E2218"
+    },
+    {
+      "type": "sprite",
+      "name": "crate",
+      "x": 9,
+      "y": 111,
+      "opts": {
+        "w": 13,
+        "h": 11
+      }
+    },
+    {
+      "type": "sprite",
+      "name": "sack",
+      "x": 46,
+      "y": 111
+    },
+    {
+      "type": "sprite",
+      "name": "crate",
+      "x": 117,
+      "y": 112,
+      "opts": {
+        "w": 12,
+        "h": 10,
+        "color": "#9A6A3A"
+      }
+    },
+    {
+      "type": "sprite",
+      "name": "sack",
+      "x": 154,
+      "y": 111
+    }
+  ],
+  "buttons": [
+    {
+      "id": "timer",
+      "x": 1,
+      "y": 5,
+      "style": "flat",
+      "color": "#E08A2E",
+      "frame": "#FBF3DC",
+      "icon": "sprite:hourglass",
+      "name": "&6Новые заказы",
+      "lore": [
+        "&7Обновятся через: &e%hokaria_market_reset%"
+      ]
+    },
+    {
+      "id": "hand_in",
+      "label": "Сдать",
+      "x": 3,
+      "y": 5,
+      "w": 3,
+      "style": "gradient",
+      "color": "#5DAA3A",
+      "frame": "#FBF3DC",
+      "name": "&a&lСдать заказ",
+      "lore": [
+        "&7Сдай урожай по заказу",
+        "&7и получи награду",
+        "",
+        "&a» Нажми, чтобы сдать"
+      ],
+      "commands": [
+        "[player] market handin"
+      ]
+    },
+    {
+      "id": "journal",
+      "x": 7,
+      "y": 5,
+      "style": "flat",
+      "color": "#B83A2E",
+      "frame": "#FBF3DC",
+      "icon": "sprite:ledger",
+      "name": "&cЖурнал заказов",
+      "commands": [
+        "[player] market history"
+      ]
+    }
+  ],
+  "extra_items": [
+    {
+      "id": "step1",
+      "material": "WHEAT",
+      "amount": 32,
+      "slot": 10,
+      "display_name": "&a✔ Шаг 1: Пшеница x32",
+      "lore": [
+        "&7Выполнено"
+      ],
+      "preview": "sprite:wheat"
+    },
+    {
+      "id": "step2",
+      "material": "CARROT",
+      "amount": 16,
+      "slot": 12,
+      "display_name": "&eШаг 2: Морковь x16",
+      "lore": [
+        "&7Сейчас"
+      ],
+      "preview": "sprite:carrot"
+    },
+    {
+      "id": "step3",
+      "material": "PUMPKIN",
+      "amount": 8,
+      "slot": 14,
+      "display_name": "&cШаг 3: Тыквы x8",
+      "preview": "sprite:pumpkin"
+    },
+    {
+      "id": "step4",
+      "material": "COD",
+      "amount": 12,
+      "slot": 16,
+      "display_name": "&cШаг 4: Треска x12",
+      "preview": "sprite:fish"
+    },
+    {
+      "id": "reward",
+      "material": "EMERALD",
+      "amount": 5,
+      "slot": 31,
+      "display_name": "&6Награда",
+      "lore": [
+        "&7За все 4 шага"
+      ],
+      "preview": "sprite:emerald"
+    }
+  ]
+}

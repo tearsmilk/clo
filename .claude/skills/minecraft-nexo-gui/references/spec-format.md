@@ -68,3 +68,22 @@ Paths are relative to the spec file.
 Label fit (pixel font, 1px spacing): a 3-wide button holds ~8 capitals / ~9 lowercase letters on one line,
 a 2-wide ~5, a 1-wide none - use two lines or a tooltip. The builder stops with an error instead of
 squeezing letters.
+
+## Scene layers (free-form art, like a market stall or a workshop)
+
+`layers` is a list drawn after the panel and before buttons (`"above": true` draws after buttons). Boxes are
+`"slots": [col,row,w,h]` (+ `pad`) or `"box": [x,y,w,h]` in window pixels.
+
+| type | keys | use |
+|------|------|-----|
+| `rect` | `color`, `pattern`, `outline`, `bevel` | grass ground, wooden walls, cloth, counters |
+| `awning` | `colors` (stripe colours), `stripe` px, `scallop` px | striped market awning with rail and wavy edge |
+| `post` | `color` | wooden posts/pillars |
+| `image` | `path`, `colors` | an illustration covering the box |
+| `sprite` | `name`, `x`,`y` or `slot`, `opts` | props: `crate` (w,h,color), `arrow` (w,h,color), `sack`, `wheat`, `coin`, `hourglass`, `ledger`, `carrot`, `pumpkin`, `emerald`, `fish`, `check` |
+| `slot_frame` | `slot` or `slot_list`, `color`, `inner`, `outline` | framed highlighted slots for quest steps, rewards, inputs (real items go there) |
+
+Button icons can be sprites: `"icon": "sprite:hourglass"`.
+`extra_items[].preview: "sprite:carrot"` (or a PNG) draws a stand-in item with its amount in preview.png only, so
+the user sees how slots with real items will look; it is not written to the DeluxeMenus file.
+See `assets/examples/market_menu/spec.json` (market stall with 4 order steps, arrows, reward slot, hand-in button).

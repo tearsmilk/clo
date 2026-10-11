@@ -50,7 +50,9 @@ single files, e.g. Nexo item icons at 16px. The rules behind it are in `referenc
 - Dependencies: `pip install pillow "rembg[cpu]"` (rembg downloads its model on first use).
 
 ### 3. Write the spec and build
-A spec is JSON. Two complete examples: `assets/examples/farm_menu/spec.json` (9 equal sunburst tiles, oak) and
+A spec is JSON. Three complete examples (third: `assets/examples/market_menu/spec.json`, a whole scene - market
+stall with awning, order steps with arrows, reward slot, hand-in button - built from `layers` and pixel `sprites`).
+Two tile-menu examples: `assets/examples/farm_menu/spec.json` (9 equal sunburst tiles, oak) and
 `assets/examples/hub_menu/spec.json` (bento layout like popular server menus: vanilla frame, big header tab,
 grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icons). Every key is listed in
 `references/spec-format.md`. The short version:
@@ -78,6 +80,9 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
   fake bold by smearing pixels, letters with 1px counters (М, Ю, Ж) turn into blobs.
 - Labels: pixel font with lowercase and Cyrillic, `\n` for two lines, `label_style` `shadow` | `plaque` | `bar` |
   `wood` | `stone` (UI-kit plates with nails/chips).
+- Scenes: when the reference is a picture-like GUI (stall, workshop, shop counter) use `layers` (rect/pattern,
+  awning, post, sprite, slot_frame) instead of tiles; real items sit in framed slots. No image model needed -
+  `scripts/sprites.py` has hand-made props and you can add more grid sprites there.
 - Decor: `decor` puts sparkles, stars, clouds, moons, leaves anywhere (px coordinates, negative y = above window).
   Fit is ~8-9 letters per line on a 3-wide button, ~5 on 2-wide; the builder refuses labels that do not fit
   rather than squeezing letters (squeezed pixel letters merge into an unreadable blob).

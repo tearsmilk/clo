@@ -31,6 +31,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageOps
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pixfont import draw_text, text_width, text_height, draw_block_text, block_text_size  # noqa: E402
 import pixelstyle  # noqa: E402
+import sprites  # noqa: E402
 
 
 # ----------------------------------------------------------------------------- colours / themes
@@ -242,6 +243,11 @@ def cover(path, w, h, colors=48):
     return im.quantize(colors=colors, method=Image.MEDIANCUT).convert('RGBA')
 
 
+def load_icon_img(ic, size):
+    k = size / max(ic.size)
+    return ic.resize((max(1, round(ic.width * k)), max(1, round(ic.height * k))), Image.NEAREST)
+
+
 def load_icon(path, max_w, max_h, alpha_cut=110):
     """Fit an RGBA icon into max_w x max_h with a hard alpha edge (pixel-art friendly)."""
     ic = Image.open(path).convert('RGBA')
@@ -249,8 +255,10 @@ def load_icon(path, max_w, max_h, alpha_cut=110):
     if bb:
         ic = ic.crop(bb)
     k = min(max_w / ic.width, max_h / ic.height)
+    if k >= 1:                       # small hand-made sprite: keep it crisp, only whole-number upscales
+        k = math.floor(k)
     nw, nh = max(1, round(ic.width * k)), max(1, round(ic.height * k))
-    resample = Image.NEAREST if (ic.width % nw == 0 and ic.height % nh == 0) else Image.LANCZOS
+    resample = Image.NEAREST if (k >= 1 or (ic.width % nw == 0 and ic.height % nh == 0)) else Image.LANCZOS
     ic = ic.resize((nw, nh), resample)
     ic.putalpha(ic.getchannel('A').point(lambda v: 255 if v > alpha_cut else 0))
     return ic
@@ -306,6 +314,76 @@ def draw_decor(img, oy, items):
                     x, y = it['x'] + i, oy + it['y'] + j
                     if 0 <= x < img.width and 0 <= y < img.height:
                         img.putpixel((x, y), c)
+
+
+
+# ----------------------------------------------------------------------------- scene layers
+
+def layer_box(L):
+    """Pixel box (x0, y0, x1, y1) of a layer from `slots: [col,row,w,h]` (+pad) or `box: [x,y,w,h]` in px."""
+    if 'slots' in L:
+        c, r, w, h = L['slots']
+        x0, y0 = slot_xy(c, r)
+        p = L.get('pad', 0)
+        return x0 - p, y0 - p, x0 + w * 18 - 1 + p, y0 + h * 18 - 1 + p
+    x, y, w, h = L['box']
+    return x, y, x + w - 1, y + h - 1
+
+
+def draw_layers(img, oy, layers, sdir, th):
+    """Free-form scene art: backgrounds, awnings, posts, props and framed slots (all px or slot based)."""
+    for L in layers:
+        t = L['type']
+        if t == 'sprite':
+            spr = sprites.render(L['name'], **L.get('opts', {}))
+            if 'slot' in L:
+                sx, sy = slot_xy(L['slot'] % 9, L['slot'] // 9)
+                x, y = sx + (18 - spr.width) // 2, sy + (18 - spr.height) // 2
+            else:
+                x, y = L['x'], L['y']
+            img.alpha_composite(spr, (x, y + oy))
+            continue
+        if t != 'slot_frame':
+            x0, y0, x1, y1 = layer_box(L)
+            y0, y1 = y0 + oy, y1 + oy
+            w, h = x1 - x0 + 1, y1 - y0 + 1
+        if t == 'rect':
+            if L.get('pattern'):
+                tile = pattern(L['pattern'], L.get('color', '#808080'), w, h, seed=L.get('seed', 1))
+            else:
+                tile = Image.new('RGBA', (w, h), H(L.get('color', '#808080')))
+            img.alpha_composite(tile, (x0, y0))
+            if L.get('outline'):
+                ImageDraw.Draw(img).rectangle((x0, y0, x1, y1), outline=H(L['outline']))
+            if L.get('bevel'):
+                c = H(L.get('color', '#808080'))
+                d = ImageDraw.Draw(img)
+                o = 1 if L.get('outline') else 0
+                d.line((x0 + o, y0 + o, x1 - o, y0 + o), fill=lighten(c, 0.25))
+                d.line((x0 + o, y1 - o, x1 - o, y1 - o), fill=darken(c, 0.3))
+        elif t == 'awning':
+            img.alpha_composite(sprites.awning(w, h, tuple(L.get('colors', ('#C2453A', '#F2E4C8'))),
+                                               L.get('stripe', 9), L.get('scallop', 4)), (x0, y0))
+        elif t == 'post':
+            img.alpha_composite(sprites.post(w, h, L.get('color', '#8A5A2E')), (x0, y0))
+        elif t == 'image':
+            im = cover(resolve(L['path'], sdir), w, h, L.get('colors', 48))
+            img.alpha_composite(im, (x0, y0))
+        elif t == 'slot_frame':          # a framed, highlighted item slot (quest steps, reward, input)
+            for idx in L.get('slot_list', [L.get('slot')]):
+                sx, sy = slot_xy(idx % 9, idx // 9)
+                sy += oy
+                fc = H(L.get('color', '#FBF3DC'))
+                d = ImageDraw.Draw(img)
+                d.rectangle((sx - 2, sy - 2, sx + 19, sy + 19), fill=H(L.get('outline', '#1E1408')))
+                d.rectangle((sx - 1, sy - 1, sx + 18, sy + 18), fill=fc)
+                inner = dict(th)
+                if L.get('inner'):
+                    ic = H(L['inner'])
+                    inner.update(slot_in=ic, slot_dk=darken(ic, 0.45), slot_lt=lighten(ic, 0.3))
+                draw_slot(img, sx, sy, inner)
+        else:
+            raise SystemExit(f"unknown layer type '{t}'")
 
 
 # ----------------------------------------------------------------------------- buttons
@@ -379,6 +457,13 @@ def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
         avail_w = w - 2 * m
         fpad = 3 if b.get('icon_frame') else 0
         size = b.get('icon_size') or min(avail_w, avail_h) - 2 * fpad
+        icon_src = b['icon']
+        if icon_src.startswith('sprite:'):
+            spr = sprites.render(icon_src[7:])
+            import tempfile
+            tmp = os.path.join(tempfile.gettempdir(), f"nexo_gui_sprite_{icon_src[7:]}.png")
+            spr.save(tmp)
+            b = dict(b, icon=tmp)
         style_opts = dict(spec_icon_style or {}, **(b.get('icon_style') or {}))
         if style_opts.get('enabled', bool(style_opts)) or b.get('disabled'):
             sil = style_opts.get('silhouette_color', '#E08A2E') if b.get('disabled') else None
@@ -540,6 +625,8 @@ def build(spec_path, out):
         bevel_box(tex, (x0 - pad, top + y0 - pad, x1 + pad, top + y1 + pad), c,
                   outline=None, hi=darken(c, 0.45), sh=lighten(c, 0.35))
 
+    draw_layers(tex, top, [L for L in spec.get('layers', []) if not L.get('above')], sdir, th)
+
     keep_slots = set(spec.get('slots_visible', []))
     if spec.get('draw_free_slots', True):
         keep_slots |= {i for i in range(rows * 9) if i not in used}
@@ -556,6 +643,7 @@ def build(spec_path, out):
             draw_slot(tex, x, y + top, th)
     for b in spec.get('buttons', []):
         draw_button(tex, top, b, sdir, th, label_case, spec.get('icon_style'))
+    draw_layers(tex, top, [L for L in spec.get('layers', []) if L.get('above')], sdir, th)
 
     title_col = H(spec.get('title_color', th['text']))
     if spec.get('title') and not spec.get('header'):
@@ -611,7 +699,7 @@ def build(spec_path, out):
     for it in spec.get('extra_items', []):   # raw DeluxeMenus items (real visible items in slots_visible etc.)
         lines.append(f"  '{it['id']}':")
         for k, v in it.items():
-            if k != 'id':
+            if k not in ('id', 'preview'):
                 lines.append(f"    {k}: {json.dumps(v, ensure_ascii=False)}")
     open(os.path.join(out, f'DeluxeMenus/gui_menus/{gid}.yml'), 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
 
@@ -641,6 +729,21 @@ def build(spec_path, out):
         bg = bg.filter(ImageFilter.GaussianBlur(8))
         bg.alpha_composite(Image.new('RGBA', bg.size, (16, 10, 20, 140)))
         canvas = bg
+    # preview-only: draw stand-ins for real items (extra_items with "preview": "sprite:name" or a PNG path)
+    for it in spec.get('extra_items', []):
+        pv = it.get('preview')
+        if not pv:
+            continue
+        ic = sprites.render(pv[7:]) if pv.startswith('sprite:') else load_icon(resolve(pv, sdir), 16, 16)
+        if ic.width > 16 or ic.height > 16:
+            ic = load_icon_img(ic, 16)
+        for sl in ([it['slot']] if 'slot' in it else it.get('slots', [])):
+            sx, sy = slot_xy(sl % 9, sl // 9)
+            ox, oyy = sx + 1 + (16 - ic.width) // 2, sy + 1 + top + (16 - ic.height) // 2
+            big.alpha_composite(ic.resize((ic.width * S, ic.height * S), Image.NEAREST), (ox * S, oyy * S))
+            if it.get('amount', 1) > 1:
+                draw_text(big, (sx + 17 - text_width(str(it['amount']))) * S, (sy + top + 10) * S, str(it['amount']),
+                          (255, 255, 255, 255), scale=S, shadow=(62, 62, 62, 255))
     canvas.alpha_composite(big, (40, 40))
     if tip:
         sx, sy = slot_xy(tb['x'], tb['y'])
