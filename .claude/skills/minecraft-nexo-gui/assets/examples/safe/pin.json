@@ -6,7 +6,7 @@
   "left": 6,
   "right": 9,
   "top": 6,
-  "bottom": 7
+  "bottom": 0
  },
  "draw_free_slots": false,
  "id": "hokaria_safe_pin",
@@ -16,8 +16,16 @@
  "layers": [
   {
    "type": "safe",
+   "part": "case",
+   "rows": 6
+  },
+  {
+   "type": "safe",
    "part": "body",
-   "depth": 4
+   "h": 126,
+   "depth": 4,
+   "bottom_depth": 2,
+   "feet": false
   },
   {
    "type": "safe",
@@ -481,5 +489,8 @@
    ]
   }
  },
- "comment": "uses the hokaria_safe_lamp item defined by lock.json"
+ "comment": "uses the hokaria_safe_lamp item defined by lock.json",
+ "container_panel": false,
+ "draw_player_inventory": false,
+ "preview_vanilla_under": true
 }

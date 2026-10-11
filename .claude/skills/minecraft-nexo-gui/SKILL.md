@@ -152,10 +152,11 @@ Then send the user the preview first (they judge visually), then the files.
   counter; all five are in `assets/examples/shop_market/`, layouts and DeluxeMenus logic (meta counter, money,
   sell caveat) in `references/shop-flow.md`. Read it whenever the user asks for a shop / market / store menu.
 
-- **Safe / vault kit** (brushed steel window, door with hinges, keypad, LCD with lamps, handle wheel, brass
-  plates, bolts): `theme: "steel"` + layers `{"type": "safe", "part": ...}` from `scripts/safe.py`; code lock,
-  change-code and 54-slot storage skin in `assets/examples/safe/`; the code-entry logic (DeluxeMenus meta +
-  regex requirements) in `references/safe-lock.md` - reuse it for any numeric input.
+- **Safe / vault kit** (classic steel safe: box with top/side faces, inset door, combination dial, 3-spoke
+  handle, heavy hinges, feet; the open safe with the door swung out in perspective; keypad/LCD for a code
+  variant): `theme: "steel"` + layers `{"type": "safe", "part": ...}` from `scripts/safe.py`; examples in
+  `assets/examples/safe/` (turn-the-handle lock with one menu per handle angle, storage skin, code lock).
+  `references/safe-lock.md`.
 
 ## Rebuilding a reference "1 in 1"
 When the user shows a finished GUI and asks for an exact copy, measure it instead of eyeballing:

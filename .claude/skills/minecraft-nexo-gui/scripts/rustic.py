@@ -353,14 +353,16 @@ def nameplate(img, cx, y, text, min_w=60):
 def card(img, x, y, w, h, picture, label=None):
     """Picture card: dark outline, brown frame with a tan inner line, the picture, and a nameplate overlapping
     the bottom edge."""
+    corners = ((x, y), (x + w - 1, y), (x, y + h - 1), (x + w - 1, y + h - 1))
+    under = {p: img.getpixel(p) for p in corners}           # cut corners show what was below (never a hole)
     d = ImageDraw.Draw(img)
     d.rectangle((x, y, x + w - 1, y + h - 1), fill=C(W1))
     d.rectangle((x + 1, y + 1, x + w - 2, y + h - 2), fill=C(W4))
     d.rectangle((x + 2, y + 2, x + w - 3, y + h - 3), fill=C(W7))
     pic = picture.resize((w - 6, h - 6), Image.NEAREST) if picture.size != (w - 6, h - 6) else picture
     img.alpha_composite(pic, (x + 3, y + 3))
-    for cx_, cy_ in ((x, y), (x + w - 1, y), (x, y + h - 1), (x + w - 1, y + h - 1)):
-        img.putpixel((cx_, cy_), (0, 0, 0, 0))
+    for p_, c_ in under.items():
+        img.putpixel(p_, c_)
     if label:
         nameplate(img, x + w // 2, y + h - 10, label)
 

@@ -650,11 +650,14 @@ def draw_shop(img, oy, L, sdir):
 def draw_safe(img, oy, L):
     """Safe kit parts. x / y / box are window px, slots are [col, row, ...] like other layers."""
     p, ox = L['part'], OX
-    if p == 'body':                       # box volume: side + bottom faces and feet outside the window
-        safe.body(img, ox, oy, 176, 114 + 18 * L.get('rows', 6), L.get('depth', 4), L.get('feet', True))
+    if p == 'case':                       # steel box over the container part only (vanilla inventory below)
+        safe.case(img, ox, oy, L.get('rows', 6), L.get('seed', 3))
+    elif p == 'body':                     # box volume: side + bottom faces (+ feet) outside the box
+        h = L.get('h', 114 + 18 * L.get('rows', 6))
+        safe.body(img, ox, oy, 176, h, L.get('depth', 4), L.get('feet', True), L.get('bottom_depth'))
     elif p == 'open_door':               # the door swung open on the left (storage screen), before 'hinges'
         safe.open_door(img, ox, oy, L.get('x', -3), L.get('y0', 4), L.get('y1', 121), L.get('width', 44),
-                       L.get('grow', 7), L.get('thick', 9), L.get('top_thick', 3))
+                       L.get('grow', 7), L.get('thick', 9), L.get('top_thick', 3), side=L.get('side', 'left'))
     elif p == 'door':
         x0, y0, x1, y1 = L.get('box', [4, 4, 171, 121])
         safe.door(img, ox + x0, oy + y0, ox + x1, oy + y1, L.get('seed', 5))
@@ -677,7 +680,28 @@ def draw_safe(img, oy, L):
         safe.keypad(img, ox, oy, c, r, L['labels'], {int(k): v for k, v in L.get('colors', {}).items()},
                     {int(k): v for k, v in L.get('glyphs', {}).items()})
     elif p == 'wheel':
-        safe.wheel(img, ox + L['x'], oy + L['y'], L.get('r', 20), L.get('spokes', 4))
+        safe.wheel(img, ox + L['x'], oy + L['y'], int(L.get('r', 20)), int(L.get('spokes', 4)),
+                   float(L.get('angle', 0)))
+    elif p == 'box3d':
+        safe.box3d(img, ox, oy, 176, L.get('h', 126), L.get('side', 5), L.get('top', 5))
+    elif p == 'door_inset':
+        x0, y0, x1, y1 = L.get('box', [9, 9, 166, 116])
+        safe.door_inset(img, ox + x0, oy + y0, ox + x1, oy + y1, L.get('seed', 5))
+    elif p == 'dial':
+        safe.dial(img, ox + L['x'], oy + L['y'], int(L.get('r', 13)))
+    elif p == 'handle':
+        safe.handle3(img, ox + L['x'], oy + L['y'], int(L.get('length', 30)), float(L.get('angle', 0)),
+                     int(L.get('spokes', 3)))
+    elif p == 'hinge_blocks':
+        for y in L.get('ys', [14, 88]):
+            safe.hinge_block(img, ox + L.get('x', 176), oy + y, L.get('h', 24), L.get('side', 'right'),
+                             L.get('leaf', True))
+    elif p == 'feet':
+        safe.feet(img, [(ox + x, oy + y) for x, y in L['pts']], L.get('w', 12), L.get('h', 3))
+    elif p == 'turn_arrows':
+        safe.turn_arrows(img, ox + L['x'], oy + L['y'], int(L.get('r', 50)))
+    elif p == 'lamps':
+        safe.lamps(img, [(ox + x, oy + y) for x, y in L['pts']], int(L.get('lit', 0)), L.get('color', 'green'))
     elif p == 'keyhole':
         safe.keyhole(img, ox + L['x'], oy + L['y'])
     elif p == 'recess':
@@ -1223,10 +1247,11 @@ def build_spec(spec, sdir, out):
     # Wherever the texture is transparent inside the window, the vanilla grey chest background shows through.
     win = tex.crop((OX, top, OX + W, top + Hh)).getchannel('A')
     corner = lambda x, y: min(x, W - 1 - x) + min(y, Hh - 1 - y) < 3     # vanilla corners are cut too
-    holes = sum(1 for y in range(Hh) for x in range(W) if not win.getpixel((x, y)) and not corner(x, y))
+    hole_h = Hh if spec.get('draw_player_inventory', True) or spec.get('container_panel', True) else rows * 18 + 17
+    holes = sum(1 for y in range(hole_h) for x in range(W) if not win.getpixel((x, y)) and not corner(x, y))
     if spec.get('background'):
         holes = 0                        # the vanilla chest shows through on purpose (pack design)
-    if holes and not spec.get('container_panel', True):
+    if holes:                            # also catches layers that punch holes into a drawn panel
         print(f'warning: {holes} px inside the window are transparent - the vanilla chest background will show '
               f'there (check preview_holes.png)', file=sys.stderr)
 
@@ -1321,7 +1346,8 @@ def build_spec(spec, sdir, out):
         under.alpha_composite(tex)
         ptex = under
     big = ptex.resize((TW * S, TH * S), Image.NEAREST)
-    if hide_label is False and (spec.get('draw_player_inventory', True) or spec.get('background')) and \
+    if hide_label is False and (spec.get('draw_player_inventory', True) or spec.get('background')
+                                or spec.get('preview_vanilla_under')) and \
             spec.get('inventory_label', 'Инвентарь'):
         # preview only: the label the client prints at (8, 18r+20)
         draw_text(big, (OX + 8) * S, (top + rows * 18 + 20) * S, spec.get('inventory_label', 'Инвентарь'),

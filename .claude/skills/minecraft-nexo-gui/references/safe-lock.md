@@ -1,45 +1,37 @@
-# Safe: code lock + storage (steel kit)
+# Safe: turn-the-handle lock + storage (steel kit)
 
-Example: `assets/examples/safe/` - `lock.json` (door with keypad, `/safe`), `pin.json` (same door, sets a new
-code, `/safe_pin`), `storage.json` (54-slot steel skin for a vault plugin). Kit: `scripts/safe.py`,
-`theme: "steel"`, layers `{"type": "safe", ...}` (keys in `references/spec-format.md`).
+Example: `assets/examples/safe/` - `lock.json` (classic safe front, `/safe`), `storage.json` (the safe open,
+54 slots, skin for a vault plugin). Alternative: `code_lock.json` + `pin.json` (keypad with a 4-digit code).
+Kit: `scripts/safe.py`, `theme: "steel"`, layers `{"type": "safe", ...}` (keys in `references/spec-format.md`).
 
-## Layout (6 rows)
-| zone | slots | what |
-|------|-------|------|
-| title band y 0..16 | - | brass nameplate (СЕЙФ / НОВЫЙ КОД) |
-| row 0 | c2-c6 | LCD: lamp sockets c2, c3, c5, c6, padlock c4 - a lit-lamp item appears per typed digit |
-| rows 1-4 | c3-c5 | keypad 1-9, red clear, 0, green OK - each key on its own slot |
-| rows 1-4 | c0-c2 | instruction plate + keyhole (decor) |
-| rows 1-4 | c6-c8 | handle wheel (decor) |
-| row 5 | - | bottom of the door, keeps the keys off the door edge |
-Volume: the safe is a box - `body` adds a dark side face (right) and bottom face with feet, the nameplate sits
-on the top edge, hinges stick out on the left, bolts out of the right side of the storage screen (spec
-`canvas: {"left": 6, "right": 9, "top": 6, "bottom": 7}`). The client's "Inventory" label line
-(y 18*rows + 20) gets a light band because dark-grey text vanishes on dark steel.
+## Look (from the user's photo of a real safe)
+- Only the safe is drawn: a steel box over the container part of the window (`case`), the vanilla player
+  inventory stays below (it cannot be removed - the client always draws it; we only leave it out of the
+  texture: `container_panel: false`, `draw_player_inventory: false`, `preview_vanilla_under: true`).
+- Volume: top face and left face (`box3d`), heavy hinges whose pins stick out past the right side
+  (`hinge_blocks`), the nameplate on the top edge. Volume = depth, not size. No feet: they land on the vanilla
+  inventory panel under the safe and look stuck on (user feedback).
+- Door set into the front with a dark seam (`door_inset`), a combination dial on top (`dial`), a big 3-spoke
+  chrome handle with ball ends below (`handle`). Keep the handle's reach clear of the dial at every angle.
 
-## Code entry with DeluxeMenus meta (no extra plugin)
-- On open: `[meta] set code STRING -` (the leading `-` keeps the string non-empty).
-- Digit key: `[meta] set code STRING %deluxemenus_meta_code_STRING_-%7`, `[refresh]`; requirement
-  `regex matches` input `%deluxemenus_meta_code_STRING_-%` regex `^-[0-9]{0,3}$` (max 4 digits).
-- Lamp n (item over the socket): `view_requirement` regex `^-[0-9]{n,}$`.
-- Clear: `[meta] set code STRING -`.
-- OK: `string equals` input the code, output `%deluxemenus_meta_safe_pin_STRING_-0000%` (default code 0000);
-  success opens the storage (`[player] pv 1` for PlayerVaults - replace with your vault plugin) and sets
-  `safe_unlocked BOOLEAN true`; deny resets the code with a message and a sound.
-- Change code: `/safe_pin` has `open_requirement` `has meta safe_unlocked BOOLEAN true` (only right after a
-  correct code); OK requires `^-[0-9]{4}$` and saves `[meta] set safe_pin STRING <code>`.
-The same pattern makes any numeric input: amounts, page numbers, a lottery number.
-Meta data is stored per player (persistent). Test regex / meta syntax once on the server's DeluxeMenus version.
+## Turning the handle (no code)
+A texture cannot rotate inside a menu, so every handle angle is its own menu: `lock.json` has `variants`
+0 / 40 / 80 deg -> menus `hokaria_safe_lock_0/_1/_2`. The handle is one invisible button over its slots
+(c2-c6, r1-r5); a click plays a sound and opens the next angle, the last click plays the door sound, closes
+and opens the vault (`[player] pv 1` for PlayerVaults - replace with your plugin's command).
+Turning menus reopen instantly; there is no progress indicator on purpose (the user wanted just the handle).
 
-## Storage
-The storage screen shows the safe OPEN: `open_door` draws the door swung out on the left hinges in perspective
-(far edge taller - closer to the viewer), then the `hinges` sit on the joint. It keeps the closed door's size
-and gets its weight from depth: a 9 px thick edge with the bolts coming out of it, a top face, a raised plug
-panel that casts a shadow, shadows under the rods and the mechanism. (User feedback: "small door" meant flat,
-not short - a door as tall as the whole window looked huge.) Canvas `{"left": 64, "right": 9, "top": 8,
-"bottom": 7}` -> texture 249x237.
+## The open safe (storage)
+`open_door` with `side: "right"` (hinges on the right like the photo): the door swung out in perspective -
+same height as the closed door, thick edge with the bolts coming out of it, raised plug, mechanism and rods;
+the hinge knuckles (`leaf: false`) sit on the joint. Bolts only on the door - not also on the body.
+Canvas `{"left": 8, "right": 66, "top": 8, "bottom": 0}` -> texture 250x230.
+DeluxeMenus cannot hold items: use the `menu_title` from `DeluxeMenus/gui_menus/hokaria_safe.yml` as the
+inventory title of the vault plugin (PlayerVaults, AxVaults...); PlaceholderAPI form in the file's comment.
 
-DeluxeMenus cannot hold items. The storage screen is a skin: use the `menu_title` string from
-`DeluxeMenus/gui_menus/hokaria_safe.yml` as the inventory title of the vault plugin (PlayerVaults, AxVaults,
-...). If the plugin does not parse `<glyph:...>` tags, use the PlaceholderAPI form from the file's comment.
+## Code lock (alternative)
+Keypad on the door, LCD with lamp sockets; DeluxeMenus meta + regex requirements:
+- on open `[meta] set code STRING -`; digit `[meta] set code STRING %deluxemenus_meta_code_STRING_-%7` with
+  requirement `regex matches` `^-[0-9]{0,3}$`; lamp n is an item with `view_requirement` regex `^-[0-9]{n,}$`;
+- OK compares with `%deluxemenus_meta_safe_pin_STRING_-0000%`; `/safe_pin` (open_requirement `has meta
+  safe_unlocked`) saves a new code. The same pattern makes any numeric input.

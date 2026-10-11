@@ -4,16 +4,26 @@
  "rows": 6,
  "theme": "steel",
  "canvas": {
-  "left": 64,
-  "right": 9,
+  "left": 8,
+  "right": 66,
   "top": 8,
-  "bottom": 7
+  "bottom": 0
  },
+ "container_panel": false,
+ "draw_player_inventory": false,
+ "preview_vanilla_under": true,
  "layers": [
   {
    "type": "safe",
-   "part": "body",
-   "depth": 4
+   "part": "box3d",
+   "h": 126,
+   "side": 5,
+   "top": 5
+  },
+  {
+   "type": "safe",
+   "part": "case",
+   "rows": 6
   },
   {
    "type": "safe",
@@ -28,9 +38,10 @@
   {
    "type": "safe",
    "part": "open_door",
+   "side": "right",
    "x": -3,
-   "y0": 4,
-   "y1": 121,
+   "y0": 10,
+   "y1": 115,
    "width": 44,
    "grow": 7,
    "thick": 9,
@@ -38,24 +49,15 @@
   },
   {
    "type": "safe",
-   "part": "hinges",
-   "x": -4,
+   "part": "hinge_blocks",
+   "x": 176,
    "ys": [
     16,
-    84
+    86
    ],
-   "leaf": 3
-  },
-  {
-   "type": "safe",
-   "part": "bolts",
-   "x": 171,
-   "ys": [
-    26,
-    62,
-    98
-   ],
-   "length": 11
+   "h": 24,
+   "side": "right",
+   "leaf": false
   },
   {
    "type": "safe",
@@ -64,5 +66,6 @@
    "y": -5,
    "text": "СЕЙФ"
   }
- ]
+ ],
+ "draw_free_slots": true
 }

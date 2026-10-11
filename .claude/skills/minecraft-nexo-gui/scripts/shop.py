@@ -66,6 +66,17 @@ def _px(img, x, y, c):
         img.putpixel((x, y), c)
 
 
+def _keep(img, pts):
+    """Remember the pixels under the corners of a box before drawing it: cut corners must show what was there
+    (wall, awning), never become transparent - a transparent pixel inside the window shows the vanilla grey."""
+    return {p: img.getpixel(p) for p in pts if 0 <= p[0] < img.width and 0 <= p[1] < img.height}
+
+
+def _restore(img, saved):
+    for p, c in saved.items():
+        img.putpixel(p, c)
+
+
 def _hline(img, x0, x1, y, c):
     for x in range(x0, x1 + 1):
         _px(img, x, y, c)
@@ -176,6 +187,7 @@ def sign(img, cx, y, text, w=70, h=11):
     G = GREEN_SIGN
     x0 = cx - w // 2
     x1 = x0 + w - 1
+    saved = _keep(img, [(xx, yy) for xx in (x0 - 2, x1 + 2) for yy in (y - 2, y + h + 1)])
     d = ImageDraw.Draw(img)
     d.rectangle((x0 - 2, y - 2, x1 + 2, y + h + 1), fill=G['out'])
     d.rectangle((x0 - 1, y - 1, x1 + 1, y + h), fill=G['frame'])
@@ -184,9 +196,7 @@ def sign(img, cx, y, text, w=70, h=11):
     d.rectangle((x0, y, x1, y + h - 1), fill=G['body'])
     _hline(img, x0, x1, y + h - 1, G['dark'])
     _hline(img, x0, x1, y, G['light'])
-    for xx in (x0 - 2, x1 + 2):
-        for yy in (y - 2, y + h + 1):
-            _px(img, xx, yy, (0, 0, 0, 0))
+    _restore(img, saved)
     tw, th = text_size(text)
     letters(img, cx - tw // 2, y + (h - th) // 2 + 1, text, G['frame_hi'], G['frame'], shadow=G['dark'])
 
@@ -416,13 +426,13 @@ def well(img, x, y, interior=None):
 
 
 def frame(img, x0, y0, x1, y1, fill=None, out=None, light=None, dark=None):
+    saved = _keep(img, [(x0, y0), (x1, y0), (x0, y1), (x1, y1)])
     d = ImageDraw.Draw(img)
     d.rectangle((x0, y0, x1, y1), fill=out or WOOD['edge'])
     d.rectangle((x0 + 1, y0 + 1, x1 - 1, y1 - 1), fill=fill or WOOD['frame'])
     _hline(img, x0 + 1, x1 - 1, y0 + 1, light or WOOD['m3'])
     _hline(img, x0 + 1, x1 - 1, y1 - 1, dark or WOOD['d3'])
-    for xx, yy in ((x0, y0), (x1, y0), (x0, y1), (x1, y1)):
-        _px(img, xx, yy, (0, 0, 0, 0))
+    _restore(img, saved)
 
 
 def wells(img, ox, oy, c0, r0, cw, ch, framed=True):
@@ -551,6 +561,7 @@ def slot_group(img, ox, oy, c0, r, n, color='green', kind=None):
     B = BUTTON[color]
     x0, y0 = ox + 7 + 18 * c0 - 4, oy + 17 + 18 * r - 4
     x1, y1 = ox + 7 + 18 * (c0 + n) + 3, oy + 17 + 18 * (r + 1) + 5
+    saved = _keep(img, [(x0, y0), (x1, y0), (x0, y1), (x1, y1)])
     d = ImageDraw.Draw(img)
     d.rectangle((x0 + 1, y1 + 1, x1 + 1, y1 + 2), fill=H('#42251a'))
     d.rectangle((x0, y0, x1, y1), fill=B['out'])
@@ -558,8 +569,7 @@ def slot_group(img, ox, oy, c0, r, n, color='green', kind=None):
     _hline(img, x0 + 1, x1 - 1, y0 + 1, B['light'])
     _hline(img, x0 + 1, x1 - 1, y1 - 2, B['lip'])
     _hline(img, x0 + 1, x1 - 1, y1 - 1, B['lip'])
-    for xx, yy in ((x0, y0), (x1, y0), (x0, y1), (x1, y1)):
-        _px(img, xx, yy, (0, 0, 0, 0))
+    _restore(img, saved)
     for i in range(n):
         wx, wy = ox + 8 + 18 * (c0 + i), oy + 18 + 18 * r
         well(img, wx, wy)
