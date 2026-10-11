@@ -178,6 +178,14 @@ Then send the user the preview first (they judge visually), then the files.
   `assets/examples/safe/` (turn-the-handle lock with one menu per handle angle, storage skin, code lock).
   `references/safe-lock.md`.
 
+- **Kitchen / workstation kit** (cutting board, stove... - input grid + tools + result + "go" arrow on a stone
+  counter; board with a cell per slot and a handle out of the window, walnut tool case with felt compartments,
+  ceramic dish, chef's knife, plank sign; 16x16 `kitchen:cutting_board` item): layers
+  `{"type": "kitchen", "part": ...}` from `scripts/kitchen.py`; example `assets/examples/cutting_board/`
+  (5x5 food, 3x2 tools, 3x2 result in a 5-row chest). Players put items in, so the logic is a plugin, not
+  DeluxeMenus - slot map and what the plugin does in `references/kitchen.md`. Read it for any crafting
+  station / workstation menu.
+
 ## Rebuilding a reference "1 in 1"
 When the user shows a finished GUI and asks for an exact copy, measure it instead of eyeballing:
 `scripts/ref_tools.py` (palette, charmap, boxes, compare) finds the window, stripe orders, offsets and colours;
@@ -220,5 +228,6 @@ reference is a pixel off. Full method and the measured royal kit: `references/re
 - `references/item-icons.md` - measured rules for 16x16 item icons, ramps, recipes of item_icons.py
 - `references/shop-flow.md` - the screens of a shop, measured stall layout, shop kit, DeluxeMenus amount/sell logic
 - `references/safe-lock.md` - safe code lock + storage skin, steel kit, code entry with DeluxeMenus meta
+- `references/kitchen.md` - workstation menus (cutting board): zone layout, slot map, kitchen kit, plugin logic
 - `references/texture-shading.md` - hand-painted texture shading rules (5-tone ramps, light, AO, materials, tiles)
 - `references/artist-brief.md` - artist hand-off kit and brief

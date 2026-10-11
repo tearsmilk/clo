@@ -6,9 +6,11 @@
     python3 shading.py demo chart.png
         5-stage shading chart (flat -> form shadow -> highlight + terminator -> reflection + bounce -> rim +
         projected shadow) on a gold sphere, a steel sphere, a glass pane, a steel cube and a steel cylinder
-    python3 shading.py check texture.png [--tile]
+    python3 shading.py check texture.png [--tile] [--kit kitchen]
         flags what breaks the rules: semi-transparent pixels, too many tones per colour group, single-pixel
-        noise, checker dithering used as a gradient, light direction, and with --tile the seam mismatch
+        noise, checker dithering used as a gradient, light direction, and with --tile the seam mismatch;
+        --kit <module> counts every declared 5-tone ramp of that kit as one material (several woods / metals
+        of similar hue in one texture), only colours outside the ramps are grouped by hue
 """
 import colorsys
 import math
@@ -62,7 +64,20 @@ def _lum(c):
     return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
 
 
-def check(path, tile=False, quiet=False):
+def kit_ramps(name):
+    """The five-tone ramps a kit module declares (lists of 6 colours: outline + 5 tones), e.g. 'kitchen'."""
+    import importlib
+    mod = importlib.import_module(name)
+    out = []
+    for k, v in vars(mod).items():
+        if isinstance(v, list) and len(v) == 6 and all(isinstance(c, tuple) and len(c) >= 3 for c in v):
+            out.append((k, [tuple(c[:3]) for c in v]))
+    return out
+
+
+def check(path, tile=False, quiet=False, ramps=None):
+    """ramps = [(name, [6 colours]), ...] (kit_ramps): colours from a declared ramp are one material each and
+    pass the tone count by construction; only colours outside every ramp are grouped by hue and counted."""
     im = Image.open(path).convert('RGBA')
     W, H = im.size
     px = im.load()
@@ -76,7 +91,13 @@ def check(path, tile=False, quiet=False):
     res['colours'] = len(cols)
     # tones per colour group: greys together, saturated colours by 30 deg hue bins
     groups = defaultdict(set)
+    known = {c: n for n, r in (ramps or ()) for c in r}
+    if ramps:
+        used = Counter(known[c] for c in cols if c in known)
+        res['kit'] = {'ramps_used': dict(used), 'outside': sum(1 for c in cols if c not in known)}
     for c in cols:
+        if c in known:
+            continue
         h, s, v = colorsys.rgb_to_hsv(*[q / 255 for q in c])
         if v < 0.16:
             continue                       # outlines / near-black do not count as tones
@@ -151,7 +172,9 @@ def check(path, tile=False, quiet=False):
             warn.append('the tile is brighter at one end - a directional gradient stripes a repeated tile')
     res['warnings'] = warn
     if not quiet:
-        print(f'{path}: {W}x{H}, {res["colours"]} colours, tones per group {res["tones_per_group"]}')
+        print(f'{path}: {W}x{H}, {res["colours"]} colours, tones per group {res["tones_per_group"]}'
+              + (f', kit ramps {res["kit"]["ramps_used"]}, {res["kit"]["outside"]} colours outside them'
+                 if ramps else ''))
         print(f'  single pixels {res["single_pixel_ratio"]:.1%}, checker {res["checker_ratio"]:.1%}, '
               f'semi-transparent {semi}, edge luminance {res["edge_luminance"]}'
               + (f', seam {res["seam"]}' if tile else ''))
@@ -361,7 +384,8 @@ if __name__ == '__main__':
         draw_demo(a[1])
         print('chart ->', a[1])
     elif a[0] == 'check':
-        for p in [x for x in a[1:] if not x.startswith('--')]:
-            check(p, tile='--tile' in a)
+        kit = a[a.index('--kit') + 1] if '--kit' in a else None
+        for p in [x for x in a[1:] if not x.startswith('--') and x != kit]:
+            check(p, tile='--tile' in a, ramps=kit_ramps(kit) if kit else None)
     else:
         sys.exit(__doc__)

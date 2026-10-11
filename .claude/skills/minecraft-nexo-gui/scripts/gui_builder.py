@@ -40,6 +40,7 @@ import royal  # noqa: E402
 import rustic  # noqa: E402
 import shop  # noqa: E402
 import safe  # noqa: E402
+import kitchen  # noqa: E402
 import scenes  # noqa: E402
 import icons16  # noqa: E402
 
@@ -393,6 +394,8 @@ def small_icon(src, sdir):
         return shop.render_icon(src[5:])
     if src.startswith('safe:'):                       # safe kit: safe:lamp, safe:lamp:red
         return safe.render_icon(src[5:])
+    if src.startswith('kitchen:'):                    # kitchen kit: kitchen:cutting_board
+        return kitchen.render_icon(src[8:])
     return load_icon(resolve(src, sdir), 16, 16)
 
 
@@ -513,6 +516,9 @@ def draw_layers(img, oy, layers, sdir, th):
             continue
         if t == 'safe':                   # steel safe kit (safe.py): door, hinge, keypad, display, wheel, ...
             draw_safe(img, oy, L)
+            continue
+        if t == 'kitchen':                # kitchen kit (kitchen.py): counter, board, tool case, dish, knife, ...
+            draw_kitchen(img, oy, L)
             continue
         if t == 'nameplate':              # green ribbon label (rustic kit) centred on x
             rustic.nameplate(img, OX + L['x'], oy + L['y'], L['text'], L.get('min_w', 60))
@@ -711,6 +717,32 @@ def draw_safe(img, oy, L):
         safe.recess(img, ox + x0, oy + y0, ox + x1, oy + y1)
     else:
         raise SystemExit(f"unknown safe part '{p}'")
+
+
+def draw_kitchen(img, oy, L):
+    """Kitchen kit parts. slots = [col, row, w, h] like other layers, x / y are window px."""
+    p, ox = L['part'], OX
+    if p == 'counter':                    # stone worktop under the container part (vanilla inventory below)
+        kitchen.counter(img, ox, oy, L.get('y0', -1), L.get('front_y', 115), L.get('front', 3),
+                        L.get('x0', -1), L.get('x1', 176), L.get('seed', 4))
+    elif p == 'board':                    # cutting board with a cell per slot, handle out of the window
+        c, r, w, h = L.get('slots', [0, 0, 5, 5])
+        kitchen.board(img, ox, oy, c, r, w, h, tuple(L.get('rim', (5, 3, 5, 3))), L.get('thick', 3),
+                      L.get('handle', 22), L.get('handle_h', 14), L.get('seed', 2))
+    elif p == 'tool_case':
+        c, r, w, h = L.get('slots', [6, 0, 3, 2])
+        kitchen.tool_case(img, ox, oy, c, r, w, h, L.get('rim', 4), L.get('thick', 3))
+    elif p == 'dish':
+        c, r, w, h = L.get('slots', [6, 3, 3, 2])
+        kitchen.dish(img, ox, oy, c, r, w, h, L.get('rim', 4), L.get('thick', 3))
+    elif p == 'arrow':
+        kitchen.arrow(img, ox + L['x'], oy + L['y'])
+    elif p == 'knife':
+        kitchen.knife(img, ox + L['x'], oy + L['y'], L.get('blade', 36), L.get('handle', 26))
+    elif p == 'sign':
+        kitchen.sign(img, ox + L.get('x', 88), oy + L['y'], L['text'])
+    else:
+        raise SystemExit(f"unknown kitchen part '{p}'")
 
 
 # ----------------------------------------------------------------------------- buttons
@@ -1429,6 +1461,22 @@ def build_spec(spec, sdir, out):
         canvas.alpha_composite(Image.new('RGBA', (16 * S, 16 * S), (255, 255, 255, 80)), (40 + (sx + 1) * S, 40 + (sy + 1 + top) * S))
         canvas.alpha_composite(tip, (40 + TW * S + 16, 40 + (sy + top) * S))
     canvas.convert('RGB').save(os.path.join(out, 'preview.png'))
+    if spec.get('preview_items'):        # preview only: the menu in use (items a plugin / the player puts in)
+        filled = canvas.copy()
+        for it in spec['preview_items']:
+            ic = small_icon(it['icon'], sdir)
+            for sl in it.get('slots', [it.get('slot')]):
+                sx, sy = slot_xy(sl % 9, sl // 9)
+                px_, py_ = sx + 1 + (16 - ic.width) // 2, sy + 1 + top + (16 - ic.height) // 2
+                filled.alpha_composite(ic.resize((ic.width * S, ic.height * S), Image.NEAREST),
+                                       (40 + px_ * S, 40 + py_ * S))
+        for it in spec['preview_items']:          # stack counts over every item, like the client
+            for sl in it.get('slots', [it.get('slot')]):
+                sx, sy = slot_xy(sl % 9, sl // 9)
+                if it.get('amount', 1) > 1:
+                    draw_text(filled, 40 + (sx + 17 - text_width(str(it['amount']))) * S, 40 + (sy + top + 10) * S,
+                              str(it['amount']), (255, 255, 255, 255), scale=S, shadow=(62, 62, 62, 255))
+        filled.convert('RGB').save(os.path.join(out, 'preview_items.png'))
 
     grid = big.copy()
     for i in range(rows * 9):

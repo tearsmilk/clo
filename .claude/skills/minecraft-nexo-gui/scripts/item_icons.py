@@ -629,10 +629,39 @@ def bundle(r='wheat', tie='wood'):
     return ic
 
 
+def rounds(r='carrot', seeds=None):
+    """Sliced vegetable: three flat round slices in a little pile (carrot coins, tomato / cucumber slices),
+    seen from the front-above like everything else: a light cut face with a darker skin ring and a lighter
+    core, a 1 px darker side under it, outline from the ramp's dark end; seeds = ramp for seed dots."""
+    ic = Icon()
+    c = ramp(r)
+    n = len(c)
+    for i, (x0, y0) in enumerate(((6, 1), (7, 7), (0, 9))):        # back -> front
+        face = {(x0 + x, y0 + y) for y, (a, b) in enumerate(((2, 6), (1, 7), (0, 8), (1, 7), (2, 6)))
+                for x in range(a, b + 1)}                           # flat 9x5 disc seen from above
+        side = {(x, y + 1) for x, y in face} - face
+        solid = face | side
+        out = {(x + dx, y + dy) for x, y in solid for dx, dy in N4} - solid
+        px = {p: c[0] for p in out}
+        px.update({p: c[1] for p in side})
+        ring = edge(face)
+        cx, cy = x0 + 4, y0 + 2
+        for p in face:                                              # skin ring (lit on the far side), light
+            px[p] = (c[n - 3] if p[1] < cy else c[n - 5]) if p in ring else c[n - 2]   # flesh, light core
+        for q in ((cx - 1, cy), (cx, cy), (cx + 1, cy)):
+            px[q] = c[n - 1]
+        if seeds:
+            for q in ((cx - 3, cy), (cx + 3, cy), (cx - 1, cy - 1), (cx + 1, cy + 1)):
+                if q in face and q not in ring:
+                    px[q] = ramp(seeds)[-3]
+        ic.pixels(f'slice{i}', px)
+    return ic
+
+
 RECIPES = {
     'bottle': bottle, 'jar': jar, 'cup': cup, 'mug': mug, 'bowl': bowl, 'fruit': fruit, 'loaf': loaf,
     'long': long_item, 'carrot': carrot, 'stack': stack, 'slice': slice_, 'drumstick': drumstick, 'pie': pie,
-    'egg': egg, 'bundle': bundle, 'tomato': tomato,
+    'egg': egg, 'bundle': bundle, 'tomato': tomato, 'rounds': rounds,
 }
 
 

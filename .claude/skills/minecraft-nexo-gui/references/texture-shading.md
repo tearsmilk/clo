@@ -98,6 +98,9 @@ palette; crisp pixels without blur; a natural spread of lights, midtones and sha
   uses `chrome()` bands; contact shadows under raised parts.
 - `scripts/item_icons.py`: ramps per material, outline from the dark end, stroke clusters instead of noise.
 - `scripts/art.py` / `props.py`: structured textures (planks, bricks, cobble) instead of noise.
+- `shading.py check OUT.png --kit kitchen` (or `safe`): every colour that comes from a ramp the kit declares
+  counts as that material; only colours outside all ramps are grouped by hue - use it for scenes with several
+  materials of similar hue (light wood, walnut, brass), where plain hue groups would add them up.
 - `shading.py check` reports: colours per hue group (> 6 tones per group = too many), single-pixel noise,
   checker dithering, semi-transparent pixels, light direction (are top-left-facing edges lighter?), and with
   `--tile` the edge mismatch. Fix everything it flags before handing over.

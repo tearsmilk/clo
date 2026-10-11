@@ -55,8 +55,11 @@ python3 scripts/item_icons.py out/icons jar:honey bottle:milk cup:juice_apple mu
     drumstick:meat pie:bread:berry egg bundle:wheat --aseprite         # + layered .aseprite per icon
 ```
 Recipes: `bottle`, `jar`, `cup`, `mug`, `bowl`, `fruit`, `tomato`, `loaf`, `long`, `carrot`, `stack`,
-`slice`, `drumstick`, `pie`, `egg`, `bundle`; arguments after the name are ramps (`jar:jam`, `cup:berry`,
-`fruit:pumpkin`, `bowl:soup_beet`).
+`slice`, `drumstick`, `pie`, `egg`, `bundle`, `rounds` (sliced food: three flat discs with a skin ring and a
+light core - `rounds:carrot`, `rounds:tomato:cheese` adds seeds); arguments after the name are ramps
+(`jar:jam`, `cup:berry`, `fruit:pumpkin`, `bowl:soup_beet`).
+Cut food reads as cut when the inside shows: a cross-section (rings, core, seeds) on a flat face, a darker
+skin ring round it - a plain round shape reads as a whole fruit or a bun.
 
 In a spec, any 16px icon source can be a recipe: `"icon": "item:jar:honey"` in `nexo_items`, buttons with
 `style: "none"` and `extra_items[].preview`.
