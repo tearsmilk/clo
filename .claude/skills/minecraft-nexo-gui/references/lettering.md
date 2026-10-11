@@ -84,12 +84,10 @@ When the user brings a TTF / OTF (e.g. a blackletter): `python3 scripts/font_pix
   (`pack/assets/<ns>/font/<name>.json` + texture) - in titles / lore `<font:hokaria:title>Текст</font>`.
 - Volumetric titles in that font: `lettering.volume(text, ramp, font=OUT_DIR)` (no growing / rounding: the
   font keeps its own shape).
-- Readability first (the user: "everything merges, make it readable"; "darker there"):
-  - air between letters = extrusion depth + 2 px, so one letter's side never reaches the next letter's face;
-  - word space = half the cap height;
-  - side faces two steps below the face: shadow on the right, the darkest tone underneath;
-  - a detailed font gets a plain face: ONE light tone, a lit bevel up-left, one step darker down-right, no
-    two-band split, no glints. Busy shading on spurs and flares turns a word into a blob.
+- The user's verdict on these titles: keep the dense look (2 px between letters, two-band face, bevel,
+  glints) and make the BACK dark - the whole extrusion in the darkest tone, only a thin shadow-tone edge on
+  the first layer of the right faces. A mid-tone back melts into the face ("всё сливается"); a sparse, plain
+  version (wide spacing, one-tone face) was tried and judged worse than the old one with a dark back.
 - **Licences**: read the font's README. "Personal use only" fonts cannot go on a server with a shop or
   donations without the commercial licence. Never commit a third-party font or its converted glyphs into
   the skill or the repo - they go only into the user's own pack.

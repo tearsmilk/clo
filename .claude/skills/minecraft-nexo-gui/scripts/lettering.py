@@ -160,15 +160,14 @@ def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, p
       corners rounded by 1 px - no nib cuts, no checker, nothing that reads as noise
     - front face: two flat bands (light top, base below) - a bevel: lit 1 px on every top / left-facing edge
       (highlight), dark 1 px on every bottom / right-facing edge (also round the counters)
-    - extrusion `depth` px down-right (light from the top-left): right-facing side faces shadow, bottom
-      faces and the back edge darkest - the sides must sit clearly below the face (the user: "darker there"),
-      a mid tone on the sides flattens the letter - shaded by which way each side faces, visible inside counters too
+    - extrusion `depth` px down-right (light from the top-left): the whole back in the darkest tone, a thin
+      shadow-tone edge on the first layer of the right faces - the user asked twice for a darker back; a mid
+      tone there flattens the letter and melts it into the face - shaded by which way each side faces, visible inside counters too
     - one outline round everything in the darkest tone; a small glint on the upper left of each letter
     - accent: None | 'sparkle' (tiny 4-point stars in the highlight tone) | 'cracks' (the tutorial's blood)"""
     if font:                                           # a converted pixel font (font_pixel.py): its own
         import font_pixel                              # shapes, no growing / smoothing
-        M = font_pixel.text_mask(font, text, spacing=gap if gap is not None else depth + 2)   # the extrusion
-        # must not reach the next letter's face - letters that touch melt into one shape
+        M = font_pixel.text_mask(font, text, spacing=gap if gap is not None else 2)
         y_min = min(y for _, y in M)
         M = {(x, y - y_min) for x, y in M}
         weight = 0
@@ -216,12 +215,13 @@ def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, p
     put = img.putpixel
     for q, (face, i) in E.items():
         back = (q[0] + 1, q[1] + 1) not in solid and i == depth
-        put(q, ramp[0] if back or face == 'bottom' else ramp[1])   # sides two steps below the face
+        # the back (the user: "the old look was better, just make the back darker"): the whole extrusion in
+        # the darkest tone, only the first layer of the right faces keeps the shadow tone as a thin edge
+        put(q, ramp[1] if (face == 'right' and i == 1) else ramp[0])
     top, bot = min(y for _, y in M), max(y for _, y in M)
     split = top + round(0.42 * (bot - top))
     for (x, y) in M:
-        c = ramp[4] if (y < split or font) else ramp[3]   # a real font: one light tone - detailed shapes
-                                                          # need the plainest face to stay readable
+        c = ramp[4] if y < split else ramp[3]
         if any((x + dx, y + dy) not in M for dx, dy in N4):
             nx = ny = 0                                 # bevel by the smoothed edge direction: up-left
             for dx in range(-2, 3):                     # lit, down-right dark, an edge running along the
@@ -230,12 +230,12 @@ def volume(text, ramp=GOTHIC, scale=3, depth=4, weight=1, accent=None, seed=1, p
                         nx += dx
                         ny += dy
             d = (nx + ny) / (abs(nx) + abs(ny) or 1)
-            c = ramp[5] if d < -0.35 else (ramp[3] if font else ramp[2]) if d > 0.35 else c
+            c = ramp[5] if d < -0.35 else ramp[2] if d > 0.35 else c
         put((x, y), c)
     for p in {(x + dx, y + dy) for x, y in solid for dx, dy in N4} - solid:
         put(p, ramp[0])
     rnd = random.Random(seed)
-    for (x, y) in (sorted(M) if not font else ()):      # glints: a short bright run inside the top band
+    for (x, y) in sorted(M):                            # glints: a short bright run inside the top band
         if (x - 1, y) in M and (x, y - 1) in M and (x - 2, y) not in M and y < split - 1 and rnd.random() < 0.25:
             for j in range(2):
                 if (x + 1, y + j) in M:
