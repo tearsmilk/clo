@@ -7,9 +7,11 @@
     "text": "Hokaria",
     "style": "block",
     "size": 3,
-    "top_color": "#F2D16B",
-    "bottom_color": "#B97A1E",
-    "outline_color": "#2A1206"
+    "depth": 3,
+    "top_color": "#FFD86B",
+    "bottom_color": "#E08A1E",
+    "side_color": "#9A4E12",
+    "outline_color": "#3A1606"
   },
   "open_commands": [
     "menu"
@@ -39,7 +41,7 @@
       "icon": "../farm_menu/icons/farm.png",
       "icon_frame": true,
       "icon_frame_color": "#7A5A33",
-      "label_style": "plaque",
+      "label_style": "wood",
       "name": "&e&lФерма",
       "lore": [
         "&7Сажай, поливай, собирай урожай",
@@ -96,7 +98,8 @@
       "commands": [
         "[close]",
         "[player] shop"
-      ]
+      ],
+      "label_style": "wood"
     },
     {
       "id": "warps",
@@ -111,7 +114,8 @@
       "commands": [
         "[close]",
         "[player] warps"
-      ]
+      ],
+      "label_style": "stone"
     },
     {
       "id": "rewards",
@@ -124,11 +128,12 @@
       "pattern": "dots",
       "color": "#A8426E",
       "icon": "../farm_menu/icons/rewards.png",
-      "label_style": "plaque",
+      "label_style": "wood",
       "commands": [
         "[close]",
         "[player] daily"
-      ]
+      ],
+      "sparkle": true
     },
     {
       "id": "fair",
@@ -179,11 +184,12 @@
       "style": "flat",
       "color": "#B8763A",
       "icon": "../farm_menu/icons/quests.png",
-      "name": "&6Задания",
+      "name": "&7Задания &8(скоро)",
       "commands": [
         "[close]",
         "[player] quests"
-      ]
+      ],
+      "disabled": true
     },
     {
       "id": "close",
@@ -197,6 +203,26 @@
       "commands": [
         "[close]"
       ]
+    }
+  ],
+  "icon_style": {
+    "extrude": 1
+  },
+  "decor": [
+    {
+      "type": "sparkle",
+      "x": 20,
+      "y": -14
+    },
+    {
+      "type": "sparkle_small",
+      "x": 152,
+      "y": -6
+    },
+    {
+      "type": "star",
+      "x": 160,
+      "y": -16
     }
   ]
 }

@@ -41,6 +41,34 @@ Takeaways baked into the builder:
 - the header deserves size: `header.size: 2` puts a double-size title on a tab above the window
 - keep slots that hold real items (`slots_visible`) drawn as slots so players see where items go
 
+## Pixel-art asset rules (from item/icon sheets, UI kits and Minecraft-style packs)
+
+These are what `pixelstyle.stylize` and the builder apply; follow them for anything drawn by hand too.
+
+1. **One grid per set.** Items 16x16 (big ones 32x32), menu icons 16-24px, all on whole pixels, no
+   semi-transparent edge pixels. Tools/weapons lie diagonally, handle bottom-left (Minecraft convention).
+2. **Few colours, shared palette.** 4-6 colours per object, a set drawn from one ~16-24 colour palette so
+   everything matches. Pass `palette` to stylize a whole menu with one palette.
+3. **Coloured outline.** 1px outline in a darker, slightly cooler shade of the colour it touches - not black.
+   Black outlines are a valid style (UI kits, chunky Redstone-Labs icons) but pick one per set.
+4. **Hue-shifted ramps.** Each colour has 3-4 steps: highlight (lighter + warmer), base, shadow (darker +
+   cooler/purple), outline. Light comes from the top-left; the bottom/right edge gets the shadow.
+5. **Silhouette first.** At 16px an item is recognised by its outline shape and 1-2 main colours. Simplify
+   prompts ("a red gift box with a gold ribbon") rather than adding detail that turns to noise.
+6. **States.** Rare/special = 4-point sparkles; locked/coming soon = single-colour line-art of the same icon
+   (orange or grey) on a desaturated tile; pressed/selected = brighter rim.
+7. **Pseudo-3D.** Extruding the sprite 1-3px down-right in a dark side colour gives the chunky "block" look of
+   popular icon packs and logo lettering (`icon_style.extrude`, `header.depth`).
+8. **UI pieces are kits.** Plates, signs and frames are built from the same recipe: black outline with cut
+   corners, light top row, 2px darker bottom, nails/rivets at the ends, wood grain or stone chips inside
+   (`label_style: wood|stone`, header plaques). Framed "paintings" with a wooden frame work well for big choices.
+9. **Decor sparingly.** Clouds, moons, stars and sparkles around a header or on a sky-coloured tile add life;
+   keep them away from labels and clickable centres.
+
+Style references collected from the user (third-party art, use for style only, never copy into a pack):
+pixel item/food/harvest sheets, Minecraft-style mob drops, bird and animal sprites, cloud/moon/sparkle sets,
+wooden/stone UI plates, Redstone-Labs Social/PvP/Weather icon packs, House-Management GUI with framed pictures.
+
 ## Icons
 
 Best quality path: generate each icon separately with an image model (prompt template in

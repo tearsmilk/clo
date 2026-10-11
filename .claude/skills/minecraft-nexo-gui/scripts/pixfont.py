@@ -234,7 +234,7 @@ def block_text_size(text, scale=3):
 
 
 def draw_block_text(img, x, y, text, top="#D8D8D8", bottom="#6E6A68", outline="#111111", shadow="#000000",
-                    scale=3, cracks=True, seed=3):
+                    scale=3, cracks=True, seed=3, depth=0, side=None):
     """Chunky 'Minecraft logo' lettering: light upper part, darker lower third, 1px outline,
     a 1px drop shadow and a few crack pixels. (x, y) is the top-left of the outline box."""
     import random
@@ -251,6 +251,11 @@ def draw_block_text(img, x, y, text, top="#D8D8D8", bottom="#6E6A68", outline="#
     full = Image.new("L", (m.width + 2 * pad, m.height + 2 * pad), 0)
     full.paste(m, (pad, pad))
     ring = full.filter(ImageFilter.MaxFilter(3))                     # 1px outline
+    if depth:                                                        # extruded 3D side, Redstone-Labs style
+        sc = rgba(side) if side else tuple(max(0, int(v * 0.55)) for v in rgba(bottom)[:3]) + (255,)
+        for d in range(depth, 0, -1):
+            img.paste(rgba(outline), (x + d, y + d + 1), ring)
+            img.paste(sc, (x + d, y + d), full)
     img.paste(rgba(shadow), (x + 1, y + 1), ring)
     img.paste(rgba(outline), (x, y), ring)
     face = Image.new("RGBA", full.size, rgba(top))

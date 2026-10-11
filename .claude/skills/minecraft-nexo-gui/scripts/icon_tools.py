@@ -4,7 +4,10 @@
 Subcommands
     gen  OUT.png "prompt" [--model M] [--size 512]     generate one icon (Pollinations, key from $POLLI_KEY)
     cut  IN.png OUT.png [--fill-holes]                 remove background with rembg, crop to content
-    pixel IN.png OUT.png --size 24 [--colors 24]       downscale to a pixel icon (hard alpha, limited palette)
+    pixel IN.png OUT.png --size 24 [--colors 24]       plain downscale to a pixel icon (hard alpha, limited palette)
+    style IN.png OUT.png --size 24 [--extrude 1] [--sparkle] [--silhouette '#E08A2E'] [--palette pal.png]
+                                                       full pixel-art stylize (see pixelstyle.py): palette, coloured
+                                                       outline, top-left light, extrusion, sparkles, line-art
     sheet OUT.png IN1.png IN2.png ...                  contact sheet on a mid-blue backdrop to eyeball cut quality
 
 Typical flow per icon:  gen -> cut -> (look at the sheet) -> gui_builder.py fits it into the button.
@@ -110,6 +113,11 @@ if __name__ == '__main__':
     c = sp.add_parser('cut'); c.add_argument('inp'); c.add_argument('out'); c.add_argument('--fill-holes', action='store_true')
     p = sp.add_parser('pixel'); p.add_argument('inp'); p.add_argument('out'); p.add_argument('--size', type=int, default=24)
     p.add_argument('--colors', type=int, default=24)
+    st = sp.add_parser('style'); st.add_argument('inp'); st.add_argument('out'); st.add_argument('--size', type=int, default=24)
+    st.add_argument('--colors', type=int, default=10); st.add_argument('--outline', default='auto')
+    st.add_argument('--extrude', type=int, default=0); st.add_argument('--sparkle', action='store_true')
+    st.add_argument('--silhouette', default=None); st.add_argument('--palette', default=None, help='PNG whose pixels are the palette')
+    st.add_argument('--scale', type=int, default=1, help='also save an upscaled preview *_xN.png')
     sh = sp.add_parser('sheet'); sh.add_argument('out'); sh.add_argument('files', nargs='+')
     a = ap.parse_args()
     if a.cmd == 'gen':
@@ -118,5 +126,17 @@ if __name__ == '__main__':
         cut(a.inp, a.out, a.fill_holes)
     elif a.cmd == 'pixel':
         pixel(a.inp, a.out, a.size, a.colors)
+    elif a.cmd == 'style':
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import pixelstyle
+        pal = None
+        if a.palette:
+            pal = sorted({c[:3] for c in Image.open(a.palette).convert('RGBA').getdata() if c[3] > 0})[:256]
+        im = pixelstyle.stylize(Image.open(a.inp), size=a.size, colors=a.colors, outline=a.outline, palette=pal,
+                                extrude_depth=a.extrude, sparkle=a.sparkle, silhouette_color=a.silhouette)
+        im.save(a.out)
+        if a.scale > 1:
+            im.resize((im.width * a.scale, im.height * a.scale), Image.NEAREST).save(a.out.replace('.png', f'_x{a.scale}.png'))
+        print(a.out, im.size)
     else:
         sheet(a.out, a.files)

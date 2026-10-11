@@ -39,6 +39,11 @@ python3 scripts/icon_tools.py gen icons/raw_farm.png "a bundle of golden wheat c
 python3 scripts/icon_tools.py cut icons/raw_farm.png icons/farm.png          # add --fill-holes if a light interior vanished
 python3 scripts/icon_tools.py sheet icons/check.png icons/*.png             # look at it before building
 ```
+The builder pixel-fits icons itself; add `"icon_style": {"extrude": 1}` to the spec to run the full pixel-art
+stylize on every icon (shared palette, coloured outline, top-left light, extruded side; `sparkle` for rare
+items; disabled buttons automatically get an orange line-art icon). `icon_tools.py style` does the same for
+single files, e.g. Nexo item icons at 16px. The rules behind it are in `references/design-guide.md`
+("Pixel-art asset rules") - read them before drawing or prompting icons.
 - Light subjects (parchment, paper, eggs) -> `--bg "dark navy blue"` so rembg does not eat them.
 - Other generators work too (Figma `generate_image`, user-supplied PNGs); only the cut step matters.
 - A 402 "Insufficient balance" from Pollinations means the free daily credits are used up - tell the user.
@@ -71,7 +76,9 @@ grass/planks/stone textured tiles, illustration tiles, plaques, 1x1 utility icon
 - Headers: `header.size: 2` (double-size plate on a tab) or `header.style: "block"` (Minecraft-logo letters,
   great for the server name). Pixel text at x2 or bolder needs wider gaps - the builder handles that; do not
   fake bold by smearing pixels, letters with 1px counters (М, Ю, Ж) turn into blobs.
-- Labels: pixel font with lowercase and Cyrillic, `\n` for two lines, `label_style` `shadow` | `plaque` | `bar`.
+- Labels: pixel font with lowercase and Cyrillic, `\n` for two lines, `label_style` `shadow` | `plaque` | `bar` |
+  `wood` | `stone` (UI-kit plates with nails/chips).
+- Decor: `decor` puts sparkles, stars, clouds, moons, leaves anywhere (px coordinates, negative y = above window).
   Fit is ~8-9 letters per line on a 3-wide button, ~5 on 2-wide; the builder refuses labels that do not fit
   rather than squeezing letters (squeezed pixel letters merge into an unreadable blob).
 - Illustrations for `image` tiles: generate a small scene (or crop one from art the user already has) - a

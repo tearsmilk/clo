@@ -24,6 +24,8 @@ Paths are relative to the spec file.
 | `open_commands` | [id] | DeluxeMenus open commands |
 | `extra_items` | [] | raw DeluxeMenus items, e.g. `{"id":"head","material":"head-%player_name%","slot":10}` |
 | `ascent_nudge` / `shift_nudge` | 0 | 1px corrections after testing in game |
+| `icon_style` | none | stylize every icon: `{"extrude": 1, "sparkle": false, "colors": 10, "outline": "auto", "light": true, "palette": ["#hex", ...]}` (see pixelstyle.py) |
+| `decor` | [] | pixel decorations in px coords on top of everything (y may be negative = above the window): `{"type": "sparkle"\|"sparkle_small"\|"star"\|"cloud"\|"moon"\|"leaf", "x": 20, "y": -14, "color": "#hex"}` |
 | `preview_tooltip` | none | button id to show hovered with its tooltip in preview.png |
 | `preview_background` | none | image behind the preview (blurred, dimmed) |
 
@@ -31,6 +33,7 @@ Paths are relative to the spec file.
 `{"text": "Меню", "size": 1|2, "style": "plaque"|"tab"|"text", "color": "#4A4A4A", "text_color": "#F0F0F0", "rivets": true, "case": "keep"}`
 - `size: 2` = double-size letters on a tab that sticks out ~10px above the window (texture gets taller, ascent rises accordingly - handled automatically).
 - `plaque` (size 1) = small plate inside the 17px top strip with rivets left/right.
+- `style: block` + `depth: 3` (+ `side_color`) extrudes the letters into a 3D slab like Redstone-Labs logos.
 - `style: block` = chunky "Minecraft logo" letters (light top, darker bottom third, outline, crack pixels) above
   the window. `size` 3 (default) or 4; size 2 merges letters - avoid. Colours: `top_color`, `bottom_color`, `outline_color`.
 
@@ -48,13 +51,15 @@ Paths are relative to the spec file.
 | `icon_size` | auto | max icon side in px |
 | `icon_frame` | false | draw a bevelled box behind the icon (`icon_frame_color`) |
 | `label` | - | text; `\n` for two lines (e.g. `"Боевой\nПропуск"`) |
-| `label_style` | `shadow` | `shadow` (Minecraft text shadow), `plaque` (dark rounded plate), `bar` (full-width band) |
+| `label_style` | `shadow` | `shadow` (Minecraft text shadow), `plaque` (dark rounded plate), `bar` (full-width band), `wood` (plank plate with nails), `stone` (stone plate) |
 | `label_pos` | `bottom` | `bottom` or `top` |
 | `label_color` / `plaque_color` | white / derived | |
 | `frame` | - | colour of a 1px inner frame instead of the bevel (card look) |
 | `outline` | `#1E1408` | outer 1px outline |
 | `inset` | 1 | px kept free on each side; 0 makes tiles touch |
-| `disabled` | false | greyscale + darken (locked / coming soon) |
+| `disabled` | false | greyscale background + the icon redrawn as orange line-art (locked / coming soon) |
+| `icon_style` | - | per-button override of the top-level `icon_style` |
+| `sparkle` | false | add sparkles to this icon (rare / special) |
 | `name`, `lore` | label / - | DeluxeMenus display name & lore (legacy `&` codes) |
 | `commands` | - | DeluxeMenus `left_click_commands` |
 | `material` | invisible | set e.g. `nexo-farm_icon` to show a real item instead of `PAPER` + `item_model: nexo:empty` |

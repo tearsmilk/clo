@@ -30,6 +30,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pixfont import draw_text, text_width, text_height, draw_block_text, block_text_size  # noqa: E402
+import pixelstyle  # noqa: E402
 
 
 # ----------------------------------------------------------------------------- colours / themes
@@ -255,13 +256,65 @@ def load_icon(path, max_w, max_h, alpha_cut=110):
     return ic
 
 
+
+def plate(img, box, kind='wood', color=None):
+    """Rounded plate like pixel UI kits: black outline, cut corners, light top row, 2px darker bottom,
+    nails at both ends (wood) or chips (stone). box = (x0, y0, x1, y1) inclusive."""
+    x0, y0, x1, y1 = box
+    base = H(color or ('#D9895A' if kind == 'wood' else '#9A968C'))
+    d = ImageDraw.Draw(img)
+    d.rectangle((x0 + 1, y0, x1 - 1, y1), fill=(0, 0, 0, 255))
+    d.rectangle((x0, y0 + 1, x1, y1 - 1), fill=(0, 0, 0, 255))
+    d.rectangle((x0 + 1, y0 + 1, x1 - 1, y1 - 1), fill=base)
+    d.line((x0 + 2, y0 + 1, x1 - 2, y0 + 1), fill=lighten(base, 0.3))
+    d.line((x0 + 1, y1 - 1, x1 - 1, y1 - 1), fill=darken(base, 0.35))
+    if y1 - y0 > 7:
+        d.line((x0 + 1, y1 - 2, x1 - 1, y1 - 2), fill=darken(base, 0.18))
+    if kind == 'wood':
+        my = (y0 + y1) // 2
+        for nx in (x0 + 2, x1 - 3):
+            d.rectangle((nx, my - 1, nx + 1, my), fill=darken(base, 0.45))
+    else:
+        rnd = random.Random(x0 * 31 + y0)
+        for _ in range(max(1, (x1 - x0) // 10)):
+            cx, cy = rnd.randint(x0 + 3, x1 - 3), rnd.randint(y0 + 2, y1 - 3)
+            d.point((cx, cy), fill=lighten(base, 0.2))
+            d.point((cx + 1, cy + 1), fill=darken(base, 0.25))
+
+
+# Decoration sprites (drawn in px coordinates on top of the texture)
+DECOR = {
+    'sparkle': (["...#...", "...#...", "..###..", "#######", "..###..", "...#...", "...#..."], {'#': '#FFF3B0'}),
+    'sparkle_small': ([".#.", "###", ".#."], {'#': '#FFF3B0'}),
+    'star': (["..#..", ".###.", "#####", ".###.", "..#.."], {'#': '#FFE27A'}),
+    'cloud': (["....###......", "..##WWW#.###.", ".#WWWWWW#WWW#", "#WWWWWWWWWWWW#", "#LLWWWWWWWLLL#", ".##LLLLLLLL##."],
+              {'#': '#9CC9EE', 'W': '#FFFFFF', 'L': '#CFE6F8'}),
+    'moon': (["..###..", ".#OOO#.", "#OOOOD#", "#OOODD#", "#ODODD#", ".#ODD#.", "..###.."],
+             {'#': '#3C4A7A', 'O': '#DDE6FF', 'D': '#A9B8E6'}),
+    'leaf': (["...##", "..#G#", ".#GG#", "#GG#.", "##..."], {'#': '#24601A', 'G': '#5DAA3A'}),
+}
+
+
+def draw_decor(img, oy, items):
+    for it in items:
+        rows, pal = DECOR[it['type']]
+        col = it.get('color')
+        for j, row in enumerate(rows):
+            for i, ch in enumerate(row):
+                if ch in pal:
+                    c = H(col) if (col and ch in '#') and it['type'].startswith(('sparkle', 'star')) else H(pal[ch])
+                    x, y = it['x'] + i, oy + it['y'] + j
+                    if 0 <= x < img.width and 0 <= y < img.height:
+                        img.putpixel((x, y), c)
+
+
 # ----------------------------------------------------------------------------- buttons
 
 def resolve(path, sdir):
     return path if os.path.isabs(path) else os.path.join(sdir, path)
 
 
-def draw_button(img, oy, b, sdir, th, label_case):
+def draw_button(img, oy, b, sdir, th, label_case, spec_icon_style=None):
     style = b.get('style', 'sunburst')
     x0, y0 = slot_xy(b['x'], b['y'])
     y0 += oy
@@ -294,6 +347,11 @@ def draw_button(img, oy, b, sdir, th, label_case):
         td.line((1, h - 2, w - 2, h - 2), fill=darken(base, 0.35))
         td.line((w - 2, 1, w - 2, h - 2), fill=darken(base, 0.35))
 
+    if b.get('disabled'):                # grey out the background only; the icon becomes a coloured line-art
+        g = ImageOps.grayscale(tile.convert('RGB')).convert('RGBA')
+        tile = Image.blend(g, Image.new('RGBA', g.size, (40, 40, 40, 255)), 0.35)
+        td = ImageDraw.Draw(tile)
+
     # label geometry
     label = b.get('label') or ''
     case = b.get('label_case', label_case)
@@ -305,12 +363,12 @@ def draw_button(img, oy, b, sdir, th, label_case):
     label_zone = 0
     if label:
         tw, tht = text_width(label), text_height(label)
-        maxw = w - (8 if lstyle == 'plaque' else 4)
+        maxw = w - {'plaque': 8, 'wood': 11, 'stone': 11}.get(lstyle, 4)
         if tw > maxw:
             raise SystemExit(f"label '{label}' is {tw}px but button '{b['id']}' fits {maxw}px - shorten it, "
                              f"split it into two lines with \\n, or widen the button")
-        label_zone = tht + (6 if lstyle in ('plaque', 'bar') else 3)
-        if label_zone > h - 4:
+        label_zone = tht + (6 if lstyle in ('plaque', 'bar', 'wood', 'stone') else 3)
+        if b.get('icon') and label_zone > h - 4:
             raise SystemExit(f"label '{label}' is too tall for button '{b['id']}' ({h}px high)")
 
     # icon (optionally inside a framed box)
@@ -321,7 +379,19 @@ def draw_button(img, oy, b, sdir, th, label_case):
         avail_w = w - 2 * m
         fpad = 3 if b.get('icon_frame') else 0
         size = b.get('icon_size') or min(avail_w, avail_h) - 2 * fpad
-        ic = load_icon(resolve(b['icon'], sdir), size, size)
+        style_opts = dict(spec_icon_style or {}, **(b.get('icon_style') or {}))
+        if style_opts.get('enabled', bool(style_opts)) or b.get('disabled'):
+            sil = style_opts.get('silhouette_color', '#E08A2E') if b.get('disabled') else None
+            ic = pixelstyle.stylize(Image.open(resolve(b['icon'], sdir)), size=size,
+                                    colors=style_opts.get('colors', 10), outline=style_opts.get('outline', 'auto'),
+                                    light=style_opts.get('light', True), palette=style_opts.get('palette'),
+                                    extrude_depth=0 if sil else style_opts.get('extrude', 0),
+                                    sparkle=style_opts.get('sparkle', False) or b.get('sparkle', False),
+                                    silhouette_color=sil)
+            if ic.width > size or ic.height > size:      # extrude/sparkle grow the canvas; keep it inside
+                ic.thumbnail((size + 4, size + 4), Image.NEAREST)
+        else:
+            ic = load_icon(resolve(b['icon'], sdir), size, size)
         bw, bh = ic.width + 2 * fpad, ic.height + 2 * fpad
         bx = (w - bw) // 2
         by = top_free + (avail_h - bh) // 2
@@ -346,6 +416,14 @@ def draw_button(img, oy, b, sdir, th, label_case):
             bevel_box(tile, (px0, py0, px0 + pw - 1, py0 + ph - 1), pc, outline=darken(pc, 0.5),
                       hi=lighten(pc, 0.22), chamfer=1)
             draw_text(tile, px0 + 3, py0 + 3, label, tcol, shadow=darken(pc, 0.6), align='center')
+        elif lstyle in ('wood', 'stone'):  # pixel UI-kit plates with nails / chips
+            pw, ph = tw + 10, min(tht + 6, h - 2)
+            px0 = (w - pw) // 2
+            py0 = (h - ph) // 2 if not b.get('icon') and h < 40 else ((h - ph - 2) if lpos == 'bottom' else 2)
+            plate(tile, (px0, py0, px0 + pw - 1, py0 + ph - 1), lstyle, b.get('plaque_color'))
+            pc = H(b.get('plaque_color') or ('#D9895A' if lstyle == 'wood' else '#9A968C'))
+            draw_text(tile, px0 + 5, py0 + (ph - 7) // 2 - (1 if ph >= tht + 6 else 0), label, H(b.get('label_color', '#FFFFFF')),
+                      shadow=darken(pc, 0.55), align='center')
         elif lstyle == 'bar':            # full-width band
             ph = tht + 5
             py0 = (h - ph - 1) if lpos == 'bottom' else 1
@@ -362,11 +440,6 @@ def draw_button(img, oy, b, sdir, th, label_case):
                 ty = (h - tht - 3) if lpos == 'bottom' else 3
             draw_text(tile, (w - tw) // 2, ty, label, tcol, shadow=darken(base, 0.7), align='center')
 
-    if b.get('disabled'):
-        g = ImageOps.grayscale(tile.convert('RGB')).convert('RGBA')
-        g = Image.blend(g, Image.new('RGBA', g.size, (40, 40, 40, 255)), 0.35)
-        g.putalpha(tile.getchannel('A'))
-        tile = g
     img.alpha_composite(tile, (x0, y0))
 
 
@@ -375,7 +448,7 @@ def header_top(spec):
     hd = spec.get('header') or {}
     if hd.get('style') == 'block':
         txt = hd['text'] if hd.get('case') == 'keep' else hd['text'].upper()
-        return max(0, block_text_size(txt, hd.get('size', 3))[1] - 15)
+        return max(0, block_text_size(txt, hd.get('size', 3))[1] + hd.get('depth', 0) - 15)
     if hd.get('size', 1) == 2:
         return 10
     return 8 if hd.get('style') == 'tab' else 0
@@ -395,9 +468,11 @@ def draw_header(img, oy, spec, th):
     tw = text_width(text, scale=sc)
     if style == 'block':                 # Minecraft-logo lettering sticking out above the window
         bw, bh = block_text_size(text, hd.get('size', 3))
+        bh += hd.get('depth', 0)
         draw_block_text(img, (176 - bw) // 2, oy + 15 - bh, text, scale=hd.get('size', 3),
                         top=hd.get('top_color', '#D8D8D8'), bottom=hd.get('bottom_color', '#6E6A68'),
-                        outline=hd.get('outline_color', '#111111'))
+                        outline=hd.get('outline_color', '#111111'), depth=hd.get('depth', 0),
+                        side=hd.get('side_color'))
         return
     if style == 'text':
         draw_text(img, (176 - tw) // 2 if hd.get('center', True) else 8, oy + 5, text,
@@ -480,12 +555,13 @@ def build(spec_path, out):
             x, y = hotbar_xy(c, rows)
             draw_slot(tex, x, y + top, th)
     for b in spec.get('buttons', []):
-        draw_button(tex, top, b, sdir, th, label_case)
+        draw_button(tex, top, b, sdir, th, label_case, spec.get('icon_style'))
 
     title_col = H(spec.get('title_color', th['text']))
     if spec.get('title') and not spec.get('header'):
         draw_text(tex, 8, top + 5, spec['title'], title_col)
     draw_header(tex, top, spec, th)
+    draw_decor(tex, top, spec.get('decor', []))
     inv_label = spec.get('inventory_label', 'Инвентарь')
     if inv_label and spec.get('draw_player_inventory', True):
         draw_text(tex, 8, top + rows * 18 + 20, inv_label, title_col)
