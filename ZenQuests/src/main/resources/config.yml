@@ -29,6 +29,11 @@ menu:
   # assets/zenquests/textures/gui/sprites/tooltip/farm_background.png и farm_frame.png).
   # Пусто "" — обычная подсказка Minecraft. Без ресурспака у игроков будет фиолетово-чёрная рамка!
   tooltip-style: "zenquests:farm"
+  # Нарисованные фоны меню (ресурспак: assets/zenquests/font/menu.json + textures/gui/menu/*.png).
+  # true — вместо стекла рамки окно рисуется картинкой. Без ресурспака у игроков будут квадратики в названии!
+  textures:
+    enabled: true
+    font: "zenquests:menu"
   # name/icon — карточка категории; pane/corner — цвет рамки её страницы; description — строки под названием
   categories:
     daily:

@@ -7,7 +7,9 @@ import ink.hoka.zenquests.ZenQuests;
 import ink.hoka.zenquests.model.Category;
 import ink.hoka.zenquests.model.Quest;
 import ink.hoka.zenquests.util.Text;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -102,13 +104,13 @@ public final class QuestMenu implements Listener {
         QuestManager qm = plugin.quests();
         qm.refresh(p, false);
         Holder h = new Holder();
-        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(plugin.getConfig().getString("menu.title", "Квесты")));
+        Inventory inv = Bukkit.createInventory(h, 54, menuTitle("main", plugin.getConfig().getString("menu.title", "Квесты")));
         h.inv = inv;
         frame(inv, mat(plugin.getConfig().getString("menu.accent"), Material.LIGHT_BLUE_STAINED_GLASS_PANE),
                 mat(plugin.getConfig().getString("menu.corner"), Material.CYAN_STAINED_GLASS_PANE));
 
         ItemStack bg = item(mat(plugin.getConfig().getString("menu.background"), Material.BLACK_STAINED_GLASS_PANE), " ", List.of(), false, 1);
-        for (int slot : INNER) inv.setItem(slot, bg);
+        if (!textured()) for (int slot : INNER) inv.setItem(slot, bg);
 
         int readyAll = 0;
         Category[] cats = Category.values();
@@ -220,7 +222,7 @@ public final class QuestMenu implements Listener {
         Holder h = new Holder();
         int pages = Math.max(1, (items.size() + INNER.length - 1) / INNER.length);
         int pg = Math.max(0, Math.min(page, pages - 1));
-        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(title(catName(c), pg, pages)));
+        Inventory inv = Bukkit.createInventory(h, 54, menuTitle(c.key, title(catName(c), pg, pages)));
         h.inv = inv;
         frame(inv, catMat(c, "pane", Material.GRAY_STAINED_GLASS_PANE), catMat(c, "corner", Material.BLACK_STAINED_GLASS_PANE));
 
@@ -292,7 +294,7 @@ public final class QuestMenu implements Listener {
         Holder h = new Holder();
         int pages = Math.max(1, (items.size() + INNER.length - 1) / INNER.length);
         int pg = Math.max(0, Math.min(page, pages - 1));
-        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(title(catName(Category.STORY), pg, pages)));
+        Inventory inv = Bukkit.createInventory(h, 54, menuTitle("story", title(catName(Category.STORY), pg, pages)));
         h.inv = inv;
         frame(inv, catMat(Category.STORY, "pane", Material.PURPLE_STAINED_GLASS_PANE),
                 catMat(Category.STORY, "corner", Material.MAGENTA_STAINED_GLASS_PANE));
@@ -355,7 +357,7 @@ public final class QuestMenu implements Listener {
         Holder h = new Holder();
         int pages = Math.max(1, (items.size() + INNER.length - 1) / INNER.length);
         int pg = Math.max(0, Math.min(page, pages - 1));
-        Inventory inv = Bukkit.createInventory(h, 54, Text.parse(title(ch.name(), pg, pages)));
+        Inventory inv = Bukkit.createInventory(h, 54, menuTitle("chain", title(ch.name(), pg, pages)));
         h.inv = inv;
         frame(inv, catMat(Category.STORY, "pane", Material.PURPLE_STAINED_GLASS_PANE),
                 catMat(Category.STORY, "corner", Material.MAGENTA_STAINED_GLASS_PANE));
@@ -511,8 +513,30 @@ public final class QuestMenu implements Listener {
         }
     }
 
-    /** Рамка: верх и низ — акцентный цвет, углы — свой, бока и середина — тёмные. */
+    // ── нарисованные фоны меню (ресурспак, шрифт zenquests:menu) ──
+
+    /** Символы фонов в шрифте: сдвиг влево на 8, картинка 176x222, сдвиг обратно к началу названия. */
+    private static final Map<String, Character> BACKGROUNDS = Map.of(
+            "main", '\uE000', "daily", '\uE001', "weekly", '\uE002', "seasonal", '\uE003',
+            "story", '\uE004', "chain", '\uE005');
+    private static final char SHIFT_TO_EDGE = '\uE100', SHIFT_BACK = '\uE101';
+
+    private boolean textured() { return plugin.getConfig().getBoolean("menu.textures.enabled", false); }
+
+    /** Название окна: с включёнными текстурами перед текстом идёт фон-картинка из шрифта ресурспака. */
+    private Component menuTitle(String background, String text) {
+        Component title = Text.parse(text);
+        Character bg = BACKGROUNDS.get(background);
+        if (!textured() || bg == null) return title;
+        Key font = Key.key(plugin.getConfig().getString("menu.textures.font", "zenquests:menu"));
+        Component image = Component.text("" + SHIFT_TO_EDGE + bg + SHIFT_BACK).font(font).color(NamedTextColor.WHITE);
+        // соседние компоненты не наследуют шрифт друг друга — текст остаётся обычным
+        return Component.empty().append(image).append(title);
+    }
+
+    /** Рамка: верх и низ — акцентный цвет, углы — свой, бока и середина — тёмные. С текстурами — пусто, рамку рисует фон. */
     private void frame(Inventory inv, Material accent, Material corner) {
+        if (textured()) { inv.clear(); return; }
         ItemStack dark = item(mat(plugin.getConfig().getString("menu.background"), Material.BLACK_STAINED_GLASS_PANE), " ", List.of(), false, 1);
         ItemStack acc = item(accent, " ", List.of(), false, 1);
         ItemStack cor = item(corner, " ", List.of(), false, 1);
