@@ -481,7 +481,7 @@ def load(font_dir):
 def text_mask(font_dir, text, spacing=1):
     """Pixels of `text` set in a converted font (lines split by \\n) - feed it to lettering.volume(mask=)."""
     meta = load(font_dir) if isinstance(font_dir, str) else font_dir
-    space = max(3, meta['cap'] // 3)
+    space = max(4, meta['cap'] // 2)                    # word space: half a cap, words must not run together
     on, y0 = set(), 0
     for line in text.split('\n'):
         x = 0
