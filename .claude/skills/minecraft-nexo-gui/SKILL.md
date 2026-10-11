@@ -112,6 +112,9 @@ Then send the user the preview first (they judge visually), then the files.
    use https://nexomc.com/tools/gui-visualizer. If tags show as raw text use `%nexo_shift_-8%%nexo_<id>%`.
 
 ## Beyond chest menus
+- Item / crop assets: `scripts/crop_wheat.py OUT/` draws 8 wheat growth stages at 32x32 (arching leaf blades,
+  grain ears that ripen green -> gold, awns); its tables are the template for other crops. Hand-made props and
+  item sprites live in `scripts/sprites.py`; wrap PNGs as Nexo items with `Pack.texture` for menu icons.
 - Visible custom icons in normal slots (shop items, ranks): make Nexo items with `Pack.texture` and use
   `material: nexo-<item_id>` in DeluxeMenus - see `references/nexo-reference.md` (Items).
 - Multi-page menus: one glyph per page + `[openguimenu]`; state variants via `view_requirement` + `priority`
