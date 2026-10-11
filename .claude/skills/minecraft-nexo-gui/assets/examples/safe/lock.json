@@ -49,7 +49,8 @@
    "h": 24,
    "side": "right",
    "leaf": true,
-   "leaf_w": 6
+   "leaf_w": 6,
+   "door_strap": 20
   },
   {
    "type": "safe",

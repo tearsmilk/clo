@@ -560,7 +560,7 @@ def render_icon(name):
 
 
 def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=9, top_thick=3,
-              bolt_v=(0.2, 0.5, 0.8), side='left'):
+              bolt_v=(0.2, 0.5, 0.8), side='left', hinge_ys=(), hinge_h=24):
     """The door swung open to the left of the window (storage screens), in perspective, with VOLUME rather
     than size: same height as the closed door, but a thick vault door.
       * inner face: quad from the hinge edge (x_hinge, y0..y1) to the free edge `width` px left, which is
@@ -574,7 +574,7 @@ def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=9, 
     if side == 'right':                                       # hinges on the right: draw the left door mirrored
         tmp = Image.new('RGBA', img.size, (0, 0, 0, 0))
         oxm = img.width - ox - 176                            # the window maps onto itself under the flip
-        open_door(tmp, oxm, oy, x_hinge, y0, y1, width, grow, thick, top_thick, bolt_v, 'left')
+        open_door(tmp, oxm, oy, x_hinge, y0, y1, width, grow, thick, top_thick, bolt_v, 'left', hinge_ys, hinge_h)
         img.alpha_composite(tmp.transpose(Image.Transpose.FLIP_LEFT_RIGHT))
         return
     S, B = STEEL, BRASS
@@ -654,6 +654,20 @@ def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=9, 
                 elif pr < u <= pr + 0.05 and ytp + 2 <= y <= ybp + 2.5:
                     c = S['d1']                                                    # plug shadow, hinge side
             _px(img, x, y, c)
+    for hy in hinge_ys:                                       # hinge straps on the face at the hinge edge: the
+        v0 = (hy + 4 - y0) / (y1 - y0)                        # same hinges as on the closed screen, seen from
+        v1 = (hy + hinge_h - 5 - y0) / (y1 - y0)              # inside - they meet the knuckles on the joint
+        for x in range(round(at(0.3, 0)[0]), xh + 1):
+            u = (xh - x) / max(1, width)
+            ya, yb = round(top(u) + (bot(u) - top(u)) * v0), round(top(u) + (bot(u) - top(u)) * v1)
+            for y in range(ya, yb + 1):
+                edge = y in (ya, yb) or x == round(at(0.3, 0)[0])
+                c = S['out'] if edge else S['hi'] if y == ya + 1 else S['d1'] if y == yb - 1 else S['m2']
+                _px(img, x, y, c)
+            _px(img, x + 1, yb + 1, S['d2'])
+        for uu in (0.08, 0.2):
+            rx_, ry_ = at(uu, (v0 + v1) / 2)
+            rivet(img, round(rx_), round(ry_))
     for uu, vv in ((0.06, 0.035), (0.94, 0.035), (0.06, 0.965), (0.94, 0.965)):   # rivets on the face corners
         rx_, ry_ = at(uu, vv)
         rivet(img, round(rx_), round(ry_))
@@ -846,7 +860,7 @@ def handle3(img, cx, cy, length=30, angle=0.0, spokes=3):
         _px(img, x, y, c)
 
 
-def hinge_block(img, x_edge, y, h=24, side='right', leaf=True, leaf_w=6):
+def hinge_block(img, x_edge, y, h=24, side='right', leaf=True, leaf_w=6, door_strap=0):
     """Heavy hinge of a classic safe: a leaf on the door edge, a knuckle with a pin sticking out past the body's
     side (x_edge = the body's outer edge), caps at both ends. side='right' for the photo look."""
     S = STEEL
@@ -866,6 +880,18 @@ def hinge_block(img, x_edge, y, h=24, side='right', leaf=True, leaf_w=6):
         _hline(img, lx0 + 1, lx1 - 1, y + h - 4, S['d1'])
         for ry in (y + 7, y + h - 8):
             rivet(img, (lx0 + lx1) // 2, ry)
+    if door_strap:                                                # closed door: a strap from the knuckle across
+        sx0, sx1 = (x_edge - door_strap, x_edge - 1) if side == 'right' else (x_edge, x_edge + door_strap - 1)
+        d.rectangle((sx0 + 1, y + 5, sx1 + 1, y + h - 4), fill=S['d2'])          # the seam onto the door,
+        d.rectangle((sx0, y + 4, sx1, y + h - 5), fill=S['out'])                 # screwed to the door - the
+        d.rectangle((sx0 + 1, y + 5, sx1 - 1, y + h - 6), fill=S['m2'])          # door visibly hangs on it
+        _hline(img, sx0 + 1, sx1 - 1, y + 5, S['hi'])
+        _hline(img, sx0 + 1, sx1 - 1, y + h - 6, S['d1'])
+        end = sx0 if side == 'right' else sx1                     # rounded free end
+        for yy in (y + 4, y + h - 5):
+            _px(img, end, yy, img.getpixel((end - s, yy)) if False else S['d2'])
+        for k, sx in enumerate((sx0 + 3, sx0 + 8) if side == 'right' else (sx1 - 3, sx1 - 8)):
+            rivet(img, sx, y + h // 2 - (2 if k else -2) - 1 + 1)
     kx0 = x_edge if side == 'right' else x_edge - 7               # knuckle: a vertical cylinder past the edge
     cols = (S['out'], S['hi'], S['spec'], S['l2'], S['l1'], S['m1'], S['d1'], S['out'])
     for i, c in enumerate(cols):

@@ -26,7 +26,9 @@ Turning menus reopen instantly; there is no progress indicator on purpose (the u
 same height as the closed door, thick edge with the bolts coming out of it, raised plug, mechanism and rods;
 the hinges are the SAME as on the closed screen (leaf on the frame x 170..175, knuckle x 176..183) and the
 open door hangs right off the knuckle (`x: -8` -> hinge edge at x 183) - if the hinge or the distance changes
-between the two screens, players see the door jump. Bolts only on the door - not also on the body.
+between the two screens, players see the door jump. A hinge also needs its door leaf, or door and hinge read
+as two separate things: closed - `door_strap: 20` runs from the knuckle across the seam onto the door with two
+screws; open - `hinge_ys` draws the same straps on the open door's face at the hinge edge. Bolts only on the door - not also on the body.
 `box3d` draws a 2 px dark base strip under the safe that separates it from the vanilla inventory.
 Canvas `{"left": 8, "right": 66, "top": 8, "bottom": 0}` -> texture 250x230.
 DeluxeMenus cannot hold items: use the `menu_title` from `DeluxeMenus/gui_menus/hokaria_safe.yml` as the

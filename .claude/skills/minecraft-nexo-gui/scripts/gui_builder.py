@@ -657,7 +657,8 @@ def draw_safe(img, oy, L):
         safe.body(img, ox, oy, 176, h, L.get('depth', 4), L.get('feet', True), L.get('bottom_depth'))
     elif p == 'open_door':               # the door swung open on the left (storage screen), before 'hinges'
         safe.open_door(img, ox, oy, L.get('x', -3), L.get('y0', 4), L.get('y1', 121), L.get('width', 44),
-                       L.get('grow', 7), L.get('thick', 9), L.get('top_thick', 3), side=L.get('side', 'left'))
+                       L.get('grow', 7), L.get('thick', 9), L.get('top_thick', 3), side=L.get('side', 'left'),
+                       hinge_ys=L.get('hinge_ys', ()), hinge_h=L.get('hinge_h', 24))
     elif p == 'door':
         x0, y0, x1, y1 = L.get('box', [4, 4, 171, 121])
         safe.door(img, ox + x0, oy + y0, ox + x1, oy + y1, L.get('seed', 5))
@@ -695,7 +696,7 @@ def draw_safe(img, oy, L):
     elif p == 'hinge_blocks':
         for y in L.get('ys', [14, 88]):
             safe.hinge_block(img, ox + L.get('x', 176), oy + y, L.get('h', 24), L.get('side', 'right'),
-                             L.get('leaf', True), L.get('leaf_w', 6))
+                             L.get('leaf', True), L.get('leaf_w', 6), L.get('door_strap', 0))
     elif p == 'feet':
         safe.feet(img, [(ox + x, oy + y) for x, y in L['pts']], L.get('w', 12), L.get('h', 3))
     elif p == 'turn_arrows':

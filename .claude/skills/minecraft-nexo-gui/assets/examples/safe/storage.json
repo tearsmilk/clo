@@ -46,7 +46,12 @@
    "width": 44,
    "grow": 7,
    "thick": 9,
-   "top_thick": 3
+   "top_thick": 3,
+   "hinge_ys": [
+    16,
+    86
+   ],
+   "hinge_h": 24
   },
   {
    "type": "safe",
