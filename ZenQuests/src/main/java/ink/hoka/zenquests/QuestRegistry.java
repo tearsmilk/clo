@@ -53,7 +53,7 @@ public final class QuestRegistry {
         if (ss != null) for (String sid : ss.getKeys(false)) {
             ConfigurationSection s = ss.getConfigurationSection(sid);
             if (s == null) continue;
-            LocalDate start = date(s.getString("start"), sid), end = date(s.getString("end"), sid);
+            LocalDate start = date(s.get("start"), sid), end = date(s.get("end"), sid);
             if (start == null || end == null) continue;
             List<Quest> qs = new ArrayList<>();
             readPool(s.getConfigurationSection("quests"), Category.SEASONAL, qs, false);
@@ -106,7 +106,11 @@ public final class QuestRegistry {
         }
     }
 
-    private LocalDate date(String s, String seasonId) {
+    /** YAML сам превращает 2026-12-01 без кавычек в Date — принимаем и так, и строкой. */
+    private LocalDate date(Object v, String seasonId) {
+        if (v instanceof java.util.Date d) return d.toInstant().atZone(java.time.ZoneOffset.UTC).toLocalDate();
+        if (v instanceof LocalDate d) return d;
+        String s = v == null ? null : v.toString().trim();
         try { return LocalDate.parse(s); }
         catch (DateTimeParseException | NullPointerException e) {
             plugin.getLogger().warning("quests.yml: сезон '" + seasonId + "' — дата должна быть вида 2026-12-01, сейчас: " + s);

@@ -731,8 +731,8 @@ weekly:
 seasons:
   autumn-2026:
     name: "<gradient:#f7971e:#ffd200>Осень 2026</gradient>"
-    start: 2026-09-01
-    end: 2026-11-30
+    start: "2026-09-01"
+    end: "2026-11-30"
     quests:
       harvest:
         name: "&6Урожай"
@@ -834,8 +834,8 @@ seasons:
           commands: ["minecraft:give {player} enchanted_golden_apple 2", "minecraft:xp add {player} 800 points"]
   winter-2026:
     name: "<gradient:#00c6ff:#e0f7ff>Зима 2026</gradient>"
-    start: 2026-12-01
-    end: 2027-02-28
+    start: "2026-12-01"
+    end: "2027-02-28"
     quests:
       snowman:
         name: "&fСнеговик"
