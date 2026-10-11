@@ -16,7 +16,7 @@
   {
    "type": "safe",
    "part": "box3d",
-   "h": 126,
+   "h": 134,
    "side": 5,
    "top": 5,
    "base": 2
@@ -24,7 +24,8 @@
   {
    "type": "safe",
    "part": "case",
-   "rows": 6
+   "rows": 6,
+   "h": 134
   },
   {
    "type": "safe",
@@ -42,24 +43,25 @@
    "side": "right",
    "x": -8,
    "y0": 10,
-   "y1": 115,
+   "y1": 123,
    "width": 44,
-   "grow": 7,
    "thick": 9,
    "top_thick": 3,
    "hinge_ys": [
-    16,
-    86
+    18,
+    92
    ],
-   "hinge_h": 24
+   "hinge_h": 24,
+   "grow_top": 3,
+   "grow_bot": 10
   },
   {
    "type": "safe",
    "part": "hinge_blocks",
    "x": 176,
    "ys": [
-    16,
-    86
+    18,
+    92
    ],
    "h": 24,
    "side": "right",
@@ -74,5 +76,6 @@
    "text": "СЕЙФ"
   }
  ],
- "draw_free_slots": true
+ "draw_free_slots": true,
+ "hide_inventory_label": true
 }

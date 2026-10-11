@@ -98,12 +98,12 @@ def panel(img, box, rows=6, seed=3):
         rivet(img, rx, ry)
 
 
-def case(img, ox, oy, rows=6, seed=3):
+def case(img, ox, oy, rows=6, seed=3, h=None):
     """The safe as a steel box over the container part of the window only (x 0..175, y 0..17 + 18*rows); the
     player inventory below stays vanilla (the client always draws it - it cannot be removed, only left out of
     our texture). Chamfered outline, 2 px bevel, brush streaks, corner rivets."""
     S = STEEL
-    W, Hh = 176, 18 + 18 * rows
+    W, Hh = 176, h or 18 + 18 * rows
     bx, by = ox, oy
     d = ImageDraw.Draw(img)
     d.rectangle((bx, by, bx + W - 1, by + Hh - 1), fill=S['out'])
@@ -560,7 +560,7 @@ def render_icon(name):
 
 
 def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=9, top_thick=3,
-              bolt_v=(0.2, 0.5, 0.8), side='left', hinge_ys=(), hinge_h=24):
+              bolt_v=(0.2, 0.5, 0.8), side='left', hinge_ys=(), hinge_h=24, grow_top=None, grow_bot=None):
     """The door swung open to the left of the window (storage screens), in perspective, with VOLUME rather
     than size: same height as the closed door, but a thick vault door.
       * inner face: quad from the hinge edge (x_hinge, y0..y1) to the free edge `width` px left, which is
@@ -574,13 +574,18 @@ def open_door(img, ox, oy, x_hinge=-3, y0=4, y1=121, width=44, grow=7, thick=9, 
     if side == 'right':                                       # hinges on the right: draw the left door mirrored
         tmp = Image.new('RGBA', img.size, (0, 0, 0, 0))
         oxm = img.width - ox - 176                            # the window maps onto itself under the flip
-        open_door(tmp, oxm, oy, x_hinge, y0, y1, width, grow, thick, top_thick, bolt_v, 'left', hinge_ys, hinge_h)
+        open_door(tmp, oxm, oy, x_hinge, y0, y1, width, grow, thick, top_thick, bolt_v, 'left', hinge_ys, hinge_h,
+                  grow_top, grow_bot)
         img.alpha_composite(tmp.transpose(Image.Transpose.FLIP_LEFT_RIGHT))
         return
     S, B = STEEL, BRASS
     xh, xf = ox + x_hinge, ox + x_hinge - width
     yth, ybh = oy + y0, oy + y1
-    ytf, ybf = oy + y0 - grow, oy + y1 + grow
+    # the free edge is closer to the viewer: taller. Seen from above (the box shows its top face) it grows
+    # mostly downward - equal growth up and down makes the open door look shifted up
+    gt = grow if grow_top is None else grow_top
+    gb = grow if grow_bot is None else grow_bot
+    ytf, ybf = oy + y0 - gt, oy + y1 + gb
 
     def top(u):
         return yth + (ytf - yth) * u

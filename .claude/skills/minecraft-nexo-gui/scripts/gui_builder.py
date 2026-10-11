@@ -651,14 +651,15 @@ def draw_safe(img, oy, L):
     """Safe kit parts. x / y / box are window px, slots are [col, row, ...] like other layers."""
     p, ox = L['part'], OX
     if p == 'case':                       # steel box over the container part only (vanilla inventory below)
-        safe.case(img, ox, oy, L.get('rows', 6), L.get('seed', 3))
+        safe.case(img, ox, oy, L.get('rows', 6), L.get('seed', 3), L.get('h'))
     elif p == 'body':                     # box volume: side + bottom faces (+ feet) outside the box
         h = L.get('h', 114 + 18 * L.get('rows', 6))
         safe.body(img, ox, oy, 176, h, L.get('depth', 4), L.get('feet', True), L.get('bottom_depth'))
     elif p == 'open_door':               # the door swung open on the left (storage screen), before 'hinges'
         safe.open_door(img, ox, oy, L.get('x', -3), L.get('y0', 4), L.get('y1', 121), L.get('width', 44),
                        L.get('grow', 7), L.get('thick', 9), L.get('top_thick', 3), side=L.get('side', 'left'),
-                       hinge_ys=L.get('hinge_ys', ()), hinge_h=L.get('hinge_h', 24))
+                       hinge_ys=L.get('hinge_ys', ()), hinge_h=L.get('hinge_h', 24),
+                       grow_top=L.get('grow_top'), grow_bot=L.get('grow_bot'))
     elif p == 'door':
         x0, y0, x1, y1 = L.get('box', [4, 4, 171, 121])
         safe.door(img, ox + x0, oy + y0, ox + x1, oy + y1, L.get('seed', 5))

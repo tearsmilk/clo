@@ -18,7 +18,7 @@
   {
    "type": "safe",
    "part": "box3d",
-   "h": 126,
+   "h": 134,
    "side": 5,
    "top": 5,
    "base": 2
@@ -26,7 +26,8 @@
   {
    "type": "safe",
    "part": "case",
-   "rows": 6
+   "rows": 6,
+   "h": 134
   },
   {
    "type": "safe",
@@ -35,7 +36,7 @@
     10,
     10,
     165,
-    115
+    123
    ]
   },
   {
@@ -43,8 +44,8 @@
    "part": "hinge_blocks",
    "x": 176,
    "ys": [
-    16,
-    86
+    18,
+    92
    ],
    "h": 24,
    "side": "right",
@@ -63,14 +64,14 @@
    "type": "safe",
    "part": "dial",
    "x": 88,
-   "y": 26,
+   "y": 28,
    "r": 11
   },
   {
    "type": "safe",
    "part": "handle",
    "x": 88,
-   "y": 76,
+   "y": 80,
    "length": 30,
    "angle": "${angle}"
   }
@@ -122,5 +123,6 @@
    "c2": "[close]",
    "c3": "[player] pv 1"
   }
- ]
+ ],
+ "hide_inventory_label": true
 }

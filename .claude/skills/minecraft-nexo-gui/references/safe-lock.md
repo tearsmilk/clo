@@ -8,6 +8,10 @@ Kit: `scripts/safe.py`, `theme: "steel"`, layers `{"type": "safe", ...}` (keys i
 - Only the safe is drawn: a steel box over the container part of the window (`case`), the vanilla player
   inventory stays below (it cannot be removed - the client always draws it; we only leave it out of the
   texture: `container_panel: false`, `draw_player_inventory: false`, `preview_vanilla_under: true`).
+- The box needs a frame on all four sides on BOTH screens, but under the 6th slot row (y 124) the client writes
+  "Inventory" at y 128 - no room. So `hide_inventory_label: true` (lang override, global: the label disappears
+  in every container) and the box is `h: 134` on both screens (9 px frame under the slots; the closed door is
+  centred in the same box). A storage box that ends right under the slots reads as broken.
 - Volume: top face and left face (`box3d`), heavy hinges whose pins stick out past the right side
   (`hinge_blocks`), the nameplate on the top edge. Volume = depth, not size. No feet: they land on the vanilla
   inventory panel under the safe and look stuck on (user feedback).
@@ -23,7 +27,8 @@ Turning menus reopen instantly; there is no progress indicator on purpose (the u
 
 ## The open safe (storage)
 `open_door` with `side: "right"` (hinges on the right like the photo): the door swung out in perspective -
-same height as the closed door, thick edge with the bolts coming out of it, raised plug, mechanism and rods;
+same height as the closed door, its near edge growing mostly DOWN (`grow_top: 3, grow_bot: 10`) because the box
+is seen from above - equal growth makes the door look shifted up; thick edge with the bolts coming out of it, raised plug, mechanism and rods;
 the hinges are the SAME as on the closed screen (leaf on the frame x 170..175, knuckle x 176..183) and the
 open door hangs right off the knuckle (`x: -8` -> hinge edge at x 183) - if the hinge or the distance changes
 between the two screens, players see the door jump. A hinge also needs its door leaf, or door and hinge read
