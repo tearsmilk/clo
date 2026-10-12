@@ -7,6 +7,6 @@
   (прямой upload на node.hoka.ink недоступен). После записи сверять содержимое с локальным файлом.
 - Конфиги: `plugins/ZenQuests/config.yml`, `quests.yml`; `/квесты reload` после правок (jar — только рестарт).
 - Nexo: всё для квестов — только в `plugins/Nexo/pack/assets/zenquests/` (фоны меню, тултип, иконки, шрифты).
-  Исключения: глифы — `plugins/Nexo/glyphs/zenquests.yml` (поле `char` не задавать: Nexo назначает сам при reload
+  Исключения: глифы — `plugins/Nexo/glyphs/zenquests.yml` (обязательно `font: minecraft:default`, иначе глиф уходит в шрифт nexo:default и голый символ из плейсхолдера не рисуется; поле `char` не задавать: Nexo назначает сам при reload
   и пишет в файл; свой PUA-символ клиент показывает как «тофу»). После заливки — `nexo reload all` в консоль.
 - Таб/роли — TakuCore (`plugins/TakuCore/roles.yml`, общий для сети — не править без спроса).
