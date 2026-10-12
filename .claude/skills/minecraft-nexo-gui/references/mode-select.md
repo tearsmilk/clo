@@ -89,8 +89,22 @@ frame" and "the title is not pretty, change its style". All three became one spe
   gold caps. The rods stick out 16 GUI px past the window on both sides. The paper has a slowly wandering
   deckle edge past the window (no random 1 px nubs, the jaggy check flags those) and curls into each rod.
   Engraved ship and sea-serpent doodles sit in the bottom corners.
-- **New title:** volumetric gold letters (`lettering.volume`, the style the user approved before: dense face,
-  dark back) with sparkles, standing on the top rod and breaking out above the window, shadow on the rod.
+- **Title: written on the chart, the way old maps name themselves** (`title` part, `title_inlay`):
+  - Letters: bold capitals (`lettering.chunky`, scale 3) - a lighter top edge, the last row of every stroke
+    darker (the cutting board sign's lettering the user pointed at).
+  - The ink is the border's muted gold (GOLD 3 / 2 / 1) with a faint 1 px shadow, no bright highlight, no dark
+    outline. The user: "make the text darker so it is part of the map" - bright gold read as a label stuck
+    on top.
+  - The chart's top double border runs through the title's middle and stops in gold diamonds either side,
+    with the grid and stars cleared under the letters.
+  - The user's verdicts on the way:
+    - volumetric letters standing over the top rod: "why will it just hang there";
+    - a wooden plank sign under the rod: "no wooden background, place it on the paper nicely";
+    - bright gold letters on the paper: "darker, so it is part of the map".
+
+    So the title belongs on the paper, not floating and not on a separate plate.
+  - `{"part": "title", "style": "volume"}` still gives the floating gold letters, and `modes_hd.sign()` the
+    plank, if another menu wants them.
 - **Cards:** a 10 px frame (textured material band, 2 px trim fillet, dark line). Blessed has faceted gold
   bosses with ruby gems and a 21x20 wither skull with glowing sockets. Farm has leaf sprays on the corners
   and a fanned wheat sheaf.

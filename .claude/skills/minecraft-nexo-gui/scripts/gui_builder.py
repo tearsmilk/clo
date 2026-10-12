@@ -813,8 +813,13 @@ def draw_modes(img, oy, L):
         elif p == 'compass':
             r0, r1 = L.get('rows', [1, 4])
             modes_hd.compass(img, ox, oy, L.get('col', 4), r0, r1)
-        elif p == 'title':
+        elif p == 'title' and L.get('style') == 'volume':   # volumetric gold letters over the top rod
             modes_hd.title(img, (ox + L.get('x', 88)) * HDK, (oy + L.get('y', -12)) * HDK, L['text'], L.get('scale', 4))
+        elif p == 'title':               # gold letters written on the chart under the top rod (default)
+            modes_hd.title_inlay(img, (ox + L.get('x', 88)) * HDK, (oy + L.get('y', 4)) * HDK, L['text'],
+                                 L.get('scale', 3))
+        elif p == 'sign':                # plank sign with burnt-in letters nailed under the top rod
+            modes_hd.sign(img, (ox + L.get('x', 88)) * HDK, (oy + L.get('y', 3)) * HDK, L['text'])
         elif p == 'soon':
             c, r, w = L['slots'][:3]
             modes_hd.soon(img, ox, oy, c, r, w, L.get('text', 'Скоро...'))

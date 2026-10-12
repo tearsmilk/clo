@@ -188,7 +188,8 @@ Mode-select kit parts (`{"type": "modes", "part": ...}`; a star chart with illus
 glyph tiles joined in the title (`references/gui-geometry.md`, "HD menus"). Only HD-aware layers (`modes`), buttons
 with style `none`, `container_panel` / `draw_player_inventory` / `draw_free_slots` false. In HD the modes parts are
 `scroll` (the chart between two rods sticking out past the window; canvas left / right >= 16, `front_y` 126),
-`gate`, `compass`, `soon`, `title` (volumetric gold letters, `scale` 4, `y` -13, canvas top >= 14).
+`gate`, `compass`, `soon`, `title` (gold letters written on the chart under the top rod, `scale` 3, `y` 4; the border
+stops in diamonds round it; `"style": "volume"` = volumetric letters over the rod instead).
 
 `export_layers: true` (or `gui_builder.py spec.json OUT --layers`): every spec layer - and every part a kit
 marks inside it (scene parts, frame, ribbon...) - also as its own PNG in `OUT/layers/` with `layers.json`

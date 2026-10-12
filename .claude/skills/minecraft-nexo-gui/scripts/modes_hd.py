@@ -863,14 +863,15 @@ def scroll(img, ox, oy, front_y=126, seed=4):
     for _ in range(140):
         x, y = rnd.randint(X0 + 10, X1 - 10), rnd.randint(Y0 + 16, YB - 16)
         P(img, x, y, CHART[5] if rnd.random() < 0.3 else CHART[4])
+    TB = Y0 + 14                                             # the top border runs through the title's middle
     for k, c in ((7, GOLD[2]), (10, GOLD[1])):               # gold double border with corner diamonds
         for x in range(X0 + k, X1 - k + 1):
-            P(img, x, Y0 + 8 + k, c)
+            P(img, x, TB + k, c)
             P(img, x, YB - 8 - k, c)
-        for y in range(Y0 + 8 + k, YB - 8 - k + 1):
+        for y in range(TB + k, YB - 8 - k + 1):
             P(img, X0 + k, y, c)
             P(img, X1 - k, y, c)
-    for (cx, cy) in ((X0 + 8, Y0 + 17), (X1 - 8, Y0 + 17), (X0 + 8, YB - 17), (X1 - 8, YB - 17)):
+    for (cx, cy) in ((X0 + 8, TB + 9), (X1 - 8, TB + 9), (X0 + 8, YB - 17), (X1 - 8, YB - 17)):
         for (x, y) in {(cx + dx, cy + dy) for dx in range(-3, 4) for dy in range(-3, 4) if abs(dx) + abs(dy) <= 3}:
             P(img, x, y, GOLD[4] if x + y < cx + cy else GOLD[2])
     for y in range(Y0, Y0 + 4):                              # paper curling out of the top rod
@@ -1186,3 +1187,79 @@ if __name__ == '__main__':
         export_parts(a[1])
     else:
         print(__doc__)
+
+
+def sign(img, cx, y, text, pad=14, scale=3):
+    """Plank sign with burnt-in letters (the cutting board's sign, in HD), nailed to the chart under the top rod:
+    a light beech plank 4 px thick with rounded corners, grain, a lit far edge, steel nails at both ends; the
+    letters are bold capitals (2 px strokes) burnt into the wood - the groove's top / left wall in shadow, its
+    lower / right lip lit, the burn itself in the wood's darkest tones."""
+    from kitchen import BOARD, STEEL, grain
+    import lettering
+    ink = lettering.chunky(text, scale=scale)                # uniform bold strokes, gaps kept open
+    mx0, my0 = min(x for x, _ in ink), min(y for _, y in ink)
+    ink = {(x - mx0, y - my0) for x, y in ink}
+
+    class _M:                                                # width / height of the letter block
+        width = max(x for x, _ in ink) + 1
+        height = max(y for _, y in ink) + 1
+    m = _M
+    w, h = m.width + 2 * pad, m.height + 14
+    x0 = cx - w // 2
+    solid, face = raised(img, rrect(x0, y, x0 + w - 1, y + h - 1, 4), 4, BOARD, shadow_off=(3, 4), shadow_ramp=CHART,
+                         front_grain=0.04, seed=11)
+    grain(img, face, BOARD, seed=11, density=0.03, light=0.35, length=(6, 20))
+    lx, ly = cx - m.width // 2, y + 7
+    letters = {(lx + xx, ly + yy) for xx, yy in ink}
+    for (x, yy) in letters:                                  # groove walls: shadow above / left, lit lip below / right
+        for (dx, dy), c in (((0, -1), BOARD[2]), ((-1, 0), BOARD[2]), ((0, 1), BOARD[4]), ((1, 0), BOARD[4])):
+            q = (x + dx, yy + dy)
+            if q not in letters and q in face:
+                P(img, *q, c)
+    for (x, yy) in letters:                                  # the burn: darkest, a touch lighter at the bottom
+        below = (x, yy + 1) not in letters
+        P(img, x, yy, BOARD[1] if below and yy > ly + m.height // 2 else BOARD[0])
+    for nx in (x0 + 5, x0 + w - 6):                          # nails
+        ny = y + h // 2 - 1
+        fill(img, [(nx, ny), (nx + 1, ny)], STEEL[4])
+        fill(img, [(nx, ny + 1), (nx + 1, ny + 1)], STEEL[2])
+        P(img, nx, ny, STEEL[5])
+    return x0, y, x0 + w - 1, y + h + 3
+
+
+def title_inlay(img, cx, y, text, scale=3, rod_y=None):
+    """The menu's name printed on the chart itself, like the title of an old map: bold capitals (the sign
+    lettering - a lighter top edge, the last row of every stroke darker) in the border's muted gold ink with a
+    faint 1 px shadow - part of the map, not a bright label on it (the user: "darker, so it is part of the
+    map"); the chart's border and grid make room for it and end in gold diamonds either side."""
+    import lettering
+    ink = lettering.chunky(text, scale=scale)
+    mx0, my0 = min(x for x, _ in ink), min(yy for _, yy in ink)
+    wdt = max(x for x, _ in ink) - mx0 + 1
+    hgt = max(yy for _, yy in ink) - my0 + 1
+    x0 = cx - wdt // 2
+    ink = {(x - mx0 + x0, yy - my0 + y) for x, yy in ink}
+    clear = (CHART[4], CHART[5], GOLD[1], GOLD[2])           # border, grid, stars under the title make room
+    gx0, gx1 = x0 - 14, x0 + wdt + 13
+    for yy in range(y - 4, y + hgt + 6):
+        for x in range(gx0, gx1 + 1):
+            if 0 <= x < img.width and 0 <= yy < img.height and img.getpixel((x, yy)) in clear:
+                P(img, x, yy, CHART[3])
+    by = y + hgt // 2                                        # diamonds where the border stops
+    for ex in (gx0 - 3, gx1 + 3):
+        dm = {(ex + dx, by + dy) for dx in range(-4, 5) for dy in range(-4, 5) if abs(dx) + abs(dy) <= 4}
+        for (x, yy) in dm:
+            d = (x - ex) + (yy - by)
+            P(img, x, yy, GOLD[4] if d < -2 else GOLD[3] if d < 1 else GOLD[2])
+        outline(img, dm, GOLD[1], CHART[1])
+        for k in range(1, 8):                                # a fine line running on into the border
+            P(img, ex + (k + 5) * (1 if ex > cx else -1), by, GOLD[2] if k % 2 else GOLD[3])
+    for (x, yy) in ink:                                      # printed into the paper: a faint 1 px shadow
+        q = (x + 1, yy + 1)
+        if q not in ink:
+            P(img, *q, CHART[1])
+    for (x, yy) in ink:                                      # map ink: the border's muted gold, no bright light
+        above, below = (x, yy - 1) not in ink, (x, yy + 1) not in ink
+        rel = (yy - y) / max(1, hgt - 1)
+        c = GOLD[3] if above else GOLD[1] if below and rel > 0.5 else GOLD[2]
+        P(img, x, yy, c)
