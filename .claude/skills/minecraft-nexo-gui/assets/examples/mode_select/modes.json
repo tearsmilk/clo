@@ -1,0 +1,127 @@
+{
+ "id": "hokaria_modes",
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "vanilla",
+ "comment": "mode select (Навигатор) in HD (32x32-style: 2 texture px per GUI px, cut into glyph tiles): a star chart unrolled between two wooden rods that stick out past the window, Blessed and Farm as illustrated cards built from parts, a compass rose in the gap column, gold title letters written on the chart under the top rod, 'coming soon' in row 5",
+ "canvas": {
+  "left": 16,
+  "right": 16,
+  "top": 7,
+  "bottom": 0
+ },
+ "container_panel": false,
+ "draw_player_inventory": false,
+ "preview_vanilla_under": true,
+ "draw_free_slots": false,
+ "hide_inventory_label": true,
+ "preview_tooltip": "blessed",
+ "layers": [
+  {
+   "type": "modes",
+   "part": "scroll"
+  },
+  {
+   "type": "modes",
+   "part": "title",
+   "text": "НАВИГАТОР",
+   "y": 4
+  },
+  {
+   "type": "modes",
+   "part": "gate",
+   "slots": [
+    0,
+    1,
+    4,
+    4
+   ],
+   "kind": "blessed",
+   "seed": 3
+  },
+  {
+   "type": "modes",
+   "part": "gate",
+   "slots": [
+    5,
+    1,
+    4,
+    4
+   ],
+   "kind": "farm",
+   "seed": 5
+  },
+  {
+   "type": "modes",
+   "part": "compass",
+   "col": 4,
+   "rows": [
+    1,
+    4
+   ]
+  },
+  {
+   "type": "modes",
+   "part": "soon",
+   "slots": [
+    3,
+    5,
+    3
+   ]
+  }
+ ],
+ "buttons": [
+  {
+   "id": "blessed",
+   "x": 0,
+   "y": 1,
+   "w": 4,
+   "h": 4,
+   "style": "none",
+   "name": "&c&lBlessed",
+   "lore": [
+    "&fOneblock, pvp, рыбалка",
+    "&fквантовые технологии...",
+    "",
+    "&eНажмите, чтобы перейти"
+   ],
+   "commands": [
+    "[close]",
+    "[connect] blessed"
+   ]
+  },
+  {
+   "id": "farm",
+   "x": 5,
+   "y": 1,
+   "w": 4,
+   "h": 4,
+   "style": "none",
+   "name": "&a&lФерма",
+   "lore": [
+    "&fДобывай ресурсы, выполняй задания",
+    "&fпрокачивай уровень и открывай свою лавку!",
+    "",
+    "&eНажмите, чтобы перейти"
+   ],
+   "commands": [
+    "[close]",
+    "[connect] farm"
+   ]
+  },
+  {
+   "id": "soon",
+   "x": 3,
+   "y": 5,
+   "w": 3,
+   "h": 1,
+   "style": "none",
+   "name": "&f&lСкоро...",
+   "lore": [
+    "&fновые режимы появятся позже"
+   ],
+   "commands": []
+  }
+ ],
+ "hd": 2
+}

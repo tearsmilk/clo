@@ -1,0 +1,272 @@
+{
+ "id": "hokaria_jobs",
+ "namespace": "hokaria",
+ "rows": 5,
+ "background": "pack/${tex}.png",
+ "window_at": [
+  40,
+  33
+ ],
+ "hint_glyphs": {
+  "lmb": "pack/left_click.png",
+  "rmb": "pack/right_click.png"
+ },
+ "hide_inventory_label": false,
+ "open_commands": [
+  "jobs_${id}"
+ ],
+ "preview_tooltip": "join",
+ "layers": [
+  {
+   "type": "patch",
+   "box": [
+    74,
+    -1,
+    30,
+    8
+   ],
+   "from_x": 60,
+   "above": true
+  },
+  {
+   "type": "text",
+   "x": 88,
+   "y": -2,
+   "text": "${title}",
+   "material": [
+    "#371621",
+    "#c58b55",
+    "#f8cfad",
+    "#ffe6cc",
+    "#fffaf0"
+   ],
+   "above": true
+  },
+  {
+   "type": "image",
+   "box": [
+    28,
+    20,
+    120,
+    48
+   ],
+   "path": "${picture}",
+   "if": "${picture}",
+   "above": true
+  },
+  {
+   "type": "nameplate",
+   "x": 88,
+   "y": 57,
+   "text": "${label}",
+   "min_w": 73,
+   "above": true
+  }
+ ],
+ "nexo_items": [
+  {
+   "id": "hokaria_job_${id}",
+   "icon": "${icon_png}",
+   "name": "<yellow>${label}"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "join",
+   "x": 2,
+   "y": 0,
+   "w": 5,
+   "h": 3,
+   "style": "none",
+   "name": "&e&l${label}",
+   "lore": [
+    "&7${about}",
+    "",
+    "%nexo_hokaria_lmb% &aВступить",
+    "%nexo_hokaria_rmb% &7Подробнее о профессии"
+   ],
+   "commands": [
+    "[player] jobs join ${job}"
+   ],
+   "right_commands": [
+    "[player] jobs info ${job}"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "join_icon",
+   "material": "nexo-hokaria_job_${id}",
+   "slot": 29,
+   "display_name": "&a&lВступить",
+   "lore": [
+    "&7Профессия: &f${label}",
+    "",
+    "%nexo_hokaria_lmb% &aВступить"
+   ],
+   "left_click_commands": [
+    "[player] jobs join ${job}"
+   ],
+   "preview": "${icon_png}"
+  },
+  {
+   "id": "info",
+   "material": "BOOK",
+   "slot": 30,
+   "display_name": "&e&lОписание",
+   "lore": [
+    "&7Что даёт опыт и деньги"
+   ],
+   "left_click_commands": [
+    "[player] jobs info ${job}"
+   ],
+   "preview": "sprite:ledger"
+  },
+  {
+   "id": "stats",
+   "material": "EXPERIENCE_BOTTLE",
+   "slot": 31,
+   "display_name": "&b&lМой прогресс",
+   "lore": [
+    "&7Уровень и опыт во всех профессиях"
+   ],
+   "left_click_commands": [
+    "[player] jobs stats"
+   ],
+   "preview": "sprite:emerald"
+  },
+  {
+   "id": "top",
+   "material": "GOLD_INGOT",
+   "slot": 32,
+   "display_name": "&6&lТоп игроков",
+   "lore": [
+    "&7Лучшие: ${label}"
+   ],
+   "left_click_commands": [
+    "[player] jobs top ${job}"
+   ],
+   "preview": "sprite:coin"
+  },
+  {
+   "id": "leave",
+   "material": "BARRIER",
+   "slot": 33,
+   "display_name": "&c&lПокинуть",
+   "lore": [
+    "&7Выйти из профессии"
+   ],
+   "left_click_commands": [
+    "[player] jobs leave ${job}"
+   ],
+   "preview": "sprite:barrier"
+  },
+  {
+   "id": "prev",
+   "material": "ARROW",
+   "slot": 38,
+   "display_name": "&6« ${prev_label}",
+   "left_click_commands": [
+    "[openguimenu] hokaria_jobs_${prev_id}"
+   ],
+   "preview": "sprite:arrow_gold",
+   "preview_flip": true
+  },
+  {
+   "id": "next",
+   "material": "ARROW",
+   "slot": 42,
+   "display_name": "&6${next_label} »",
+   "left_click_commands": [
+    "[openguimenu] hokaria_jobs_${next_id}"
+   ],
+   "preview": "sprite:arrow_gold"
+  }
+ ],
+ "variants": [
+  {
+   "id": "farmer",
+   "tex": "farmer",
+   "label": "Фермер",
+   "job": "Farmer",
+   "about": "Сажай и собирай урожай"
+  },
+  {
+   "id": "miner",
+   "tex": "miner",
+   "label": "Шахтёр",
+   "job": "Miner",
+   "about": "Добывай руду и камень"
+  },
+  {
+   "id": "woodcutter",
+   "tex": "wood_cutter",
+   "label": "Лесоруб",
+   "job": "Woodcutter",
+   "about": "Руби деревья"
+  },
+  {
+   "id": "digger",
+   "tex": "digger",
+   "label": "Землекоп",
+   "job": "Digger",
+   "about": "Копай землю, песок, гравий"
+  },
+  {
+   "id": "builder",
+   "tex": "builder",
+   "label": "Строитель",
+   "job": "Builder",
+   "about": "Ставь блоки и строй"
+  },
+  {
+   "id": "fisherman",
+   "tex": "fisherman",
+   "label": "Рыбак",
+   "job": "Fisherman",
+   "about": "Лови рыбу"
+  },
+  {
+   "id": "hunter",
+   "tex": "hunter",
+   "label": "Охотник",
+   "job": "Hunter",
+   "about": "Охоться на мобов"
+  },
+  {
+   "id": "blacksmith",
+   "tex": "blacksmith",
+   "label": "Кузнец",
+   "job": "Weaponsmith",
+   "about": "Куй оружие и броню"
+  },
+  {
+   "id": "alchemist",
+   "tex": "alchemist",
+   "label": "Алхимик",
+   "job": "Brewer",
+   "about": "Вари зелья"
+  },
+  {
+   "id": "enchanter",
+   "tex": "enchanter",
+   "label": "Чародей",
+   "job": "Enchanter",
+   "about": "Зачаровывай предметы"
+  },
+  {
+   "id": "baker",
+   "tex": "farmer",
+   "label": "Пекарь",
+   "job": "Baker",
+   "about": "Пеки хлеб и пироги",
+   "picture": "art/baker.png",
+   "icon_png": "art/bread_icon.png"
+  }
+ ],
+ "variant_defaults": {
+  "title": "Работы",
+  "picture": "",
+  "icon_png": "pack/icons/${tex}.png"
+ }
+}

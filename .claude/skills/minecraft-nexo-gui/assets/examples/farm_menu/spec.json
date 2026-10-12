@@ -1,0 +1,194 @@
+{
+  "id": "hokaria_main",
+  "namespace": "hokaria",
+  "rows": 6,
+  "theme": "oak",
+  "title": "Hokaria » Меню фермы",
+  "open_commands": [
+    "menu",
+    "hokaria"
+  ],
+  "preview_tooltip": "farm",
+  "buttons": [
+    {
+      "id": "farm",
+      "label": "Ферма",
+      "x": 0,
+      "y": 0,
+      "w": 3,
+      "h": 2,
+      "color": "#5DAA3A",
+      "icon": "icons/farm.png",
+      "name": "&e&lФерма",
+      "lore": [
+        "&7Сажай и собирай урожай",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ],
+      "commands": [
+        "[close]",
+        "[player] warp farm"
+      ]
+    },
+    {
+      "id": "fish",
+      "label": "Рыбалка",
+      "x": 3,
+      "y": 0,
+      "w": 3,
+      "h": 2,
+      "color": "#3E86C8",
+      "icon": "icons/fish.png",
+      "commands": [
+        "[close]",
+        "[player] warp fishing"
+      ],
+      "name": "&f&lРыбалка",
+      "lore": [
+        "&7Тихий пруд и редкая рыба",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ]
+    },
+    {
+      "id": "hunt",
+      "label": "Охота",
+      "x": 6,
+      "y": 0,
+      "w": 3,
+      "h": 2,
+      "color": "#D9822B",
+      "icon": "icons/hunt.png",
+      "commands": [
+        "[close]",
+        "[player] warp hunting"
+      ],
+      "name": "&f&lОхота",
+      "lore": [
+        "&7Лес, дичь и трофеи",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ]
+    },
+    {
+      "id": "market",
+      "label": "Рынок",
+      "x": 0,
+      "y": 2,
+      "w": 3,
+      "h": 2,
+      "color": "#E0AE22",
+      "icon": "icons/market.png",
+      "commands": [
+        "[close]",
+        "[player] shop"
+      ],
+      "name": "&f&lРынок",
+      "lore": [
+        "&7Продай урожай, купи семена",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ]
+    },
+    {
+      "id": "warps",
+      "label": "Телепорт",
+      "x": 3,
+      "y": 2,
+      "w": 3,
+      "h": 2,
+      "color": "#8B5CC8",
+      "icon": "icons/warps.png",
+      "commands": [
+        "[close]",
+        "[player] warps"
+      ],
+      "name": "&f&lТелепорт",
+      "lore": [
+        "&7Все места сервера",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ]
+    },
+    {
+      "id": "home",
+      "label": "Домой",
+      "x": 6,
+      "y": 2,
+      "w": 3,
+      "h": 2,
+      "color": "#D2483C",
+      "icon": "icons/home.png",
+      "commands": [
+        "[close]",
+        "[player] home"
+      ],
+      "name": "&f&lДомой",
+      "lore": [
+        "&7Вернуться в свой домик",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ]
+    },
+    {
+      "id": "rewards",
+      "label": "Награды",
+      "x": 0,
+      "y": 4,
+      "w": 3,
+      "h": 2,
+      "color": "#D24C8C",
+      "icon": "icons/rewards.png",
+      "commands": [
+        "[close]",
+        "[player] daily"
+      ],
+      "name": "&f&lНаграды",
+      "lore": [
+        "&7Ежедневный подарок",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ]
+    },
+    {
+      "id": "quests",
+      "label": "Задания",
+      "x": 3,
+      "y": 4,
+      "w": 3,
+      "h": 2,
+      "color": "#B8763A",
+      "icon": "icons/quests.png",
+      "commands": [
+        "[close]",
+        "[player] quests"
+      ],
+      "name": "&f&lЗадания",
+      "lore": [
+        "&7Помоги жителям деревни",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ]
+    },
+    {
+      "id": "animals",
+      "label": "Животные",
+      "x": 6,
+      "y": 4,
+      "w": 3,
+      "h": 2,
+      "color": "#33A89C",
+      "icon": "icons/animals.png",
+      "commands": [
+        "[close]",
+        "[player] pets"
+      ],
+      "name": "&f&lЖивотные",
+      "lore": [
+        "&7Твои питомцы и скот",
+        "",
+        "&a» Нажми, чтобы открыть"
+      ]
+    }
+  ]
+}

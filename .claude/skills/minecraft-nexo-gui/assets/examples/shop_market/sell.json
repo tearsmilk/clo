@@ -1,0 +1,87 @@
+{
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "vanilla",
+ "canvas": {
+  "left": 40,
+  "right": 40,
+  "top": 34,
+  "bottom": 0
+ },
+ "draw_free_slots": false,
+ "id": "hokaria_shop_sell",
+ "layers": [
+  {
+   "type": "shop",
+   "part": "stall",
+   "sign": "СКУПКА",
+   "hanging": "ХОКАРИЯ"
+  },
+  {
+   "type": "shop",
+   "part": "wells",
+   "slots": [
+    1,
+    1,
+    7,
+    4
+   ]
+  },
+  {
+   "type": "shop",
+   "part": "icon",
+   "slot": 4,
+   "icon": "shop:home"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "home",
+   "x": 4,
+   "y": 0,
+   "style": "none",
+   "name": "&eВ магазин",
+   "commands": [
+    "[openguimenu] hokaria_shop"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "wheat",
+   "material": "WHEAT",
+   "slot": 10,
+   "display_name": "&6Пшеница",
+   "lore": [
+    "&7Скупаю по &e1 монете&7 за штуку",
+    "",
+    "&fЛКМ &7- продать всё"
+   ],
+   "left_click_commands": [
+    "[player] sell wheat"
+   ],
+   "preview": "item:bundle:wheat"
+  },
+  {
+   "id": "carrot",
+   "material": "CARROT",
+   "slot": 11,
+   "display_name": "&6Морковь",
+   "preview": "item:carrot"
+  },
+  {
+   "id": "tomato",
+   "material": "BEETROOT",
+   "slot": 12,
+   "display_name": "&cТомат",
+   "preview": "item:tomato"
+  },
+  {
+   "id": "pumpkin",
+   "material": "PUMPKIN",
+   "slot": 13,
+   "display_name": "&6Тыква",
+   "preview": "item:fruit:pumpkin"
+  }
+ ]
+}

@@ -1,0 +1,123 @@
+{
+ "id": "hokaria_cutting_board",
+ "namespace": "hokaria",
+ "rows": 5,
+ "theme": "vanilla",
+ "comment": "cutting board: 5x5 food on the board (slots 0-4, 9-13, 18-22, 27-31, 36-40), 3x2 tools in the case (6-8, 15-17), 3x2 result on the plate (33-35, 42-44); column 5 and row 2 on the right stay empty; the arrow (32, 41) is the cut button",
+ "canvas": {
+  "left": 24,
+  "right": 16,
+  "top": 16,
+  "bottom": 0
+ },
+ "container_panel": false,
+ "draw_player_inventory": false,
+ "preview_vanilla_under": true,
+ "draw_free_slots": false,
+ "hide_inventory_label": true,
+ "layers": [
+  {
+   "type": "kitchen",
+   "part": "counter"
+  },
+  {
+   "type": "kitchen",
+   "part": "sign",
+   "y": -15,
+   "text": "РАЗДЕЛОЧНАЯ ДОСКА"
+  },
+  {
+   "type": "kitchen",
+   "part": "board",
+   "slots": [
+    0,
+    0,
+    5,
+    5
+   ]
+  },
+  {
+   "type": "kitchen",
+   "part": "tool_case",
+   "slots": [
+    6,
+    0,
+    3,
+    2
+   ]
+  },
+  {
+   "type": "kitchen",
+   "part": "plate",
+   "slots": [
+    6,
+    3,
+    3,
+    2
+   ]
+  },
+  {
+   "type": "kitchen",
+   "part": "arrow",
+   "x": 102,
+   "y": 87
+  },
+  {
+   "type": "kitchen",
+   "part": "knife",
+   "x": 150,
+   "y": 4
+  }
+ ],
+ "buttons": [
+  {
+   "id": "cut",
+   "x": 5,
+   "y": 3,
+   "w": 1,
+   "h": 2,
+   "style": "none",
+   "name": "&eНарезать",
+   "lore": [
+    "&7Положи еду на доску,",
+    "&7нож в ящик и нажми"
+   ],
+   "commands": [
+    "[message] &7Нарезку делает плагин кухни - этот файл только показывает фон"
+   ]
+  }
+ ],
+ "preview_items": [
+  {
+   "slot": 10,
+   "icon": "item:tomato"
+  },
+  {
+   "slot": 12,
+   "icon": "item:carrot",
+   "amount": 3
+  },
+  {
+   "slot": 20,
+   "icon": "item:loaf"
+  },
+  {
+   "slot": 30,
+   "icon": "item:fruit:apple"
+  },
+  {
+   "slot": 6,
+   "icon": "kitchen:knife"
+  },
+  {
+   "slot": 33,
+   "icon": "item:rounds:carrot",
+   "amount": 6
+  },
+  {
+   "slot": 34,
+   "icon": "item:rounds:tomato:cheese",
+   "amount": 4
+  }
+ ]
+}

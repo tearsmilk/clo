@@ -1,0 +1,150 @@
+{
+ "id": "hokaria_shop_items",
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "vanilla",
+ "canvas": {
+  "left": 40,
+  "right": 40,
+  "top": 34,
+  "bottom": 0
+ },
+ "draw_free_slots": false,
+ "layers": [
+  {
+   "type": "shop",
+   "part": "stall",
+   "sign": "ФЕРМА",
+   "hanging": "ХОКАРИЯ"
+  },
+  {
+   "type": "shop",
+   "part": "wells",
+   "slots": [
+    1,
+    1,
+    7,
+    4
+   ]
+  },
+  {
+   "type": "shop",
+   "part": "icon",
+   "slot": 4,
+   "icon": "shop:home"
+  }
+ ],
+ "nexo_items": [
+  {
+   "id": "hokaria_shop_back",
+   "icon": "shop:back",
+   "name": "<yellow>Назад"
+  },
+  {
+   "id": "hokaria_shop_next",
+   "icon": "shop:next",
+   "name": "<yellow>Дальше"
+  },
+  {
+   "id": "hokaria_cheese",
+   "icon": "item:slice:cheese",
+   "name": "<yellow>Сыр"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "home",
+   "x": 4,
+   "y": 0,
+   "style": "none",
+   "name": "&eВ магазин",
+   "commands": [
+    "[openguimenu] hokaria_shop"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "prev",
+   "material": "nexo-hokaria_shop_back",
+   "slot": 1,
+   "display_name": "&eНазад",
+   "left_click_commands": [
+    "[openguimenu] hokaria_shop"
+   ],
+   "preview": "shop:back"
+  },
+  {
+   "id": "next",
+   "material": "nexo-hokaria_shop_next",
+   "slot": 7,
+   "display_name": "&eСледующая страница",
+   "left_click_commands": [
+    "[openguimenu] hokaria_shop_items_2"
+   ],
+   "preview": "shop:next"
+  },
+  {
+   "id": "bread",
+   "material": "BREAD",
+   "slot": 10,
+   "display_name": "&6Хлеб",
+   "lore": [
+    "&7Цена: &e5 монет",
+    "",
+    "&fЛКМ &7- выбрать количество",
+    "&fПКМ &7- купить стаками"
+   ],
+   "left_click_commands": [
+    "[meta] set amount INTEGER 1",
+    "[openguimenu] hokaria_shop_confirm"
+   ],
+   "right_click_commands": [
+    "[openguimenu] hokaria_shop_stacks"
+   ],
+   "preview": "item:loaf:bread"
+  },
+  {
+   "id": "honey",
+   "material": "HONEY_BOTTLE",
+   "slot": 11,
+   "display_name": "&6Мёд",
+   "preview": "item:jar:honey"
+  },
+  {
+   "id": "milk",
+   "material": "MILK_BUCKET",
+   "slot": 12,
+   "display_name": "&fМолоко",
+   "preview": "item:bottle:milk"
+  },
+  {
+   "id": "cheese",
+   "material": "nexo-hokaria_cheese",
+   "slot": 13,
+   "display_name": "&eСыр",
+   "preview": "item:slice:cheese"
+  },
+  {
+   "id": "apple",
+   "material": "APPLE",
+   "slot": 14,
+   "display_name": "&cЯблоко",
+   "preview": "item:fruit:apple"
+  },
+  {
+   "id": "pie",
+   "material": "PUMPKIN_PIE",
+   "slot": 15,
+   "display_name": "&6Пирог",
+   "preview": "item:pie:bread:berry"
+  },
+  {
+   "id": "carrot",
+   "material": "CARROT",
+   "slot": 16,
+   "display_name": "&6Морковь",
+   "preview": "item:carrot"
+  }
+ ]
+}
