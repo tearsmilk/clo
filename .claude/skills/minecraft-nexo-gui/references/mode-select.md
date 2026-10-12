@@ -108,6 +108,24 @@ frame" and "the title is not pretty, change its style". All three became one spe
     So the title belongs on the paper, not floating and not on a separate plate.
   - `{"part": "title", "style": "volume"}` still gives the floating gold letters, and `modes_hd.sign()` the
     plank, if another menu wants them.
+- **A lived-in chart** (the user: "more details on the background so it looks more alive", then "now age
+  everything and make the paper slightly damaged at the sides"):
+  - Life (`_chart_life`), all in the paper's own tones so the cards stay the focus, and only where the
+    chart shows (the title strip, row 0, row 5, the gap column, the margins):
+    - folds in three with lit crease edges and stains;
+    - rhumb lines radiating from the compass and from a small gold-and-navy wind rose (portolan charts);
+    - islands with wobbly coasts, wave hatching, trees, hills, a red-and-white lighthouse throwing light;
+    - gulls, constellations and twinkles;
+    - red dashed voyage routes from an "X" by the ship and by the serpent toward the cards.
+  - Age (`_age_paper`), only tone steps along each colour's own ramp, no new colours and no noise:
+    - edges browned in an uneven band, the rim worn dark;
+    - V tears and bitten-out bits along both sides, with slits running in from them;
+    - a sun-faded blotch, foxing spots, water-stain rings with a light inner edge, scratches;
+    - the title's print rubbed off in places;
+    - rods with rubbed streaks and brass tarnished in patches (not per-pixel specks - that read as noise);
+    - scratches and tarnished bosses on the card frames, never on the pictures.
+  - Tears stay outside the window: the paper overhangs it by about 10 px. A hole inside the window would show
+    the chest's grey.
 - **Cards:** a 10 px frame (textured material band, 2 px trim fillet, dark line). Blessed has faceted gold
   bosses with ruby gems and a 21x20 wither skull with glowing sockets. Farm has leaf sprays on the corners
   and a fanned wheat sheaf.

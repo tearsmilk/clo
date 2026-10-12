@@ -800,7 +800,7 @@ def drop_shadow(img, solid, dx, dy, ramps):
             px[q] = _darker(px[q], ramps)
 
 
-def _rod(img, x0, x1, yc, seed=1):
+def _rod(img, x0, x1, yc, seed=1, aged=False):
     """A wooden scroll rod (cylinder lying across): lit top band, base, dark underside, grain streaks, gold
     end caps with a knob; outlined."""
     rnd = random.Random(seed)
@@ -823,6 +823,16 @@ def _rod(img, x0, x1, yc, seed=1):
         for (x, y) in disc(cx + side * 5, yc, 5, 6):
             d = (x - cx - side * 5) + (y - yc)
             pts[(x, y)] = GOLD[5] if d < -4 else GOLD[4] if d < 0 else GOLD[3] if d < 4 else GOLD[2]
+    if aged:                                                 # worn: rubbed streaks along the wood, tarnish patches
+        for _ in range((x1 - x0) // 10):
+            x, j = rnd.randint(x0 + 8, x1 - 14), rnd.choice((-3, -2, 1, 2, 3))
+            k = rnd.choice((-1, 1))
+            for i in range(rnd.randint(2, 5)):
+                if pts.get((x + i, yc + j)) in WALNUT:
+                    pts[(x + i, yc + j)] = _step(pts[(x + i, yc + j)], k)
+        for (x, y), c in list(pts.items()):
+            if c in GOLD and math.sin(x * 0.8 + y * 0.3) + math.cos(y * 0.9 - x * 0.2) > 1.1:
+                pts[(x, y)] = _step(c, -2)                   # tarnish in patches
     solid = set(pts)
     drop_shadow(img, solid, 3, 4, (CHART,))
     for p, c in pts.items():
@@ -833,15 +843,28 @@ def _rod(img, x0, x1, yc, seed=1):
 
 def scroll(img, ox, oy, front_y=126, seed=4):
     """The star chart unrolled between two wooden rods that stick out past the window on both sides: navy
-    paper with deckle edges beyond the window, a dashed grid, constellations, a gold double border, an
-    engraved ship and a sea serpent in the bottom corners, the paper curling into each rod."""
+    paper with deckle edges beyond the window, a dashed grid, folds, stains, rhumb lines from the compass
+    and a small wind rose, islands, constellations (_chart_life), a gold double border, an engraved ship and
+    a sea serpent with red voyage routes toward the cards, the paper curling into each rod."""
     rnd = random.Random(seed)
     X0, X1 = ox * K, (ox + 176) * K - 1                       # the window in HD px
     Y0, YB = (oy - 1) * K, (oy + front_y) * K                  # paper top / bottom rod centre
     paper = set()
+    trnd = random.Random(seed + 5)                           # damaged sides: V tears and bitten-out bits
+    tears = {side: [(trnd.randint(Y0 + 14, YB - 14), trnd.randint(4, 8), trnd.randint(3, 7), trnd.random() < 0.35)
+                    for _ in range(7)] for side in (-1, 1)}
     for y in range(Y0, YB + 1):                              # deckle edge: wanders slowly, no 1 px nubs
-        l = X0 - 5 - round(1 + math.sin(y * 0.11) + 0.6 * math.sin(y * 0.29 + 1))
-        r = X1 + 5 + round(1 + math.sin(y * 0.13 + 2) + 0.6 * math.sin(y * 0.31))
+        cut = {}
+        for side in (-1, 1):
+            c = 0
+            for (ty, depth, half, bite) in tears[side]:
+                dy = abs(y - ty)
+                if dy <= half:
+                    c = max(c, round(depth * (math.sqrt(1 - (dy / half) ** 2) if bite else 1 - dy / half)))
+            cut[side] = c
+        l = X0 - 10 - round(1 + math.sin(y * 0.11) + 0.6 * math.sin(y * 0.29 + 1)) + cut[-1]
+        r = X1 + 10 + round(1 + math.sin(y * 0.13 + 2) + 0.6 * math.sin(y * 0.31)) - cut[1]
+        l, r = min(l, X0 - 1), max(r, X1 + 1)                # never into the window (the chest grey would show)
         for x in range(l, r + 1):
             paper.add((x, y))
     drop_shadow(img, paper, 4, 4, ())                        # no surface under it: nothing to darken
@@ -863,6 +886,7 @@ def scroll(img, ox, oy, front_y=126, seed=4):
     for _ in range(140):
         x, y = rnd.randint(X0 + 10, X1 - 10), rnd.randint(Y0 + 16, YB - 16)
         P(img, x, y, CHART[5] if rnd.random() < 0.3 else CHART[4])
+    _chart_life(img, ox, oy, paper, X0, X1, Y0, YB, seed)
     TB = Y0 + 14                                             # the top border runs through the title's middle
     for k, c in ((7, GOLD[2]), (10, GOLD[1])):               # gold double border with corner diamonds
         for x in range(X0 + k, X1 - k + 1):
@@ -884,8 +908,195 @@ def scroll(img, ox, oy, front_y=126, seed=4):
                 P(img, x, y, CHART[4] if y == YB - 9 else CHART[2])
     _ship(img, X0 + 22, YB - 34)
     _serpent(img, X1 - 64, YB - 30)
-    _rod(img, X0 - 22, X1 + 22, Y0 - 2, seed)
-    _rod(img, X0 - 22, X1 + 22, YB, seed + 1)
+    _route(img, [(X0 + 52, YB - 22), (X0 + 66, YB - 30), (X0 + 74, YB - 44), (X0 + 80, YB - 60)])
+    _route(img, [(X1 - 70, YB - 22), (X1 - 84, YB - 28), (X1 - 92, YB - 42), (X1 - 96, YB - 60)])
+    _age_paper(img, paper, X0, X1, Y0, YB, seed)
+    _rod(img, X0 - 22, X1 + 22, Y0 - 2, seed, aged=True)
+    _rod(img, X0 - 22, X1 + 22, YB, seed + 1, aged=True)
+
+
+def _step(c, k, ramps=None):
+    """c moved k tones along its own ramp (- darker, + lighter); colours of no ramp stay."""
+    for r in ramps or (CHART, CHART2, GOLD, WALNUT, RED, CREAM, BLACKSTONE, OAK, WITHER, LEAF):
+        if c in r:
+            return r[max(1, min(5, r.index(c) + k))] if r.index(c) > 0 else c
+    return c
+
+
+def _age_paper(img, paper, X0, X1, Y0, YB, seed):
+    """An old, much-used chart: edges browned in an uneven band and worn dark at the very rim (darker still
+    round the tears), a sun-faded patch, foxing spots, two water-stain rings, scratches, little slits running
+    in from the torn sides. Only tone steps of each colour's own ramp - no new colours, no noise."""
+    rnd = random.Random(seed + 21)
+    px = img.load()
+    rows = {}
+    for (x, y) in paper:
+        lo, hi = rows.get(y, (x, x))
+        rows[y] = (min(lo, x), max(hi, x))
+    for (x, y) in paper:
+        lo, hi = rows[y]
+        d = min(x - lo, hi - x)
+        band = 7 + 3 * math.sin(y * 0.07) + 2 * math.sin(y * 0.23 + 1)
+        if d <= 1:
+            px[x, y] = CHART[1] if d == 0 else _step(px[x, y], -2)
+        elif d < band:
+            px[x, y] = _step(px[x, y], -1)
+    for (cx, cy, r) in ((X0 + 150, Y0 + 62, 20), (X1 - 120, YB - 40, 18)):   # sun-faded patches: one step lighter
+        for (x, y) in disc(cx, cy, r, r * 0.6):
+            ang = math.atan2(y - cy, x - cx)
+            edge = r * 0.75 * (1 + 0.15 * math.sin(ang * 3) + 0.08 * math.sin(ang * 7))
+            if (x, y) in paper and px[x, y] == CHART[3] and math.hypot(x - cx, (y - cy) / 0.6) < edge:
+                px[x, y] = CHART[4]
+    for _ in range(26):                                      # foxing: little clusters of brown spots
+        x, y = rnd.randint(X0 - 4, X1 + 4), rnd.randint(Y0 + 8, YB - 12)
+        for (dx, dy) in ((0, 0), (1, 0), (0, 1)) if rnd.random() < 0.5 else ((0, 0),):
+            if (x + dx, y + dy) in paper:
+                px[x + dx, y + dy] = _step(px[x + dx, y + dy], -2)
+    for (cx, cy, r) in ((X0 + 30, YB - 70, 11), (X1 - 36, Y0 + 96, 9)):   # water-stain rings
+        for t in range(0, 360, 3):
+            rr = r + 1.2 * math.sin(math.radians(t * 3))
+            x, y = round(cx + rr * math.cos(math.radians(t))), round(cy + rr * 0.8 * math.sin(math.radians(t)))
+            if (x, y) in paper:
+                px[x, y] = _step(px[x, y], -1)
+                q = (x - (1 if x > cx else -1), y)
+                if q in paper:
+                    px[q] = _step(px[q], 1)
+    for _ in range(14):                                      # scratches: short light lines
+        x, y = rnd.randint(X0, X1), rnd.randint(Y0 + 10, YB - 12)
+        dx = rnd.choice((-1, 1))
+        for k in range(rnd.randint(4, 9)):
+            q = (x + k * dx, y + k // 2)
+            if q in paper:
+                px[q] = _step(px[q], 1)
+    for side in (-1, 1):                                     # slits running in from the torn edge
+        for _ in range(4):
+            y = rnd.randint(Y0 + 16, YB - 16)
+            lo, hi = rows.get(y, (X0, X1))
+            x = lo if side < 0 else hi
+            for k in range(rnd.randint(4, 8)):
+                q = (x - side * k, y + (k // 3) * rnd.choice((0, 1)))
+                if q in paper:
+                    px[q] = CHART[0]
+
+
+def _chart_life(img, ox, oy, paper, X0, X1, Y0, YB, seed):
+    """What makes the chart look used and alive, all in the paper's own tones so the cards stay the focus:
+    folds (creases with a lit edge), a few stains, rhumb lines radiating from the compass and from a small
+    wind rose (portolan charts), islands with hatched coasts, trees and hills, constellations."""
+    rnd = random.Random(seed + 11)
+    on = lambda x, y: (x, y) in paper
+    for fx in (X0 + (X1 - X0) // 3, X0 + 2 * (X1 - X0) // 3):  # folds: the paper was folded in three
+        for y in range(Y0 + 4, YB - 9):
+            if on(fx, y):
+                P(img, fx, y, CHART[2])
+                P(img, fx + 1, y, CHART[4] if y % 7 else CHART[3])
+    fy = (Y0 + YB) // 2
+    for x in range(X0 - 6, X1 + 7):
+        if on(x, fy):
+            P(img, x, fy, CHART[2])
+            P(img, x, fy + 1, CHART[4] if x % 9 else CHART[3])
+    for (sx, sy, r) in ((X0 + 60, Y0 + 60, 9), (X1 - 40, YB - 50, 7), (X0 + 210, Y0 + 30, 6)):   # stains
+        for (x, y) in disc(sx, sy, r, r * 0.7):
+            wob = math.sin(x * 0.9) + math.cos(y * 1.3)
+            if on(x, y) and (math.hypot(x - sx, (y - sy) / 0.7) < r - 1.5 + wob) and img.getpixel((x, y)) == CHART[3]:
+                P(img, x, y, CHART[2])
+
+    def rhumbs(cx, cy, n, step):
+        for k in range(n):
+            a = 2 * math.pi * k / n
+            for t in range(10, 520, 1):
+                x, y = round(cx + math.cos(a) * t), round(cy + math.sin(a) * t)
+                if not on(x, y):
+                    if t > 40:
+                        break
+                    continue
+                if t % step < 2 and img.getpixel((x, y)) == CHART[3]:
+                    P(img, x, y, CHART[4])
+    ccx, ccy = (ox + 7 + 18 * 4 + 9) * K, (oy + 17 + 18 + 36) * K
+    rhumbs(ccx, ccy, 16, 4)                                  # from the compass rose in the gap column
+    wx, wy = X0 + 40, Y0 + 54                                # a wind rose in the top-left strip
+    rhumbs(wx, wy, 8, 5)
+    rose = {}
+    for k in range(8):
+        a = 2 * math.pi * k / 8 - math.pi / 2
+        L, wd = (11, 2.2) if k % 2 == 0 else (6, 1.6)
+        for t10 in range(0, L * 10, 3):
+            t = t10 / 10
+            half = wd * (1 - t / L)
+            for s10 in range(-int(half * 10), int(half * 10) + 1, 3):
+                sv = s10 / 10
+                x = round(wx + math.cos(a) * t - math.sin(a) * sv)
+                y = round(wy + math.sin(a) * t + math.cos(a) * sv)
+                rose[(x, y)] = (GOLD[3] if sv < 0 else GOLD[1]) if k % 2 == 0 else (CHART[5] if sv < 0 else CHART[4])
+    for (x, y), c in rose.items():
+        P(img, x, y, c)
+    for t in range(0, 360, 4):
+        P(img, round(wx + 7 * math.cos(math.radians(t))), round(wy + 7 * math.sin(math.radians(t))), CHART[5])
+    for (dx, dy) in ((0, -12), (0, -13)):
+        P(img, wx + dx, wy + dy, RED[4])                     # north
+    P(img, wx, wy, CREAM[5])
+    for (ix, iy, rx, ry, sd) in ((X1 - 62, Y0 + 56, 16, 7, 1), (X1 - 98, Y0 + 62, 5, 3, 2), (X0 + 72, Y0 + 66, 8, 4, 3)):
+        isl = set()
+        for (x, y) in disc(ix, iy, rx, ry):                  # an island: wobbly coast, land a step lighter
+            ang = math.atan2(y - iy, x - ix)
+            rr = 1 + 0.18 * math.sin(ang * 3 + sd) + 0.1 * math.sin(ang * 7 + sd * 2)
+            if ((x - ix) / (rx * rr)) ** 2 + ((y - iy) / (ry * rr)) ** 2 <= 1 and on(x, y):
+                isl.add((x, y))
+        for (x, y) in isl:
+            P(img, x, y, CHART[4])
+        for p in edge_ring(isl):                             # coast line + hatching of waves round it
+            P(img, *p, CHART[5])
+        halo = {(x + dx, y + dy) for x, y in edge_ring(isl) for dx in range(-3, 4) for dy in range(-2, 3)} - isl
+        for (x, y) in halo:
+            if on(x, y) and img.getpixel((x, y)) == CHART[3] and (x + 2 * y) % 5 == 0 and \
+                    min(abs(x - qx) + abs(y - qy) for qx, qy in edge_ring(isl)) in (2, 3):
+                P(img, x, y, CHART[4])
+        for k in range(max(1, rx // 5)):                     # trees and a hill on the bigger islands
+            tx, ty = ix - rx // 2 + k * 6, iy - 1
+            if (tx, ty) in isl and rx > 6:
+                fill(img, [(tx, ty - 2), (tx - 1, ty - 1), (tx, ty - 1), (tx + 1, ty - 1), (tx, ty)], CHART[5])
+        if rx > 10:
+            for d in range(4):
+                P(img, ix + 6 + d, iy + 1 - d, CHART[5])
+                P(img, ix + 13 - d, iy + 1 - d, CHART[5])
+    lx, ly = X1 - 52, Y0 + 54                                # a lighthouse on the big island, its light
+    for j in range(9):
+        for i in range(3):
+            P(img, lx + i, ly - j, (RED[4] if i == 0 else RED[3]) if (j // 2) % 2 == 0 else (CREAM[5] if i == 0 else CREAM[3]))
+    fill(img, [(lx, ly - 9), (lx + 1, ly - 9), (lx + 2, ly - 9), (lx + 1, ly - 10)], CHART[1])
+    P(img, lx + 1, ly - 8, BEAM[5])
+    for (dx, dy) in ((-3, -8), (-5, -9), (-7, -10), (5, -8), (7, -9), (9, -10)):
+        P(img, lx + 1 + dx, ly + dy, BEAM[4])
+    for (gx, gy) in ((X1 - 90, Y0 + 44), (X1 - 82, Y0 + 40), (X0 + 92, Y0 + 50)):   # gulls
+        fill(img, [(gx - 2, gy - 1), (gx - 1, gy), (gx, gy), (gx + 1, gy), (gx + 2, gy - 1)], CHART[5])
+    for (tx, ty) in ((X0 + 112, Y0 + 44), (X1 - 120, Y0 + 70), (X0 + 160, Y0 + 72), (X1 - 26, Y0 + 70)):
+        twinkle(img, tx, ty, CREAM[5], CHART[5])
+    for pts in (((X0 + 120, Y0 + 52), (X0 + 132, Y0 + 58), (X0 + 145, Y0 + 54), (X0 + 152, Y0 + 62)),
+                ((X1 - 150, Y0 + 50), (X1 - 140, Y0 + 56), (X1 - 128, Y0 + 52), (X1 - 132, Y0 + 62))):
+        for (a, b) in zip(pts, pts[1:]):                     # constellations: stars joined by fine lines
+            n = max(abs(b[0] - a[0]), abs(b[1] - a[1]))
+            for i in range(1, n):
+                if i % 2 == 0:
+                    P(img, round(a[0] + (b[0] - a[0]) * i / n), round(a[1] + (b[1] - a[1]) * i / n), CHART[4])
+        for (x, y) in pts:
+            twinkle(img, x, y, CREAM[4], CHART[5])
+
+
+def _route(img, pts):
+    """A voyage route: red dashes along a polyline, a small arrowhead at its end."""
+    k = 0
+    for (a, b) in zip(pts, pts[1:]):
+        n = max(abs(b[0] - a[0]), abs(b[1] - a[1]))
+        for i in range(n):
+            x, y = round(a[0] + (b[0] - a[0]) * i / n), round(a[1] + (b[1] - a[1]) * i / n)
+            if k % 5 < 3:
+                P(img, x, y, RED[4])
+                P(img, x + 1, y, RED[2])
+            k += 1
+    sx, sy = pts[0]                                          # the X where the voyage starts
+    for d in range(-2, 3):
+        P(img, sx + d, sy + d, RED[4])
+        P(img, sx + d, sy - d, RED[4])
 
 
 def _ship(img, x, y):
@@ -978,6 +1189,20 @@ def card(img, ox, oy, c, r, w, h, kind, seed=1, scene=None):
         layers.mark(f'{kind}/corners')
         _sheaf(img, cx, y0 - 12)
     layers.mark(f'{kind}/keystone')
+    wrnd = random.Random(seed + 40)                          # wear on the frame band only, not the picture
+    px = img.load()
+    for _ in range(18):
+        x, y = wrnd.randint(x0 + 3, x1 - 3), wrnd.randint(y0 + 3, y1 - 7)
+        if sx0 - 3 <= x <= sx1 + 3 and sy0 - 3 <= y <= sy1 + 3:
+            continue
+        for k in range(wrnd.randint(2, 5)):
+            q = (x + k, y + (k // 2) * wrnd.choice((0, 1)))
+            if 0 <= q[0] < img.width and 0 <= q[1] < img.height and not (sx0 - 3 <= q[0] <= sx1 + 3 and sy0 - 3 <= q[1] <= sy1 + 3):
+                px[q] = _step(px[q], 1 if k % 2 else -1)
+    for (qx, qy) in corners:                                 # tarnished corners
+        for (x, y) in disc(qx, qy, 5):
+            if wrnd.random() < 0.25 and px[x, y] in GOLD:
+                px[x, y] = _step(px[x, y], -1)
     pixel_perfect(img, only={base[0], WALNUT[0], WITHER[0], LEAF[0], GOLD[0]}, box=(x0 - 4, y0 - 14, x1 + 6, y1 + 6))
     layers.mark(f'{kind}/cleanup')
 
@@ -1259,6 +1484,11 @@ def title_inlay(img, cx, y, text, scale=3, rod_y=None):
         q = (x + 1, yy + 1)
         if q not in ink:
             P(img, *q, CHART[1])
-    for (x, yy) in ink:                                      # the paper's own colour a step lighter
+    wrnd = random.Random(7)
+    for (x, yy) in ink:                                      # the paper's own colour a step lighter, worn print
         above = (x, yy - 1) not in ink
-        P(img, x, yy, CHART[5] if above else CHART[4])
+        c = CHART[5] if above else CHART[4]
+        if wrnd.random() < 0.08 or (x * 5 + yy * 3) % 23 == 0:
+            c = CHART[3] if not above else CHART[4]          # rubbed-off ink
+        P(img, x, yy, c)
+    pixel_perfect(img, only={CHART[1]}, box=(x0 - 2, y - 2, x0 + wdt + 3, y + hgt + 3))
