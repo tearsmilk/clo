@@ -533,7 +533,10 @@ public final class QuestMenu implements Listener {
         Character bg = BACKGROUNDS.get(background);
         if (!textured() || bg == null) return title;
         Key font = Key.key(plugin.getConfig().getString("menu.textures.font", "zenquests:menu"));
-        Component image = Component.text("" + SHIFT_TO_EDGE + bg + SHIFT_BACK).font(font).color(NamedTextColor.WHITE);
+        // menu.textures.sequence — порядок символов шрифта: сдвиги, HD-плитки сцены, {bg} — накладка меню, сдвиг назад
+        String seq = plugin.getConfig().getString("menu.textures.sequence", "");
+        if (seq == null || seq.isBlank()) seq = "" + SHIFT_TO_EDGE + "{bg}" + SHIFT_BACK;
+        Component image = Component.text(seq.replace("{bg}", String.valueOf(bg))).font(font).color(NamedTextColor.WHITE);
         // название уже нарисовано на картинке (лента) — текст поверх арта не нужен; menu.textures.title: true вернёт его
         if (!plugin.getConfig().getBoolean("menu.textures.title", false)) return image;
         // соседние компоненты не наследуют шрифт друг друга — текст остаётся обычным

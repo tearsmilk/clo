@@ -1,5 +1,9 @@
 # Фоны меню ZenQuests — спеки для скилла minecraft-nexo-gui
 
+Текущая схема — HD: сцена `art/barn_hd.png` (472x270 = 2 px текстуры на 1 px интерфейса) режется на 4 плитки
+`textures/gui/scene/scene_{tl,tr,bl,br}.png` (236x136 / 236x134), в `menu_font.json` они — bitmap с `height` 68/67 и
+`ascent` 30 / -38; поверх идёт накладка меню 1x (`textures/gui/menu/<name>.png`, окно прозрачное, в (235,238) пиксель
+с alpha=1 — якорь ширины глифа). Порядок символов задаёт `menu.textures.sequence` в config.yml плагина.
 Сцена амбара (`art/barn_full.png`, 1536x864) сгенерирована Figma AI (gpt-image) по промпту «16-bit pixel art barn wall,
 lanterns, wheat garland, hay and pumpkins in the corners, calm empty centre»; `art/barn.png` — она же, обрезана до 236x135
 (box [-30,0,236,135] в спеке) и квантована до 48 цветов. Поверх неё билдер кладёт ленту-заголовок, рамки слотов и
@@ -9,8 +13,9 @@ lanterns, wheat garland, hay and pumpkins in the corners, calm empty centre»; `
 `claude/discord-minecraft-banner-k8ln0l` репозитория, либо `~/.claude/skills/minecraft-nexo-gui`):
 
 ```bash
-python3 scripts/gui_builder.py gui-specs/main_art.json OUT_main     # главное меню (текущее)
-python3 scripts/gui_builder.py gui-specs/pages_art.json OUT_pages   # daily / weekly / seasonal / story / chain (variants)
+python3 scripts/gui_builder.py gui-specs/main_hd.json OUT_main     # накладки 1x (рамки, лента, инвентарь; окно прозрачное)
+python3 scripts/gui_builder.py gui-specs/pages_hd.json OUT_pages   # daily / weekly / seasonal / story / chain (variants)
+# main_art/pages_art — та же сцена, но 1x внутри одной картинки; main/pages — сцена целиком от билдера
 # main.json / pages.json — старая версия, где сцена целиком рисовалась билдером
 ```
 

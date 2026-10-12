@@ -1,0 +1,194 @@
+{
+ "id": "main",
+ "namespace": "zenquests",
+ "rows": 6,
+ "theme": "oak",
+ "container_panel": false,
+ "inventory_panel": "vanilla",
+ "hide_inventory_label": false,
+ "canvas": {
+  "left": 30,
+  "right": 30,
+  "top": 17
+ },
+ "draw_free_slots": false,
+ "preview_tooltip": "daily",
+ "layers": [
+  {
+   "type": "rect",
+   "box": [
+    4,
+    125,
+    62,
+    12
+   ],
+   "color": "#e6c896",
+   "outline": "#6a4a28",
+   "above": true
+  },
+  {
+   "type": "divider",
+   "box": [
+    14,
+    22,
+    60,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "divider",
+   "box": [
+    102,
+    22,
+    60,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "slot_frame",
+   "slot": 4,
+   "color": "#feae34",
+   "inner": "#3e2731"
+  },
+  {
+   "type": "flourish",
+   "box": [
+    38,
+    36,
+    100,
+    16
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "note",
+   "box": [
+    41,
+    54,
+    16,
+    18
+   ],
+   "seed": 2,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    77,
+    54,
+    16,
+    18
+   ],
+   "seed": 4,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    113,
+    54,
+    16,
+    18
+   ],
+   "seed": 6,
+   "seal": null
+  },
+  {
+   "type": "slot_frame",
+   "slot_list": [
+    19,
+    21,
+    23,
+    25
+   ],
+   "color": "#feae34",
+   "inner": "#3e2731"
+  },
+  {
+   "type": "divider",
+   "box": [
+    36,
+    78,
+    104,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "slot_frame",
+   "slot_list": [
+    48,
+    50
+   ],
+   "color": "#feae34",
+   "inner": "#3e2731"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "daily",
+   "x": 1,
+   "y": 2,
+   "style": "none",
+   "name": "&e☀ Ежедневные",
+   "lore": [
+    "&7Новые задания каждый день",
+    "&7в &f00:00&7 по Москве.",
+    "",
+    "&7Выполнено: &f1/3",
+    "&a||||||&8|||||||||||||| &f33%",
+    "",
+    "&e▶ Нажми, чтобы открыть"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "head",
+   "material": "head-%player_name%",
+   "slot": 4,
+   "preview": "hub:head"
+  },
+  {
+   "id": "weekly",
+   "material": "CLOCK",
+   "slot": 21,
+   "preview": "sprite:hourglass"
+  },
+  {
+   "id": "seasonal",
+   "material": "PUMPKIN_PIE",
+   "slot": 23,
+   "preview": "sprite:pumpkin"
+  },
+  {
+   "id": "story",
+   "material": "WRITABLE_BOOK",
+   "slot": 25,
+   "preview": "sprite:ledger"
+  },
+  {
+   "id": "premium",
+   "material": "GOLDEN_HOE",
+   "slot": 48,
+   "preview": "sprite:wheat"
+  },
+  {
+   "id": "close",
+   "material": "BARRIER",
+   "slot": 50,
+   "preview": "sprite:barrier"
+  }
+ ],
+ "header": {
+  "text": "КВЕСТЫ",
+  "style": "ribbon",
+  "font": "bold",
+  "case": "keep",
+  "width": 150,
+  "color": "#c8553d",
+  "embroidered": "#f2c94c"
+ }
+}
