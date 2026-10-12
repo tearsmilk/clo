@@ -5,6 +5,7 @@ import ink.hoka.zenquests.QuestManager;
 import ink.hoka.zenquests.QuestRegistry;
 import ink.hoka.zenquests.ZenQuests;
 import ink.hoka.zenquests.model.Category;
+import ink.hoka.zenquests.model.ObjectiveType;
 import ink.hoka.zenquests.model.Quest;
 import ink.hoka.zenquests.util.Text;
 import net.kyori.adventure.key.Key;
@@ -411,11 +412,12 @@ public final class QuestMenu implements Listener {
         else lore.add(gui("status-left", "left", q.amount() - prog));
 
         if (claimed) {
-            return icon("claimed", item(mat(plugin.getConfig().getString("gui.claimed-icon"), Material.LIME_STAINED_GLASS_PANE),
-                    gui("claimed-name", "quest", Text.strip(q.name())), lore, false, 1));
+            ItemStack it = item(mat(plugin.getConfig().getString("gui.claimed-icon"), Material.LIME_STAINED_GLASS_PANE),
+                    gui("claimed-name", "quest", Text.strip(q.name())), lore, false, 1);
+            return questCards() ? questCard(it, q, "claimed") : icon("claimed", it);
         }
         String name = done ? gui("ready-name", "quest", q.name()) : q.name();
-        return item(q.icon(), name, lore, done, 1);
+        return questCard(item(q.icon(), name, lore, done, 1), q, done ? "ready" : "active");
     }
 
     // ── Ферма+ ──
@@ -574,6 +576,34 @@ public final class QuestMenu implements Listener {
                 try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { }
             }
             it.setItemMeta(m);
+        }
+        return it;
+    }
+
+    // ── карточки квестов: пергамент по состоянию + эмблема по типу задания (модели zenquests:quest_<state>_<emblem>) ──
+
+    private boolean questCards() { return !plugin.getConfig().getString("menu.quest-cards", "").isBlank(); }
+
+    /** Эмблема по типу задания — имя слоя в ресурспаке. */
+    static String emblem(ObjectiveType t) {
+        return switch (t) {
+            case BREAK -> "pickaxe"; case PLACE -> "block"; case KILL -> "sword"; case FISH -> "fish";
+            case CRAFT -> "craft"; case SMELT -> "furnace"; case EAT -> "apple"; case ENCHANT -> "ench";
+            case BREED -> "heart"; case TAME -> "bone"; case WALK -> "boots"; case PLAYTIME -> "clock";
+            case CROP_HIT, CROP_HARVEST, CROP_BREAK -> "wheat"; case COOK, COOK_ITEM -> "pot"; case MILL -> "mill";
+            case FLOUR_SACK -> "sack"; case EARN, SPEND -> "coin"; case FARM_VISIT -> "house"; case NPC_TALK, DIALOG -> "bubble";
+        };
+    }
+
+    /** menu.quest-cards: шаблон модели, напр. "zenquests:quest_{state}_{emblem}"; пусто — обычный предмет квеста. */
+    private ItemStack questCard(ItemStack it, Quest q, String state) {
+        String tpl = plugin.getConfig().getString("menu.quest-cards", "");
+        if (tpl == null || tpl.isBlank()) return it;
+        NamespacedKey model = NamespacedKey.fromString(tpl.replace("{state}", state).replace("{emblem}", emblem(q.type())).toLowerCase());
+        if (model == null) return it;
+        ItemMeta m = it.getItemMeta();
+        if (m != null) {
+            try { m.setItemModel(model); it.setItemMeta(m); } catch (Throwable ignored) { }
         }
         return it;
     }

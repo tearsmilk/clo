@@ -35,6 +35,9 @@ menu:
     enabled: true
     font: "zenquests:menu"
     title: false   # true — печатать название окна текстом поверх картинки (на наших фонах оно уже на ленте)
+  # Карточки квестов из ресурспака: шаблон модели предмета, {state} = active|ready|claimed, {emblem} — по типу задания
+  # (assets/zenquests/items/quest_*.json). Пусто "" — у квеста обычная иконка-предмет из quests.yml.
+  quest-cards: "zenquests:quest_{state}_{emblem}"
   # Свои иконки кнопок меню (ресурспак: assets/zenquests/items/icon_*.json). Пусто "" — обычный предмет.
   icons:
     daily: "zenquests:icon_daily"

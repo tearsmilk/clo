@@ -24,3 +24,8 @@ python3 scripts/gui_builder.py gui-specs/pages.json OUT_pages   # daily / weekly
 `shading.ramp5`), затем на каждую `python3 scripts/aseprite_draw.py OPS/<name>.json OUT/<name>.png`.
 Aseprite собирается `bash scripts/build_aseprite.sh DIR` (нужны `apt-get update` и libxcursor/libxi/libxrandr/
 libgl1-mesa/libfontconfig dev-пакеты; ~10 мин), бинарь не коммитить (EULA). `icons_preview.png` — как выглядят.
+
+Карточки квестов (`menu.quest-cards`): `quest_cards_make_ops.py OPS/` рисует 4 пергамента по состоянию
+(`card_active|ready|claimed|locked`) и 19 эмблем по типу задания; модели `models/item/quest/<state>_<emblem>.json`
+(generated, layer0 карточка + layer1 эмблема) и определения `items/quest_<state>_<emblem>.json` генерируются на
+каждую пару. Плагин подставляет модель по состоянию квеста и его objective.type (`QuestMenu.emblem`).
