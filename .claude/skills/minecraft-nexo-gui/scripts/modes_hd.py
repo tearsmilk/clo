@@ -1229,9 +1229,10 @@ def sign(img, cx, y, text, pad=14, scale=3):
 
 def title_inlay(img, cx, y, text, scale=3, rod_y=None):
     """The menu's name printed on the chart itself, like the title of an old map: bold capitals (the sign
-    lettering - a lighter top edge, the last row of every stroke darker) in the border's muted gold ink with a
-    faint 1 px shadow - part of the map, not a bright label on it (the user: "darker, so it is part of the
-    map"); the chart's border and grid make room for it and end in gold diamonds either side."""
+    lettering) in the paper's own colour one step lighter, the top edge one more step, a faint 1 px shadow -
+    part of the map, not a label on it (the user: "darker, so it is part of the map", then "take the
+    background colour and lighten it a little"); the chart's border and grid make room for it and end in gold
+    diamonds either side."""
     import lettering
     ink = lettering.chunky(text, scale=scale)
     mx0, my0 = min(x for x, _ in ink), min(yy for _, yy in ink)
@@ -1258,8 +1259,6 @@ def title_inlay(img, cx, y, text, scale=3, rod_y=None):
         q = (x + 1, yy + 1)
         if q not in ink:
             P(img, *q, CHART[1])
-    for (x, yy) in ink:                                      # map ink: the border's muted gold, no bright light
-        above, below = (x, yy - 1) not in ink, (x, yy + 1) not in ink
-        rel = (yy - y) / max(1, hgt - 1)
-        c = GOLD[3] if above else GOLD[1] if below and rel > 0.5 else GOLD[2]
-        P(img, x, yy, c)
+    for (x, yy) in ink:                                      # the paper's own colour a step lighter
+        above = (x, yy - 1) not in ink
+        P(img, x, yy, CHART[5] if above else CHART[4])

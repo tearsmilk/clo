@@ -92,15 +92,18 @@ frame" and "the title is not pretty, change its style". All three became one spe
 - **Title: written on the chart, the way old maps name themselves** (`title` part, `title_inlay`):
   - Letters: bold capitals (`lettering.chunky`, scale 3) - a lighter top edge, the last row of every stroke
     darker (the cutting board sign's lettering the user pointed at).
-  - The ink is the border's muted gold (GOLD 3 / 2 / 1) with a faint 1 px shadow, no bright highlight, no dark
-    outline. The user: "make the text darker so it is part of the map" - bright gold read as a label stuck
-    on top.
+  - The ink is the paper's own colour one step lighter (CHART[4], top edge CHART[5]) with a faint 1 px
+    shadow, no outline.
+  - The user first said "make the text darker so it is part of the map" (bright gold read as a label stuck
+    on top), then "take the background colour and lighten it a little". A map title is printed in the map's
+    own colours.
   - The chart's top double border runs through the title's middle and stops in gold diamonds either side,
     with the grid and stars cleared under the letters.
   - The user's verdicts on the way:
     - volumetric letters standing over the top rod: "why will it just hang there";
     - a wooden plank sign under the rod: "no wooden background, place it on the paper nicely";
-    - bright gold letters on the paper: "darker, so it is part of the map".
+    - bright gold letters on the paper: "darker, so it is part of the map";
+    - muted gold: "take the background colour and lighten it a little".
 
     So the title belongs on the paper, not floating and not on a separate plate.
   - `{"part": "title", "style": "volume"}` still gives the floating gold letters, and `modes_hd.sign()` the
