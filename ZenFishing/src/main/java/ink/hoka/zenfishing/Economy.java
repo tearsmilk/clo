@@ -31,6 +31,20 @@ public final class Economy {
         return switch (m) { case "vault" -> vault != null; case "command" -> cmd; default -> vault != null || cmd; };
     }
 
+    /** Списать монеты (только Vault). @return false — нет Vault или не хватает. */
+    public boolean take(Player p, double amount) {
+        if (amount <= 0) return true;
+        if (vault == null) return false;
+        try {
+            Object has = vault.getClass().getMethod("has", OfflinePlayer.class, double.class).invoke(vault, p, amount);
+            if (!Boolean.TRUE.equals(has)) return false;
+            Object r = vault.getClass().getMethod("withdrawPlayer", OfflinePlayer.class, double.class).invoke(vault, p, amount);
+            return Boolean.TRUE.equals(r.getClass().getMethod("transactionSuccess").invoke(r));
+        } catch (Throwable t) { plugin.getLogger().warning("Vault: " + t); return false; }
+    }
+
+    public boolean canCharge() { return vault != null; }
+
     /** @return true, если выплата прошла */
     public boolean pay(Player p, double amount) {
         if (amount <= 0) return false;

@@ -11,7 +11,7 @@
  },
  "draw_free_slots": false,
  "draw_player_inventory": false,
- "id": "collection",
+ "id": "rod",
  "layers": [
   {
    "type": "divider",
@@ -34,64 +34,78 @@
    "gem": "#ff7b6b"
   },
   {
+   "type": "slot_frame",
+   "slot": 4,
+   "color": "#4e9fd6",
+   "inner": "#14213a"
+  },
+  {
+   "type": "flourish",
+   "box": [
+    38,
+    38,
+    100,
+    16
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
    "type": "slot_bar",
    "slots": [
-    1,
-    1,
-    7,
-    4
+    2,
+    2,
+    5,
+    1
    ],
    "kind": "wood",
    "rim": "#4e9fd6",
    "inner": "#14213a"
   },
   {
-   "type": "slot_bar",
-   "slots": [
-    3,
-    5,
-    3,
-    1
+   "type": "divider",
+   "box": [
+    36,
+    78,
+    104,
+    7
    ],
-   "kind": "wood",
-   "rim": "#4e9fd6",
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "slot_frame",
+   "slot": 49,
+   "color": "#4e9fd6",
    "inner": "#14213a"
   }
  ],
  "buttons": [
   {
    "id": "x",
-   "x": 1,
-   "y": 1,
+   "x": 2,
+   "y": 2,
    "style": "none",
-   "name": "&bКарп",
+   "name": "&bУдача",
    "lore": [
-    "&7Поймано: 3"
+    "&7Сейчас: +8%"
    ]
   }
  ],
  "extra_items": [
   {
-   "id": "prev",
-   "material": "ARROW",
-   "slot": 48,
-   "preview": "sprite:arrow_gold"
+   "id": "rod",
+   "material": "FISHING_ROD",
+   "slot": 4,
+   "preview": "sprite:fish"
   },
   {
    "id": "back",
    "material": "ARROW",
    "slot": 49,
    "preview": "sprite:page"
-  },
-  {
-   "id": "next",
-   "material": "ARROW",
-   "slot": 50,
-   "preview": "sprite:arrow_gold"
   }
  ],
  "header": {
-  "text": "КОЛЛЕКЦИЯ",
+  "text": "ПРОКАЧКА",
   "style": "ribbon",
   "font": "bold",
   "case": "keep",

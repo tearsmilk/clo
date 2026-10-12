@@ -20,7 +20,7 @@
     },
     {
       "type": "bitmap",
-      "file": "zenfishing:gui/menu/collection.png",
+      "file": "zenfishing:gui/menu/rod.png",
       "ascent": 30,
       "height": 239,
       "chars": [

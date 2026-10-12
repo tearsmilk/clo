@@ -10,28 +10,33 @@ rod:
   # Опыт до следующего уровня: xp-base × xp-growth^(уровень−1)   (1→2: 100, 2→3: 125, 10→11: ~750 …)
   xp-base: 100
   xp-growth: 1.25
-  # Бонусы за КАЖДЫЙ уровень удочки (доли: 0.02 = 2%)
-  per-level:
-    luck: 0.02          # шанс редкой рыбы (множитель веса редкостей выше «обычной»)
-    bite-speed: 0.012   # быстрее клёв (меньше ожидание)
-    double-catch: 0.004 # шанс второй рыбы за один улов
-    sell-bonus: 0.008   # дороже продажа
-    big-fish: 0.01      # рыба крупнее (сдвиг к максимальному весу)
+  # Сколько очков прокачки даёт каждый новый уровень. Очки вкладываются в ветки в меню /рыбалка → Прокачка.
+  points-per-level: 1
+  # Ветки: per-point — бонус за одно очко (0.02 = 2%), max — очков в ветке, cost-base × cost-growth^вложено — цена
+  # очередного очка в монетах (0 — бесплатно). Сумма max всех веток = (max-level − 1) × points-per-level.
+  upgrades:
+    luck:   { name: "Удача",         per-point: 0.08, max: 10, cost-base: 150, cost-growth: 1.35 }   # шанс редкой рыбы
+    bite:   { name: "Клёв",          per-point: 0.06, max: 10, cost-base: 120, cost-growth: 1.35 }   # быстрее поклёвка
+    double: { name: "Двойной улов",  per-point: 0.02, max: 10, cost-base: 200, cost-growth: 1.35 }   # шанс второй рыбы
+    sell:   { name: "Цена",          per-point: 0.04, max: 10, cost-base: 180, cost-growth: 1.35 }   # дороже продажа
+    big:    { name: "Крупная рыба",  per-point: 0.05, max: 9,  cost-base: 150, cost-growth: 1.35 }   # рыба тяжелее
   name: "&b🎣 Удочка &7[&fур. {level}&7]"
   name-max: "&b🎣 Удочка &7[&6МАКС&7]"
+  # {tracks} — по строке track-line на каждую прокачанную ветку; {free} — свободные очки
   lore:
     - "&8──────────────"
     - "&7Опыт: &f{xp}&7/&f{need}"
     - "{bar}"
     - "&8──────────────"
-    - "&7Удача: &a+{luck}%   &7Клёв: &a+{bite}%"
-    - "&7Двойной улов: &a{double}%   &7Цена: &a+{sell}%"
+    - "{tracks}"
+    - "&7Свободных очков: &e{free}"
   lore-max:
     - "&8──────────────"
     - "&6✦ Максимальный уровень"
     - "&8──────────────"
-    - "&7Удача: &a+{luck}%   &7Клёв: &a+{bite}%"
-    - "&7Двойной улов: &a{double}%   &7Цена: &a+{sell}%"
+    - "{tracks}"
+    - "&7Свободных очков: &e{free}"
+  track-line: "&7{track}: &a+{value}% &8({points})"
   bar: { length: 20, filled: "&b▮", empty: "&8▮" }
 
 # ── Улов ──
@@ -65,6 +70,7 @@ premium:
   bite-speed: 0.2        # клёв на 20% быстрее
   double-catch: 0.05     # +5% к шансу второй рыбы
   sell-bonus: 0.15       # +15% к цене
+  upgrade-discount: 0.2  # скидка 20% на прокачку удочки за монеты
   exclusive-fish: true   # рыба с premium: true в fish.yml ловится только подписчикам
   # Значок в табе/чате через PlaceholderAPI: %zenfishing_premium_badge%
   badge: ""
@@ -75,12 +81,13 @@ premium:
     - "&7• Клёв быстрее на &b20%"
     - "&7• Вторая рыба за улов &b+5%"
     - "&7• Рыба дороже на &b15%"
+    - "&7• Прокачка удочки дешевле на &b20%"
     - "&7• Особая рыба только для &bРыбак+"
 
 # ── Меню /рыбалка ──
 menu:
   title: "<gradient:#38b6ff:#5ce1e6>🎣 Рыбалка</gradient>"
-  collection-title: "<gradient:#38b6ff:#5ce1e6>🎣 Коллекция рыбы</gradient> &8({page}/{pages})"
+  rod-title: "<gradient:#38b6ff:#5ce1e6>🎣 Прокачка удочки</gradient>"
   accent: LIGHT_BLUE_STAINED_GLASS_PANE
   corner: CYAN_STAINED_GLASS_PANE
   background: BLACK_STAINED_GLASS_PANE
@@ -92,7 +99,7 @@ menu:
     font: "zenfishing:menu"
     title: false
     sequence: "\uE100\uE010\uE102\uE011\uE103\uE012\uE102\uE013\uE103{bg}\uE101"
-    backgrounds: { main: "\uE000", collection: "\uE001" }
+    backgrounds: { main: "\uE000", rod: "\uE001" }
   # Свои иконки кнопок (модели предметов, напр. zenquests:icon_close). Пусто — обычный предмет.
   icons: { close: "", back: "", prev: "", next: "", sell: "", top: "", premium-active: "", premium-inactive: "", collection: "", unknown: "", rod: "" }
   profile:
@@ -105,14 +112,28 @@ menu:
   rod:
     name: "&bУдочка в руке"
     none: ["&7Возьми удочку в руку,", "&7чтобы увидеть её уровень"]
-  collection:
-    name: "&bКоллекция рыбы"
-    lore: ["&7Все виды рыбы и твои рекорды", "", "&eНажми, чтобы открыть"]
-    known-lore: ["&7Поймано: &f{count}", "&7Рекорд: &f{best} кг", "&7Цена: &e{price} {currency}"]
-    unknown-name: "&8???"
-    unknown-lore: ["{color}{rarity}", "&8Ещё не поймана"]
-    unknown-item: GRAY_DYE
-    premium-lore: "&b✦ Только для {premium}"
+  upgrade:
+    name: "&bПрокачка удочки"
+    lore: ["&7Вложи очки в удачу, клёв,", "&7двойной улов, цену и размер рыбы", "", "&eНажми, чтобы открыть"]
+    item: ANVIL
+  # Меню прокачки: шапка — удочка, 5 веток, назад
+  tracks:
+    name: "&b{track} &7[&f{points}&7/&f{max}&7]"
+    name-max: "&b{track} &7[&6МАКС&7]"
+    lore:
+      - "&7Сейчас: &a+{value}%"
+      - "&7Следующее очко: &a+{next}%"
+      - ""
+      - "&7Цена: &e{cost} {currency}"
+      - "&7Свободных очков: &e{free}"
+      - ""
+      - "&eНажми, чтобы вложить очко"
+    lore-max: ["&7Сейчас: &a+{value}%", "", "&6✦ Ветка прокачана полностью"]
+    lore-no-points: ["&7Сейчас: &a+{value}%", "&7Следующее очко: &a+{next}%", "", "&cНет свободных очков", "&7Очки дают уровни удочки"]
+    items: { luck: RABBIT_FOOT, bite: CLOCK, double: COD, sell: GOLD_NUGGET, big: SALMON }
+  rod-none:
+    name: "&cНет удочки"
+    lore: ["&7Возьми удочку в руку", "&7и открой меню снова"]
   sell:
     name: "&eПродать всю рыбу"
     lore: ["&7Рыбы в инвентаре: &f{count}", "&7На сумму: &e{amount} {currency}", "", "&eНажми, чтобы продать"]
@@ -144,6 +165,11 @@ messages:
   record: "&6★ Новый личный рекорд: {color}{fish} &6{weight} кг!"
   level-up: "&b🎣 Удочка прокачана до &fуровня {level}&b!"
   level-max: "&6✦ Удочка достигла максимального уровня!"
+  upgraded: "&b🎣 {track} &7→ &a+{value}%&7. Осталось очков: &e{free}"
+  upgrade-no-rod: "&cВозьми удочку в руку."
+  upgrade-no-points: "&cНет свободных очков — лови рыбу, уровни дают очки."
+  upgrade-max: "&7Эта ветка уже прокачана полностью."
+  upgrade-no-money: "&cНе хватает монет: нужно &e{cost} {currency}&c."
   sold: "&aПродано рыбы: &f{count} &aна &e{amount} {currency}&a."
   nothing-to-sell: "&7В инвентаре нет рыбы."
   sell-unavailable: "&cПродажа сейчас недоступна (нет экономики)."

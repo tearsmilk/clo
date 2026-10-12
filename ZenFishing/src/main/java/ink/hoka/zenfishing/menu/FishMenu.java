@@ -1,7 +1,6 @@
 package ink.hoka.zenfishing.menu;
 
 import ink.hoka.zenfishing.Fish;
-import ink.hoka.zenfishing.FishItems;
 import ink.hoka.zenfishing.PlayerStats;
 import ink.hoka.zenfishing.PremiumStore;
 import ink.hoka.zenfishing.Rods;
@@ -34,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * /рыбалка: главное — профиль, удочка в руке, Рыбак+, коллекция, продажа, топ.
- * Коллекция — все виды по страницам: пойманные с рекордом, остальные «???».
+ * /рыбалка: главное — профиль, удочка в руке, Рыбак+, прокачка, продажа, топ.
+ * Прокачка — удочка в шапке и 5 веток: клик вкладывает очко (и списывает монеты, если задана цена).
  */
 public final class FishMenu implements Listener {
 
@@ -48,7 +47,8 @@ public final class FishMenu implements Listener {
     private static final int[] INNER = {
             10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25,
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
-    private static final int ROD = 2, PROFILE = 4, PREMIUM = 6, COLLECTION = 22, SELL = 20, TOP = 24, CLOSE = 49, PREV = 48, BACK = 49, NEXT = 50;
+    private static final int ROD = 2, PROFILE = 4, PREMIUM = 6, UPGRADE = 22, SELL = 20, TOP = 24, CLOSE = 49, BACK = 49;
+    private static final int[] TRACK_SLOTS = {20, 21, 22, 23, 24};
     private static final char SHIFT_TO_EDGE = '', SHIFT_BACK = '';
 
     private final ZenFishing plugin;
@@ -90,6 +90,7 @@ public final class FishMenu implements Listener {
             ItemMeta m = show.getItemMeta();
             if (m != null) { m.addItemFlags(ItemFlag.values()); if (tooltipStyle() != null) try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { } show.setItemMeta(m); }
             inv.setItem(ROD, icon("rod", show));
+            h.actions.put(ROD, () -> openRod(p));
         } else inv.setItem(ROD, icon("rod", item(Material.FISHING_ROD, cfg("rod.name", "Удочка"), cfgList("rod.none"), false)));
 
         // Рыбак+
@@ -101,8 +102,8 @@ public final class FishMenu implements Listener {
                 item(mat(prem ? "premium.active.item" : "premium.inactive.item", Material.NAUTILUS_SHELL), fill(cfg(prem ? "premium.active.name" : "premium.inactive.name", "{premium}")), lore, prem)));
 
         // коллекция / продажа / топ
-        inv.setItem(COLLECTION, icon("collection", item(Material.TROPICAL_FISH, cfg("collection.name", "Коллекция"), cfgList("collection.lore"), false)));
-        h.actions.put(COLLECTION, () -> openCollection(p, 0));
+        inv.setItem(UPGRADE, icon("upgrade", item(mat("upgrade.item", Material.ANVIL), cfg("upgrade.name", "Прокачка"), cfgList("upgrade.lore"), false)));
+        h.actions.put(UPGRADE, () -> openRod(p));
         ZenFishing.Sale sale = plugin.appraise(p);
         inv.setItem(SELL, icon("sell", item(mat("sell.item", Material.GOLD_INGOT), cfg("sell.name", "Продать"),
                 fillAll(cfgList("sell.lore"), "count", sale.count(), "amount", Text.num(sale.amount())), false)));
@@ -139,44 +140,61 @@ public final class FishMenu implements Listener {
         return Text.duration(Duration.ofMillis(until - System.currentTimeMillis()));
     }
 
-    // ── коллекция ──
+    // ── прокачка удочки ──
 
-    public void openCollection(Player p, int page) {
-        List<Fish> all = plugin.fish().sorted();
-        int pages = Math.max(1, (all.size() + INNER.length - 1) / INNER.length);
-        int pg = Math.max(0, Math.min(page, pages - 1));
+    private ItemStack rodInHand(Player p) {
+        ItemStack rod = p.getInventory().getItemInMainHand();
+        if (!plugin.rods().isRod(rod)) rod = p.getInventory().getItemInOffHand();
+        return plugin.rods().isRod(rod) ? rod : null;
+    }
+
+    public void openRod(Player p) {
+        Rods rods = plugin.rods();
         Holder h = new Holder();
-        Inventory inv = Bukkit.createInventory(h, 54, menuTitle("collection", fill(cfg("collection-title", "Коллекция"), "page", pg + 1, "pages", pages)));
+        Inventory inv = Bukkit.createInventory(h, 54, menuTitle("rod", cfg("rod-title", "Прокачка удочки")));
         h.inv = inv;
         frame(inv);
-        PlayerStats st = plugin.stats().get(p);
-        for (int i = 0; i < INNER.length; i++) {
-            int idx = pg * INNER.length + i;
-            if (idx >= all.size()) break;
-            Fish f = all.get(idx);
-            int count = st.count.getOrDefault(f.id(), 0);
-            ItemStack it;
-            if (count > 0) {
-                double best = st.best.getOrDefault(f.id(), 0.0);
-                List<String> lore = new ArrayList<>();
-                lore.add(f.rarity().color() + f.rarity().name());
-                for (String l : f.lore()) lore.add(l);
-                lore.add("");
-                lore.addAll(fillAll(cfgList("collection.known-lore"), "count", count, "best", Text.num(best), "price", Text.num(Math.round(f.priceFor(best)))));
-                if (f.premium()) lore.add(fill(cfg("collection.premium-lore", "")));
-                it = item(FishItems.base(f.item()), f.rarity().color() + f.name(), lore, f.rarity().order() >= 3);
-            } else {
-                List<String> lore = fillAll(cfgList("collection.unknown-lore"), "color", f.rarity().color(), "rarity", f.rarity().name());
-                if (f.premium()) lore.add(fill(cfg("collection.premium-lore", "")));
-                it = icon("unknown", item(mat("collection.unknown-item", Material.GRAY_DYE), cfg("collection.unknown-name", "???"), lore, false));
+        ItemStack rod = rodInHand(p);
+        if (rod == null) {
+            inv.setItem(PROFILE, item(Material.FISHING_ROD, cfg("rod-none.name", "Нет удочки"), cfgList("rod-none.lore"), false));
+        } else {
+            rods.refresh(rod, p);
+            ItemStack show = rod.clone();
+            ItemMeta m = show.getItemMeta();
+            if (m != null) { m.addItemFlags(ItemFlag.values()); if (tooltipStyle() != null) try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { } show.setItemMeta(m); }
+            inv.setItem(PROFILE, icon("rod", show));
+            boolean prem = plugin.isPremium(p);
+            int free = rods.points(rod);
+            for (int i = 0; i < Rods.TRACKS.length && i < TRACK_SLOTS.length; i++) {
+                int pts = rods.track(rod, i), max = rods.trackMax(i);
+                boolean full = pts >= max;
+                double cost = rods.trackCost(rod, i, prem);
+                Object[] kv = {"track", rods.trackName(i), "points", pts, "max", max, "value", Rods.pct(rods.trackValue(rod, i)),
+                        "next", Rods.pct((pts + 1) * rods.trackStep(i)), "cost", Text.num(cost), "free", free};
+                List<String> lore = fillAll(cfgList(full ? "tracks.lore-max" : free > 0 ? "tracks.lore" : "tracks.lore-no-points"), kv);
+                ItemStack it = item(mat("tracks.items." + Rods.TRACKS[i], Material.PAPER), fill(cfg(full ? "tracks.name-max" : "tracks.name", "{track}"), kv), lore, full);
+                inv.setItem(TRACK_SLOTS[i], icon("track", it));
+                final int idx = i;
+                h.actions.put(TRACK_SLOTS[i], () -> upgrade(p, idx));
             }
-            inv.setItem(INNER[i], it);
         }
-        if (pg > 0) { inv.setItem(PREV, icon("prev", item(mat("prev.item", Material.ARROW), cfg("prev.name", "←"), List.of(), false))); h.actions.put(PREV, () -> openCollection(p, pg - 1)); }
-        if (pg < pages - 1) { inv.setItem(NEXT, icon("next", item(mat("next.item", Material.ARROW), cfg("next.name", "→"), List.of(), false))); h.actions.put(NEXT, () -> openCollection(p, pg + 1)); }
         inv.setItem(BACK, icon("back", item(mat("back.item", Material.ARROW), cfg("back.name", "Назад"), List.of(), false)));
         h.actions.put(BACK, () -> openMain(p));
         p.openInventory(inv);
+    }
+
+    private void upgrade(Player p, int i) {
+        Rods rods = plugin.rods();
+        ItemStack rod = rodInHand(p);
+        if (rod == null) { plugin.msg(p, "upgrade-no-rod"); openRod(p); return; }
+        if (rods.track(rod, i) >= rods.trackMax(i)) { plugin.msg(p, "upgrade-max"); return; }
+        if (rods.points(rod) <= 0) { plugin.msg(p, "upgrade-no-points"); return; }
+        double cost = rods.trackCost(rod, i, plugin.isPremium(p));
+        if (cost > 0 && plugin.economy().canCharge() && !plugin.economy().take(p, cost)) { plugin.msg(p, "upgrade-no-money", "cost", Text.num(cost)); return; }
+        if (!rods.upgrade(rod, i, p)) return;
+        plugin.msg(p, "upgraded", "track", rods.trackName(i), "value", Rods.pct(rods.trackValue(rod, i)), "free", rods.points(rod));
+        p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE, 0.6f, 1.4f);
+        openRod(p);
     }
 
     // ── события ──
