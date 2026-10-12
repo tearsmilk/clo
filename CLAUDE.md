@@ -12,3 +12,4 @@
 - Таб/роли — TakuCore (`plugins/TakuCore/roles.yml`, общий для сети — не править без спроса).
 - Фоны меню рисуются скиллом `minecraft-nexo-gui` из спеков `ZenQuests/gui-specs/` (см. README там); скилл лежит в ветке
   `claude/discord-minecraft-banner-k8ln0l` (`.claude/skills/minecraft-nexo-gui`) — забрать через `git archive` в `~/.claude/skills/`.
+- Иконки меню — Aseprite (`ZenQuests/gui-specs/README.md`); бинарь собирается в контейнере заново: `build_aseprite.sh`.

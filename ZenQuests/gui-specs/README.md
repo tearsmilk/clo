@@ -19,5 +19,8 @@ python3 scripts/gui_builder.py gui-specs/pages.json OUT_pages   # daily / weekly
 кухонной вывеске). Этой опции в скилле из ветки нет — она добавлена патчем `gui_builder_ribbon_bold.patch`
 (`patch -p0 scripts/gui_builder.py < gui_builder_ribbon_bold.patch` внутри папки скилла).
 
-Иконки кнопок меню (`assets/zenquests/textures/item/icon/*.png`, 15 штук) рисует `icons_gen.py OUT/`
-(сетки 16x16, объект ~14x14, 5 тонов на материал через `shading.ramp5` из скилла); `icons_preview.png` — как выглядят.
+Иконки кнопок меню (`assets/zenquests/textures/item/icon/*.png`, 15 штук) рисуются инструментами Aseprite
+через скилл: `python3 icons_make_ops.py OPS/` пишет операции (эллипсы, контуры, Outline; 5-тоновые рампы
+`shading.ramp5`), затем на каждую `python3 scripts/aseprite_draw.py OPS/<name>.json OUT/<name>.png`.
+Aseprite собирается `bash scripts/build_aseprite.sh DIR` (нужны `apt-get update` и libxcursor/libxi/libxrandr/
+libgl1-mesa/libfontconfig dev-пакеты; ~10 мин), бинарь не коммитить (EULA). `icons_preview.png` — как выглядят.
