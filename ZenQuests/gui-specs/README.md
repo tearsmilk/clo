@@ -25,8 +25,10 @@ python3 scripts/gui_builder.py gui-specs/pages.json OUT_pages   # daily / weekly
 Aseprite собирается `bash scripts/build_aseprite.sh DIR` (нужны `apt-get update` и libxcursor/libxi/libxrandr/
 libgl1-mesa/libfontconfig dev-пакеты; ~10 мин), бинарь не коммитить (EULA). `icons_preview.png` — как выглядят.
 
-Карточки квестов (`menu.quest-cards`): стиль 16x16 RPG-паков — предмет по типу задания без фона (тёмный цветной
-контур, 3 тона + блик) и бейдж состояния в правом нижнем углу (`badge_ready` золотая искра, `badge_claimed` зелёная
-галочка, `badge_locked` замок, `badge_active` пустой). `quest_items16.py OUT/` рисует их из пиксельных сеток;
-модели `models/item/quest/<state>_<emblem>.json` = generated, layer0 предмет + layer1 бейдж; определения
-`items/quest_<state>_<emblem>.json`. Плагин выбирает модель по состоянию и objective.type (`QuestMenu.emblem`).
+Иконки квестов (`menu.quest-cards`, 32x32): сгенерированы картиночной моделью (Figma AI, gpt-image) одним листом
+в стиле 16-bit RPG-паков — `quest-icons/generated_sheet.png`; дальше лист режется по сетке, фон (#3d3d3c) убирается
+по цветовому расстоянию, каждый предмет ужимается `pixelstyle.fit(30)` + `quantize(20)` в 32x32 (`quest-icons/*.png`).
+Состояние — бейдж 1:1 в правом нижнем углу (`badge_ready` искра, `badge_claimed` галочка, `badge_locked` замок,
+`badge_active` пустой; рисуются `quest_items16.py`). Модели `models/item/quest/<state>_<emblem>.json` = generated,
+layer0 предмет + layer1 бейдж; плагин выбирает модель по состоянию и objective.type (`QuestMenu.emblem`).
+Промпт для догенерации — в истории сессии; новые предметы добавлять тем же способом, чтобы стиль совпадал.
