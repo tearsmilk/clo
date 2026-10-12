@@ -5,7 +5,7 @@ api-version: '1.21'
 description: Система квестов
 website: https://hoka.ink
 authors: [nakuZen]
-softdepend: [TakuFarmers, Nexo]
+softdepend: [TakuFarmers, Nexo, PlaceholderAPI]
 
 commands:
   quests:

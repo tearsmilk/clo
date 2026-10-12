@@ -12,7 +12,7 @@ chmod +x gradlew      # один раз, если после распаковк�
 ./gradlew build
 ```
 
-Готовый плагин: `build/libs/ZenQuests-1.5.0.jar` → кинуть в `plugins/` сервера.
+Готовый плагин: `build/libs/ZenQuests-1.6.0.jar` → кинуть в `plugins/` сервера.
 В VSCode: открыть папку `ZenQuests`, поставить Extension Pack for Java + Gradle for Java
 (предложит сам), сборка — вкладка Gradle → `build → build`.
 Байткод собирается под Java 21 (минимум Paper 1.21.11), работает и на Java 25.

@@ -35,6 +35,7 @@ public final class ZenQuests extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ProgressListener(this), this);
         getServer().getPluginManager().registerEvents(menu, this);
         ink.hoka.zenquests.hook.TakuFarmersHook.tryRegister(this);
+        ink.hoka.zenquests.hook.PapiHook.tryRegister(this);
 
         PluginCommand cmd = getCommand("quests");
         if (cmd != null) {

@@ -89,6 +89,11 @@ menu:
 # и бонусные награды (premium-rewards у любого квеста).
 premium:
   permission: "zenquests.premium"
+  # Значок подписки для таба/чата через PlaceholderAPI: %zenquests_premium_badge% — badge, если подписка есть,
+  # иначе badge-none. По умолчанию — глиф Nexo premium_badge (plugins/Nexo/glyphs/zenquests.yml), картинка в ресурспаке.
+  # В TakuCore roles.yml:  tab: { suffix: " %zenquests_premium_badge%" }
+  badge: "\uE2A0"
+  badge-none: ""
   name: "<gradient:#ffd34e:#ff9f1c>Ферма+</gradient>"
   quest-tag: "&6✦ Задание {premium}"
   bonus-title: "&6✦ Бонус {premium}&6:"

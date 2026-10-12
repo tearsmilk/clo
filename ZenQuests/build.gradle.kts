@@ -4,17 +4,20 @@ plugins {
 }
 
 group = "ink.hoka"
-version = "1.5.0"
+version = "1.6.0"
 description = "Система квестов"
 
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.extendedclip.com/releases/")
 }
 
 dependencies {
     // Paper API 1.21.11 — подходит и для Leaf (это форк Paper).
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    // PlaceholderAPI — плейсхолдеры %zenquests_*% (необязательная зависимость)
+    compileOnly("me.clip:placeholderapi:2.11.6")
 }
 
 // Тулчейн не пинуем — используется JDK, которым запущен Gradle (JDK 25).
