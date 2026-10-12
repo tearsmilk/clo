@@ -43,7 +43,18 @@ public final class FishItems {
         List<Component> lore = new ArrayList<>();
         for (String l : plugin.getConfig().getStringList("catch.lore")) lore.add(Text.parse(fill(l, f, weight, who, date)));
         m.lore(lore);
+        String model = f.model() != null ? f.model() : plugin.getConfig().getString("catch.item-model", "").replace("{id}", f.id());
+        if (model != null && !model.isBlank()) { try { m.setItemModel(NamespacedKey.fromString(model)); } catch (Throwable ignored) { } }
         it.setItemMeta(m);
+        return it;
+    }
+
+    /** Предмет-образец вида (для меню): модель как у улова, без веса. */
+    public ItemStack sample(Fish f) {
+        ItemStack it = base(f.item());
+        ItemMeta m = it.getItemMeta();
+        String model = f.model() != null ? f.model() : plugin.getConfig().getString("catch.item-model", "").replace("{id}", f.id());
+        if (m != null && model != null && !model.isBlank()) { try { m.setItemModel(NamespacedKey.fromString(model)); it.setItemMeta(m); } catch (Throwable ignored) { } }
         return it;
     }
 

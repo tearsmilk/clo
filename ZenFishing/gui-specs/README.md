@@ -11,3 +11,10 @@
   Слоты главного меню: 2 удочка, 4 профиль, 6 Рыбак+, 20 продать, 22 прокачка, 24 топ, 49 закрыть; прокачка —
   4 удочка, 20..24 ветки, 49 назад (`FishMenu`).
 - Превью: `preview_main.png`, `preview_rod.png`.
+
+## Текстуры рыбы
+`fish-icons/*.png` (32x32, 44 видов) — сгенерированы Figma AI тремя листами 4x4 (`fish-icons/_sheet*.png`, промпт — список
+рыб по рядам на магентовом фоне), нарезаны по клеткам `fish_icons_cut.py` (мусор соседних клеток отфильтрован по связным
+компонентам, затем `pixelstyle.fit(30)` + `quantize(20)`). Пак: `assets/zenfishing/textures/item/fish/<id>.png`,
+`models/item/fish/<id>.json` (generated), `items/fish/<id>.json`; плагин ставит модель `zenfishing:fish/<id>`
+(`catch.item-model` в config.yml) — отдельных yml предметов Nexo нет. Превью — `fish_icons_preview.png`.

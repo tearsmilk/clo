@@ -48,7 +48,7 @@ public final class FishRegistry {
             for (String b : s.getStringList("biomes")) biomes.add(b.trim().toUpperCase(Locale.ROOT));
             fish.put(k, new Fish(k, s.getString("name", k), s.getString("item", "COD"), r, min, Math.max(min, max),
                     s.getDouble("price", 5), s.getDouble("price-per-kg", 0), s.getBoolean("premium", false),
-                    biomes, s.getStringList("lore")));
+                    biomes, s.getStringList("lore"), s.contains("model") ? s.getString("model", "") : null));
         }
     }
 

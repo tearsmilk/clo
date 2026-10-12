@@ -45,6 +45,9 @@ catch:
   announce-from: epic
   sounds: true
   # Шансы редкостей (относительные веса) — в fish.yml у каждой редкости
+  # Своя текстура рыбы из ресурспака: шаблон модели предмета, {id} — id рыбы из fish.yml
+  # (assets/zenfishing/items/fish/<id>.json). Пусто "" — ванильные предметы. У рыбы можно задать свой model.
+  item-model: "zenfishing:fish/{id}"
   # Подпись на рыбе
   name: "{color}{fish} &7({weight} кг)"
   lore:
