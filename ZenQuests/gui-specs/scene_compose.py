@@ -6,7 +6,7 @@ import sys, os
 from PIL import Image, ImageFilter, ImageDraw, ImageChops
 
 A = os.path.dirname(os.path.abspath(__file__)); OUT = sys.argv[1]
-W, H = 472, 270
+W, H = 472, 478          # всё окно: 239 GUI px (17 верх + 222)
 G = 2                       # px текстуры на 1 px интерфейса
 
 def load(n, gw=None, gh=None):
@@ -54,10 +54,11 @@ glow(52, 70, 70); glow(W - 52, 70, 70)
 # ── верхняя балка ──
 beam = load('beam', gw=236); beam = beam.resize((W, beam.height), Image.LANCZOS)
 put(beam, (0, -2), off=(0, 6), alpha=140)
-# ── пол: тёмная половая доска внизу ──
+# ── пол внизу и балка-перекладина между доской квестов и инвентарём (GUI y 131..137) ──
 floor = beam.resize((W, 22), Image.LANCZOS); put(floor, (0, H - 22), off=(0, -5), alpha=120)
+mid = beam.resize((W, 14), Image.LANCZOS); put(mid, (0, 262), off=(0, 6), alpha=140)
 # ── столбы ──
-post = load('post', gh=140)
+post = load('post', gh=245)
 post = post.resize((28, post.height), Image.LANCZOS)                 # столб 14 GUI px шириной, во всю высоту
 r_, g_, b_, a_ = post.split(); post.putalpha(a_.point(lambda v: 255 if v > 110 else 0))
 for x in (6, W - 6 - post.width):

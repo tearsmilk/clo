@@ -4,7 +4,6 @@
  "rows": 6,
  "theme": "oak",
  "container_panel": false,
- "inventory_panel": "spruce",
  "hide_inventory_label": false,
  "canvas": {
   "left": 30,
@@ -166,5 +165,6 @@
   "width": 150,
   "color": "${ribbon}",
   "embroidered": "#f2c94c"
- }
+ },
+ "draw_player_inventory": false
 }

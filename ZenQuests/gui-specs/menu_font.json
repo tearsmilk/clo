@@ -67,7 +67,7 @@
       "type": "bitmap",
       "file": "zenquests:gui/scene/scene_tl.png",
       "ascent": 30,
-      "height": 68,
+      "height": 120,
       "chars": [
         "\ue010"
       ]
@@ -76,7 +76,7 @@
       "type": "bitmap",
       "file": "zenquests:gui/scene/scene_tr.png",
       "ascent": 30,
-      "height": 68,
+      "height": 120,
       "chars": [
         "\ue011"
       ]
@@ -84,8 +84,8 @@
     {
       "type": "bitmap",
       "file": "zenquests:gui/scene/scene_bl.png",
-      "ascent": -38,
-      "height": 67,
+      "ascent": -90,
+      "height": 119,
       "chars": [
         "\ue012"
       ]
@@ -93,8 +93,8 @@
     {
       "type": "bitmap",
       "file": "zenquests:gui/scene/scene_br.png",
-      "ascent": -38,
-      "height": 67,
+      "ascent": -90,
+      "height": 119,
       "chars": [
         "\ue013"
       ]
