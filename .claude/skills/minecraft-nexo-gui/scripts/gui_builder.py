@@ -2,7 +2,9 @@
 """Build a Nexo glyph GUI (chest menu) from a JSON spec.
 
 Usage:
-    python3 gui_builder.py spec.json OUT_DIR
+    python3 gui_builder.py spec.json OUT_DIR [--layers]
+        --layers (or "export_layers": true in the spec): every layer / part of the art also as its own PNG in
+        OUT_DIR/layers/ (+ layers.json with positions, _sheet.png) and OUT_DIR/<id>.aseprite, one layer each
 
 Produces in OUT_DIR:
     texture/<id>.png                 1:1 GUI texture (1 px = 1 GUI px), the glyph image
@@ -43,6 +45,7 @@ import safe  # noqa: E402
 import kitchen  # noqa: E402
 import hub  # noqa: E402
 import modes  # noqa: E402
+import layers  # noqa: E402
 import scenes  # noqa: E402
 import icons16  # noqa: E402
 
@@ -791,15 +794,25 @@ def draw_hub(img, oy, L):
         raise SystemExit(f"unknown hub part '{p}'")
 
 
+def _layer_name(L):
+    return '/'.join(str(v) for v in (L['type'], L.get('part') or L.get('name') or L.get('style'), L.get('kind'))
+                    if v)
+
+
 def draw_modes(img, oy, L):
-    """Mode-select kit parts: gate (slots, kind blessed | farm, name, seed), signpost (col, rows), soon (slots)."""
+    """Mode-select kit parts: chart, gate (slots, kind blessed | farm, name, seed, scene overrides), compass
+    (col, rows), title (text, x, y), soon (slots, text)."""
     p, ox = L['part'], OX
-    if p == 'gate':
+    if p == 'chart':
+        modes.chart(img, ox, oy, L.get('y0', -1), L.get('front_y', 127), L.get('front', 3), L.get('seed', 4))
+    elif p == 'gate':
         c, r, w, h = L['slots']
-        modes.gate(img, ox, oy, c, r, w, h, L['kind'], L['name'], L.get('seed', 1))
-    elif p == 'signpost':
+        modes.gate(img, ox, oy, c, r, w, h, L['kind'], L.get('name'), L.get('seed', 1), L.get('scene'))
+    elif p == 'compass':
         r0, r1 = L.get('rows', [1, 4])
-        modes.signpost(img, ox, oy, L.get('col', 4), r0, r1)
+        modes.compass(img, ox, oy, L.get('col', 4), r0, r1)
+    elif p == 'title':
+        modes.title(img, ox + L.get('x', 88), oy + L.get('y', -7), L['text'])
     elif p == 'soon':
         c, r, w = L['slots'][:3]
         modes.soon(img, ox, oy, c, r, w, L.get('text', 'Скоро...'))
@@ -1239,6 +1252,7 @@ def build_spec(spec, sdir, out):
         for k, v in (('container_panel', False), ('draw_player_inventory', False), ('draw_free_slots', False),
                      ('preview_vanilla_under', True)):
             spec.setdefault(k, v)
+    rec = layers.start(tex) if spec.get('export_layers') else None   # --layers: every part its own layer
     th['_bookmarks'] = [L for L in spec.get('layers', []) if L['type'] == 'bookmark']
     th['_rows'] = rows
     inv_y = top + rows * 18 + 23                      # top of a separate player-inventory panel
@@ -1273,7 +1287,9 @@ def build_spec(spec, sdir, out):
         bevel_box(tex, (x0 - pad, top + y0 - pad, x1 + pad, top + y1 + pad), c,
                   outline=None, hi=darken(c, 0.3), sh=lighten(c, 0.3))   # carved: dark top/left, lit bottom/right
 
-    draw_layers(tex, top, [L for L in spec.get('layers', []) if not L.get('above')], sdir, th)
+    for L in [L for L in spec.get('layers', []) if not L.get('above')]:
+        draw_layers(tex, top, [L], sdir, th)
+        layers.mark(_layer_name(L))
 
     keep_slots = set(spec.get('slots_visible', []))
     if spec.get('draw_free_slots', spec.get('container_panel', True)):   # scenes paint their own slots
@@ -1326,7 +1342,10 @@ def build_spec(spec, sdir, out):
     # foreground layers (piles over the inventory corners...) must not cover the player's slots
     inv_box = (OX + 7, top + rows * 18 + 30, OX + 7 + 162, top + rows * 18 + 106)
     before = tex.crop(inv_box).tobytes()
-    draw_layers(tex, top, [L for L in spec.get('layers', []) if L.get('above')], sdir, th)
+    layers.mark('buttons')
+    for L in [L for L in spec.get('layers', []) if L.get('above')]:
+        draw_layers(tex, top, [L], sdir, th)
+        layers.mark(_layer_name(L))
     if spec.get('draw_player_inventory', True) and tex.crop(inv_box).tobytes() != before:
         print('warning: an "above" layer paints over the player inventory slots - keep foreground props on the '
               'panel border (y < 18*rows+30, x < 7 or x > 168)', file=sys.stderr)
@@ -1362,6 +1381,14 @@ def build_spec(spec, sdir, out):
         for lang in ('ru_ru', 'en_us', 'uk_ua'):
             json.dump({'container.inventory': ''}, open(os.path.join(ldir, f'{lang}.json'), 'w'))
     tex.save(os.path.join(out, 'texture', f'{gid}.png'))
+    if rec:
+        layers.mark('header')
+        layers.stop()
+        meta = layers.save_parts(rec.items, os.path.join(out, 'layers'), tex.size)
+        if layers.compose(meta, os.path.join(out, 'layers')).tobytes() != tex.tobytes():
+            print('warning: the exported layers do not rebuild the texture exactly', file=sys.stderr)
+        layers.write_aseprite(os.path.join(out, f'{gid}.aseprite'), rec.items, tex.size)
+        print(f'{len(rec.items)} layers -> {out}/layers/ and {out}/{gid}.aseprite', file=sys.stderr)
     tex.save(os.path.join(out, f'Nexo/pack/assets/{ns}/textures/gui/{gid}.png'))
 
     # --- Nexo glyph: height = texture height keeps it 1:1; ascent 13 (+top) aligns the window top ---
@@ -1574,6 +1601,19 @@ def build_spec(spec, sdir, out):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    if len(args) != 2:
         sys.exit(__doc__)
-    build(sys.argv[1], sys.argv[2])
+    if '--layers' in sys.argv:
+        _spec = json.load(open(args[0], encoding='utf-8'))
+        _spec['export_layers'] = True
+        import tempfile
+        with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False, encoding='utf-8',
+                                         dir=os.path.dirname(os.path.abspath(args[0]))) as f:
+            json.dump(_spec, f, ensure_ascii=False)
+        try:
+            build(f.name, args[1])
+        finally:
+            os.unlink(f.name)
+    else:
+        build(args[0], args[1])

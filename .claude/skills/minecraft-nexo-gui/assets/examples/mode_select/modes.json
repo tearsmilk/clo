@@ -3,7 +3,7 @@
  "namespace": "hokaria",
  "rows": 6,
  "theme": "vanilla",
- "comment": "mode select (Навигатор) on the user's grid: Blessed 4x4 left, Farm 4x4 right, a signpost in the gap column, header in row 0, 'coming soon' in row 5",
+ "comment": "mode select (Навигатор) on the user's grid: a navigator's star chart; Blessed and Farm as illustrated cards (4x4 each) built from parts, a compass rose in the gap column, the title plaque in row 0, 'coming soon' in row 5",
  "canvas": {
   "left": 1,
   "right": 1,
@@ -18,8 +18,8 @@
  "preview_tooltip": "blessed",
  "layers": [
   {
-   "type": "hub",
-   "part": "backdrop"
+   "type": "modes",
+   "part": "chart"
   },
   {
    "type": "modes",
@@ -31,7 +31,6 @@
     4
    ],
    "kind": "blessed",
-   "name": "BLESSED",
    "seed": 3
   },
   {
@@ -44,12 +43,11 @@
     4
    ],
    "kind": "farm",
-   "name": "ФЕРМА",
    "seed": 5
   },
   {
    "type": "modes",
-   "part": "signpost",
+   "part": "compass",
    "col": 4,
    "rows": [
     1,
@@ -66,8 +64,8 @@
    ]
   },
   {
-   "type": "hub",
-   "part": "sign",
+   "type": "modes",
+   "part": "title",
    "text": "НАВИГАТОР",
    "y": -7
   }

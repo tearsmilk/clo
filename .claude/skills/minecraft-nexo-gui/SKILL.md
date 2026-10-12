@@ -168,7 +168,9 @@ Then send the user the preview first (they judge visually), then the files.
 - **Pictures that code draws poorly** (characters, detailed scenes, emblems): hand them to a pixel artist with
   `scripts/artist_kit.py` (template, guide, mockup, palette .gpl for Aseprite) and a brief -
   `references/artist-brief.md`. Exact-size PNGs are pasted 1:1. With a locally built Aseprite
-  (`scripts/build_aseprite.sh`, headless) `scripts/aseprite_tools.py` also makes a layered `.aseprite` template
+  (`scripts/build_aseprite.sh`, headless; the binary is never shipped - Aseprite's EULA - so build it once
+  per machine; `aseprite_tools.find()` looks in $ASEPRITE, PATH, ./aseprite_build, ~/aseprite_build and any
+  aseprite_build under /tmp before saying it is missing) `scripts/aseprite_tools.py` also makes a layered `.aseprite` template
   for the artist, exports the `art` layer of their files, converts pictures to the pack palette and rotates
   pixel art with RotSprite; `scripts/aseprite_draw.py` draws pictures with Aseprite's tools from a list of
   operations (pixel-perfect pencil, curves, contours, bucket, per-layer coloured outlines) - example
@@ -207,13 +209,20 @@ Then send the user the preview first (they judge visually), then the files.
   plaques, social keys, walnut header with gold letters): layers `{"type": "hub", "part": ...}` from
   `scripts/hub.py`; example `assets/examples/main_menu/`. When the user shows someone else's menu and asks for
   it "in our style", keep its slot layout (measure it) and redraw every tile this way - `references/main-menu.md`.
-- **Mode / server select** ("выбор режимов", navigator): every mode is a WINDOW into its own world, set in a
-  slab of the mode's material - Blessed: the void with one floating grass block in a holy beam, a sword stuck
-  in it, a fishing line into the void, a quantum orb; Farm: sunny wheat field, a path to a market stall, XP
-  orbs - with a keystone (skull / barn gable), the name in arcade letters, a signpost in the gap pointing to
-  both, a calm "coming soon" plank. Layers `{"type": "modes", "part": ...}` from `scripts/modes.py`; example
-  `assets/examples/mode_select/`. The concept method (turn the tooltip's words into objects in one scene) and
-  how to add a third mode: `references/mode-select.md`.
+- **Mode / server select** ("выбор режимов", navigator): the menu is a navigator's star chart, every mode
+  an illustrated CARD - a window into its world filling its whole area, with depth (far / middle / near) -
+  and a ribbon with its name; a gold compass rose between the cards, a gold-framed title plaque, an
+  "uncharted" plaque for what comes later. Blessed: the void, one floating grass block in a holy beam, a
+  sword stuck in it, a fishing line into the void, a quantum atom; Farm: a sunny field in perspective, barn
+  and silo, a path to a market stall, a quest board, XP orbs. Layers `{"type": "modes", "part": ...}` from
+  `scripts/modes.py`; example `assets/examples/mode_select/`. Concept method (the tooltip's nouns become
+  objects in one scene), parts and how to add a mode: `references/mode-select.md`.
+- **Split into parts** (the user: "break it into parts so the whole scene can be built from them"): scenes
+  are lists of parts (sprite + x, y, bottom -> top) that `compose()` assembles; a spec moves or hides any
+  part (`"scene": {"stall": {"x": 30}, "barn": null}`); `python3 scripts/modes.py parts OUT/` and
+  `gui_builder.py spec.json OUT/ --layers` export every part as PNG + `layers.json` + a contact sheet +
+  `.aseprite` with one layer each (`scripts/layers.py`, checked: Aseprite flattens it back to the exact
+  texture) - for an artist to repaint one part, or to rebuild the scene differently.
 
 ## Rebuilding a reference "1 in 1"
 When the user shows a finished GUI and asks for an exact copy, measure it instead of eyeballing:
@@ -259,7 +268,7 @@ reference is a pixel off. Full method and the measured royal kit: `references/re
 - `references/safe-lock.md` - safe code lock + storage skin, steel kit, code entry with DeluxeMenus meta
 - `references/kitchen.md` - workstation menus (cutting board): zone layout, slot map, kitchen kit, plugin logic
 - `references/main-menu.md` - main menu in the house style: measured layout, material slabs, player head, hub kit
-- `references/mode-select.md` - mode select: world windows, concept from the tooltips, signpost, modes kit
+- `references/mode-select.md` - mode select: star chart, illustrated cards from parts, concept from the tooltips
 - `references/lettering.md` - a beautiful title letter in five steps (shape, outline, gradient, shadows, accent)
 - `references/texture-shading.md` - hand-painted texture shading rules (5-tone ramps, light, AO, materials, tiles)
 - `references/pixel-art-craft.md` - lines (doubles, jaggies), 8 outline styles, value test, focus, AA, sizes

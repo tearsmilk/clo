@@ -177,10 +177,16 @@ Main-menu kit parts (`{"type": "hub", "part": ...}`; destinations as material sl
 `label`, `art` medallion|portrait|portal|chest|book, `narrow`, `head_slot`), `key` (`slot`, `brand`
 discord|youtube|tiktok) - layout and rules in `references/main-menu.md`.
 
-Mode-select kit parts (`{"type": "modes", "part": ...}`; every mode a window into its world, on the hub backdrop):
-`gate` (`slots` [c, r, w, h], `kind` blessed|farm, `name` - arcade letters on a plate, `seed`), `signpost` (`col`,
-`rows` [r0, r1] - post with arrow boards in a gap column), `soon` (`slots` [c, r, w], `text`) - concept, layout and
-how to add a mode in `references/mode-select.md`.
+Mode-select kit parts (`{"type": "modes", "part": ...}`; a star chart with illustrated mode cards):
+`chart` (backdrop: navy chart, grid, constellations, gold border; `front_y` 127), `gate` (`slots` [c, r, w, h],
+`kind` blessed|farm, `name` - arcade letters on a ribbon, `seed`, `scene` - per-part overrides
+`{"stall": {"x": 30, "y": 8} | {"dx": -4}, "barn": null}`), `compass` (`col`, `rows` [r0, r1]), `title` (`text`,
+`x`, `y`), `soon` (`slots` [c, r, w], `text`) - concept, part names and how to add a mode in
+`references/mode-select.md`.
+
+`export_layers: true` (or `gui_builder.py spec.json OUT --layers`): every spec layer - and every part a kit
+marks inside it (scene parts, frame, ribbon...) - also as its own PNG in `OUT/layers/` with `layers.json`
+(name, file, x, y, order) and `_sheet.png`, plus `OUT/<id>.aseprite` with one layer each.
 
 `preview_items: [{"slot" | "slots", "icon", "amount"}]` - preview only: also writes `preview_items.png`, the
 menu with items in it (food on a board, loot in a storage skin); nothing goes into the menu config.

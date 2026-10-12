@@ -83,10 +83,23 @@ spr:saveAs(app.params.out)
 '''
 
 
+def find():
+    """Path of a usable Aseprite or None: $ASEPRITE, PATH, then the places build_aseprite.sh builds into
+    (./aseprite_build, ~/aseprite_build, any aseprite_build under /tmp - e.g. a session scratchpad)."""
+    import glob
+    cands = [os.environ.get('ASEPRITE'), shutil.which('aseprite'), shutil.which('libresprite'),
+             './aseprite_build/build/bin/aseprite', os.path.expanduser('~/aseprite_build/build/bin/aseprite')]
+    cands += sorted(glob.glob('/tmp/**/aseprite_build/build/bin/aseprite', recursive=True))
+    for c in cands:
+        if c and os.path.isfile(c) and os.access(c, os.X_OK):
+            return os.path.abspath(c)
+    return None
+
+
 def binary():
-    exe = os.environ.get('ASEPRITE') or shutil.which('aseprite')
-    if not exe or not os.path.exists(exe):
-        sys.exit('aseprite not found: build it with scripts/build_aseprite.sh and set ASEPRITE=/path/to/aseprite')
+    exe = find()
+    if not exe:
+        sys.exit('aseprite not found: build it once with scripts/build_aseprite.sh (or set ASEPRITE=/path)')
     return exe
 
 
