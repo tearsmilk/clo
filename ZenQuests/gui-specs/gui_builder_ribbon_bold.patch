@@ -1,0 +1,27 @@
+--- /tmp/claude-0/gb_orig.py	2026-10-12 07:49:35.310234787 +0000
++++ scripts/gui_builder.py	2026-10-12 07:49:02.774755574 +0000
+@@ -1098,7 +1098,8 @@
+     if style == 'ribbon':                # cloth ribbon with folded, V-cut tails (quest boards, castle scenes)
+         sc = hd.get('size', 1)
+         sp = hd.get('spacing', 1)
+-        tw = text_width(text, scale=sc, spacing=sp)
++        bold = hd.get('font') == 'bold'      # жирные 7-px капители из shop.letters (как на кухонной вывеске)
++        tw = shop.text_size(text)[0] if bold else text_width(text, scale=sc, spacing=sp)
+         bh = 7 * sc + 8
+         rw = hd.get('width', tw + 2 * 14 + 48)
+         rib = props.ribbon(rw, bh + 5, hd.get('color', '#c42f3c'))
+@@ -1107,7 +1108,13 @@
+         art.drop_shadow(img, (rx + 14, ry, rx + rw - 15, ry + bh - 1))
+         img.alpha_composite(rib, (rx, ry))
+         tcol = H(hd.get('text_color', '#FFFFFF'))
+-        if hd.get('font') == 'material':
++        if bold:
++            ocol = H(art.outline_of(hd.get('color', '#c42f3c')))
++            lx, ly = rx + (rw - tw) // 2, ry + (bh - 7) // 2
++            for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):       # обводка в тёмном оттенке ленты
++                shop.letters(img, lx + dx, ly + dy, text, ocol, ocol)
++            shop.letters(img, lx, ly, text, tcol, H(hd.get('text_color2', '#D8D8D8')))
++        elif hd.get('font') == 'material':
+             mw, _ = material_text_size(text, sc)
+             draw_material_text(img, rx + (rw - mw) // 2, ry + (bh - 7 * sc - 3) // 2, text,
+                                hd.get('material', 'gold'), scale=sc)

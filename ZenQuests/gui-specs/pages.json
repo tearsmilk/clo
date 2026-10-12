@@ -107,13 +107,6 @@
    ]
   },
   {
-   "type": "kitchen",
-   "part": "sign",
-   "x": 88,
-   "y": -14,
-   "text": "${title_upper}"
-  },
-  {
    "type": "banner",
    "box": [
     -31,
@@ -329,5 +322,13 @@
    "slot": 50,
    "preview": "sprite:arrow_gold"
   }
- ]
+ ],
+ "header": {
+  "text": "${title_upper}",
+  "style": "ribbon",
+  "font": "bold",
+  "case": "keep",
+  "width": 150,
+  "color": "${ribbon}"
+ }
 }
