@@ -9,19 +9,21 @@ OUT = sys.argv[1]; G = 2
 W_ = f'{OUT}/pack/assets/minecraft/textures/gui'; sp = f'{W_}/sprites/widget'
 os.makedirs(sp, exist_ok=True)
 
-def mcmeta(path, w, h, b):
-    json.dump({"gui": {"scaling": {"type": "nine_slice", "width": w, "height": h, "border": b}}}, open(path + '.mcmeta', 'w'))
+def mcmeta(path, w, h, b, bv=None):
+    border = b if bv is None else {"left": b, "top": bv, "right": b, "bottom": bv}
+    json.dump({"gui": {"scaling": {"type": "nine_slice", "width": w, "height": h, "border": border}}}, open(path + '.mcmeta', 'w'))
 def hard(im, t=110):
     r, g, b, a = im.split(); im.putalpha(a.point(lambda v: 255 if v > t else 0)); return im
 def quant(im, n=48):
     a = im.split()[3]; q = im.convert('RGB').quantize(colors=n, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert('RGBA'); q.putalpha(a); return q
 
 beam = Image.open(f'{RAW}/raw/beam.png').convert('RGBA')
+FB = Image.open(f'{SP}/figma/btn_cut.png').convert('RGBA'); FBH = Image.open(f'{SP}/figma/btn_hl_cut.png').convert('RGBA')
 wall = Image.open(f'{RAW}/wall_full.png').convert('RGB')
 
-def button(w, h, light=1.0, warm=0, rim=None, dim=False):
+def button(w, h, light=1.0, warm=0, rim=None, dim=False, src=None):
     """Балка, сжатая до кнопки; по контуру — тёмная обводка; rim — светлый кант (наведение)."""
-    im = hard(beam.resize((w, h), Image.LANCZOS))
+    im = hard((src if src is not None else FB).resize((w, h), Image.LANCZOS))
     if dim:
         im = ImageEnhance.Color(im).enhance(0.25); im = ImageEnhance.Brightness(im).enhance(0.75)
     elif light != 1.0:
@@ -41,9 +43,9 @@ def button(w, h, light=1.0, warm=0, rim=None, dim=False):
 
 BW, BH = 200 * G, 20 * G
 button(BW, BH).save(f'{sp}/button.png')
-button(BW, BH, light=1.18, warm=0.12, rim=(240, 196, 96)).save(f'{sp}/button_highlighted.png')
+button(BW, BH, src=FBH).save(f'{sp}/button_highlighted.png')
 button(BW, BH, dim=True).save(f'{sp}/button_disabled.png')
-for n in ('button', 'button_highlighted', 'button_disabled'): mcmeta(f'{sp}/{n}.png', 200, 20, 4)
+for n in ('button', 'button_highlighted', 'button_disabled'): mcmeta(f'{sp}/{n}.png', 200, 20, 20, 4)
 
 # фон: стена амбара (четверть, сведена к бесшовному тайлу 64x64), затемнена
 def wall_tile(k, alpha, size=128, seed_box=(0, 0, 512, 512)):
@@ -75,8 +77,9 @@ def track(k):
     return quant(t)
 track(0.5).save(f'{sp}/slider.png'); track(0.62).save(f'{sp}/slider_highlighted.png')
 def handle(rim=None):
-    im = hard(beam.crop((0, 0, 70, 121)).resize((8 * G, BH), Image.LANCZOS))
-    return button.__wrapped__(im, rim) if False else _finish(im, rim)
+    src = FBH if rim else FB; k = src.height * 0.55
+    im = hard(src.crop((0, 0, int(k), src.height)).resize((8 * G, BH), Image.LANCZOS))
+    return quant(im)
 def _finish(im, rim):
     from PIL import ImageFilter
     a = im.split()[3]; grow = a.filter(ImageFilter.MaxFilter(2 * G + 1))
@@ -90,20 +93,24 @@ for n in ('slider_handle', 'slider_handle_highlighted'): mcmeta(f'{sp}/{n}.png',
 
 # ── превью (GUI scale 2, окно 427x240 GUI px), подписи шрифтом Minecraft по-русски ──
 S = 2; PW, PH = 427 * S, 240 * S
-def nine(img, lw, lh, b, lw0, lh0):
+def nine(img, lw, lh, b, lw0, lh0, bv=None):
+    bv = b if bv is None else bv
     """Девятислайс как в игре: img логически lw0 x lh0, рисуем lw x lh (в GUI px), углы b."""
     sx = img.width / lw0; out = Image.new('RGBA', (lw * S, lh * S))
     def part(x0, y0, x1, y1, dx, dy, dw, dh):
         out.alpha_composite(img.crop((int(x0 * sx), int(y0 * sx), int(x1 * sx), int(y1 * sx))).resize((dw * S, dh * S), Image.NEAREST), (dx * S, dy * S))
-    cw, ch = lw - 2 * b, lh - 2 * b
-    part(0, 0, b, b, 0, 0, b, b); part(lw0 - b, 0, lw0, b, lw - b, 0, b, b); part(0, lh0 - b, b, lh0, 0, lh - b, b, b); part(lw0 - b, lh0 - b, lw0, lh0, lw - b, lh - b, b, b)
-    part(b, 0, b + cw, b, b, 0, cw, b); part(b, lh0 - b, b + cw, lh0, b, lh - b, cw, b)
-    part(0, b, b, b + ch, 0, b, b, ch); part(lw0 - b, b, lw0, b + ch, lw - b, b, b, ch); part(b, b, b + cw, b + ch, b, b, cw, ch)
+    cw, ch = lw - 2 * b, lh - 2 * bv
+    part(0, 0, b, bv, 0, 0, b, bv); part(lw0 - b, 0, lw0, bv, lw - b, 0, b, bv); part(0, lh0 - bv, b, lh0, 0, lh - bv, b, bv); part(lw0 - b, lh0 - bv, lw0, lh0, lw - b, lh - bv, b, bv)
+    part(b, 0, b + cw, bv, b, 0, cw, bv); part(b, lh0 - bv, b + cw, lh0, b, lh - bv, cw, bv)
+    part(0, bv, b, bv + ch, 0, bv, b, ch); part(lw0 - b, bv, lw0, bv + ch, lw - b, bv, b, ch); part(b, bv, b + cw, bv + ch, b, bv, cw, ch)
     return out
 def label(pv, lx, ly, lw, text, color='#ffffff'):
-    mcfont.draw(pv, (lx + lw // 2) * S - mcfont.width(text, S) // 2, (ly + 6) * S, text, color, scale=S)
+    tw = mcfont.width(text, S); inner = (lw - 4) * S
+    t = Image.new('RGBA', (tw + S, 10 * S)); mcfont.draw(t, 0, 0, text, color, scale=S)
+    if tw > inner: t = t.crop((0, 0, inner, t.height)); tw = inner
+    pv.alpha_composite(t, ((lx + lw // 2) * S - tw // 2, (ly + 6) * S))
 def btn(pv, kind, lx, ly, lw, text, color='#ffffff'):
-    pv.alpha_composite(nine(Image.open(f'{sp}/{kind}.png'), lw, 20, 4, 200, 20), (lx * S, ly * S)); label(pv, lx, ly, lw, text, color)
+    pv.alpha_composite(nine(Image.open(f'{sp}/{kind}.png'), lw, 20, 20, 200, 20, 4), (lx * S, ly * S)); label(pv, lx, ly, lw, text, color)
 def slider(pv, lx, ly, lw, text, frac, hl=False):
     pv.alpha_composite(nine(Image.open(f'{sp}/slider.png'), lw, 20, 4, 200, 20), (lx * S, ly * S))
     hx = lx + int((lw - 8) * frac); pv.alpha_composite(nine(Image.open(f'{sp}/slider_handle{"_highlighted" if hl else ""}.png'), 8, 20, 3, 8, 20), (hx * S, ly * S))
