@@ -10,3 +10,5 @@
   Исключения: глифы — `plugins/Nexo/glyphs/zenquests.yml` (обязательно `font: minecraft:default`, иначе глиф уходит в шрифт nexo:default и голый символ из плейсхолдера не рисуется; поле `char` не задавать: Nexo назначает сам при reload
   и пишет в файл; свой PUA-символ клиент показывает как «тофу»). После заливки — `nexo reload all` в консоль.
 - Таб/роли — TakuCore (`plugins/TakuCore/roles.yml`, общий для сети — не править без спроса).
+- Фоны меню рисуются скиллом `minecraft-nexo-gui` из спеков `ZenQuests/gui-specs/` (см. README там); скилл лежит в ветке
+  `claude/discord-minecraft-banner-k8ln0l` (`.claude/skills/minecraft-nexo-gui`) — забрать через `git archive` в `~/.claude/skills/`.

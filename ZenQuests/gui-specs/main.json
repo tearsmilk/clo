@@ -1,0 +1,360 @@
+{
+ "id": "main",
+ "namespace": "zenquests",
+ "rows": 6,
+ "theme": "oak",
+ "container_panel": false,
+ "inventory_panel": "vanilla",
+ "hide_inventory_label": false,
+ "canvas": {
+  "left": 30,
+  "right": 30,
+  "top": 17
+ },
+ "header": {
+  "text": "Квесты",
+  "style": "ribbon",
+  "case": "keep",
+  "width": 150,
+  "color": "#c8553d"
+ },
+ "draw_free_slots": false,
+ "preview_tooltip": "daily",
+ "layers": [
+  {
+   "type": "planks",
+   "box": [
+    -14,
+    0,
+    204,
+    135
+   ],
+   "color": "#b86f50",
+   "seed": 5
+  },
+  {
+   "type": "post",
+   "box": [
+    -24,
+    -4,
+    10,
+    128
+   ],
+   "color": "#8A5A2E"
+  },
+  {
+   "type": "post",
+   "box": [
+    190,
+    -4,
+    10,
+    128
+   ],
+   "color": "#8A5A2E"
+  },
+  {
+   "type": "brazier",
+   "kind": "lantern",
+   "box": [
+    -25,
+    -16,
+    12,
+    13
+   ]
+  },
+  {
+   "type": "brazier",
+   "kind": "lantern",
+   "box": [
+    189,
+    -16,
+    12,
+    13
+   ]
+  },
+  {
+   "type": "banner",
+   "box": [
+    -31,
+    8,
+    26,
+    84
+   ],
+   "color": "#3e8948",
+   "tail": "swallow",
+   "emblem": "wheat",
+   "seed": 1
+  },
+  {
+   "type": "banner",
+   "box": [
+    181,
+    8,
+    26,
+    84
+   ],
+   "color": "#3e8948",
+   "tail": "swallow",
+   "emblem": "wheat",
+   "seed": 2
+  },
+  {
+   "type": "divider",
+   "box": [
+    14,
+    22,
+    60,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "divider",
+   "box": [
+    102,
+    22,
+    60,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "slot_frame",
+   "slot": 4,
+   "color": "#feae34",
+   "inner": "#3e2731"
+  },
+  {
+   "type": "flourish",
+   "box": [
+    38,
+    36,
+    100,
+    16
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "note",
+   "box": [
+    41,
+    54,
+    16,
+    18
+   ],
+   "seed": 2,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    77,
+    54,
+    16,
+    18
+   ],
+   "seed": 4,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    113,
+    54,
+    16,
+    18
+   ],
+   "seed": 6,
+   "seal": null
+  },
+  {
+   "type": "slot_frame",
+   "slot_list": [
+    19,
+    21,
+    23,
+    25
+   ],
+   "color": "#feae34",
+   "inner": "#3e2731"
+  },
+  {
+   "type": "divider",
+   "box": [
+    36,
+    78,
+    104,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "note",
+   "box": [
+    8,
+    24,
+    15,
+    19
+   ],
+   "seed": 3
+  },
+  {
+   "type": "note",
+   "box": [
+    153,
+    24,
+    15,
+    19
+   ],
+   "seed": 7
+  },
+  {
+   "type": "slot_frame",
+   "slot_list": [
+    48,
+    50
+   ],
+   "color": "#feae34",
+   "inner": "#3e2731"
+  },
+  {
+   "type": "rubble",
+   "box": [
+    -30,
+    86,
+    80,
+    44
+   ],
+   "shape": "left",
+   "color": "#3e8948",
+   "leaves": "#63c74d",
+   "size": [
+    5,
+    9
+   ],
+   "seed": 4
+  },
+  {
+   "type": "rubble",
+   "box": [
+    126,
+    86,
+    80,
+    44
+   ],
+   "shape": "right",
+   "color": "#3e8948",
+   "leaves": "#63c74d",
+   "size": [
+    5,
+    9
+   ],
+   "seed": 7
+  },
+  {
+   "type": "hay",
+   "box": [
+    -30,
+    110,
+    58,
+    23
+   ],
+   "seed": 3,
+   "above": true
+  },
+  {
+   "type": "hay",
+   "box": [
+    148,
+    110,
+    58,
+    23
+   ],
+   "seed": 8,
+   "above": true
+  },
+  {
+   "type": "sprite",
+   "name": "pumpkin",
+   "x": -24,
+   "y": 118,
+   "above": true
+  },
+  {
+   "type": "sprite",
+   "name": "pumpkin",
+   "x": 186,
+   "y": 118,
+   "above": true
+  },
+  {
+   "type": "rect",
+   "box": [
+    4,
+    125,
+    62,
+    12
+   ],
+   "color": "#e6c896",
+   "outline": "#6a4a28",
+   "above": true
+  }
+ ],
+ "buttons": [
+  {
+   "id": "daily",
+   "x": 1,
+   "y": 2,
+   "style": "none",
+   "name": "&e☀ Ежедневные",
+   "lore": [
+    "&7Новые задания каждый день",
+    "&7в &f00:00&7 по Москве.",
+    "",
+    "&7Выполнено: &f1/3",
+    "&a||||||&8|||||||||||||| &f33%",
+    "",
+    "&e▶ Нажми, чтобы открыть"
+   ],
+   "icon": "sprite:wheat"
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "head",
+   "material": "head-%player_name%",
+   "slot": 4,
+   "preview": "hub:head"
+  },
+  {
+   "id": "weekly",
+   "material": "CLOCK",
+   "slot": 21,
+   "preview": "sprite:hourglass"
+  },
+  {
+   "id": "seasonal",
+   "material": "PUMPKIN_PIE",
+   "slot": 23,
+   "preview": "sprite:pumpkin"
+  },
+  {
+   "id": "story",
+   "material": "WRITABLE_BOOK",
+   "slot": 25,
+   "preview": "sprite:ledger"
+  },
+  {
+   "id": "premium",
+   "material": "GOLDEN_HOE",
+   "slot": 48,
+   "preview": "sprite:wheat"
+  },
+  {
+   "id": "close",
+   "material": "BARRIER",
+   "slot": 50,
+   "preview": "sprite:barrier"
+  }
+ ]
+}
