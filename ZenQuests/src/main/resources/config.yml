@@ -34,6 +34,7 @@ menu:
   textures:
     enabled: true
     font: "zenquests:menu"
+    title: false   # true — печатать название окна текстом поверх картинки (на наших фонах оно уже на ленте)
   # Свои иконки кнопок меню (ресурспак: assets/zenquests/items/icon_*.json). Пусто "" — обычный предмет.
   icons:
     daily: "zenquests:icon_daily"

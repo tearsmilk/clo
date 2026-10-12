@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "ink.hoka"
-version = "1.6.0"
+version = "1.6.1"
 description = "Система квестов"
 
 repositories {

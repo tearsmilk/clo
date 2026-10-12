@@ -18,3 +18,6 @@ python3 scripts/gui_builder.py gui-specs/pages.json OUT_pages   # daily / weekly
 Заголовки — лента (`header.style: ribbon`) с жирным шрифтом `font: "bold"` и вышивкой `embroidered: "#f2c94c"` (цвет нити) (капители из `shop.letters`, как на
 кухонной вывеске). Этой опции в скилле из ветки нет — она добавлена патчем `gui_builder_ribbon_bold.patch`
 (`patch -p0 scripts/gui_builder.py < gui_builder_ribbon_bold.patch` внутри папки скилла).
+
+Иконки кнопок меню (`assets/zenquests/textures/item/icon/*.png`, 15 штук) рисует `icons_gen.py OUT/`
+(сетки 16x16, объект ~14x14, 5 тонов на материал через `shading.ramp5` из скилла); `icons_preview.png` — как выглядят.
