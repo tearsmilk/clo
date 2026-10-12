@@ -56,18 +56,6 @@
  ],
  "layers": [
   {
-   "type": "rect",
-   "box": [
-    4,
-    125,
-    62,
-    12
-   ],
-   "color": "#e6c896",
-   "outline": "#6a4a28",
-   "above": true
-  },
-  {
    "type": "divider",
    "box": [
     14,
