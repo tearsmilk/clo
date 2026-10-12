@@ -45,6 +45,7 @@ import safe  # noqa: E402
 import kitchen  # noqa: E402
 import hub  # noqa: E402
 import modes  # noqa: E402
+import modes_hd  # noqa: E402
 import layers  # noqa: E402
 import scenes  # noqa: E402
 import icons16  # noqa: E402
@@ -803,6 +804,23 @@ def draw_modes(img, oy, L):
     """Mode-select kit parts: chart, gate (slots, kind blessed | farm, name, seed, scene overrides), compass
     (col, rows), title (text, x, y), soon (slots, text)."""
     p, ox = L['part'], OX
+    if HDK > 1:                          # HD kit (modes_hd.py): same parts, drawn at HDK px per GUI px
+        if p in ('chart', 'scroll'):
+            modes_hd.scroll(img, ox, oy, L.get('front_y', 126), L.get('seed', 4))
+        elif p == 'gate':
+            c, r, w, h = L['slots']
+            modes_hd.card(img, ox, oy, c, r, w, h, L['kind'], L.get('seed', 1), L.get('scene'))
+        elif p == 'compass':
+            r0, r1 = L.get('rows', [1, 4])
+            modes_hd.compass(img, ox, oy, L.get('col', 4), r0, r1)
+        elif p == 'title':
+            modes_hd.title(img, (ox + L.get('x', 88)) * HDK, (oy + L.get('y', -12)) * HDK, L['text'], L.get('scale', 4))
+        elif p == 'soon':
+            c, r, w = L['slots'][:3]
+            modes_hd.soon(img, ox, oy, c, r, w, L.get('text', 'Скоро...'))
+        else:
+            raise SystemExit(f"unknown modes part '{p}'")
+        return
     if p == 'chart':
         modes.chart(img, ox, oy, L.get('y0', -1), L.get('front_y', 127), L.get('front', 3), L.get('seed', 4))
     elif p == 'gate':
@@ -1225,8 +1243,57 @@ def build(spec_path, out):
     print(f"{len(variants)} variants -> {out}/<id>/ and merged into {out}/_all/")
 
 
+HDK = 1                                  # texture px per GUI px ("hd": 2 = 32x32-style detail)
+HD_LAYERS = {'modes'}                    # layer types whose kits draw natively in HD
+
+
+def _check_hd(spec):
+    bad = [k for k in ('header', 'decor', 'panels', 'royal_ornaments', 'background', 'title') if spec.get(k)]
+    bad += [k for k in ('container_panel', 'draw_player_inventory', 'draw_free_slots') if spec.get(k, True)]
+    bad += [f"layer type {L['type']}" for L in spec.get('layers', []) if L['type'] not in HD_LAYERS]
+    bad += [f"button {b['id']} style {b.get('style')}" for b in spec.get('buttons', []) if b.get('style') != 'none']
+    if bad:
+        raise SystemExit('"hd" menus are drawn by HD kits only (layers: ' + ', '.join(sorted(HD_LAYERS)) +
+                         '; buttons style "none"; container_panel / draw_player_inventory / draw_free_slots false) - '
+                         'not allowed here: ' + ', '.join(bad))
+
+
+def hd_tiles(tex, K, gid, ns, out, ascent, shift):
+    """Cut an HD texture into glyph tiles of at most 256x256 (Minecraft stitches every glyph into a 256x256
+    font atlas), one Nexo glyph each with height = tile height / K (that scale gives K texture px per GUI px),
+    ascent moved down by the tile's offset; the title joins them with <shift>, using the advance the client
+    computes: round(rightmost opaque column / K) + 1. Returns (glyph yml text, menu title, papi title)."""
+    T = 256
+    W2, H2 = tex.size
+    entries = []
+    for ty in range(0, H2, T):
+        for tx in range(0, W2, T):
+            tile = tex.crop((tx, ty, min(tx + T, W2), min(ty + T, H2)))
+            bb = tile.getbbox()
+            if not bb:
+                continue
+            name = f'{gid}_{ty // T}_{tx // T}'
+            tile.save(os.path.join(out, f'Nexo/pack/assets/{ns}/textures/gui/{name}.png'))
+            entries.append({'name': name, 'x': tx // K, 'y': ty // K, 'h': tile.height // K,
+                            'adv': int(0.5 + bb[2] / K) + 1})
+    yml = [f"# Nexo glyphs for the '{gid}' menu background: {W2}x{H2} texture px drawn at {K} px per GUI px,",
+           f"# cut into {len(entries)} tiles of at most 256x256 (one glyph each). The menu title joins them."]
+    title, papi, cur = [f'<shift:{shift}>'], [f'%nexo_shift_{shift}%'], 0
+    for e in entries:
+        yml += [f"{e['name']}:", f"  texture: {ns}:gui/{e['name']}", f"  ascent: {ascent - e['y']}",
+                f"  height: {e['h']}"]
+        d = e['x'] - cur
+        if d:
+            title.append(f'<shift:{d}>')
+            papi.append(f'%nexo_shift_{d}%')
+        title.append(f"<glyph:{e['name']}>")
+        papi.append(f"%nexo_{e['name']}%")
+        cur = e['x'] + e['adv']
+    return '\n'.join(yml) + '\n', ''.join(title), ''.join(papi)
+
+
 def build_spec(spec, sdir, out):
-    global OX
+    global OX, HDK
     spec['_sdir'] = sdir
     gid, ns, rows = spec['id'], spec.get('namespace', 'gui'), int(spec.get('rows', 6))
     assert 1 <= rows <= 6, 'rows must be 1..6'
@@ -1241,9 +1308,12 @@ def build_spec(spec, sdir, out):
     TW = OX + W + int(cv.get('right', 0))
     top = max(header_top(spec), int(cv.get('top', 0)))
     TH = Hh + top + int(cv.get('bottom', 0))
-    if TW > 256 or TH > 256:
+    HDK = int(spec.get('hd', 1))
+    if HDK > 1:
+        _check_hd(spec)
+    elif TW > 256 or TH > 256:
         raise SystemExit(f'texture {TW}x{TH} is over the 256x256 glyph limit - shrink canvas margins')
-    tex = Image.new('RGBA', (TW, TH), (0, 0, 0, 0))
+    tex = Image.new('RGBA', (TW * HDK, TH * HDK), (0, 0, 0, 0))
     if spec.get('background'):          # ready-made texture (bought pack): use it as is, only overlay layers
         bg = Image.open(resolve(spec['background'], sdir)).convert('RGBA')
         OX, top = spec['window_at']
@@ -1360,7 +1430,8 @@ def build_spec(spec, sdir, out):
     # never baked into the texture (that would double it). hide_inventory_label ships a lang override instead.
     hide_label = spec.get('hide_inventory_label', False)
     # Wherever the texture is transparent inside the window, the vanilla grey chest background shows through.
-    win = tex.crop((OX, top, OX + W, top + Hh)).getchannel('A')
+    tex1 = tex if HDK == 1 else tex.resize((TW, TH), Image.NEAREST)     # GUI-px view for the checks
+    win = tex1.crop((OX, top, OX + W, top + Hh)).getchannel('A')
     corner = lambda x, y: min(x, W - 1 - x) + min(y, Hh - 1 - y) < 3     # vanilla corners are cut too
     hole_h = Hh if spec.get('draw_player_inventory', True) or spec.get('container_panel', True) else rows * 18 + 17
     holes = sum(1 for y in range(hole_h) for x in range(W) if not win.getpixel((x, y)) and not corner(x, y))
@@ -1389,24 +1460,28 @@ def build_spec(spec, sdir, out):
             print('warning: the exported layers do not rebuild the texture exactly', file=sys.stderr)
         layers.write_aseprite(os.path.join(out, f'{gid}.aseprite'), rec.items, tex.size)
         print(f'{len(rec.items)} layers -> {out}/layers/ and {out}/{gid}.aseprite', file=sys.stderr)
-    tex.save(os.path.join(out, f'Nexo/pack/assets/{ns}/textures/gui/{gid}.png'))
-
     # --- Nexo glyph: height = texture height keeps it 1:1; ascent 13 (+top) aligns the window top ---
     ascent = 13 + top + int(spec.get('ascent_nudge', 0))
-    open(os.path.join(out, f'Nexo/glyphs/{gid}.yml'), 'w', encoding='utf-8').write(
-        f"# Nexo glyph for the '{gid}' menu background. Texture is {TW}x{TH}, drawn 1:1.\n"
-        f"{gid}:\n  texture: {ns}:gui/{gid}\n  ascent: {ascent}\n  height: {TH}\n")
-
-    # --- DeluxeMenus menu ---
     shift = -8 - OX + int(spec.get('shift_nudge', 0))
     back = TW + 1 - OX
     title_text = spec.get('title_text', '')
-    menu_title = f"<white><shift:{shift}><glyph:{gid}>" + (f"<shift:-{back}><dark_gray>{title_text}" if title_text else '')
+    if HDK == 1:
+        tex.save(os.path.join(out, f'Nexo/pack/assets/{ns}/textures/gui/{gid}.png'))
+        open(os.path.join(out, f'Nexo/glyphs/{gid}.yml'), 'w', encoding='utf-8').write(
+            f"# Nexo glyph for the '{gid}' menu background. Texture is {TW}x{TH}, drawn 1:1.\n"
+            f"{gid}:\n  texture: {ns}:gui/{gid}\n  ascent: {ascent}\n  height: {TH}\n")
+        glyph_title, papi_title = f"<shift:{shift}><glyph:{gid}>", f"%nexo_shift_{shift}%%nexo_{gid}%"
+    else:
+        yml, glyph_title, papi_title = hd_tiles(tex, HDK, gid, ns, out, ascent, shift)
+        open(os.path.join(out, f'Nexo/glyphs/{gid}.yml'), 'w', encoding='utf-8').write(yml)
+
+    # --- DeluxeMenus menu ---
+    menu_title = f"<white>{glyph_title}" + (f"<shift:-{back}><dark_gray>{title_text}" if title_text else '')
     lines = [
         f"# DeluxeMenus menu '{gid}' - generated by minecraft-nexo-gui",
         f"# Register in plugins/DeluxeMenus/config.yml under gui_menus: {gid}: {{file: {gid}.yml}}",
         "# If the <glyph>/<shift> tags show as raw text, use PlaceholderAPI instead:",
-        f"#   menu_title: '%nexo_shift_{shift}%%nexo_{gid}%'",
+        f"#   menu_title: '{papi_title}'",
         f"menu_title: '{menu_title}'",
         "open_command:",
     ] + [f"  - {c}" for c in spec.get('open_commands', [gid])] + [f"size: {rows * 9}"]
@@ -1466,6 +1541,8 @@ def build_spec(spec, sdir, out):
         for c in range(9):
             x, y = hotbar_xy(c, rows)
             draw_slot(under, x, y + top, vt)
+        if HDK > 1:
+            under = under.resize((TW * HDK, TH * HDK), Image.NEAREST)
         under.alpha_composite(tex)
         ptex = under
     big = ptex.resize((TW * S, TH * S), Image.NEAREST)
@@ -1575,7 +1652,7 @@ def build_spec(spec, sdir, out):
         draw_text(grid, x * S + 3, y * S + 3, str(i), (255, 255, 255, 255), scale=2, outline=(0, 0, 0, 255))
     grid.convert('RGB').save(os.path.join(out, 'preview_grid.png'))
     if holes and not spec.get('container_panel', True):
-        hv = tex.copy()
+        hv = tex1.copy()
         hp = hv.load()
         for y in range(top, top + Hh):
             for x in range(OX, OX + W):
@@ -1585,7 +1662,9 @@ def build_spec(spec, sdir, out):
 
     open(os.path.join(out, 'INSTALL.md'), 'w', encoding='utf-8').write(
         f"# Install '{gid}'\n\n"
-        f"1. Copy `Nexo/` into `plugins/` (merges `glyphs/{gid}.yml` and `pack/assets/{ns}/textures/gui/{gid}.png`).\n"
+        f"1. Copy `Nexo/` into `plugins/` (merges `glyphs/{gid}.yml` and its texture"
+        + (f"s - {HDK}x HD art cut into glyph tiles, the title joins them -" if HDK > 1 else "")
+        + f" in `pack/assets/{ns}/textures/gui/`).\n"
         f"2. Copy `DeluxeMenus/gui_menus/{gid}.yml` into `plugins/DeluxeMenus/gui_menus/` and register it in `config.yml`.\n"
         f"3. `/nexo reload all` (rebuilds and resends the pack), then `/dm reload`.\n"
         f"4. Open with `/{spec.get('open_commands', [gid])[0]}`. If the art is off by a few pixels, adjust\n"

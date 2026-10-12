@@ -81,3 +81,19 @@ Title glyphs work on any container with a title. Widths are 176 unless noted.
 
 For anything bigger than 256px or wider than the window (full-screen menus), split the texture into a
 Multi-Bitmap Glyph (see nexo-reference.md) or several glyphs joined with `<shift>`.
+
+## HD menus ("32x32" detail: 2 texture px per GUI px)
+A bitmap glyph is drawn at `height / texture height` scale, so a texture twice the GUI size with `height` = GUI
+height renders 2 texture px per GUI px: pixels half the size of the vanilla ones, like a 32x32 resource pack.
+`"hd": 2` in a spec does it (`gui_builder.py`, HD kits only - `modes_hd.py`):
+- The art is drawn natively at 2x. It is never upscaled, or the detail is fake.
+- Minecraft stitches every glyph into a 256x256 font atlas, so the texture is cut into tiles of at most
+  256x256. Each tile is a glyph with `height` = tile height / 2, and `ascent` = menu ascent minus the
+  tile's GUI y offset. Tiles of lower rows have negative ascents: the client checks only ascent <= height.
+- The title joins the tiles with shifts. After a bitmap glyph the client advances
+  `round(rightmost opaque column x scale) + 1`, so the builder measures each tile and emits the exact
+  `<shift>` to the next tile's x, for example
+  `<shift:-24><glyph:m_0_0><shift:-1><glyph:m_0_1><shift:-209><glyph:m_1_0><shift:-1><glyph:m_1_1>`.
+- Caveat: at an odd GUI scale (3) one HD pixel is 1.5 screen px, so pixel sizes alternate 1/2. It is crisp
+  at GUI scale 2 and 4, and at GUI scale 1 the half pixels merge. Tell the user and check in game.
+- The vanilla player inventory below stays 1x (the client draws it). Only the menu art is HD.

@@ -25,7 +25,9 @@ my_menu:
   #is_emoji: true / tabcomplete: true
 ```
 
-- Textures over **256x256** must be downscaled or made a Multi-Bitmap Glyph.
+- Textures over **256x256** must be downscaled or made a Multi-Bitmap Glyph, or cut into tiles joined with
+  `<shift>` (HD menus: `references/gui-geometry.md`, "HD menus"). `height` smaller than the texture height
+  draws it at height / texture-height scale (2x textures = 32x32-style detail).
 - Tags (MiniMessage, work in inventory titles, item names, lore, scoreboards, tab, chat):
   - `<glyph:id>`; `<glyph:id:colorable>` / `:c` to accept preceding colour (otherwise forced white)
   - `<glyph:id:shadow:#AARRGGBB>` / `:s:` shadow colour (1.21.4+); `<glyph:id:2>` / `<glyph:id:2..3>` multi-bitmap parts

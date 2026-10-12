@@ -64,20 +64,58 @@ frames on the slate counter, and the user said "looks not great, you can do bett
    - Small ribbon tails behind the title read as red blocks, so they were dropped.
    - The ribbon must not hide the near-depth details. It was moved down onto the frame edge.
 
+## Version 3: HD, a scroll that breaks the frame, a new title (current example)
+The user asked for "32x32, detailed and beautiful", "do something with the tile behind - it may go beyond the
+frame" and "the title is not pretty, change its style". All three became one spec, `"hd": 2` (see
+`references/gui-geometry.md`, "HD menus"):
+- **HD scenes** (`modes_hd.py`, 124x120 each, drawn natively):
+  - Blessed:
+    - a 56 px grass block: grass fringe with drips, dirt pebbles, stones, blades and flowers on the top;
+    - a lit spot where the beam lands, dirt stalactites and roots underneath;
+    - a chest on the top;
+    - a sword with a fuller, curved guard, gem and wrapped grip;
+    - a rod with a reel, the line sagging to a bobber;
+    - a cube with panel lines on three orbits with electrons;
+    - three far islands, one with a tree; god rays and motes in the beam.
+  - Farm:
+    - the square sun, flat clouds, hazy mountains, a tree line;
+    - a gambrel-roof barn with shingles, a hay loft and X doors; a ribbed silo; a fence;
+    - furrows in perspective;
+    - a stony path to a stall with apples, carrots and bread in crates, a coin sign and a lantern; a barrel;
+    - a quest board with notes and a "!";
+    - pumpkins, two chickens, XP orbs;
+    - big wheat stalks with grains, awns and leaves.
+- **The tile behind goes beyond the frame:** the star chart is a scroll unrolled between two wooden rods with
+  gold caps. The rods stick out 16 GUI px past the window on both sides. The paper has a slowly wandering
+  deckle edge past the window (no random 1 px nubs, the jaggy check flags those) and curls into each rod.
+  Engraved ship and sea-serpent doodles sit in the bottom corners.
+- **New title:** volumetric gold letters (`lettering.volume`, the style the user approved before: dense face,
+  dark back) with sparkles, standing on the top rod and breaking out above the window, shadow on the rod.
+- **Cards:** a 10 px frame (textured material band, 2 px trim fillet, dark line). Blessed has faceted gold
+  bosses with ruby gems and a 21x20 wither skull with glowing sockets. Farm has leaf sprays on the corners
+  and a fanned wheat sheaf.
+- **The 4x4 card is cut into 4 glyph tiles** (404x472 -> 256 px tiles), joined in the title with measured
+  shifts. All 39 parts export with `--layers`, and Aseprite flattens the `.aseprite` back to the exact
+  texture.
+- Name ribbons on the cards were removed at the user's request ("not needed": the picture and the tooltip
+  name the mode). `gate` draws one only when a `name` is given (1x kit).
+
 ## Built from parts
 Every scene is a list of parts, bottom to top. Each part is drawn on its own transparent canvas and kept as
 a tight sprite with its offset.
 
 | scene | parts |
 |-------|-------|
-| `blessed_parts()` | void (nebula), stars, far_islands, god_rays, beam, quantum, island, sword, fishing |
-| `farm_parts()` | sky, sun, clouds, forest, barn, meadow, field, path, stall (casts a shadow on the field), quest_board, xp, wheat_front |
+| `blessed_parts()` (1x and HD) | void (nebula), stars, far_islands, god_rays, beam, quantum, island, sword, fishing |
+| `farm_parts()` 1x | sky, sun, clouds, forest, barn, meadow, field, path, stall (casts a shadow on the field), quest_board, xp, wheat_front |
+| `farm_parts()` HD | sky, sun, clouds, mountains, forest, barn, field, fence, path, quest_board, pumpkins, barrel, stall, chickens, xp, wheat_front |
 
 - `compose(items, img, ox, oy, clip)` pastes the parts in order.
   - A part with `shadow` darkens what is under its lower rows in that surface's own ramp, so the shadow
     follows the part when it moves.
 - A spec moves or hides parts per card: `"scene": {"stall": {"x": 30, "y": 8}, "xp": {"dx": -4}, "barn": null}`.
-- `python3 scripts/modes.py parts OUT/` exports, per scene:
+- `python3 scripts/modes.py parts OUT/` (1x) or `python3 scripts/modes_hd.py parts OUT/` (HD) exports, per
+  scene:
   - every part as `NN_part.png` + `layers.json` (name, file, x, y) + `_sheet.png`;
   - `<scene>.png`, rebuilt FROM the exported PNGs (asserted equal to the drawn scene);
   - `<scene>.aseprite` with one layer per part (shadows baked into their part's layer).

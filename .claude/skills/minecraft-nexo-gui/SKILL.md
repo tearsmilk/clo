@@ -217,6 +217,10 @@ Then send the user the preview first (they judge visually), then the files.
   and silo, a path to a market stall, a quest board, XP orbs. Layers `{"type": "modes", "part": ...}` from
   `scripts/modes.py`; example `assets/examples/mode_select/`. Concept method (the tooltip's nouns become
   objects in one scene), parts and how to add a mode: `references/mode-select.md`.
+- **HD menus** (the user: "make it 32x32"): `"hd": 2` draws the art at 2 texture px per GUI px (half-size pixels,
+  real extra detail - never upscale) and cuts it into <= 256 px glyph tiles joined in the title with measured
+  shifts; crisp at GUI scale 2 / 4, uneven at 3 - say so. Kit: `scripts/modes_hd.py` (scenes 124x120 with
+  barn, silo, stall goods, chickens, quest notes, chest, atom...). `references/gui-geometry.md` "HD menus".
 - **Split into parts** (the user: "break it into parts so the whole scene can be built from them"): scenes
   are lists of parts (sprite + x, y, bottom -> top) that `compose()` assembles; a spec moves or hides any
   part (`"scene": {"stall": {"x": 30}, "barn": null}`); `python3 scripts/modes.py parts OUT/` and
