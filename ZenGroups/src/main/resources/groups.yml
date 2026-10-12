@@ -13,8 +13,8 @@
 default:
   display: "Игрок"
   weight: 0
-  tab-prefix: "&7"
-  chat-prefix: "&7"
+  tab-prefix: ""
+  chat-prefix: ""
   name-prefix: ""
 
 vip:

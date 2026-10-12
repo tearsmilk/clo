@@ -28,4 +28,6 @@
 - Jar: `./gradlew build` в `ZenGroups/` → `plugins/ZenGroups-<версия>.jar`; деплой и рестарт как у ZenQuests.
 - Конфиги: `plugins/ZenGroups/config.yml` (плагин: таб/чат/над ником вкл-выкл), `groups.yml` (группы, вес, префиксы/суффиксы),
   `permissions.yml` (права групп, `-право`, `*`); `/group reload`. Команды: `/group add|set|take|info|list`, право `zengroups.admin` (op).
-- Регистрируется в Vault как провайдер прав и чата; PAPI `%zengroups_*%`. Таб/чат могут пересекаться с TakuCore — выключать в config.yml.
+- Регистрируется в Vault как провайдер прав и чата; PAPI `%zengroups_*%`. Таб/ник/чат рисует TakuCore: в его `roles.yml`
+  (с разрешения владельца, бэкап `roles.yml.bak-zengroups`) в prefix/suffix каждой роли подставлены `%zengroups_<tab|name|chat>_prefix/suffix%`;
+  в ZenGroups `tab/nametag/chat.enabled: false`. На других серверах сети без ZenGroups эти плейсхолдеры покажутся текстом.

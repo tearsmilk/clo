@@ -11,19 +11,19 @@ default-group: default
 expire-check-seconds: 30
 
 # Таб: префикс/суффикс из groups.yml (tab-prefix / tab-suffix) и сортировка по весу группы.
-# Если табом управляет TakuCore — выключи и используй плейсхолдеры %zengroups_tab_prefix% / %zengroups_tab_suffix%.
+# На Orsess таб, ник и чат рисует TakuCore (roles.yml подставляет %zengroups_tab_prefix% и т.п.) — поэтому здесь выключено.
 tab:
-  enabled: true
+  enabled: false
   format: "{prefix}{name}{suffix}"
   sort: true
 
 # Над ником (name-prefix / name-suffix через команды скорборда)
 nametag:
-  enabled: true
+  enabled: false
 
 # Чат (chat-prefix / chat-suffix)
 chat:
-  enabled: true
+  enabled: false
   format: "{prefix}{name}{suffix}&7: &f{message}"
   # Право на цвета в сообщении: игроки с этим правом могут писать &-коды
   color-permission: zengroups.chat.color
