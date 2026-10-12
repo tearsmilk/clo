@@ -1,11 +1,17 @@
 # Фоны меню ZenQuests — спеки для скилла minecraft-nexo-gui
 
+Сцена амбара (`art/barn_full.png`, 1536x864) сгенерирована Figma AI (gpt-image) по промпту «16-bit pixel art barn wall,
+lanterns, wheat garland, hay and pumpkins in the corners, calm empty centre»; `art/barn.png` — она же, обрезана до 236x135
+(box [-30,0,236,135] в спеке) и квантована до 48 цветов. Поверх неё билдер кладёт ленту-заголовок, рамки слотов и
+панель инвентаря — так арт от модели, а геометрия слотов точная.
+
 Картинки меню рисует `scripts/gui_builder.py` из скилла `minecraft-nexo-gui` (лежит в `.claude/skills/` в ветке
 `claude/discord-minecraft-banner-k8ln0l` репозитория, либо `~/.claude/skills/minecraft-nexo-gui`):
 
 ```bash
-python3 scripts/gui_builder.py gui-specs/main.json OUT_main     # главное меню
-python3 scripts/gui_builder.py gui-specs/pages.json OUT_pages   # daily / weekly / seasonal / story / chain (variants)
+python3 scripts/gui_builder.py gui-specs/main_art.json OUT_main     # главное меню (текущее)
+python3 scripts/gui_builder.py gui-specs/pages_art.json OUT_pages   # daily / weekly / seasonal / story / chain (variants)
+# main.json / pages.json — старая версия, где сцена целиком рисовалась билдером
 ```
 
 Выход `texture/*.png` (236x239: окно 176x222 + поля 30/30 слева-справа и 17 сверху) кладётся в
