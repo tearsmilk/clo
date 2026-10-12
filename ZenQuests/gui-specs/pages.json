@@ -11,13 +11,6 @@
   "right": 30,
   "top": 17
  },
- "header": {
-  "text": "${title}",
-  "style": "ribbon",
-  "case": "keep",
-  "width": 150,
-  "color": "${ribbon}"
- },
  "draw_free_slots": false,
  "variants": [
   {
@@ -25,35 +18,40 @@
    "title": "Ежедневные",
    "ribbon": "#d99a1c",
    "cloth": "#3e8948",
-   "emblem": "wheat"
+   "emblem": "wheat",
+   "title_upper": "ЕЖЕДНЕВНЫЕ"
   },
   {
    "id": "weekly",
    "title": "Еженедельные",
    "ribbon": "#2f74b5",
    "cloth": "#2f74b5",
-   "emblem": "fish"
+   "emblem": "fish",
+   "title_upper": "ЕЖЕНЕДЕЛЬНЫЕ"
   },
   {
    "id": "seasonal",
    "title": "Сезонные",
    "ribbon": "#c45f1a",
    "cloth": "#c45f1a",
-   "emblem": "pumpkin"
+   "emblem": "pumpkin",
+   "title_upper": "СЕЗОННЫЕ"
   },
   {
    "id": "story",
    "title": "Сюжетные",
    "ribbon": "#7a3aa3",
    "cloth": "#7a3aa3",
-   "emblem": "crest"
+   "emblem": "crest",
+   "title_upper": "СЮЖЕТНЫЕ"
   },
   {
    "id": "chain",
    "title": "История",
    "ribbon": "#7a3aa3",
    "cloth": "#7a3aa3",
-   "emblem": "page"
+   "emblem": "page",
+   "title_upper": "ИСТОРИЯ"
   }
  ],
  "layers": [
@@ -107,6 +105,13 @@
     12,
     13
    ]
+  },
+  {
+   "type": "kitchen",
+   "part": "sign",
+   "x": 88,
+   "y": -14,
+   "text": "${title_upper}"
   },
   {
    "type": "banner",

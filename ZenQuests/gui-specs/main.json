@@ -11,13 +11,6 @@
   "right": 30,
   "top": 17
  },
- "header": {
-  "text": "Квесты",
-  "style": "ribbon",
-  "case": "keep",
-  "width": 150,
-  "color": "#c8553d"
- },
  "draw_free_slots": false,
  "preview_tooltip": "daily",
  "layers": [
@@ -71,6 +64,13 @@
     12,
     13
    ]
+  },
+  {
+   "type": "kitchen",
+   "part": "sign",
+   "x": 88,
+   "y": -14,
+   "text": "КВЕСТЫ"
   },
   {
    "type": "banner",
