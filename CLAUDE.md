@@ -1,8 +1,11 @@
 # Заметки для Claude по проекту
 
 ## ZenQuests → сервер (Pterodactyl, panel.hoka.ink, сервер dafb2994-850a-408e-b4fe-e13e2bf96cbd)
-- Рестарт сервера: команда в консоль **`tfrestart`**. Рестартить ВСЕГДА после любой заливки на сервер (jar, конфиги, Nexo), не спрашивая (`POST /api/client/servers/<id>/command`, `{"command":"tfrestart"}`).
+- Рестарт сервера: команда в консоль **`tfrestart`** (`POST /api/client/servers/<id>/command`, `{"command":"tfrestart"}`), не спрашивая.
   Кнопки питания панели (`/power`) отвечают 500 — не использовать.
+- Пользователь просил поменьше рестартов. Без рестарта: конфиги — `/квесты reload`, `/рыбалка reload`; ресурспак — `nexo reload all`.
+  Рестарт нужен только для нового jar. `/reload` (bukkit:reload) на сервере НЕ работает: Paper-плагины с lifecycle-хендлерами
+  (Leaf 1.21.11) блокируют перезагрузку плагинов, а `reload confirm` в консоли — «Incorrect argument». Проверено 2026-10-12.
 - Jar: `./gradlew build` в `ZenQuests/` → `plugins/ZenQuests-<версия>.jar`, старый удалить. Загрузка — `files/write`
   (прямой upload на node.hoka.ink недоступен). После записи сверять содержимое с локальным файлом.
 - Конфиги: `plugins/ZenQuests/config.yml`, `quests.yml`; `/квесты reload` после правок (jar — только рестарт).
