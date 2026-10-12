@@ -25,7 +25,8 @@ python3 scripts/gui_builder.py gui-specs/pages.json OUT_pages   # daily / weekly
 Aseprite собирается `bash scripts/build_aseprite.sh DIR` (нужны `apt-get update` и libxcursor/libxi/libxrandr/
 libgl1-mesa/libfontconfig dev-пакеты; ~10 мин), бинарь не коммитить (EULA). `icons_preview.png` — как выглядят.
 
-Карточки квестов (`menu.quest-cards`, текстуры 32x32 — клиент ужимает в слот): `quest_cards_make_ops.py OPS/` рисует 4 пергамента по состоянию
-(`card_active|ready|claimed|locked`) и 19 эмблем по типу задания; модели `models/item/quest/<state>_<emblem>.json`
-(generated, layer0 карточка + layer1 эмблема) и определения `items/quest_<state>_<emblem>.json` генерируются на
-каждую пару. Плагин подставляет модель по состоянию квеста и его objective.type (`QuestMenu.emblem`).
+Карточки квестов (`menu.quest-cards`): стиль 16x16 RPG-паков — предмет по типу задания без фона (тёмный цветной
+контур, 3 тона + блик) и бейдж состояния в правом нижнем углу (`badge_ready` золотая искра, `badge_claimed` зелёная
+галочка, `badge_locked` замок, `badge_active` пустой). `quest_items16.py OUT/` рисует их из пиксельных сеток;
+модели `models/item/quest/<state>_<emblem>.json` = generated, layer0 предмет + layer1 бейдж; определения
+`items/quest_<state>_<emblem>.json`. Плагин выбирает модель по состоянию и objective.type (`QuestMenu.emblem`).
