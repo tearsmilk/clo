@@ -1,0 +1,67 @@
+{
+  "providers": [
+    {
+      "type": "space",
+      "advances": {
+        "": -38,
+        "": -191,
+        "": -1,
+        "": -237
+      }
+    },
+    {
+      "type": "bitmap",
+      "file": "zenfishing:gui/menu/main.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenfishing:gui/menu/collection.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenfishing:gui/scene/scene_tl.png",
+      "ascent": 30,
+      "height": 120,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenfishing:gui/scene/scene_tr.png",
+      "ascent": 30,
+      "height": 120,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenfishing:gui/scene/scene_bl.png",
+      "ascent": -90,
+      "height": 119,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenfishing:gui/scene/scene_br.png",
+      "ascent": -90,
+      "height": 119,
+      "chars": [
+        ""
+      ]
+    }
+  ]
+}

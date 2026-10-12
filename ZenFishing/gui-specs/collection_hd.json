@@ -1,0 +1,102 @@
+{
+ "namespace": "zenfishing",
+ "rows": 6,
+ "theme": "oak",
+ "container_panel": false,
+ "hide_inventory_label": false,
+ "canvas": {
+  "left": 30,
+  "right": 30,
+  "top": 17
+ },
+ "draw_free_slots": false,
+ "draw_player_inventory": false,
+ "id": "collection",
+ "layers": [
+  {
+   "type": "divider",
+   "box": [
+    14,
+    22,
+    60,
+    7
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "divider",
+   "box": [
+    102,
+    22,
+    60,
+    7
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    1,
+    1,
+    7,
+    4
+   ],
+   "kind": "wood",
+   "rim": "#4e9fd6",
+   "inner": "#14213a"
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    3,
+    5,
+    3,
+    1
+   ],
+   "kind": "wood",
+   "rim": "#4e9fd6",
+   "inner": "#14213a"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "x",
+   "x": 1,
+   "y": 1,
+   "style": "none",
+   "name": "&bКарп",
+   "lore": [
+    "&7Поймано: 3"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "prev",
+   "material": "ARROW",
+   "slot": 48,
+   "preview": "sprite:arrow_gold"
+  },
+  {
+   "id": "back",
+   "material": "ARROW",
+   "slot": 49,
+   "preview": "sprite:page"
+  },
+  {
+   "id": "next",
+   "material": "ARROW",
+   "slot": 50,
+   "preview": "sprite:arrow_gold"
+  }
+ ],
+ "header": {
+  "text": "КОЛЛЕКЦИЯ",
+  "style": "ribbon",
+  "font": "bold",
+  "case": "keep",
+  "width": 150,
+  "color": "#2f74b5",
+  "embroidered": "#bfefff"
+ }
+}

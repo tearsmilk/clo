@@ -86,13 +86,13 @@ menu:
   background: BLACK_STAINED_GLASS_PANE
   # Стиль подсказки из ресурспака (как у квестов). Пусто "" — обычный.
   tooltip-style: "zenquests:farm"
-  # Нарисованные фоны (как у квестов): font + символы накладок. Пока выключено — фон рисуется стеклом.
+  # Нарисованные фоны (ресурспак assets/zenfishing/font/menu.json + textures/gui/menu, scene): та же схема, что у квестов.
   textures:
-    enabled: false
-    font: "zenquests:menu"
+    enabled: true
+    font: "zenfishing:menu"
     title: false
-    sequence: ""
-    backgrounds: { main: "", collection: "" }
+    sequence: "\uE100\uE010\uE102\uE011\uE103\uE012\uE102\uE013\uE103{bg}\uE101"
+    backgrounds: { main: "\uE000", collection: "\uE001" }
   # Свои иконки кнопок (модели предметов, напр. zenquests:icon_close). Пусто — обычный предмет.
   icons: { close: "", back: "", prev: "", next: "", sell: "", top: "", premium-active: "", premium-inactive: "", collection: "", unknown: "", rod: "" }
   profile:
