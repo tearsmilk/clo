@@ -13,3 +13,9 @@
 - Фоны меню рисуются скиллом `minecraft-nexo-gui` из спеков `ZenQuests/gui-specs/` (см. README там); скилл лежит в ветке
   `claude/discord-minecraft-banner-k8ln0l` (`.claude/skills/minecraft-nexo-gui`) — забрать через `git archive` в `~/.claude/skills/`.
 - Иконки меню — Aseprite (`ZenQuests/gui-specs/README.md`); бинарь собирается в контейнере заново: `build_aseprite.sh`.
+
+## ZenFishing (рыбалка) — тот же сервер
+- Jar: `./gradlew build` в `ZenFishing/` → `plugins/ZenFishing-<версия>.jar`, старый удалить; деплой и рестарт как у ZenQuests.
+- Конфиги: `plugins/ZenFishing/config.yml`, `fish.yml`; `/рыбалка reload`. Продажа — Vault (экономика монет TakuFarmers).
+- Подписка Рыбак+: право `zenfishing.premium` или `/рыбалка premium give <ник> [срок]`; PAPI `%zenfishing_premium_badge%`.
+- На сервере есть старый rurukaFish 0.2.0 — тоже подменяет улов; одновременно с ZenFishing не держать.

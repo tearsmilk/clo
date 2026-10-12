@@ -1,0 +1,221 @@
+# ==========================================================
+#  ZenFishing — рыба. /рыбалка reload после правок.
+#
+#  rarities: редкости — weight (относительный шанс), xp (опыт удочки за улов), color, name
+#  fish.<id>:
+#    name        — название
+#    item        — предмет: материал Minecraft (COD, SALMON, TROPICAL_FISH, PUFFERFISH) или nexo:<id>
+#    rarity      — редкость из rarities
+#    weight      — [мин, макс] вес в кг
+#    price       — базовая цена
+#    price-per-kg — добавка за каждый кг веса
+#    premium     — true: ловится только с подпиской Рыбак+
+#    biomes      — где ловится: пусто — везде; иначе группы OCEAN, RIVER, SWAMP, LUSH, COLD, JUNGLE или ключи
+#                  биомов (minecraft:deep_ocean). Проверяется биом крючка.
+#    lore        — описание в коллекции
+# ==========================================================
+
+rarities:
+  common:    { name: "Обычная",     color: "&f", weight: 58, xp: 6 }
+  uncommon:  { name: "Необычная",   color: "&a", weight: 26, xp: 14 }
+  rare:      { name: "Редкая",      color: "&9", weight: 11, xp: 35 }
+  epic:      { name: "Эпическая",   color: "&5", weight: 4,  xp: 90 }
+  legendary: { name: "Легендарная", color: "&6", weight: 1,  xp: 280 }
+
+fish:
+  # ── обычная ──
+  carp:
+    name: "Карп"
+    item: COD
+    rarity: common
+    weight: [0.6, 4.0]
+    price: 6
+    price-per-kg: 2
+    lore: ["&7Житель любого пруда."]
+  perch:
+    name: "Окунь"
+    item: COD
+    rarity: common
+    weight: [0.2, 1.5]
+    price: 5
+    price-per-kg: 2
+    lore: ["&7Полосатый и колючий."]
+  roach:
+    name: "Плотва"
+    item: COD
+    rarity: common
+    weight: [0.1, 0.8]
+    price: 4
+    price-per-kg: 2
+    lore: ["&7Мелкая, но клюёт охотно."]
+  bream:
+    name: "Лещ"
+    item: COD
+    rarity: common
+    weight: [0.5, 3.5]
+    price: 7
+    price-per-kg: 2
+    biomes: [RIVER, SWAMP]
+    lore: ["&7Широкий речной лещ."]
+  herring:
+    name: "Сельдь"
+    item: COD
+    rarity: common
+    weight: [0.2, 1.0]
+    price: 5
+    price-per-kg: 2
+    biomes: [OCEAN]
+    lore: ["&7Ходит огромными косяками."]
+  # ── необычная ──
+  pike:
+    name: "Щука"
+    item: SALMON
+    rarity: uncommon
+    weight: [1.0, 9.0]
+    price: 14
+    price-per-kg: 3
+    biomes: [RIVER, SWAMP, LUSH]
+    lore: ["&7Зубастая хищница."]
+  trout:
+    name: "Форель"
+    item: SALMON
+    rarity: uncommon
+    weight: [0.4, 3.0]
+    price: 16
+    price-per-kg: 3
+    biomes: [RIVER, COLD]
+    lore: ["&7Любит холодную быструю воду."]
+  catfish:
+    name: "Сом"
+    item: SALMON
+    rarity: uncommon
+    weight: [2.0, 25.0]
+    price: 12
+    price-per-kg: 3
+    lore: ["&7Усатый обитатель дна."]
+  mackerel:
+    name: "Скумбрия"
+    item: SALMON
+    rarity: uncommon
+    weight: [0.5, 2.5]
+    price: 15
+    price-per-kg: 3
+    biomes: [OCEAN]
+    lore: ["&7Быстрая морская рыба."]
+  zander:
+    name: "Судак"
+    item: SALMON
+    rarity: uncommon
+    weight: [0.8, 6.0]
+    price: 15
+    price-per-kg: 3
+    lore: ["&7Ценная столовая рыба."]
+  # ── редкая ──
+  sturgeon:
+    name: "Осётр"
+    item: SALMON
+    rarity: rare
+    weight: [5.0, 60.0]
+    price: 40
+    price-per-kg: 4
+    biomes: [RIVER, OCEAN]
+    lore: ["&7Царская рыба с костяными щитками."]
+  tuna:
+    name: "Тунец"
+    item: SALMON
+    rarity: rare
+    weight: [10.0, 120.0]
+    price: 35
+    price-per-kg: 4
+    biomes: [OCEAN]
+    lore: ["&7Океанский торпедоносец."]
+  clownfish:
+    name: "Рыба-клоун"
+    item: TROPICAL_FISH
+    rarity: rare
+    weight: [0.05, 0.3]
+    price: 60
+    price-per-kg: 1
+    biomes: [OCEAN, JUNGLE]
+    lore: ["&7Яркая, как закат над рифом."]
+  pufferfish:
+    name: "Иглобрюх"
+    item: PUFFERFISH
+    rarity: rare
+    weight: [0.3, 2.0]
+    price: 45
+    price-per-kg: 2
+    lore: ["&7Осторожно: ядовит."]
+  # ── эпическая ──
+  golden_carp:
+    name: "Золотой карп"
+    item: TROPICAL_FISH
+    rarity: epic
+    weight: [1.0, 8.0]
+    price: 150
+    price-per-kg: 10
+    lore: ["&7Говорят, приносит удачу."]
+  swordfish:
+    name: "Меч-рыба"
+    item: SALMON
+    rarity: epic
+    weight: [20.0, 200.0]
+    price: 120
+    price-per-kg: 6
+    biomes: [OCEAN]
+    lore: ["&7Носит на носу собственный меч."]
+  marsh_king:
+    name: "Болотный король"
+    item: COD
+    rarity: epic
+    weight: [8.0, 40.0]
+    price: 140
+    price-per-kg: 8
+    biomes: [SWAMP]
+    lore: ["&7Старый сом, что помнит ещё первых поселенцев."]
+  # ── легендарная ──
+  moon_fish:
+    name: "Лунная рыба"
+    item: TROPICAL_FISH
+    rarity: legendary
+    weight: [3.0, 30.0]
+    price: 600
+    price-per-kg: 20
+    lore: ["&7Светится серебром в темноте.", "&7Клюёт только у терпеливых."]
+  farm_legend:
+    name: "Хозяин озера"
+    item: SALMON
+    rarity: legendary
+    weight: [40.0, 300.0]
+    price: 800
+    price-per-kg: 15
+    lore: ["&7Легенда фермерского озера."]
+  # ── только Рыбак+ ──
+  azure_trout:
+    name: "Лазурная форель"
+    item: TROPICAL_FISH
+    rarity: rare
+    premium: true
+    weight: [0.5, 4.0]
+    price: 90
+    price-per-kg: 6
+    lore: ["&7Переливается цветом неба.", "&b✦ Только для Рыбак+"]
+  crystal_pike:
+    name: "Хрустальная щука"
+    item: SALMON
+    rarity: epic
+    premium: true
+    weight: [2.0, 15.0]
+    price: 260
+    price-per-kg: 12
+    lore: ["&7Прозрачная, как лёд.", "&b✦ Только для Рыбак+"]
+  kraken_calf:
+    name: "Детёныш кракена"
+    item: PUFFERFISH
+    rarity: legendary
+    premium: true
+    weight: [10.0, 80.0]
+    price: 1200
+    price-per-kg: 25
+    biomes: [OCEAN]
+    lore: ["&7Ещё маленький, но уже тянет лодку.", "&b✦ Только для Рыбак+"]

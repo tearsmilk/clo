@@ -1,0 +1,165 @@
+# ==========================================================
+#  ZenFishing — рыбалка (https://hoka.ink)
+#  Рыба — в fish.yml. Перезагрузка без рестарта: /рыбалка reload
+#  Цвета: MiniMessage (<gradient:#a:#b>, <#ff8800>) и &-коды.
+# ==========================================================
+
+# ── Удочка: уровень и опыт хранятся на самом предмете (любая удочка при первом улове становится прокачиваемой) ──
+rod:
+  max-level: 50
+  # Опыт до следующего уровня: xp-base × xp-growth^(уровень−1)   (1→2: 100, 2→3: 125, 10→11: ~750 …)
+  xp-base: 100
+  xp-growth: 1.25
+  # Бонусы за КАЖДЫЙ уровень удочки (доли: 0.02 = 2%)
+  per-level:
+    luck: 0.02          # шанс редкой рыбы (множитель веса редкостей выше «обычной»)
+    bite-speed: 0.012   # быстрее клёв (меньше ожидание)
+    double-catch: 0.004 # шанс второй рыбы за один улов
+    sell-bonus: 0.008   # дороже продажа
+    big-fish: 0.01      # рыба крупнее (сдвиг к максимальному весу)
+  name: "&b🎣 Удочка &7[&fур. {level}&7]"
+  name-max: "&b🎣 Удочка &7[&6МАКС&7]"
+  lore:
+    - "&8──────────────"
+    - "&7Опыт: &f{xp}&7/&f{need}"
+    - "{bar}"
+    - "&8──────────────"
+    - "&7Удача: &a+{luck}%   &7Клёв: &a+{bite}%"
+    - "&7Двойной улов: &a{double}%   &7Цена: &a+{sell}%"
+  lore-max:
+    - "&8──────────────"
+    - "&6✦ Максимальный уровень"
+    - "&8──────────────"
+    - "&7Удача: &a+{luck}%   &7Клёв: &a+{bite}%"
+    - "&7Двойной улов: &a{double}%   &7Цена: &a+{sell}%"
+  bar: { length: 20, filled: "&b▮", empty: "&8▮" }
+
+# ── Улов ──
+catch:
+  # От какой редкости и выше сообщать всему серверу: common, uncommon, rare, epic, legendary, none
+  announce-from: epic
+  sounds: true
+  # Шансы редкостей (относительные веса) — в fish.yml у каждой редкости
+  # Подпись на рыбе
+  name: "{color}{fish} &7({weight} кг)"
+  lore:
+    - "{color}{rarity}"
+    - "&7Вес: &f{weight} кг"
+    - "&7Цена: &e{price} {currency}"
+    - "&8Поймал: {player}, {date}"
+
+# ── Продажа (/рыбалка продать или кнопка в меню) ──
+sell:
+  # auto — Vault, если есть, иначе команда; vault; command
+  method: auto
+  # Команда консоли, если нет Vault. {player} — ник, {amount} — сумма
+  command: "eco give {player} {amount}"
+  currency: "монет"
+
+# ── Подписка Рыбак+ (право zenfishing.premium — LuckPerms/донат, или /рыбалка premium give <ник> [срок]) ──
+premium:
+  permission: "zenfishing.premium"
+  name: "&bРыбак+"
+  xp-multiplier: 1.5     # опыт удочки ×1.5
+  luck: 0.25             # +25% к шансу редкой рыбы
+  bite-speed: 0.2        # клёв на 20% быстрее
+  double-catch: 0.05     # +5% к шансу второй рыбы
+  sell-bonus: 0.15       # +15% к цене
+  exclusive-fish: true   # рыба с premium: true в fish.yml ловится только подписчикам
+  # Значок в табе/чате через PlaceholderAPI: %zenfishing_premium_badge%
+  badge: ""
+  badge-none: ""
+  perks:
+    - "&7• Опыт удочки &b×1.5"
+    - "&7• Шанс редкой рыбы &b+25%"
+    - "&7• Клёв быстрее на &b20%"
+    - "&7• Вторая рыба за улов &b+5%"
+    - "&7• Рыба дороже на &b15%"
+    - "&7• Особая рыба только для &bРыбак+"
+
+# ── Меню /рыбалка ──
+menu:
+  title: "<gradient:#38b6ff:#5ce1e6>🎣 Рыбалка</gradient>"
+  collection-title: "<gradient:#38b6ff:#5ce1e6>🎣 Коллекция рыбы</gradient> &8({page}/{pages})"
+  accent: LIGHT_BLUE_STAINED_GLASS_PANE
+  corner: CYAN_STAINED_GLASS_PANE
+  background: BLACK_STAINED_GLASS_PANE
+  # Стиль подсказки из ресурспака (как у квестов). Пусто "" — обычный.
+  tooltip-style: "zenquests:farm"
+  # Нарисованные фоны (как у квестов): font + символы накладок. Пока выключено — фон рисуется стеклом.
+  textures:
+    enabled: false
+    font: "zenquests:menu"
+    title: false
+    sequence: ""
+    backgrounds: { main: "", collection: "" }
+  # Свои иконки кнопок (модели предметов, напр. zenquests:icon_close). Пусто — обычный предмет.
+  icons: { close: "", back: "", prev: "", next: "", sell: "", top: "", premium-active: "", premium-inactive: "", collection: "", unknown: "", rod: "" }
+  profile:
+    name: "&b{player}"
+    lore:
+      - "&7Поймано рыбы: &f{caught}"
+      - "&7Открыто видов: &f{known}&7/&f{total}"
+      - "&7Самая крупная: &f{best}"
+      - "&7Заработано: &e{earned} {currency}"
+  rod:
+    name: "&bУдочка в руке"
+    none: ["&7Возьми удочку в руку,", "&7чтобы увидеть её уровень"]
+  collection:
+    name: "&bКоллекция рыбы"
+    lore: ["&7Все виды рыбы и твои рекорды", "", "&eНажми, чтобы открыть"]
+    known-lore: ["&7Поймано: &f{count}", "&7Рекорд: &f{best} кг", "&7Цена: &e{price} {currency}"]
+    unknown-name: "&8???"
+    unknown-lore: ["{color}{rarity}", "&8Ещё не поймана"]
+    unknown-item: GRAY_DYE
+    premium-lore: "&b✦ Только для {premium}"
+  sell:
+    name: "&eПродать всю рыбу"
+    lore: ["&7Рыбы в инвентаре: &f{count}", "&7На сумму: &e{amount} {currency}", "", "&eНажми, чтобы продать"]
+    item: GOLD_INGOT
+  top:
+    name: "&6Топ рыбаков"
+    item: WRITABLE_BOOK
+    line: "&7{n}. &f{player} &8— &f{value}"
+    lore-caught: "&bПо улову:"
+    lore-biggest: "&bСамая крупная рыба:"
+  premium:
+    active: { name: "{premium} &aактивна", lore: ["&7Осталось: &f{time}", ""], item: HEART_OF_THE_SEA }
+    inactive: { name: "{premium}", lore: ["&7Подписка рыбака:", ""], item: NAUTILUS_SHELL }
+  close: { name: "&cЗакрыть", item: BARRIER }
+  back: { name: "&7← Назад", item: ARROW }
+  prev: { name: "&7← Назад", item: ARROW }
+  next: { name: "&7Вперёд →", item: ARROW }
+
+messages:
+  prefix: "&b🎣 &r"
+  no-permission: "&cНет прав."
+  players-only: "&cТолько для игроков."
+  reloaded: "&aКонфиги перезагружены: рыбы — {fish}."
+  usage-admin: "&7/рыбалка reload &8— &fперезагрузить\n&7/рыбалка rod [игрок] [уровень] &8— &fвыдать удочку\n&7/рыбалка stats <игрок> &8— &fстатистика\n&7/рыбалка premium give|take|check <игрок> [срок] &8— &fподписка"
+  usage: "&7/рыбалка &8— &fменю\n&7/рыбалка продать &8— &fпродать всю рыбу\n&7/рыбалка топ &8— &fтоп рыбаков"
+  caught: "{color}Поймана {fish} &7({weight} кг) {color}— {rarity}&7! &8+{xp} опыта удочки"
+  caught-double: "&b✦ Двойной улов! &7Ещё одна рыба: {color}{fish}"
+  announce: "&b🎣 &f{player} &7поймал {color}{fish} &7({weight} кг) — {color}{rarity}&7!"
+  record: "&6★ Новый личный рекорд: {color}{fish} &6{weight} кг!"
+  level-up: "&b🎣 Удочка прокачана до &fуровня {level}&b!"
+  level-max: "&6✦ Удочка достигла максимального уровня!"
+  sold: "&aПродано рыбы: &f{count} &aна &e{amount} {currency}&a."
+  nothing-to-sell: "&7В инвентаре нет рыбы."
+  sell-unavailable: "&cПродажа сейчас недоступна (нет экономики)."
+  rod-given: "&aВыдана удочка &fур. {level} &aигроку &f{player}&a."
+  player-not-found: "&cИгрок {player} не в сети."
+  player-unknown: "&cИгрок {player} не найден."
+  stats: "&b{player}&7: поймано &f{caught}&7, видов &f{known}&7/&f{total}&7, рекорд &f{best}&7, заработано &e{earned} {currency}"
+  top-header: "&b🎣 Топ рыбаков"
+  top-line: "&7{n}. &f{player} &8— &f{value}"
+  premium-bad-term: "&cНепонятный срок: {term}. Примеры: 30d, 12h, 1w, forever"
+  premium-given: "&aИгроку &f{player}&a выдана подписка Рыбак+ — осталось: &f{time}"
+  premium-received: "&b✦ Тебе выдана подписка Рыбак+! &7Осталось: &f{time}"
+  premium-taken: "&aУ игрока &f{player}&a забрана выданная подписка."
+  premium-lost: "&7Твоя подписка Рыбак+ закончилась."
+  premium-none: "&7У игрока &f{player}&7 нет выданной подписки."
+  premium-check: "&7Подписка &f{player}&7: осталось &f{time}"
+  premium-check-perm: "&7У &f{player}&7 подписка через право (LuckPerms/донат), командой не управляется."
+  premium-forever: "навсегда"
+  premium-only: "&cЭта рыба только для подписчиков {premium}."
