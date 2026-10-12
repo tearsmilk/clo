@@ -4,7 +4,7 @@
  "rows": 6,
  "theme": "oak",
  "container_panel": false,
- "inventory_panel": "vanilla",
+ "inventory_panel": "spruce",
  "hide_inventory_label": false,
  "canvas": {
   "left": 30,
