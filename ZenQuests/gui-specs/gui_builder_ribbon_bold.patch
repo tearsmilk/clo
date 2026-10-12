@@ -1,5 +1,5 @@
 --- /tmp/claude-0/gb_orig.py	2026-10-12 07:49:35.310234787 +0000
-+++ scripts/gui_builder.py	2026-10-12 07:49:02.774755574 +0000
++++ scripts/gui_builder.py	2026-10-12 07:50:53.261653897 +0000
 @@ -1098,7 +1098,8 @@
      if style == 'ribbon':                # cloth ribbon with folded, V-cut tails (quest boards, castle scenes)
          sc = hd.get('size', 1)
@@ -10,17 +10,36 @@
          bh = 7 * sc + 8
          rw = hd.get('width', tw + 2 * 14 + 48)
          rib = props.ribbon(rw, bh + 5, hd.get('color', '#c42f3c'))
-@@ -1107,7 +1108,13 @@
+@@ -1107,7 +1108,32 @@
          art.drop_shadow(img, (rx + 14, ry, rx + rw - 15, ry + bh - 1))
          img.alpha_composite(rib, (rx, ry))
          tcol = H(hd.get('text_color', '#FFFFFF'))
 -        if hd.get('font') == 'material':
 +        if bold:
-+            ocol = H(art.outline_of(hd.get('color', '#c42f3c')))
++            rcol = hd.get('color', '#c42f3c')
 +            lx, ly = rx + (rw - tw) // 2, ry + (bh - 7) // 2
-+            for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):       # обводка в тёмном оттенке ленты
-+                shop.letters(img, lx + dx, ly + dy, text, ocol, ocol)
-+            shop.letters(img, lx, ly, text, tcol, H(hd.get('text_color2', '#D8D8D8')))
++            emb = hd.get('embroidered')
++            if emb:                                                  # вышивка: нить лежит в канавке ткани
++                thread = emb if isinstance(emb, str) else '#f2c94c'
++                dark, light = art.step(rcol, -2), art.step(rcol, 1)
++                shop.letters(img, lx + 1, ly + 1, text, light, light)   # блик ткани снизу-справа
++                shop.letters(img, lx - 1, ly - 1, text, dark, dark)     # тень канавки сверху-слева
++                shop.letters(img, lx, ly - 1, text, dark, dark)
++                shop.letters(img, lx - 1, ly, text, dark, dark)
++                m = shop._slab_mask(text, 1, 1, 'bold'); mp = m.load()
++                t_hi, t_lo, t_sh = art.step(thread, 1), art.rgba(thread), art.step(thread, -1)
++                for yy in range(m.height):
++                    for xx in range(m.width):
++                        if mp[xx, yy]:
++                            # гладь: нить идёт горизонтальными стежками — ряды светлый/основной, нижний ряд темнее
++                            last = yy + 1 >= m.height or not mp[xx, yy + 1]
++                            c = t_sh if last else (t_hi if yy % 2 == 0 else t_lo)
++                            img.putpixel((lx + xx, ly + yy), c)
++            else:
++                ocol = H(art.outline_of(rcol))
++                for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):       # обводка в тёмном оттенке ленты
++                    shop.letters(img, lx + dx, ly + dy, text, ocol, ocol)
++                shop.letters(img, lx, ly, text, tcol, H(hd.get('text_color2', '#D8D8D8')))
 +        elif hd.get('font') == 'material':
              mw, _ = material_text_size(text, sc)
              draw_material_text(img, rx + (rw - mw) // 2, ry + (bh - 7 * sc - 3) // 2, text,

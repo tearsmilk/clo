@@ -329,6 +329,7 @@
   "font": "bold",
   "case": "keep",
   "width": 150,
-  "color": "${ribbon}"
+  "color": "${ribbon}",
+  "embroidered": "#f2c94c"
  }
 }

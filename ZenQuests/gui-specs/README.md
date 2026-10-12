@@ -15,6 +15,6 @@ python3 scripts/gui_builder.py gui-specs/pages.json OUT_pages   # daily / weekly
 Раскладка слотов фиксирована в `QuestMenu`: главное — 4 (профиль), 19/21/23/25 (категории), 48 (Ферма+), 50 (закрыть);
 страницы — 4 (шапка), 10..43 без крайних колонок (28 квестов), 48/49/50 (навигация).
 
-Заголовки — лента (`header.style: ribbon`) с жирным шрифтом `font: "bold"` (капители из `shop.letters`, как на
+Заголовки — лента (`header.style: ribbon`) с жирным шрифтом `font: "bold"` и вышивкой `embroidered: "#f2c94c"` (цвет нити) (капители из `shop.letters`, как на
 кухонной вывеске). Этой опции в скилле из ветки нет — она добавлена патчем `gui_builder_ribbon_bold.patch`
 (`patch -p0 scripts/gui_builder.py < gui_builder_ribbon_bold.patch` внутри папки скилла).
