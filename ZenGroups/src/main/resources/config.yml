@@ -1,0 +1,51 @@
+# ==========================================================
+#  ZenGroups — настройки плагина (https://hoka.ink)
+#  Группы и их префиксы — groups.yml, права групп — permissions.yml.
+#  /group reload — перечитать всё. Цвета: MiniMessage и &-коды.
+# ==========================================================
+
+# Группа, которая есть у всех (её можно не выдавать)
+default-group: default
+
+# Как часто проверять, не истекли ли временные группы (секунды)
+expire-check-seconds: 30
+
+# Таб: префикс/суффикс из groups.yml (tab-prefix / tab-suffix) и сортировка по весу группы.
+# Если табом управляет TakuCore — выключи и используй плейсхолдеры %zengroups_tab_prefix% / %zengroups_tab_suffix%.
+tab:
+  enabled: true
+  format: "{prefix}{name}{suffix}"
+  sort: true
+
+# Над ником (name-prefix / name-suffix через команды скорборда)
+nametag:
+  enabled: true
+
+# Чат (chat-prefix / chat-suffix)
+chat:
+  enabled: true
+  format: "{prefix}{name}{suffix}&7: &f{message}"
+  # Право на цвета в сообщении: игроки с этим правом могут писать &-коды
+  color-permission: zengroups.chat.color
+
+messages:
+  prefix: "&8[&bГруппы&8] &r"
+  no-permission: "&cНет прав."
+  usage: "&7/group add <игрок> <группа> [срок] &8— &fдобавить (старые остаются)\n&7/group set <игрок> <группа> [срок] &8— &fустановить (старые снимаются)\n&7/group take <игрок> <группа> &8— &fзабрать\n&7/group info <игрок> &8— &fгруппы игрока\n&7/group list &8— &fвсе группы\n&7/group reload"
+  player-unknown: "&cИгрок &f{player}&c не найден."
+  group-unknown: "&cГруппы &f{group}&c нет. Есть: &f{groups}"
+  bad-term: "&cНепонятный срок: {term}. Примеры: 30d, 12h, 1w, forever"
+  added: "&aИгроку &f{player}&a добавлена группа &f{group}&a ({time})."
+  set: "&aИгроку &f{player}&a установлена группа &f{group}&a ({time})."
+  taken: "&aУ игрока &f{player}&a забрана группа &f{group}&a."
+  not-in-group: "&7У игрока &f{player}&7 нет группы &f{group}&7."
+  received: "&aТебе выдана группа &f{group}&a ({time})."
+  lost: "&7Группа &f{group}&7 снята."
+  expired: "&7Срок группы &f{group}&7 истёк."
+  info-header: "&bГруппы игрока &f{player}&b (главная: &f{primary}&b):"
+  info-line: "&7• &f{group} &8— &7{time}"
+  info-empty: "&7• только &f{default}"
+  list-header: "&bГруппы (&f{count}&b):"
+  list-line: "&7• &f{group} &8вес {weight} &7{prefix}"
+  reloaded: "&aПерезагружено: групп — {groups}."
+  forever: "навсегда"

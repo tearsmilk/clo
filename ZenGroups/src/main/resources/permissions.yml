@@ -1,0 +1,26 @@
+# ==========================================================
+#  ZenGroups — права групп. Группа получает свои права + права из inherits (groups.yml).
+#  "-право" — забрать право (например, унаследованное). "*" — все права сервера.
+# ==========================================================
+
+default:
+  - zenquests.use
+  - zenfishing.use
+
+vip:
+  - zengroups.chat.color
+
+premium:
+  - zenquests.premium
+  - zenfishing.premium
+
+helper:
+  - zenquests.admin
+  - zenfishing.admin
+
+moder:
+  - minecraft.command.kick
+  - minecraft.command.tp
+
+admin:
+  - "*"

@@ -23,3 +23,9 @@
 - Конфиги: `plugins/ZenFishing/config.yml`, `fish.yml`; `/рыбалка reload`. Продажа — Vault (экономика монет TakuFarmers).
 - Подписка Рыбак+: право `zenfishing.premium` или `/рыбалка premium give <ник> [срок]`; PAPI `%zenfishing_premium_badge%`.
 - На сервере есть старый rurukaFish 0.2.0 — тоже подменяет улов; одновременно с ZenFishing не держать.
+
+## ZenGroups (группы/права) — тот же сервер
+- Jar: `./gradlew build` в `ZenGroups/` → `plugins/ZenGroups-<версия>.jar`; деплой и рестарт как у ZenQuests.
+- Конфиги: `plugins/ZenGroups/config.yml` (плагин: таб/чат/над ником вкл-выкл), `groups.yml` (группы, вес, префиксы/суффиксы),
+  `permissions.yml` (права групп, `-право`, `*`); `/group reload`. Команды: `/group add|set|take|info|list`, право `zengroups.admin` (op).
+- Регистрируется в Vault как провайдер прав и чата; PAPI `%zengroups_*%`. Таб/чат могут пересекаться с TakuCore — выключать в config.yml.

@@ -1,0 +1,58 @@
+# ==========================================================
+#  ZenGroups — группы. Права — в permissions.yml. /group reload после правок.
+#
+#  <id>:
+#    display      — название (в сообщениях и %zengroups_group_display%)
+#    weight       — вес: у игрока с несколькими группами главная — с самым большим весом
+#    tab-prefix / tab-suffix     — в табе
+#    chat-prefix / chat-suffix   — в чате
+#    name-prefix / name-suffix   — над ником (до 64 символов вместе с цветами)
+#    inherits     — права каких групп наследовать (список)
+# ==========================================================
+
+default:
+  display: "Игрок"
+  weight: 0
+  tab-prefix: "&7"
+  chat-prefix: "&7"
+  name-prefix: ""
+
+vip:
+  display: "VIP"
+  weight: 10
+  tab-prefix: "&a[VIP] "
+  chat-prefix: "&a[VIP] &f"
+  name-prefix: "&a[VIP] "
+  inherits: [default]
+
+premium:
+  display: "Premium"
+  weight: 20
+  tab-prefix: "&6[Premium] "
+  chat-prefix: "&6[Premium] &f"
+  name-prefix: "&6[Premium] "
+  inherits: [vip]
+
+helper:
+  display: "Хелпер"
+  weight: 50
+  tab-prefix: "&b[Хелпер] "
+  chat-prefix: "&b[Хелпер] &f"
+  name-prefix: "&b[Хелпер] "
+  inherits: [premium]
+
+moder:
+  display: "Модератор"
+  weight: 60
+  tab-prefix: "&9[Модер] "
+  chat-prefix: "&9[Модер] &f"
+  name-prefix: "&9[Модер] "
+  inherits: [helper]
+
+admin:
+  display: "Админ"
+  weight: 100
+  tab-prefix: "&c[Админ] "
+  chat-prefix: "&c[Админ] &f"
+  name-prefix: "&c[Админ] "
+  inherits: [moder]
