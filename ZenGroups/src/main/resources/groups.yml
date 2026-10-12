@@ -10,49 +10,53 @@
 #    inherits     — права каких групп наследовать (список)
 # ==========================================================
 
-default:
+# Значки — глифы Nexo ({glyph:имя} превращается в символ при выводе): badge_admin, badge_player — старые (glyphs/badges.yml),
+# badge_moder, badge_media, badge_vipplus, badge_vip — glyphs/zengroups.yml, текстуры assets/zengroups/textures/font.
+
+player:
   display: "Игрок"
   weight: 0
-  tab-prefix: ""
-  chat-prefix: ""
-  name-prefix: ""
+  tab-prefix: "{glyph:badge_player} "
+  tab-suffix: ""
+  chat-prefix: "{glyph:badge_player} &7"
+  name-prefix: "{glyph:badge_player} "
 
 vip:
   display: "VIP"
-  weight: 10
-  tab-prefix: "&a[VIP] "
-  chat-prefix: "&a[VIP] &f"
-  name-prefix: "&a[VIP] "
-  inherits: [default]
-
-premium:
-  display: "Premium"
   weight: 20
-  tab-prefix: "&6[Premium] "
-  chat-prefix: "&6[Premium] &f"
-  name-prefix: "&6[Premium] "
+  tab-prefix: "{glyph:badge_vip} "
+  chat-prefix: "{glyph:badge_vip} &e"
+  name-prefix: "{glyph:badge_vip} "
+  inherits: [player]
+
+vipplus:
+  display: "VIP+"
+  weight: 30
+  tab-prefix: "{glyph:badge_vipplus} "
+  chat-prefix: "{glyph:badge_vipplus} &6"
+  name-prefix: "{glyph:badge_vipplus} "
   inherits: [vip]
 
-helper:
-  display: "Хелпер"
-  weight: 50
-  tab-prefix: "&b[Хелпер] "
-  chat-prefix: "&b[Хелпер] &f"
-  name-prefix: "&b[Хелпер] "
-  inherits: [premium]
+media:
+  display: "Media"
+  weight: 40
+  tab-prefix: "{glyph:badge_media} "
+  chat-prefix: "{glyph:badge_media} &d"
+  name-prefix: "{glyph:badge_media} "
+  inherits: [vipplus]
 
 moder:
   display: "Модератор"
   weight: 60
-  tab-prefix: "&9[Модер] "
-  chat-prefix: "&9[Модер] &f"
-  name-prefix: "&9[Модер] "
-  inherits: [helper]
+  tab-prefix: "{glyph:badge_moder} "
+  chat-prefix: "{glyph:badge_moder} &9"
+  name-prefix: "{glyph:badge_moder} "
+  inherits: [media]
 
 admin:
   display: "Админ"
   weight: 100
-  tab-prefix: "&c[Админ] "
-  chat-prefix: "&c[Админ] &f"
-  name-prefix: "&c[Админ] "
+  tab-prefix: "{glyph:badge_admin} "
+  chat-prefix: "{glyph:badge_admin} &c"
+  name-prefix: "{glyph:badge_admin} "
   inherits: [moder]

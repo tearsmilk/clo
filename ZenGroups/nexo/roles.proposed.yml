@@ -1,0 +1,66 @@
+# ═══════════════════════════════════════════════════════════════
+#  РОЛИ — общие для ВСЕЙ сети. Этот файл ОДИНАКОВ на всех серверах.
+#  Здесь: приоритет + как роль ВЫГЛЯДИТ (TAB / над головой / чат).
+#  ПРАВА ролей — в отдельном файле permissions.yml (у каждого сервера свои!).
+#
+#  Игроки → роль хранятся в БД (не тут).
+#  Выдать роль:  /role set <игрок> <роль>     Применить:  /role reload
+#
+#  Цвета: &a..&f  &l жирный  и любой &#RRGGBB (HEX).
+#  Отображение роли в TAB / над головой (nametag) / в чате — НАСТРАИВАЕТСЯ ОТДЕЛЬНО.
+#  ⚠️ цвет ника: в tab и chat — любой HEX; над головой (nametag) — только 16 базовых
+#     (HEX сам подберётся к ближайшему из 16).
+# ═══════════════════════════════════════════════════════════════
+
+default-role: player      # роль для всех, кому не выдана другая
+
+roles:
+
+  player:
+    priority: 0           # приоритет для сортировки в TAB (больше = выше)
+    tab:
+      prefix: "%zengroups_tab_prefix%"
+      suffix: "%zenquests_premium_badge%%zengroups_tab_suffix%"
+      name-color: "&7"
+    nametag:
+      prefix: "%zengroups_name_prefix%"
+      suffix: "%zenquests_premium_badge%%zengroups_name_suffix%"
+      name-color: "&7"
+    chat:
+      prefix: "%zengroups_chat_prefix%"
+      suffix: "%zenquests_premium_badge%%zengroups_chat_suffix%"
+      name-color: "&7"
+      # {prefix} {suffix} {name-color} %player% {message}
+      format: "{prefix}{name-color}%player%{suffix} &8» &f{message}"
+
+  vip:
+    priority: 50
+    tab:
+      suffix: "%zenquests_premium_badge%%zengroups_tab_suffix%"
+      prefix: "%zengroups_tab_prefix%"
+      name-color: "&#FFD700"
+    nametag:
+      suffix: "%zenquests_premium_badge%%zengroups_name_suffix%"
+      prefix: "%zengroups_name_prefix%"
+      name-color: "&6"
+    chat:
+      suffix: "%zenquests_premium_badge%%zengroups_chat_suffix%"
+      prefix: "%zengroups_chat_prefix%"
+      name-color: "&f"
+      format: "{prefix}{name-color}%player% &8» &f{message}"
+
+  admin:
+    priority: 100
+    tab:
+      suffix: "%zenquests_premium_badge%%zengroups_tab_suffix%"
+      prefix: "%zengroups_tab_prefix%"
+      name-color: "&#FF5555"
+    nametag:
+      suffix: "%zenquests_premium_badge%%zengroups_name_suffix%"
+      prefix: "%zengroups_name_prefix%"
+      name-color: "&c"
+    chat:
+      suffix: "%zenquests_premium_badge%%zengroups_chat_suffix%"
+      prefix: "%zengroups_chat_prefix%"
+      name-color: "&c"
+      format: "{prefix}{name-color}%player% &8» &f{message}"

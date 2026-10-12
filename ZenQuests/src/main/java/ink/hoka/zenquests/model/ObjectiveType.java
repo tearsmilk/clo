@@ -29,7 +29,10 @@ public enum ObjectiveType {
     SPEND,        // потрачено валюты                      — цель: COINS или GEMS, + сумма
     FARM_VISIT,   // зайти на свою ферму                   — без цели, +1
     NPC_TALK,     // клик по NPC                           — цель: id NPC, +1
-    DIALOG;       // диалог с NPC (F)                      — цель: id диалога, +1
+    DIALOG,       // диалог с NPC (F)                      — цель: id диалога, +1
+    // ── рыбалка ZenFishing ──
+    CATCH_FISH,   // поймать рыбу ZenFishing               — цель: id рыбы из fish.yml (carp, sturgeon …) или ANY, +1
+    CATCH_RARITY; // поймать рыбу редкости                 — цель: common/uncommon/rare/epic/legendary, +1
 
     public static ObjectiveType parse(String s) {
         if (s == null) return null;

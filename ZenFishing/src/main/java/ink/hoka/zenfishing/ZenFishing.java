@@ -11,14 +11,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 
-/** Рыбалка: редкая рыба (fish.yml), прокачка удочки, подписка Рыбак+, меню /рыбалка, продажа улова. */
+/** Рыбалка: редкая рыба (fish.yml), прокачка удочки, бонусы Ферма+ (подписка ZenQuests), меню /рыбалка, продажа улова. */
 public final class ZenFishing extends JavaPlugin {
 
     private FishRegistry fish;
     private Rods rods;
     private FishItems items;
     private Economy economy;
-    private PremiumStore premium;
     private StatsStore stats;
     private FishMenu menu;
 
@@ -30,7 +29,6 @@ public final class ZenFishing extends JavaPlugin {
         rods = new Rods(this);
         items = new FishItems(this);
         economy = new Economy(this); economy.hook();
-        premium = new PremiumStore(this); premium.load();
         stats = new StatsStore(this);
         menu = new FishMenu(this);
         getServer().getPluginManager().registerEvents(new FishingListener(this), this);
@@ -45,22 +43,26 @@ public final class ZenFishing extends JavaPlugin {
     @Override
     public void onDisable() { if (stats != null) stats.saveDirty(); }
 
-    public void reloadAll() { reloadConfig(); fish.load(); premium.load(); economy.hook(); }
+    public void reloadAll() { reloadConfig(); fish.load(); economy.hook(); }
 
     public FishRegistry fish() { return fish; }
     public Rods rods() { return rods; }
     public FishItems items() { return items; }
     public Economy economy() { return economy; }
-    public PremiumStore premium() { return premium; }
     public StatsStore stats() { return stats; }
     public FishMenu menu() { return menu; }
     public boolean quests() { return Bukkit.getPluginManager().getPlugin("ZenQuests") != null; }
 
+    /** Ферма+: право premium.permission или подписка, выданная в ZenQuests (/квесты premium give). */
     public boolean isPremium(Player p) {
-        return p.hasPermission(getConfig().getString("premium.permission", "zenfishing.premium")) || premium.active(p.getUniqueId());
+        if (p.hasPermission(getConfig().getString("premium.permission", "zenquests.premium"))) return true;
+        try {
+            Class<?> api = Class.forName("ink.hoka.zenquests.QuestsAPI");
+            return Boolean.TRUE.equals(api.getMethod("isPremium", Player.class).invoke(null, p));
+        } catch (Throwable t) { return false; }
     }
 
-    public String premiumName() { return getConfig().getString("premium.name", "&bРыбак+"); }
+    public String premiumName() { return getConfig().getString("premium.name", "&6Ферма+"); }
     public String currency() { return getConfig().getString("sell.currency", ""); }
 
     /** Результат продажи. */

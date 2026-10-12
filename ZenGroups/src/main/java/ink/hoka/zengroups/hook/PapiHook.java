@@ -47,12 +47,12 @@ public final class PapiHook extends PlaceholderExpansion {
             case "group" -> g.id();
             case "group_display" -> g.display();
             case "weight" -> String.valueOf(g.weight());
-            case "tab_prefix" -> g.tabPrefix();
-            case "tab_suffix" -> g.tabSuffix();
-            case "chat_prefix" -> g.chatPrefix();
-            case "chat_suffix" -> g.chatSuffix();
-            case "name_prefix" -> g.namePrefix();
-            case "name_suffix" -> g.nameSuffix();
+            case "tab_prefix" -> Text.glyphs(g.tabPrefix());
+            case "tab_suffix" -> Text.glyphs(g.tabSuffix());
+            case "chat_prefix" -> Text.glyphs(g.chatPrefix());
+            case "chat_suffix" -> Text.glyphs(g.chatSuffix());
+            case "name_prefix" -> Text.glyphs(g.namePrefix());
+            case "name_suffix" -> Text.glyphs(g.nameSuffix());
             case "time" -> {
                 UserStore.Entry e = plugin.users().entry(p.getUniqueId(), g.id());
                 if (e == null || e.until == UserStore.FOREVER) yield plugin.getConfig().getString("messages.forever", "навсегда");

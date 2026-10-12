@@ -1,7 +1,6 @@
 package ink.hoka.zenfishing.hook;
 
 import ink.hoka.zenfishing.PlayerStats;
-import ink.hoka.zenfishing.PremiumStore;
 import ink.hoka.zenfishing.ZenFishing;
 import ink.hoka.zenfishing.util.Text;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -10,10 +9,9 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.time.Duration;
 
 /**
- * %zenfishing_premium_badge% / %zenfishing_premium% / %zenfishing_premium_left% — подписка Рыбак+
+ * %zenfishing_premium% — есть ли Ферма+ (сама подписка — в ZenQuests: %zenquests_premium_badge% и т.п.)
  * %zenfishing_level% / %zenfishing_xp% / %zenfishing_need% — удочка в руке (пусто, если её нет)
  * %zenfishing_caught% / %zenfishing_known% / %zenfishing_earned% — статистика
  */
@@ -38,16 +36,8 @@ public final class PapiHook extends PlaceholderExpansion {
     public String onRequest(OfflinePlayer p, String params) {
         if (p == null) return "";
         Player on = p.getPlayer();
-        boolean prem = on != null ? plugin.isPremium(on) : plugin.premium().active(p.getUniqueId());
         switch (params.toLowerCase()) {
-            case "premium_badge": return plugin.getConfig().getString(prem ? "premium.badge" : "premium.badge-none", "");
-            case "premium": return String.valueOf(prem);
-            case "premium_left": {
-                if (!prem) return "";
-                Long until = plugin.premium().expires(p.getUniqueId());
-                if (until == null || until == PremiumStore.FOREVER) return plugin.getConfig().getString("messages.premium-forever", "навсегда");
-                return Text.duration(Duration.ofMillis(until - System.currentTimeMillis()));
-            }
+            case "premium": return String.valueOf(on != null && plugin.isPremium(on));
             case "level": case "xp": case "need": {
                 if (on == null) return "";
                 ItemStack rod = on.getInventory().getItemInMainHand();

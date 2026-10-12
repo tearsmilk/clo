@@ -2,7 +2,6 @@ package ink.hoka.zenfishing.menu;
 
 import ink.hoka.zenfishing.Fish;
 import ink.hoka.zenfishing.PlayerStats;
-import ink.hoka.zenfishing.PremiumStore;
 import ink.hoka.zenfishing.Rods;
 import ink.hoka.zenfishing.ZenFishing;
 import ink.hoka.zenfishing.util.Text;
@@ -25,7 +24,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -33,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * /рыбалка: главное — профиль, удочка в руке, Рыбак+, прокачка, продажа, топ.
+ * /рыбалка: главное — профиль, удочка в руке, Ферма+, прокачка, продажа, топ.
  * Прокачка — удочка в шапке и 5 веток: клик вкладывает очко (и списывает монеты, если задана цена).
  */
 public final class FishMenu implements Listener {
@@ -93,10 +91,9 @@ public final class FishMenu implements Listener {
             h.actions.put(ROD, () -> openRod(p));
         } else inv.setItem(ROD, icon("rod", item(Material.FISHING_ROD, cfg("rod.name", "Удочка"), cfgList("rod.none"), false)));
 
-        // Рыбак+
+        // Ферма+ (подписка ZenQuests) — бонусы на рыбалке
         boolean prem = plugin.isPremium(p);
-        String time = premiumLeft(p);
-        List<String> lore = fillAll(cfgList(prem ? "premium.active.lore" : "premium.inactive.lore"), "time", time);
+        List<String> lore = fillAll(cfgList(prem ? "premium.active.lore" : "premium.inactive.lore"));
         for (String perk : plugin.getConfig().getStringList("premium.perks")) lore.add(fill(perk));
         inv.setItem(PREMIUM, icon(prem ? "premium-active" : "premium-inactive",
                 item(mat(prem ? "premium.active.item" : "premium.inactive.item", Material.NAUTILUS_SHELL), fill(cfg(prem ? "premium.active.name" : "premium.inactive.name", "{premium}")), lore, prem)));
@@ -132,12 +129,6 @@ public final class FishMenu implements Listener {
     private String bestText(PlayerStats s) {
         Fish f = plugin.fish().get(s.bestFish);
         return f == null ? "—" : f.rarity().color() + f.name() + " &f" + Text.num(s.bestWeight) + " кг";
-    }
-
-    private String premiumLeft(Player p) {
-        Long until = plugin.premium().expires(p.getUniqueId());
-        if (until == null || until == PremiumStore.FOREVER) return plugin.getConfig().getString("messages.premium-forever", "навсегда");
-        return Text.duration(Duration.ofMillis(until - System.currentTimeMillis()));
     }
 
     // ── прокачка удочки ──

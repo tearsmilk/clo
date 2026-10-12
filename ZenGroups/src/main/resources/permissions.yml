@@ -3,24 +3,24 @@
 #  "-право" — забрать право (например, унаследованное). "*" — все права сервера.
 # ==========================================================
 
-default:
+player:
   - zenquests.use
   - zenfishing.use
 
 vip:
   - zengroups.chat.color
 
-premium:
-  - zenquests.premium
-  - zenfishing.premium
+vipplus:
+  - zenquests.premium      # Ферма+ (квесты и рыбалка) входит в VIP+
 
-helper:
-  - zenquests.admin
-  - zenfishing.admin
+media:
+  - minecraft.command.gamemode
 
 moder:
   - minecraft.command.kick
   - minecraft.command.tp
+  - zenquests.admin
+  - zenfishing.admin
 
 admin:
   - "*"

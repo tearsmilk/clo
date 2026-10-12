@@ -82,9 +82,9 @@ public final class VaultHook {
         private Group primary(String player) { UUID id = uuid(player); return id == null ? zg.registry().get(zg.defaultGroup()) : zg.primary(id); }
         @Override public String getName() { return "ZenGroups"; }
         @Override public boolean isEnabled() { return zg.isEnabled(); }
-        @Override public String getPlayerPrefix(String world, String player) { return primary(player).chatPrefix(); }
+        @Override public String getPlayerPrefix(String world, String player) { return ink.hoka.zengroups.util.Text.glyphs(primary(player).chatPrefix()); }
         @Override public void setPlayerPrefix(String world, String player, String prefix) { }
-        @Override public String getPlayerSuffix(String world, String player) { return primary(player).chatSuffix(); }
+        @Override public String getPlayerSuffix(String world, String player) { return ink.hoka.zengroups.util.Text.glyphs(primary(player).chatSuffix()); }
         @Override public void setPlayerSuffix(String world, String player, String suffix) { }
         @Override public String getGroupPrefix(String world, String group) { Group g = zg.registry().get(group); return g == null ? "" : g.chatPrefix(); }
         @Override public void setGroupPrefix(String world, String group, String prefix) { }

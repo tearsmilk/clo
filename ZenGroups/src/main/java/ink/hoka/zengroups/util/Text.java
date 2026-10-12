@@ -31,8 +31,36 @@ public final class Text {
 
     private Text() {}
 
+    private static final Pattern GLYPH = Pattern.compile("\\{glyph:([A-Za-z0-9_.-]+)}");
+
+    /** {glyph:имя} → символ глифа Nexo (рефлексией, без зависимости). Нет Nexo или глифа — убирается. */
+    public static String glyphs(String s) {
+        if (s == null || !s.contains("{glyph:")) return s == null ? "" : s;
+        Matcher m = GLYPH.matcher(s);
+        StringBuilder sb = new StringBuilder();
+        while (m.find()) m.appendReplacement(sb, Matcher.quoteReplacement(glyphChar(m.group(1))));
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static String glyphChar(String name) {
+        try {
+            Class<?> fonts = Class.forName("com.nexomc.nexo.api.NexoFonts");
+            Object g = fonts.getMethod("glyphFromName", String.class).invoke(null, name);
+            if (g == null) return "";
+            for (String mn : new String[]{"character", "getCharacter", "unicode", "getUnicode"}) {
+                try { Object v = g.getClass().getMethod(mn).invoke(g); if (v != null) return v.toString(); } catch (NoSuchMethodException ignored) { }
+            }
+            for (String mn : new String[]{"unicodes", "getUnicodes"}) {
+                try { Object v = g.getClass().getMethod(mn).invoke(g); if (v instanceof java.util.List<?> l && !l.isEmpty()) return String.valueOf(l.get(0)); } catch (NoSuchMethodException ignored) { }
+            }
+        } catch (Throwable ignored) { }
+        return "";
+    }
+
     public static Component parse(String s) {
         if (s == null) s = "";
+        s = glyphs(s);
         String mm = legacyToMiniMessage(s);
         try {
             return MM.deserialize(mm).decoration(TextDecoration.ITALIC, false);

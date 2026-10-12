@@ -4,9 +4,9 @@ import ink.hoka.zenfishing.Fish;
 import org.bukkit.entity.Player;
 
 /**
- * ZenQuests: сам считает FISH по материалу предмета из ванильного события. Дополнительно засчитываем
- * цель «вид рыбы» (targets: [ZENFISH_<id>]) — чтобы делать квесты «поймай 3 осетра». Второй рыбе из двойного
- * улова ванильного события нет — её засчитываем и по материалу тоже.
+ * ZenQuests: FISH по материалу предмета он считает сам из ванильного события. Мы засчитываем свои типы:
+ * CATCH_FISH (цель — id рыбы) и CATCH_RARITY (цель — редкость). Второй рыбе из двойного улова ванильного
+ * события нет — её засчитываем и как FISH по материалу.
  */
 public final class QuestsHook {
     private QuestsHook() {}
@@ -15,7 +15,8 @@ public final class QuestsHook {
         try {
             Class<?> api = Class.forName("ink.hoka.zenquests.QuestsAPI");
             var m = api.getMethod("progress", Player.class, String.class, String.class, int.class);
-            m.invoke(null, p, "FISH", "ZENFISH_" + f.id().toUpperCase(java.util.Locale.ROOT), 1);
+            m.invoke(null, p, "CATCH_FISH", f.id(), 1);
+            m.invoke(null, p, "CATCH_RARITY", f.rarity().id(), 1);
             if (extra) m.invoke(null, p, "FISH", ink.hoka.zenfishing.FishItems.base(f.item()).getType().name(), 1);
         } catch (Throwable ignored) { }
     }

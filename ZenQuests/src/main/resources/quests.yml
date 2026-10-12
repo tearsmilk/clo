@@ -8,7 +8,9 @@
 #    objective:
 #      type       — что делать:
 #                   BREAK   сломать блок        PLACE    поставить блок
-#                   KILL    убить моба/игрока   FISH     выловить
+#                   KILL    убить моба/игрока   FISH     выловить (ванильный предмет)
+#                   CATCH_FISH   поймать рыбу ZenFishing   цель: id рыбы из fish.yml (carp, sturgeon …) или ANY
+#                   CATCH_RARITY поймать рыбу редкости     цель: common, uncommon, rare, epic, legendary
 #                   CRAFT   скрафтить           SMELT    забрать из печи
 #                   EAT     съесть/выпить       ENCHANT  зачаровать
 #                   BREED   развести            TAME     приручить
@@ -80,6 +82,33 @@ daily:
       rewards:
         lines: ["&f• 8 золотых слитков"]
         commands: ["minecraft:give {player} gold_ingot 8"]
+    angler:
+      name: "&bРыбак"
+      icon: COD
+      description: ["&7Поймай любую рыбу на удочку"]
+      objective: { type: CATCH_FISH, targets: [ANY], amount: 5 }
+      rewards:
+        lines: ["&f• 150 монет"]
+        commands: ["coins give {player} 150"]
+      premium-rewards:
+        lines: ["&6• +100 монет"]
+        commands: ["coins give {player} 100"]
+    carp-day:
+      name: "&bКарповый день"
+      icon: COD
+      description: ["&7Поймай карпов или карасей"]
+      objective: { type: CATCH_FISH, targets: [carp, crucian], amount: 3 }
+      rewards:
+        lines: ["&f• 200 монет"]
+        commands: ["coins give {player} 200"]
+    rare-catch:
+      name: "&9Редкий улов"
+      icon: SALMON
+      description: ["&7Поймай рыбу редкую или выше"]
+      objective: { type: CATCH_RARITY, targets: [rare, epic, legendary], amount: 1 }
+      rewards:
+        lines: ["&f• 300 монет"]
+        commands: ["coins give {player} 300"]
     fisher:
       name: "&3Рыбак"
       icon: FISHING_ROD
