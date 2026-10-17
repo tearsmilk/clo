@@ -21,13 +21,21 @@
 ## ZenFishing (рыбалка) — тот же сервер
 - Jar: `./gradlew build` в `ZenFishing/` → `plugins/ZenFishing-<версия>.jar`, старый удалить; деплой и рестарт как у ZenQuests.
 - Конфиги: `plugins/ZenFishing/config.yml`, `fish.yml`; `/рыбалка reload`. Продажа — Vault (экономика монет TakuFarmers).
-- Подписка Рыбак+: право `zenfishing.premium` или `/рыбалка premium give <ник> [срок]`; PAPI `%zenfishing_premium_badge%`.
-- На сервере есть старый rurukaFish 0.2.0 — тоже подменяет улов; одновременно с ZenFishing не держать.
+- Своей подписки нет: бонусы рыбалки даёт Ферма+ из ZenQuests (право `zenquests.premium` / `QuestsAPI.isPremium`). Квесты на рыбу —
+  типы `CATCH_FISH` (цель id рыбы) и `CATCH_RARITY`. rurukaFish с сервера удалён (jar), папка `plugins/rurukaFish` оставлена.
 
 ## ZenGroups (группы/права) — тот же сервер
 - Jar: `./gradlew build` в `ZenGroups/` → `plugins/ZenGroups-<версия>.jar`; деплой и рестарт как у ZenQuests.
+- Группы: player (по умолчанию), vip, vipplus, media, moder, admin; префиксы — глифы `{glyph:badge_*}` (badges.yml + `glyphs/zengroups.yml`,
+  текстуры `assets/zengroups/textures/font/`, исходники `ZenGroups/nexo/`). Плагин сам резолвит `{glyph:}` через Nexo.
 - Конфиги: `plugins/ZenGroups/config.yml` (плагин: таб/чат/над ником вкл-выкл), `groups.yml` (группы, вес, префиксы/суффиксы),
   `permissions.yml` (права групп, `-право`, `*`); `/group reload`. Команды: `/group add|set|take|info|list`, право `zengroups.admin` (op).
 - Регистрируется в Vault как провайдер прав и чата; PAPI `%zengroups_*%`. Таб/ник/чат рисует TakuCore: в его `roles.yml`
   (с разрешения владельца, бэкап `roles.yml.bak-zengroups`) в prefix/suffix каждой роли подставлены `%zengroups_<tab|name|chat>_prefix/suffix%`;
   в ZenGroups `tab/nametag/chat.enabled: false`. На других серверах сети без ZenGroups эти плейсхолдеры покажутся текстом.
+
+## BetterHud — плашки ежедневных квестов
+- ZenQuests отдаёт `%zenquests_hud_<n>_active|name|desc|progress|amount%` (n 1..4, невыполненные ежедневные). В BetterHud: `huds/quests.yml`,
+  блок `quests:` в конце `layouts/default-layout.yml`, иконка `assets/icons/quest.png` + запись в `texts/default_font.yml`, `quests` в
+  `default-hud` config.yml. Исходники — `ZenQuests/betterhud/`. Бэкап старого layout — `plugins/BetterHud/default-layout.yml.bak-quests`
+  (не класть .bak в `layouts/` — BetterHud ругается). BetterHud собирает свой пак в `Nexo/pack/external_packs/modernhud`.
