@@ -8,9 +8,8 @@ quests:
       background: background
       align: right
       layer: 1
-      scale: 0.8
       x: -4
-      y: 32
+      y: 34
       conditions:
         1:
           first: "(number)papi:zenquests_hud_1_active"
@@ -22,9 +21,8 @@ quests:
       background: background
       align: right
       layer: 1
-      scale: 0.8
       x: -4
-      y: 50
+      y: 56
       conditions:
         1:
           first: "(number)papi:zenquests_hud_2_active"
@@ -36,9 +34,8 @@ quests:
       background: background
       align: right
       layer: 1
-      scale: 0.8
       x: -4
-      y: 68
+      y: 78
       conditions:
         1:
           first: "(number)papi:zenquests_hud_3_active"
@@ -50,9 +47,8 @@ quests:
       background: background
       align: right
       layer: 1
-      scale: 0.8
       x: -4
-      y: 86
+      y: 100
       conditions:
         1:
           first: "(number)papi:zenquests_hud_4_active"
