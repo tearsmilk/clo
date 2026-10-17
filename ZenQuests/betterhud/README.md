@@ -7,4 +7,4 @@
 - `texts/default_font.append.yml` — дописать в `texts/default_font.yml` → `default_font.images`;
 - `assets/icons/quest.png` — иконка (16x16, из иконки «Ежедневные» меню квестов);
 - в `config.yml` BetterHud добавить `quests` в `default-hud`; затем `/betterhud reload` (или рестарт).
-Плашки: align right, x -8, y 34/56/78/100 (фон 20 px, зазор 2 px) — под плашкой времени года (y 11). Превью — `preview_hud.png`.
+Плашки: align right, x -4, y 34/56/78/100 (фон 20 px, зазор 2 px) — под плашкой времени года (y 11). Превью — `preview_hud.png`.
