@@ -15,6 +15,9 @@ import java.time.Duration;
  *   %zenquests_premium_badge%  — значок Ферма+ (premium.badge из config.yml) или пусто — для таба/чата
  *   %zenquests_premium%        — true / false
  *   %zenquests_premium_left%   — сколько осталось («3 д 4 ч», «навсегда») или пусто
+ *   %zenquests_hud_<n>_active% — 1, если есть n-й (1..4) невыполненный ежедневный квест, иначе 0 (для BetterHud)
+ *   %zenquests_hud_<n>_name% / _progress / _amount / _percent / _left — его название без цветов и прогресс
+ *   %zenquests_hud_count%      — сколько ежедневных ещё не выполнено
  */
 public final class PapiHook extends PlaceholderExpansion {
 
@@ -40,6 +43,7 @@ public final class PapiHook extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer p, String params) {
         if (p == null) return "";
+        if (params.toLowerCase().startsWith("hud_")) return hud(p, params.toLowerCase().substring(4));
         boolean prem = isPremium(p);
         switch (params.toLowerCase()) {
             case "premium_badge": return plugin.getConfig().getString(prem ? "premium.badge" : "premium.badge-none", "");
@@ -53,6 +57,33 @@ public final class PapiHook extends PlaceholderExpansion {
             }
             default: return null;
         }
+    }
+
+    /** Невыполненные ежедневные квесты игрока по порядку — для плашек BetterHud. */
+    private String hud(OfflinePlayer op, String key) {
+        Player p = op.getPlayer();
+        if (p == null) return key.endsWith("active") || key.equals("count") ? "0" : "";
+        java.util.List<ink.hoka.zenquests.QuestManager.Entry> open = new java.util.ArrayList<>();
+        for (ink.hoka.zenquests.QuestManager.Entry e : plugin.quests().entries(p, ink.hoka.zenquests.model.Category.DAILY))
+            if (!plugin.quests().isDone(p, e)) open.add(e);
+        if (key.equals("count")) return String.valueOf(open.size());
+        int us = key.indexOf('_');
+        if (us <= 0) return null;
+        int n;
+        try { n = Integer.parseInt(key.substring(0, us)); } catch (NumberFormatException ex) { return null; }
+        String what = key.substring(us + 1);
+        if (n < 1 || n > open.size()) return what.equals("active") ? "0" : "";
+        ink.hoka.zenquests.QuestManager.Entry e = open.get(n - 1);
+        int prog = Math.min(plugin.quests().data(p).get(e.key()), e.quest().amount()), amount = e.quest().amount();
+        return switch (what) {
+            case "active" -> "1";
+            case "name" -> Text.strip(e.quest().name()).trim();
+            case "progress" -> String.valueOf(prog);
+            case "amount" -> String.valueOf(amount);
+            case "left" -> String.valueOf(amount - prog);
+            case "percent" -> String.valueOf(amount == 0 ? 100 : prog * 100 / amount);
+            default -> null;
+        };
     }
 
     /** В сети — полная проверка (право + выданная подписка), не в сети — только выданная командой. */
