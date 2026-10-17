@@ -1,0 +1,1124 @@
+# ==========================================================
+#  Квесты. Добавить новый — просто дописать блок.
+#
+#  Поля квеста:
+#    name         — название (цвета/градиенты)
+#    icon         — предмет-иконка в меню
+#    description  — описание (список строк)
+#    objective:
+#      type       — что делать:
+#                   BREAK   сломать блок        PLACE    поставить блок
+#                   KILL    убить моба/игрока   FISH     выловить (ванильный предмет)
+#                   CATCH_FISH   поймать рыбу ZenFishing   цель: id рыбы из fish.yml (carp, sturgeon …) или ANY
+#                   CATCH_RARITY поймать рыбу редкости     цель: common, uncommon, rare, epic, legendary
+#                   CRAFT   скрафтить           SMELT    забрать из печи
+#                   EAT     съесть/выпить       ENCHANT  зачаровать
+#                   BREED   развести            TAME     приручить
+#                   WALK    пройти блоков       PLAYTIME наиграть минут
+#                 TakuFarmers (нужен TakuFarmers с API 1.0+):
+#                   CROP_HIT      удачный удар мотыгой по выросшей культуре   цель: wheat, carrot, potato,
+#                   CROP_HARVEST  собрать урожая (сколько выпало)                   onion, tomato, cucumber
+#                   CROP_BREAK    срубить куст целиком (последний удар цикла)
+#                   COOK          закончить готовку на станции               цель: id станции
+#                   COOK_ITEM     приготовить блюдо (сколько выдано)         цель: предмет или id Nexo
+#                   MILL          перемолоть на жёрнове (сколько выдано)     цель: предмет или id Nexo
+#                   FLOUR_SACK    скрафтить мешок муки                       без цели
+#                   EARN / SPEND  заработать / потратить валюту              цель: COINS или GEMS
+#                   FARM_VISIT    зайти на свою ферму                        без цели
+#                   NPC_TALK      кликнуть по NPC                            цель: id NPC
+#                   DIALOG        поговорить с NPC (F)                       цель: id диалога
+#      targets    — что именно (имена Minecraft). Пусто или ANY — что угодно.
+#                   Можно шаблоном: "*_LOG" (любые брёвна), "*_ORE" (любая руда)
+#      amount     — сколько
+#    rewards:
+#      lines      — как награда выглядит в меню (игрок видит это)
+#      commands   — что выполнит консоль. {player} — ник игрока
+#    premium-rewards:  (необязательно) бонус для подписки Ферма+, выдаётся СВЕРХУ rewards
+#      lines / commands — так же, как у rewards. Без подписки игрок видит бонус серым.
+#    premium: true     (необязательно) квест виден только с Ферма+ (для сезонных)
+#
+#  Ферма+ (подписка, право zenquests.premium — см. config.yml):
+#    daily.premium-count / premium-quests  — сколько и из чего выдавать подписчикам
+#                                            дополнительно к обычным
+#    weekly.premium-count / premium-quests — то же для недели
+#    story.<цепочка>.premium: true         — вся цепочка только для Ферма+
+#
+#  Сюжетная цепочка: name, icon, description (строки под названием в меню), premium, steps
+#    id премиум-квестов не должны совпадать с обычными
+#
+#  ежедневные: каждый день в 00:00 игроку выпадает count случайных из списка
+#  еженедельные: каждый понедельник в 00:00 — count случайных из списка
+#  сезонные: доступны все квесты сезона, пока идут даты start–end (включительно)
+#  сюжетные: цепочки по шагам — следующий шаг открывается после награды за предыдущий
+# ==========================================================
+
+daily:
+  count: 3
+  quests:
+    miner:
+      name: "&7Шахтёр"
+      icon: IRON_PICKAXE
+      description: ["&7Добудь камень"]
+      objective: { type: BREAK, targets: [STONE, COBBLESTONE, DEEPSLATE, COBBLED_DEEPSLATE], amount: 128 }
+      rewards:
+        lines: ["&f• 16 железных слитков", "&f• 50 опыта"]
+        commands: ["minecraft:give {player} iron_ingot 16", "minecraft:xp add {player} 50 points"]
+      premium-rewards:
+        lines: ["&6• +8 железных слитков"]
+        commands: ["minecraft:give {player} iron_ingot 8"]
+    lumberjack:
+      name: "&6Лесоруб"
+      icon: IRON_AXE
+      description: ["&7Наруби брёвен любого дерева"]
+      objective: { type: BREAK, targets: ["*_LOG"], amount: 64 }
+      rewards:
+        lines: ["&f• 32 яблока"]
+        commands: ["minecraft:give {player} apple 32"]
+    hunter:
+      name: "&cОхотник"
+      icon: IRON_SWORD
+      description: ["&7Убей зомби или скелетов"]
+      objective: { type: KILL, targets: [ZOMBIE, SKELETON, HUSK, STRAY], amount: 20 }
+      rewards:
+        lines: ["&f• 8 золотых слитков"]
+        commands: ["minecraft:give {player} gold_ingot 8"]
+    angler:
+      name: "&bРыбак"
+      icon: COD
+      description: ["&7Поймай любую рыбу на удочку"]
+      objective: { type: CATCH_FISH, targets: [ANY], amount: 5 }
+      rewards:
+        lines: ["&f• 150 монет"]
+        commands: ["coins give {player} 150"]
+      premium-rewards:
+        lines: ["&6• +100 монет"]
+        commands: ["coins give {player} 100"]
+    carp-day:
+      name: "&bКарповый день"
+      icon: COD
+      description: ["&7Поймай карпов или карасей"]
+      objective: { type: CATCH_FISH, targets: [carp, crucian], amount: 3 }
+      rewards:
+        lines: ["&f• 200 монет"]
+        commands: ["coins give {player} 200"]
+    rare-catch:
+      name: "&9Редкий улов"
+      icon: SALMON
+      description: ["&7Поймай рыбу редкую или выше"]
+      objective: { type: CATCH_RARITY, targets: [rare, epic, legendary], amount: 1 }
+      rewards:
+        lines: ["&f• 300 монет"]
+        commands: ["coins give {player} 300"]
+    fisher:
+      name: "&3Рыбак"
+      icon: FISHING_ROD
+      description: ["&7Поймай рыбу"]
+      objective: { type: FISH, targets: [COD, SALMON, TROPICAL_FISH, PUFFERFISH], amount: 10 }
+      rewards:
+        lines: ["&f• 2 изумруда"]
+        commands: ["minecraft:give {player} emerald 2"]
+    walker:
+      name: "&aПутешественник"
+      icon: LEATHER_BOOTS
+      description: ["&7Пройди пешком"]
+      objective: { type: WALK, amount: 2000 }
+      rewards:
+        lines: ["&f• 100 опыта"]
+        commands: ["minecraft:xp add {player} 100 points"]
+    cook:
+      name: "&eПовар"
+      icon: FURNACE
+      description: ["&7Приготовь мясо в печи"]
+      objective: { type: SMELT, targets: [COOKED_BEEF, COOKED_PORKCHOP, COOKED_CHICKEN, COOKED_MUTTON], amount: 32 }
+      rewards:
+        lines: ["&f• 3 золотых морковки"]
+        commands: ["minecraft:give {player} golden_carrot 3"]
+    harvester:
+      name: "&eЖнец"
+      icon: WOODEN_HOE
+      description: ["&7Собери пшеницу мотыгой на ферме"]
+      objective: { type: CROP_HARVEST, targets: [wheat], amount: 64 }
+      rewards:
+        lines: ["&f• 100 опыта"]
+        commands: ["minecraft:xp add {player} 100 points"]
+      premium-rewards:
+        lines: ["&6• +4 изумруда"]
+        commands: ["minecraft:give {player} emerald 4"]
+    gardener:
+      name: "&aОгородник"
+      icon: CARROT
+      description: ["&7Собери овощи на ферме"]
+      objective: { type: CROP_HARVEST, targets: [carrot, potato, onion, tomato, cucumber], amount: 48 }
+      rewards:
+        lines: ["&f• 80 опыта"]
+        commands: ["minecraft:xp add {player} 80 points"]
+    chef:
+      name: "&6Повар"
+      icon: CAMPFIRE
+      description: ["&7Приготовь что-нибудь на станции"]
+      objective: { type: COOK, amount: 3 }
+      rewards:
+        lines: ["&f• 5 золотых морковок"]
+        commands: ["minecraft:give {player} golden_carrot 5"]
+
+    sugar-cane:
+      name: "&aТростниковые заросли"
+      icon: SUGAR_CANE
+      description: ["&7Срежь сахарный тростник"]
+      objective: { type: BREAK, targets: [SUGAR_CANE], amount: 64 }
+      rewards:
+        lines: ["&f• 16 бумаги", "&f• 60 опыта"]
+        commands: ["minecraft:give {player} paper 16", "minecraft:xp add {player} 60 points"]
+    melon-picker:
+      name: "&2Арбузный сбор"
+      icon: MELON
+      description: ["&7Собери арбузы"]
+      objective: { type: BREAK, targets: [MELON], amount: 32 }
+      rewards:
+        lines: ["&f• 4 сверкающих ломтика арбуза"]
+        commands: ["minecraft:give {player} glistering_melon_slice 4"]
+    beet-farmer:
+      name: "&4Свекольная грядка"
+      icon: BEETROOT
+      description: ["&7Собери свёклу"]
+      objective: { type: BREAK, targets: [BEETROOTS], amount: 48 }
+      rewards:
+        lines: ["&f• 4 свекольных супа", "&f• 50 опыта"]
+        commands: ["minecraft:give {player} beetroot_soup 4", "minecraft:xp add {player} 50 points"]
+    potato-digger:
+      name: "&6Картофельное поле"
+      icon: POTATO
+      description: ["&7Выкопай картофель"]
+      objective: { type: BREAK, targets: [POTATOES], amount: 64 }
+      rewards:
+        lines: ["&f• 16 печёного картофеля"]
+        commands: ["minecraft:give {player} baked_potato 16"]
+    sower:
+      name: "&aСеятель"
+      icon: WHEAT_SEEDS
+      description: ["&7Посади любые культуры"]
+      objective: { type: PLACE, targets: [WHEAT, CARROTS, POTATOES, BEETROOTS], amount: 64 }
+      rewards:
+        lines: ["&f• 16 костной муки"]
+        commands: ["minecraft:give {player} bone_meal 16"]
+    baker:
+      name: "&eПекарь"
+      icon: BREAD
+      description: ["&7Испеки хлеб на верстаке"]
+      objective: { type: CRAFT, targets: [BREAD], amount: 16 }
+      rewards:
+        lines: ["&f• 2 торта"]
+        commands: ["minecraft:give {player} cake 2"]
+    cookie-maker:
+      name: "&6Печеньки"
+      icon: COOKIE
+      description: ["&7Испеки печенье"]
+      objective: { type: CRAFT, targets: [COOKIE], amount: 32 }
+      rewards:
+        lines: ["&f• 6 какао-бобов", "&f• 50 опыта"]
+        commands: ["minecraft:give {player} cocoa_beans 6", "minecraft:xp add {player} 50 points"]
+    gourmet:
+      name: "&dГурман"
+      icon: COOKED_BEEF
+      description: ["&7Съешь что-нибудь вкусное"]
+      objective: { type: EAT, amount: 15 }
+      rewards:
+        lines: ["&f• 2 золотых яблока"]
+        commands: ["minecraft:give {player} golden_apple 2"]
+    berry-eater:
+      name: "&cЯгодка"
+      icon: SWEET_BERRIES
+      description: ["&7Съешь сладкие ягоды"]
+      objective: { type: EAT, targets: [SWEET_BERRIES, GLOW_BERRIES], amount: 20 }
+      rewards:
+        lines: ["&f• 3 бутылочки мёда"]
+        commands: ["minecraft:give {player} honey_bottle 3"]
+    coal-miner:
+      name: "&8Угольщик"
+      icon: COAL
+      description: ["&7Добудь угольную руду"]
+      objective: { type: BREAK, targets: [COAL_ORE, DEEPSLATE_COAL_ORE], amount: 32 }
+      rewards:
+        lines: ["&f• 32 факела"]
+        commands: ["minecraft:give {player} torch 32"]
+    iron-miner:
+      name: "&fЖелезная жила"
+      icon: RAW_IRON
+      description: ["&7Добудь железную руду"]
+      objective: { type: BREAK, targets: [IRON_ORE, DEEPSLATE_IRON_ORE], amount: 24 }
+      rewards:
+        lines: ["&f• 1 железный блок", "&f• 80 опыта"]
+        commands: ["minecraft:give {player} iron_block 1", "minecraft:xp add {player} 80 points"]
+    copper-smith:
+      name: "&6Медник"
+      icon: COPPER_INGOT
+      description: ["&7Выплавь медные слитки"]
+      objective: { type: SMELT, targets: [COPPER_INGOT], amount: 32 }
+      rewards:
+        lines: ["&f• 8 фонарей"]
+        commands: ["minecraft:give {player} lantern 8"]
+    glassblower:
+      name: "&bСтеклодув"
+      icon: GLASS
+      description: ["&7Выплавь стекло из песка"]
+      objective: { type: SMELT, targets: [GLASS], amount: 64 }
+      rewards:
+        lines: ["&f• 16 бутылочек", "&f• 40 опыта"]
+        commands: ["minecraft:give {player} glass_bottle 16", "minecraft:xp add {player} 40 points"]
+    digger:
+      name: "&6Землекоп"
+      icon: IRON_SHOVEL
+      description: ["&7Выкопай землю, песок или гравий"]
+      objective: { type: BREAK, targets: [DIRT, GRASS_BLOCK, SAND, GRAVEL, COARSE_DIRT, ROOTED_DIRT], amount: 192 }
+      rewards:
+        lines: ["&f• Железная лопата", "&f• 50 опыта"]
+        commands: ["minecraft:give {player} iron_shovel 1", "minecraft:xp add {player} 50 points"]
+    spider-hunter:
+      name: "&8Паутинщик"
+      icon: STRING
+      description: ["&7Убей пауков"]
+      objective: { type: KILL, targets: [SPIDER, CAVE_SPIDER], amount: 15 }
+      rewards:
+        lines: ["&f• 2 изумруда", "&f• 16 нитей"]
+        commands: ["minecraft:give {player} emerald 2", "minecraft:give {player} string 16"]
+    creeper-buster:
+      name: "&aСапёр"
+      icon: CREEPER_HEAD
+      description: ["&7Убей криперов"]
+      objective: { type: KILL, targets: [CREEPER], amount: 10 }
+      rewards:
+        lines: ["&f• 3 фейерверка", "&f• 16 пороха"]
+        commands: ["minecraft:give {player} firework_rocket 3", "minecraft:give {player} gunpowder 16"]
+    builder:
+      name: "&7Строитель"
+      icon: BRICKS
+      description: ["&7Поставь любые блоки"]
+      objective: { type: PLACE, amount: 256 }
+      rewards:
+        lines: ["&f• 32 строительных лесов"]
+        commands: ["minecraft:give {player} scaffolding 32"]
+    tree-planter:
+      name: "&2Лесник"
+      icon: OAK_SAPLING
+      description: ["&7Посади саженцы"]
+      objective: { type: PLACE, targets: ["*_SAPLING"], amount: 16 }
+      rewards:
+        lines: ["&f• 32 бревна", "&f• 40 опыта"]
+        commands: ["minecraft:give {player} oak_log 32", "minecraft:xp add {player} 40 points"]
+    shepherd:
+      name: "&fПастушок"
+      icon: WHITE_WOOL
+      description: ["&7Разведи овец"]
+      objective: { type: BREED, targets: [SHEEP], amount: 6 }
+      rewards:
+        lines: ["&f• Ножницы", "&f• 1 изумруд"]
+        commands: ["minecraft:give {player} shears 1", "minecraft:give {player} emerald 1"]
+    chicken-coop:
+      name: "&eКурятник"
+      icon: EGG
+      description: ["&7Разведи кур"]
+      objective: { type: BREED, targets: [CHICKEN], amount: 8 }
+      rewards:
+        lines: ["&f• 16 яиц", "&f• 50 опыта"]
+        commands: ["minecraft:give {player} egg 16", "minecraft:xp add {player} 50 points"]
+    playtime-daily:
+      name: "&fНа связи"
+      icon: CLOCK
+      description: ["&7Поиграй на сервере"]
+      objective: { type: PLAYTIME, amount: 60 }
+      rewards:
+        lines: ["&f• 2 изумруда"]
+        commands: ["minecraft:give {player} emerald 2"]
+    farm-visitor:
+      name: "&aХозяин фермы"
+      icon: OAK_FENCE_GATE
+      description: ["&7Загляни на свою ферму"]
+      objective: { type: FARM_VISIT, amount: 1 }
+      rewards:
+        lines: ["&f• 30 опыта"]
+        commands: ["minecraft:xp add {player} 30 points"]
+    tomato-picker:
+      name: "&cТоматы"
+      icon: RED_DYE
+      description: ["&7Собери помидоры на ферме"]
+      objective: { type: CROP_HARVEST, targets: [tomato], amount: 32 }
+      rewards:
+        lines: ["&f• 80 опыта"]
+        commands: ["minecraft:xp add {player} 80 points"]
+    cucumber-picker:
+      name: "&2Огуречник"
+      icon: SEA_PICKLE
+      description: ["&7Собери огурцы на ферме"]
+      objective: { type: CROP_HARVEST, targets: [cucumber], amount: 32 }
+      rewards:
+        lines: ["&f• 80 опыта"]
+        commands: ["minecraft:xp add {player} 80 points"]
+    onion-picker:
+      name: "&eЛуковое горе"
+      icon: BROWN_MUSHROOM
+      description: ["&7Собери лук на ферме"]
+      objective: { type: CROP_HARVEST, targets: [onion], amount: 32 }
+      rewards:
+        lines: ["&f• 80 опыта"]
+        commands: ["minecraft:xp add {player} 80 points"]
+    hoe-master:
+      name: "&6Мастер мотыги"
+      icon: STONE_HOE
+      description: ["&7Сделай удачные удары мотыгой", "&7по спелым культурам"]
+      objective: { type: CROP_HIT, amount: 100 }
+      rewards:
+        lines: ["&f• 3 изумруда"]
+        commands: ["minecraft:give {player} emerald 3"]
+    small-miller:
+      name: "&eПодмастерье мельника"
+      icon: GRINDSTONE
+      description: ["&7Перемели зерно на жёрнове"]
+      objective: { type: MILL, amount: 16 }
+      rewards:
+        lines: ["&f• 60 опыта"]
+        commands: ["minecraft:xp add {player} 60 points"]
+    dish-of-day:
+      name: "&6Блюдо дня"
+      icon: RABBIT_STEW
+      description: ["&7Приготовь блюда на кухне фермы"]
+      objective: { type: COOK_ITEM, amount: 5 }
+      rewards:
+        lines: ["&f• 3 изумруда"]
+        commands: ["minecraft:give {player} emerald 3"]
+    coin-earner:
+      name: "&eКопилка"
+      icon: GOLD_NUGGET
+      description: ["&7Заработай монеты"]
+      objective: { type: EARN, targets: [COINS], amount: 1000 }
+      rewards:
+        lines: ["&f• 80 опыта"]
+        commands: ["minecraft:xp add {player} 80 points"]
+  # ── Ферма+: дополнительно к обычным ──
+  premium-count: 2
+  premium-quests:
+    field-clearer-plus:
+      name: "&6Чистое поле"
+      icon: GOLDEN_HOE
+      description: ["&7Сруби растения пшеницы целиком"]
+      objective: { type: CROP_BREAK, targets: [wheat], amount: 40 }
+      rewards:
+        lines: ["&f• 6 изумрудов"]
+        commands: ["minecraft:give {player} emerald 6"]
+    farmer-plus:
+      name: "&6Фермер"
+      icon: WHEAT
+      description: ["&7Собери пшеницу"]
+      objective: { type: BREAK, targets: [WHEAT], amount: 128 }
+      rewards:
+        lines: ["&f• 16 хлеба", "&f• 100 опыта"]
+        commands: ["minecraft:give {player} bread 16", "minecraft:xp add {player} 100 points"]
+    carrots-plus:
+      name: "&6Морковная грядка"
+      icon: CARROT
+      description: ["&7Собери морковь"]
+      objective: { type: BREAK, targets: [CARROTS], amount: 96 }
+      rewards:
+        lines: ["&f• 8 золотых морковок"]
+        commands: ["minecraft:give {player} golden_carrot 8"]
+    rancher-plus:
+      name: "&6Скотовод"
+      icon: WHEAT_SEEDS
+      description: ["&7Разведи животных"]
+      objective: { type: BREED, amount: 10 }
+      rewards:
+        lines: ["&f• 4 изумруда"]
+        commands: ["minecraft:give {player} emerald 4"]
+
+    golden-harvest-plus:
+      name: "&6Золотой урожай"
+      icon: GOLDEN_CARROT
+      description: ["&7Собери любой урожай на ферме"]
+      objective: { type: CROP_HARVEST, amount: 128 }
+      rewards:
+        lines: ["&f• 8 изумрудов", "&f• 150 опыта"]
+        commands: ["minecraft:give {player} emerald 8", "minecraft:xp add {player} 150 points"]
+    master-chef-plus:
+      name: "&6Шеф-повар"
+      icon: SMOKER
+      description: ["&7Приготовь блюда на кухне фермы"]
+      objective: { type: COOK_ITEM, amount: 12 }
+      rewards:
+        lines: ["&f• 4 золотых яблока"]
+        commands: ["minecraft:give {player} golden_apple 4"]
+    flour-plus:
+      name: "&6Мучной склад"
+      icon: BUNDLE
+      description: ["&7Собери мешки муки"]
+      objective: { type: FLOUR_SACK, amount: 4 }
+      rewards:
+        lines: ["&f• 5 изумрудов"]
+        commands: ["minecraft:give {player} emerald 5"]
+    beekeeper-plus:
+      name: "&6Пасечник"
+      icon: HONEYCOMB
+      description: ["&7Разведи пчёл"]
+      objective: { type: BREED, targets: [BEE], amount: 4 }
+      rewards:
+        lines: ["&f• 8 бутылочек мёда", "&f• 8 сот"]
+        commands: ["minecraft:give {player} honey_bottle 8", "minecraft:give {player} honeycomb 8"]
+    pumpkin-plus:
+      name: "&6Тыквенный рай"
+      icon: CARVED_PUMPKIN
+      description: ["&7Собери тыквы"]
+      objective: { type: BREAK, targets: [PUMPKIN], amount: 48 }
+      rewards:
+        lines: ["&f• 6 тыквенных пирогов", "&f• 3 изумруда"]
+        commands: ["minecraft:give {player} pumpkin_pie 6", "minecraft:give {player} emerald 3"]
+    gold-miner-plus:
+      name: "&6Золотоискатель"
+      icon: RAW_GOLD
+      description: ["&7Добудь золотую руду"]
+      objective: { type: BREAK, targets: [GOLD_ORE, DEEPSLATE_GOLD_ORE, NETHER_GOLD_ORE], amount: 24 }
+      rewards:
+        lines: ["&f• 2 золотых блока"]
+        commands: ["minecraft:give {player} gold_block 2"]
+weekly:
+  count: 3
+  quests:
+    deep-miner:
+      name: "&bГлубинный шахтёр"
+      icon: DIAMOND_PICKAXE
+      description: ["&7Добудь алмазную руду"]
+      objective: { type: BREAK, targets: [DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE], amount: 16 }
+      rewards:
+        lines: ["&f• 3 алмаза", "&f• 500 опыта"]
+        commands: ["minecraft:give {player} diamond 3", "minecraft:xp add {player} 500 points"]
+    monster-slayer:
+      name: "&4Истребитель"
+      icon: NETHERITE_SWORD
+      description: ["&7Убей любых враждебных мобов"]
+      objective: { type: KILL, targets: [ZOMBIE, SKELETON, CREEPER, SPIDER, ENDERMAN, WITCH, HUSK, STRAY, DROWNED, PILLAGER], amount: 150 }
+      rewards:
+        lines: ["&f• Тотем бессмертия"]
+        commands: ["minecraft:give {player} totem_of_undying 1"]
+    farmer:
+      name: "&2Фермер"
+      icon: WHEAT
+      description: ["&7Разведи животных"]
+      objective: { type: BREED, targets: [COW, SHEEP, PIG, CHICKEN], amount: 30 }
+      rewards:
+        lines: ["&f• 16 золотых яблок"]
+        commands: ["minecraft:give {player} golden_apple 16"]
+    enchanter:
+      name: "&dЧародей"
+      icon: ENCHANTING_TABLE
+      description: ["&7Зачаруй предметы на столе"]
+      objective: { type: ENCHANT, amount: 10 }
+      rewards:
+        lines: ["&f• 32 лазурита", "&f• 10 пузырьков опыта"]
+        commands: ["minecraft:give {player} lapis_lazuli 32", "minecraft:give {player} experience_bottle 10"]
+    online:
+      name: "&fЗавсегдатай"
+      icon: CLOCK
+      description: ["&7Поиграй на сервере"]
+      objective: { type: PLAYTIME, amount: 300 }
+      rewards:
+        lines: ["&f• 5 изумрудов"]
+        commands: ["minecraft:give {player} emerald 5"]
+    miller:
+      name: "&eМельник"
+      icon: GRINDSTONE
+      description: ["&7Перемели зерно на жёрнове"]
+      objective: { type: MILL, amount: 64 }
+      rewards:
+        lines: ["&f• 4 изумруда"]
+        commands: ["minecraft:give {player} emerald 4"]
+    merchant:
+      name: "&eТорговец"
+      icon: GOLD_INGOT
+      description: ["&7Заработай монеты"]
+      objective: { type: EARN, targets: [COINS], amount: 5000 }
+      rewards:
+        lines: ["&f• 300 опыта"]
+        commands: ["minecraft:xp add {player} 300 points"]
+
+    great-harvest:
+      name: "&2Великий урожай"
+      icon: HAY_BLOCK
+      description: ["&7Собери любой урожай на ферме"]
+      objective: { type: CROP_HARVEST, amount: 1500 }
+      rewards:
+        lines: ["&f• 15 изумрудов", "&f• 800 опыта"]
+        commands: ["minecraft:give {player} emerald 15", "minecraft:xp add {player} 800 points"]
+    vegetable-king:
+      name: "&aОвощной барон"
+      icon: CARROT
+      description: ["&7Собери овощи на ферме"]
+      objective: { type: CROP_HARVEST, targets: [carrot, potato, onion, tomato, cucumber], amount: 600 }
+      rewards:
+        lines: ["&f• 10 изумрудов"]
+        commands: ["minecraft:give {player} emerald 10"]
+    kitchen-week:
+      name: "&6Неделя на кухне"
+      icon: CAMPFIRE
+      description: ["&7Приготовь блюда на станциях фермы"]
+      objective: { type: COOK, amount: 40 }
+      rewards:
+        lines: ["&f• 8 золотых яблок", "&f• 400 опыта"]
+        commands: ["minecraft:give {player} golden_apple 8", "minecraft:xp add {player} 400 points"]
+    flour-baron:
+      name: "&eМучной барон"
+      icon: BUNDLE
+      description: ["&7Собери мешки муки"]
+      objective: { type: FLOUR_SACK, amount: 20 }
+      rewards:
+        lines: ["&f• 12 изумрудов"]
+        commands: ["minecraft:give {player} emerald 12"]
+    big-spender:
+      name: "&eЩедрый покупатель"
+      icon: GOLD_BLOCK
+      description: ["&7Потрать монеты"]
+      objective: { type: SPEND, targets: [COINS], amount: 5000 }
+      rewards:
+        lines: ["&f• 6 изумрудов", "&f• 300 опыта"]
+        commands: ["minecraft:give {player} emerald 6", "minecraft:xp add {player} 300 points"]
+    nether-raider:
+      name: "&cГроза Незера"
+      icon: BLAZE_ROD
+      description: ["&7Убей обитателей Незера"]
+      objective: { type: KILL, targets: [BLAZE, GHAST, WITHER_SKELETON, MAGMA_CUBE, PIGLIN, HOGLIN, ZOMBIFIED_PIGLIN], amount: 60 }
+      rewards:
+        lines: ["&f• 16 огненных стержней", "&f• 600 опыта"]
+        commands: ["minecraft:give {player} blaze_rod 16", "minecraft:xp add {player} 600 points"]
+    night-watch:
+      name: "&9Ночной дозор"
+      icon: PHANTOM_MEMBRANE
+      description: ["&7Убей фантомов"]
+      objective: { type: KILL, targets: [PHANTOM], amount: 15 }
+      rewards:
+        lines: ["&f• 8 фантомных мембран", "&f• 5 изумрудов"]
+        commands: ["minecraft:give {player} phantom_membrane 8", "minecraft:give {player} emerald 5"]
+    raid-breaker:
+      name: "&4Против разбойников"
+      icon: CROSSBOW
+      description: ["&7Убей разбойников"]
+      objective: { type: KILL, targets: [PILLAGER, VINDICATOR, EVOKER, RAVAGER, WITCH], amount: 40 }
+      rewards:
+        lines: ["&f• Тотем бессмертия", "&f• 10 изумрудов"]
+        commands: ["minecraft:give {player} totem_of_undying 1", "minecraft:give {player} emerald 10"]
+    ore-collector:
+      name: "&bКоллекционер руды"
+      icon: IRON_PICKAXE
+      description: ["&7Добудь любую руду"]
+      objective: { type: BREAK, targets: ["*_ORE"], amount: 300 }
+      rewards:
+        lines: ["&f• 4 алмаза", "&f• 700 опыта"]
+        commands: ["minecraft:give {player} diamond 4", "minecraft:xp add {player} 700 points"]
+    lumber-mill:
+      name: "&6Лесопилка"
+      icon: DIAMOND_AXE
+      description: ["&7Наруби брёвен"]
+      objective: { type: BREAK, targets: ["*_LOG", "*_STEM"], amount: 640 }
+      rewards:
+        lines: ["&f• Алмазный топор", "&f• 400 опыта"]
+        commands: ["minecraft:give {player} diamond_axe 1", "minecraft:xp add {player} 400 points"]
+    sea-wolf:
+      name: "&3Морской волк"
+      icon: COD
+      description: ["&7Поймай рыбу"]
+      objective: { type: FISH, amount: 80 }
+      rewards:
+        lines: ["&f• Ведро тропической рыбы", "&f• 8 изумрудов"]
+        commands: ["minecraft:give {player} tropical_fish_bucket 1", "minecraft:give {player} emerald 8"]
+    smelter:
+      name: "&7Плавильщик"
+      icon: BLAST_FURNACE
+      description: ["&7Переплавь что угодно в печи"]
+      objective: { type: SMELT, amount: 500 }
+      rewards:
+        lines: ["&f• Доменная печь", "&f• 32 угля"]
+        commands: ["minecraft:give {player} blast_furnace 1", "minecraft:give {player} coal 32"]
+    master-builder:
+      name: "&fАрхитектор"
+      icon: BRICKS
+      description: ["&7Поставь любые блоки"]
+      objective: { type: PLACE, amount: 2000 }
+      rewards:
+        lines: ["&f• 64 кирпичей", "&f• 64 стекла", "&f• 500 опыта"]
+        commands: ["minecraft:give {player} bricks 64", "minecraft:give {player} glass 64", "minecraft:xp add {player} 500 points"]
+    marathon:
+      name: "&aМарафонец"
+      icon: GOLDEN_BOOTS
+      description: ["&7Пройди пешком"]
+      objective: { type: WALK, amount: 20000 }
+      rewards:
+        lines: ["&f• 10 изумрудов", "&f• 500 опыта"]
+        commands: ["minecraft:give {player} emerald 10", "minecraft:xp add {player} 500 points"]
+    zoo-keeper:
+      name: "&2Смотритель зоопарка"
+      icon: LEAD
+      description: ["&7Разведи разных животных"]
+      objective: { type: BREED, amount: 50 }
+      rewards:
+        lines: ["&f• 4 поводка", "&f• 2 бирки", "&f• 400 опыта"]
+        commands: ["minecraft:give {player} lead 4", "minecraft:give {player} name_tag 2", "minecraft:xp add {player} 400 points"]
+    gourmand:
+      name: "&dОбжора"
+      icon: CAKE
+      description: ["&7Съешь что-нибудь"]
+      objective: { type: EAT, amount: 120 }
+      rewards:
+        lines: ["&f• Зачарованное золотое яблоко"]
+        commands: ["minecraft:give {player} enchanted_golden_apple 1"]
+    regular:
+      name: "&fСтарожил"
+      icon: RECOVERY_COMPASS
+      description: ["&7Наиграй на сервере"]
+      objective: { type: PLAYTIME, amount: 900 }
+      rewards:
+        lines: ["&f• 3 алмаза", "&f• 10 изумрудов"]
+        commands: ["minecraft:give {player} diamond 3", "minecraft:give {player} emerald 10"]
+    farm-regular:
+      name: "&aДомосед"
+      icon: OAK_DOOR
+      description: ["&7Заходи на свою ферму"]
+      objective: { type: FARM_VISIT, amount: 7 }
+      rewards:
+        lines: ["&f• 5 изумрудов"]
+        commands: ["minecraft:give {player} emerald 5"]
+    gossip:
+      name: "&dСплетник"
+      icon: VILLAGER_SPAWN_EGG
+      description: ["&7Поговори с жителями деревни (NPC)"]
+      objective: { type: NPC_TALK, amount: 20 }
+      rewards:
+        lines: ["&f• 4 изумруда", "&f• 200 опыта"]
+        commands: ["minecraft:give {player} emerald 4", "minecraft:xp add {player} 200 points"]
+  # ── Ферма+ ──
+  premium-count: 2
+  premium-quests:
+    harvest-king-plus:
+      name: "&6Король урожая"
+      icon: HAY_BLOCK
+      description: ["&7Собери любые культуры"]
+      objective: { type: BREAK, targets: [WHEAT, CARROTS, POTATOES, BEETROOTS, MELON, PUMPKIN], amount: 1000 }
+      rewards:
+        lines: ["&f• 3 алмаза", "&f• 500 опыта"]
+        commands: ["minecraft:give {player} diamond 3", "minecraft:xp add {player} 500 points"]
+    angler-plus:
+      name: "&6Рыбак-профи"
+      icon: FISHING_ROD
+      description: ["&7Поймай рыбу"]
+      objective: { type: FISH, amount: 100 }
+      rewards:
+        lines: ["&f• Удача моря III (книга)"]
+        commands: ["minecraft:give {player} enchanted_book[stored_enchantments={luck_of_the_sea:3}] 1"]
+    tamer-plus:
+      name: "&6Друг животных"
+      icon: LEAD
+      description: ["&7Приручи животных"]
+      objective: { type: TAME, amount: 5 }
+      rewards:
+        lines: ["&f• 10 изумрудов"]
+        commands: ["minecraft:give {player} emerald 10"]
+
+    crop-legend-plus:
+      name: "&6Легенда полей"
+      icon: GOLDEN_HOE
+      description: ["&7Сруби растения целиком"]
+      objective: { type: CROP_BREAK, amount: 400 }
+      rewards:
+        lines: ["&f• Незеритовый слиток", "&f• 1000 опыта"]
+        commands: ["minecraft:give {player} netherite_ingot 1", "minecraft:xp add {player} 1000 points"]
+    millionaire-plus:
+      name: "&6Богач"
+      icon: GOLD_BLOCK
+      description: ["&7Заработай монеты"]
+      objective: { type: EARN, targets: [COINS], amount: 25000 }
+      rewards:
+        lines: ["&f• 5 алмазов", "&f• 20 изумрудов"]
+        commands: ["minecraft:give {player} diamond 5", "minecraft:give {player} emerald 20"]
+    royal-kitchen-plus:
+      name: "&6Королевская кухня"
+      icon: SMOKER
+      description: ["&7Приготовь блюда на кухне фермы"]
+      objective: { type: COOK_ITEM, amount: 100 }
+      rewards:
+        lines: ["&f• 2 зачарованных золотых яблока"]
+        commands: ["minecraft:give {player} enchanted_golden_apple 2"]
+    mill-master-plus:
+      name: "&6Мельничный магнат"
+      icon: GRINDSTONE
+      description: ["&7Перемели зерно на жёрнове"]
+      objective: { type: MILL, amount: 400 }
+      rewards:
+        lines: ["&f• 15 изумрудов", "&f• 600 опыта"]
+        commands: ["minecraft:give {player} emerald 15", "minecraft:xp add {player} 600 points"]
+    debris-plus:
+      name: "&6Древние обломки"
+      icon: ANCIENT_DEBRIS
+      description: ["&7Найди древние обломки"]
+      objective: { type: BREAK, targets: [ANCIENT_DEBRIS], amount: 8 }
+      rewards:
+        lines: ["&f• Шаблон незеритового улучшения", "&f• 1000 опыта"]
+        commands: ["minecraft:give {player} netherite_upgrade_smithing_template 1", "minecraft:xp add {player} 1000 points"]
+seasons:
+  autumn-2026:
+    name: "<gradient:#f7971e:#ffd200>Осень 2026</gradient>"
+    start: "2026-09-01"
+    end: "2026-11-30"
+    quests:
+      harvest:
+        name: "&6Урожай"
+        icon: PUMPKIN
+        description: ["&7Собери тыквы"]
+        objective: { type: BREAK, targets: [PUMPKIN], amount: 64 }
+        rewards:
+          lines: ["&f• 8 светильников Джека", "&f• 300 опыта"]
+          commands: ["minecraft:give {player} jack_o_lantern 8", "minecraft:xp add {player} 300 points"]
+      spooky:
+        name: "&5Ночь страха"
+        icon: WITHER_SKELETON_SKULL
+        description: ["&7Убей скелетов-иссушителей"]
+        objective: { type: KILL, targets: [WITHER_SKELETON], amount: 25 }
+        rewards:
+          lines: ["&f• Незеритовый слиток"]
+          commands: ["minecraft:give {player} netherite_ingot 1"]
+      pie:
+        name: "&eТыквенный пирог"
+        icon: PUMPKIN_PIE
+        description: ["&7Испеки тыквенные пироги"]
+        objective: { type: CRAFT, targets: [PUMPKIN_PIE], amount: 16 }
+        rewards:
+          lines: ["&f• 2 зачарованных золотых яблока"]
+          commands: ["minecraft:give {player} enchanted_golden_apple 2"]
+      golden-autumn:
+        premium: true          # только для Ферма+
+        name: "&6Золотая осень"
+        icon: GOLDEN_APPLE
+        description: ["&7Собери тыквы и арбузы"]
+        objective: { type: BREAK, targets: [PUMPKIN, MELON], amount: 256 }
+        rewards:
+          lines: ["&f• Тотем бессмертия"]
+          commands: ["minecraft:give {player} totem_of_undying 1"]
+      apple-picking:
+        name: "&cЯблочный спас"
+        icon: APPLE
+        description: ["&7Съешь яблоки"]
+        objective: { type: EAT, targets: [APPLE], amount: 32 }
+        rewards:
+          lines: ["&f• 4 золотых яблока"]
+          commands: ["minecraft:give {player} golden_apple 4"]
+      leaf-fall:
+        name: "&6Листопад"
+        icon: OAK_LEAVES
+        description: ["&7Убери опавшую листву"]
+        objective: { type: BREAK, targets: ["*_LEAVES"], amount: 256 }
+        rewards:
+          lines: ["&f• 16 саженцев", "&f• 200 опыта"]
+          commands: ["minecraft:give {player} oak_sapling 16", "minecraft:xp add {player} 200 points"]
+      lanterns:
+        name: "&6Тыквенные фонари"
+        icon: JACK_O_LANTERN
+        description: ["&7Поставь светильники Джека"]
+        objective: { type: PLACE, targets: [JACK_O_LANTERN], amount: 16 }
+        rewards:
+          lines: ["&f• 5 изумрудов"]
+          commands: ["minecraft:give {player} emerald 5"]
+      autumn-harvest:
+        name: "&eОсенняя страда"
+        icon: HAY_BLOCK
+        description: ["&7Собери урожай на ферме"]
+        objective: { type: CROP_HARVEST, amount: 800 }
+        rewards:
+          lines: ["&f• 10 изумрудов", "&f• 500 опыта"]
+          commands: ["minecraft:give {player} emerald 10", "minecraft:xp add {player} 500 points"]
+      undead-night:
+        name: "&2Ночь мертвецов"
+        icon: ZOMBIE_HEAD
+        description: ["&7Убей зомби любого вида"]
+        objective: { type: KILL, targets: [ZOMBIE, HUSK, DROWNED, ZOMBIE_VILLAGER], amount: 100 }
+        rewards:
+          lines: ["&f• Голова зомби", "&f• 400 опыта"]
+          commands: ["minecraft:give {player} zombie_head 1", "minecraft:xp add {player} 400 points"]
+      witch-hunt:
+        name: "&5Охота на ведьм"
+        icon: CAULDRON
+        description: ["&7Убей ведьм"]
+        objective: { type: KILL, targets: [WITCH], amount: 15 }
+        rewards:
+          lines: ["&f• 3 зелья исцеления", "&f• 300 опыта"]
+          commands: ["minecraft:give {player} potion[potion_contents={potion:\"minecraft:healing\"}] 3", "minecraft:xp add {player} 300 points"]
+      fair:
+        name: "&eОсенняя ярмарка"
+        icon: EMERALD
+        description: ["&7Заработай монеты на ярмарке"]
+        objective: { type: EARN, targets: [COINS], amount: 10000 }
+        rewards:
+          lines: ["&f• 3 алмаза"]
+          commands: ["minecraft:give {player} diamond 3"]
+      harvest-feast-plus:
+        premium: true
+        name: "&6Пир урожая"
+        icon: CAKE
+        description: ["&7Приготовь праздничные блюда"]
+        objective: { type: COOK_ITEM, amount: 60 }
+        rewards:
+          lines: ["&f• 2 зачарованных золотых яблока", "&f• 800 опыта"]
+          commands: ["minecraft:give {player} enchanted_golden_apple 2", "minecraft:xp add {player} 800 points"]
+  winter-2026:
+    name: "<gradient:#00c6ff:#e0f7ff>Зима 2026</gradient>"
+    start: "2026-12-01"
+    end: "2027-02-28"
+    quests:
+      snowman:
+        name: "&fСнеговик"
+        icon: SNOW_BLOCK
+        description: ["&7Поставь снежные блоки"]
+        objective: { type: PLACE, targets: [SNOW_BLOCK], amount: 64 }
+        rewards:
+          lines: ["&f• 16 синего льда"]
+          commands: ["minecraft:give {player} blue_ice 16"]
+
+      snowballs:
+        name: "&fСнежная битва"
+        icon: SNOWBALL
+        description: ["&7Накопай снега"]
+        objective: { type: BREAK, targets: [SNOW, SNOW_BLOCK, POWDER_SNOW], amount: 128 }
+        rewards:
+          lines: ["&f• 16 льда", "&f• 200 опыта"]
+          commands: ["minecraft:give {player} ice 16", "minecraft:xp add {player} 200 points"]
+      ice-cutter:
+        name: "&bЛедоруб"
+        icon: PACKED_ICE
+        description: ["&7Наколи льда"]
+        objective: { type: BREAK, targets: [ICE, PACKED_ICE, BLUE_ICE], amount: 64 }
+        rewards:
+          lines: ["&f• Кирка с Шёлковым касанием"]
+          commands: ["minecraft:give {player} iron_pickaxe[enchantments={silk_touch:1}] 1"]
+      strays:
+        name: "&3Ледяные стрелки"
+        icon: BOW
+        description: ["&7Убей зимогоров"]
+        objective: { type: KILL, targets: [STRAY], amount: 30 }
+        rewards:
+          lines: ["&f• 32 стрелы с замедлением"]
+          commands: ["minecraft:give {player} tipped_arrow[potion_contents={potion:\"minecraft:slowness\"}] 32"]
+      hot-cocoa:
+        name: "&6Горячий ужин"
+        icon: MUSHROOM_STEW
+        description: ["&7Съешь горячие супы и рагу"]
+        objective: { type: EAT, targets: [MUSHROOM_STEW, BEETROOT_SOUP, RABBIT_STEW, SUSPICIOUS_STEW], amount: 20 }
+        rewards:
+          lines: ["&f• 8 золотых морковок"]
+          commands: ["minecraft:give {player} golden_carrot 8"]
+      winter-fishing:
+        name: "&3Подлёдная рыбалка"
+        icon: FISHING_ROD
+        description: ["&7Поймай рыбу"]
+        objective: { type: FISH, amount: 50 }
+        rewards:
+          lines: ["&f• 6 изумрудов", "&f• 300 опыта"]
+          commands: ["minecraft:give {player} emerald 6", "minecraft:xp add {player} 300 points"]
+      new-year-tree:
+        name: "&2Ёлочка"
+        icon: SPRUCE_SAPLING
+        description: ["&7Посади ели"]
+        objective: { type: PLACE, targets: [SPRUCE_SAPLING], amount: 24 }
+        rewards:
+          lines: ["&f• 16 фейерверков"]
+          commands: ["minecraft:give {player} firework_rocket 16"]
+      gifts-plus:
+        premium: true
+        name: "&6Мешок подарков"
+        icon: CHEST
+        description: ["&7Заработай монеты к празднику"]
+        objective: { type: EARN, targets: [COINS], amount: 20000 }
+        rewards:
+          lines: ["&f• Тотем бессмертия", "&f• 5 алмазов"]
+          commands: ["minecraft:give {player} totem_of_undying 1", "minecraft:give {player} diamond 5"]
+story:
+  beginning:
+    name: "&bНачало пути"
+    icon: OAK_SAPLING
+    description: ["&7Первые шаги в новом мире:", "&7от бревна до алмазов."]
+    steps:
+      first-wood:
+        name: "&fПервое дерево"
+        icon: OAK_LOG
+        description: ["&7Наруби брёвен"]
+        objective: { type: BREAK, targets: ["*_LOG"], amount: 16 }
+        rewards:
+          lines: ["&f• Каменные инструменты"]
+          commands: ["minecraft:give {player} stone_pickaxe 1", "minecraft:give {player} stone_axe 1"]
+      workbench:
+        name: "&fМастерская"
+        icon: CRAFTING_TABLE
+        description: ["&7Скрафти верстак и печь"]
+        objective: { type: CRAFT, targets: [CRAFTING_TABLE, FURNACE], amount: 2 }
+        rewards:
+          lines: ["&f• 16 угля"]
+          commands: ["minecraft:give {player} coal 16"]
+      iron-age:
+        name: "&fЖелезный век"
+        icon: IRON_INGOT
+        description: ["&7Выплавь железо"]
+        objective: { type: SMELT, targets: [IRON_INGOT], amount: 24 }
+        rewards:
+          lines: ["&f• Железная броня"]
+          commands: ["minecraft:give {player} iron_chestplate 1", "minecraft:give {player} iron_helmet 1"]
+      diamonds:
+        name: "&bАлмазы!"
+        icon: DIAMOND
+        description: ["&7Добудь алмазную руду"]
+        objective: { type: BREAK, targets: [DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE], amount: 5 }
+        rewards:
+          lines: ["&f• Алмазная кирка", "&f• 1000 опыта"]
+          commands: ["minecraft:give {player} diamond_pickaxe 1", "minecraft:xp add {player} 1000 points"]
+
+  # Сюжетная цепочка только для Ферма+
+  farm-life:
+    premium: true
+    name: "&6Фермерская жизнь"
+    icon: HAY_BLOCK
+    description: ["&7Посевы, хлеб и большое хозяйство."]
+    steps:
+      seeds:
+        name: "&fПосевная"
+        icon: WHEAT_SEEDS
+        description: ["&7Посади семена"]
+        objective: { type: PLACE, targets: [WHEAT], amount: 64 }
+        rewards:
+          lines: ["&f• Железная мотыга"]
+          commands: ["minecraft:give {player} iron_hoe 1"]
+      bakery:
+        name: "&fПекарня"
+        icon: BREAD
+        description: ["&7Испеки хлеб"]
+        objective: { type: CRAFT, targets: [BREAD], amount: 32 }
+        rewards:
+          lines: ["&f• 16 костной муки", "&f• 200 опыта"]
+          commands: ["minecraft:give {player} bone_meal 16", "minecraft:xp add {player} 200 points"]
+      big-farm:
+        name: "&fБольшое хозяйство"
+        icon: COW_SPAWN_EGG
+        description: ["&7Разведи животных"]
+        objective: { type: BREED, amount: 30 }
+        rewards:
+          lines: ["&f• Алмазная мотыга", "&f• 5 изумрудов"]
+          commands: ["minecraft:give {player} diamond_hoe 1", "minecraft:give {player} emerald 5"]
+
+  # ── Новая сюжетная цепочка ──
+  valley-chronicles:
+    name: "<gradient:#c471f5:#fa71cd>Хроники Тихой долины</gradient>"
+    icon: WRITABLE_BOOK
+    description:
+      - "&7Старый фермер оставил тебе заросший"
+      - "&7участок и потрёпанный дневник."
+      - "&7Верни долине былую славу."
+    steps:
+      arrival:
+        name: "&fГлава I. Новый дом"
+        icon: OAK_FENCE_GATE
+        description:
+          - "&8«Калитка скрипнула, будто здороваясь...»"
+          - "&7Загляни на свою ферму."
+        objective: { type: FARM_VISIT, amount: 1 }
+        rewards:
+          lines: ["&f• Каменная мотыга", "&f• 16 хлеба"]
+          commands: ["minecraft:give {player} stone_hoe 1", "minecraft:give {player} bread 16"]
+      overgrown:
+        name: "&fГлава II. Заросли"
+        icon: SHORT_GRASS
+        description:
+          - "&8«Сорняки по пояс. Пора за работу.»"
+          - "&7Расчисти участок от травы и кустов."
+        objective: { type: BREAK, targets: [SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN, DEAD_BUSH, BUSH], amount: 64 }
+        rewards:
+          lines: ["&f• 32 семян пшеницы", "&f• 50 опыта"]
+          commands: ["minecraft:give {player} wheat_seeds 32", "minecraft:xp add {player} 50 points"]
+      first-sowing:
+        name: "&fГлава III. Первый посев"
+        icon: WHEAT_SEEDS
+        description:
+          - "&8«В дневнике: сей, пока земля тёплая.»"
+          - "&7Посади пшеницу."
+        objective: { type: PLACE, targets: [WHEAT], amount: 32 }
+        rewards:
+          lines: ["&f• 16 костной муки", "&f• 80 опыта"]
+          commands: ["minecraft:give {player} bone_meal 16", "minecraft:xp add {player} 80 points"]
+      first-harvest:
+        name: "&fГлава IV. Первый урожай"
+        icon: WHEAT
+        description:
+          - "&8«Колосья звенят на ветру.»"
+          - "&7Собери урожай мотыгой на ферме."
+        objective: { type: CROP_HARVEST, amount: 64 }
+        rewards:
+          lines: ["&f• Железная мотыга", "&f• 3 изумруда"]
+          commands: ["minecraft:give {player} iron_hoe 1", "minecraft:give {player} emerald 3"]
+      neighbors:
+        name: "&fГлава V. Соседи"
+        icon: VILLAGER_SPAWN_EGG
+        description:
+          - "&8«В долине ещё остались люди.»"
+          - "&7Поговори с жителями (NPC)."
+        objective: { type: NPC_TALK, amount: 3 }
+        rewards:
+          lines: ["&f• 5 изумрудов", "&f• 100 опыта"]
+          commands: ["minecraft:give {player} emerald 5", "minecraft:xp add {player} 100 points"]
+      old-mill:
+        name: "&fГлава VI. Старая мельница"
+        icon: GRINDSTONE
+        description:
+          - "&8«Жёрнов скрипит, но ещё мелет.»"
+          - "&7Перемели зерно на жёрнове."
+        objective: { type: MILL, amount: 32 }
+        rewards:
+          lines: ["&f• 200 опыта", "&f• 4 изумруда"]
+          commands: ["minecraft:xp add {player} 200 points", "minecraft:give {player} emerald 4"]
+      kitchen:
+        name: "&fГлава VII. Тёплая кухня"
+        icon: CAMPFIRE
+        description:
+          - "&8«Запах свежей выпечки на всю долину.»"
+          - "&7Приготовь блюда на станции."
+        objective: { type: COOK, amount: 10 }
+        rewards:
+          lines: ["&f• 6 золотых морковок", "&f• 250 опыта"]
+          commands: ["minecraft:give {player} golden_carrot 6", "minecraft:xp add {player} 250 points"]
+      market:
+        name: "&fГлава VIII. Ярмарка"
+        icon: EMERALD
+        description:
+          - "&8«Пора показать долине, на что способна ферма.»"
+          - "&7Заработай монеты."
+        objective: { type: EARN, targets: [COINS], amount: 3000 }
+        rewards:
+          lines: ["&f• 10 изумрудов", "&f• 300 опыта"]
+          commands: ["minecraft:give {player} emerald 10", "minecraft:xp add {player} 300 points"]
+      night-raid:
+        name: "&cГлава IX. Ночные гости"
+        icon: IRON_SWORD
+        description:
+          - "&8«Ночью кто-то топчет посевы...»"
+          - "&7Защити ферму — убей монстров."
+        objective: { type: KILL, targets: [ZOMBIE, SKELETON, SPIDER, CREEPER, HUSK, DROWNED, WITCH, PILLAGER], amount: 40 }
+        rewards:
+          lines: ["&f• Железный меч", "&f• Щит", "&f• 400 опыта"]
+          commands: ["minecraft:give {player} iron_sword 1", "minecraft:give {player} shield 1", "minecraft:xp add {player} 400 points"]
+      big-harvest:
+        name: "&fГлава X. Большой урожай"
+        icon: HAY_BLOCK
+        description:
+          - "&8«Амбары должны быть полны к осени.»"
+          - "&7Собери много урожая на ферме."
+        objective: { type: CROP_HARVEST, amount: 500 }
+        rewards:
+          lines: ["&f• Алмазная мотыга", "&f• 500 опыта"]
+          commands: ["minecraft:give {player} diamond_hoe 1", "minecraft:xp add {player} 500 points"]
+      diary-end:
+        name: "<gradient:#ffd34e:#ff9f1c>Глава XI. Последняя страница</gradient>"
+        icon: ENCHANTED_BOOK
+        description:
+          - "&8«Долина снова живёт. Спасибо тебе.»"
+          - "&7Пройди путь фермера: срежь растения целиком."
+        objective: { type: CROP_BREAK, amount: 100 }
+        rewards:
+          lines: ["&f• Тотем бессмертия", "&f• 3 алмаза", "&f• 1000 опыта"]
+          commands: ["minecraft:give {player} totem_of_undying 1", "minecraft:give {player} diamond 3", "minecraft:xp add {player} 1000 points"]

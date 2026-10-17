@@ -1,0 +1,225 @@
+# ==========================================================
+#  ZenQuests — настройки (https://hoka.ink)
+#  Сами квесты — в quests.yml. Перезагрузка без рестарта: /квесты reload
+#  Цвета: MiniMessage (<gradient:#a:#b>, <#ff8800>) и &-коды.
+# ==========================================================
+
+# Часовой пояс для сброса ежедневных (в 00:00) и еженедельных (в понедельник 00:00) квестов
+timezone: "Europe/Moscow"
+
+# true — награда выдаётся сразу при выполнении; false — игрок забирает её в меню
+auto-claim: false
+
+# Полоска прогресса сверху экрана на пару секунд, когда квест продвинулся
+bossbar:
+  enabled: true
+  seconds: 3
+
+# Не засчитывать ломание блоков, которые поставили игроки (защита от «поставил-сломал»).
+# Помнит до рестарта сервера.
+ignore-player-placed-blocks: true
+
+menu:
+  title: "<gradient:#4facfe:#00f2fe>✦ Квесты ✦</gradient>"
+  # Стекло рамки главного меню
+  accent: LIGHT_BLUE_STAINED_GLASS_PANE
+  corner: CYAN_STAINED_GLASS_PANE
+  background: BLACK_STAINED_GLASS_PANE
+  # Стиль подсказки при наведении на предметы меню (нужен ресурспак со спрайтами
+  # assets/zenquests/textures/gui/sprites/tooltip/farm_background.png и farm_frame.png).
+  # Пусто "" — обычная подсказка Minecraft. Без ресурспака у игроков будет фиолетово-чёрная рамка!
+  tooltip-style: "zenquests:farm"
+  # Нарисованные фоны меню (ресурспак: assets/zenquests/font/menu.json + textures/gui/menu/*.png).
+  # true — вместо стекла рамки окно рисуется картинкой. Без ресурспака у игроков будут квадратики в названии!
+  textures:
+    enabled: true
+    font: "zenquests:menu"
+    title: false   # true — печатать название окна текстом поверх картинки (на наших фонах оно уже на ленте)
+    # Из чего собирается картинка окна (символы шрифта menu.json): \uE100 — к левому краю, \uE010..\uE013 — четыре
+    # HD-плитки сцены (2 px текстуры на 1 px интерфейса), \uE102/\uE103 — сдвиги между плитками, {bg} — накладка
+    # конкретного меню (рамки, лента, инвентарь), \uE101 — назад к началу названия. Пусто — просто "\uE100{bg}\uE101".
+    sequence: "\uE100\uE010\uE102\uE011\uE103\uE012\uE102\uE013\uE103{bg}\uE101"
+  # Карточки квестов из ресурспака: шаблон модели предмета, {state} = active|ready|claimed, {emblem} — по типу задания
+  # (assets/zenquests/items/quest_*.json). Пусто "" — у квеста обычная иконка-предмет из quests.yml.
+  quest-cards: "zenquests:quest_{state}_{emblem}"
+  # Свои иконки кнопок меню (ресурспак: assets/zenquests/items/icon_*.json). Пусто "" — обычный предмет.
+  icons:
+    daily: "zenquests:icon_daily"
+    weekly: "zenquests:icon_weekly"
+    seasonal: "zenquests:icon_seasonal"
+    story: "zenquests:icon_story"
+    premium-active: "zenquests:icon_premium_on"
+    premium-inactive: "zenquests:icon_premium_off"
+    locked: "zenquests:icon_locked"
+    claimed: "zenquests:icon_claimed"
+    step-done: "zenquests:icon_step_done"
+    step-locked: "zenquests:icon_step_locked"
+    close: "zenquests:icon_close"
+    back: "zenquests:icon_back"
+    prev: "zenquests:icon_prev"
+    next: "zenquests:icon_next"
+    empty: "zenquests:icon_empty"
+  # name/icon — карточка категории; pane/corner — цвет рамки её страницы; description — строки под названием
+  categories:
+    daily:
+      name: "<gradient:#f9d423:#ff4e50>☀ Ежедневные</gradient>"
+      icon: SUNFLOWER
+      pane: YELLOW_STAINED_GLASS_PANE
+      corner: ORANGE_STAINED_GLASS_PANE
+      description: ["&7Новые задания каждый день", "&7в &f00:00&7 по Москве."]
+    weekly:
+      name: "<gradient:#00c6ff:#0072ff>⌚ Еженедельные</gradient>"
+      icon: CLOCK
+      pane: LIGHT_BLUE_STAINED_GLASS_PANE
+      corner: BLUE_STAINED_GLASS_PANE
+      description: ["&7Задания посложнее — на всю неделю.", "&7Обновляются в понедельник."]
+    seasonal:
+      name: "<gradient:#f7971e:#ffd200>❀ Сезонные</gradient>"
+      icon: PUMPKIN_PIE
+      pane: ORANGE_STAINED_GLASS_PANE
+      corner: RED_STAINED_GLASS_PANE
+      description: ["&7Особые задания сезона.", "&7Успей, пока сезон не кончился!"]
+    story:
+      name: "<gradient:#c471f5:#fa71cd>✎ Сюжетные</gradient>"
+      icon: WRITABLE_BOOK
+      pane: PURPLE_STAINED_GLASS_PANE
+      corner: MAGENTA_STAINED_GLASS_PANE
+      description: ["&7Цепочки заданий с историей.", "&7Каждый шаг открывает следующий."]
+
+# ── Подписка Ферма+ ──
+# Подписчик = игрок с правом из permission ИЛИ с подпиской, выданной командой.
+#   Командой (оп / zenquests.admin, работает и для игроков не в сети):
+#     /квесты premium give <ник> [срок]   срок: 30d, 12h, 1w, 1d12h, forever (по умолчанию навсегда)
+#     /квесты premium take <ник>          /квесты premium check <ник>
+#   Правом — донат-плагином или LuckPerms:
+#     /lp user <ник> permission settemp zenquests.premium true 30d
+# Что даёт: доп. квесты (premium-quests в quests.yml, premium: true у сезонных/сюжетных)
+# и бонусные награды (premium-rewards у любого квеста).
+premium:
+  permission: "zenquests.premium"
+  # Значок подписки для таба/чата через PlaceholderAPI: %zenquests_premium_badge% — badge, если подписка есть,
+  # иначе badge-none. По умолчанию — глиф Nexo premium_badge (plugins/Nexo/glyphs/zenquests.yml), картинка в ресурспаке.
+  # char в glyphs/zenquests.yml НЕ задавать руками: Nexo назначает его сам при reload и записывает в файл — оттуда и брать.
+  # В TakuCore roles.yml:  tab: { suffix: " %zenquests_premium_badge%" }
+  badge: "\uA41D"   # символ глифа premium_badge — Nexo сам назначает его и пишет в glyphs/zenquests.yml
+  badge-none: ""
+  name: "<gradient:#ffd34e:#ff9f1c>Ферма+</gradient>"
+  quest-tag: "&6✦ Задание {premium}"
+  bonus-title: "&6✦ Бонус {premium}&6:"
+  bonus-title-locked: "&8✦ Бонус с {premium}&8:"
+  chain-tag: "&6✦ Цепочка {premium}"
+  chain-locked-lore:
+    - "&6⛔ Только с подпиской {premium}"
+    - "&7Оформи подписку, чтобы пройти"
+    - "&7эту историю."
+  locked-icon: GOLD_BLOCK
+  locked-name: "&6⛔ Ещё {count} заданий с {premium}"
+  locked-lore:
+    - "&7Оформи подписку, чтобы открыть"
+    - "&7дополнительные задания и бонусы."
+  info-active:
+    name: "{premium} &aактивна"
+    icon: GOLDEN_HOE
+    lore:
+      - "&7Тебе доступны доп. задания,"
+      - "&7бонусные награды и бонусы"
+      - "&7на рыбалке. Спасибо! &6♥"
+  info-inactive:
+    name: "{premium}"
+    icon: WHEAT
+    lore:
+      - "&7С подпиской:"
+      - "&f• больше ежедневных и еженедельных"
+      - "&f• свои сезонные и сюжетные задания"
+      - "&f• бонус к награде за каждый квест"
+      - "&f• рыбалка: опыт удочки ×1.5, +25% к редкой"
+      - "&f  рыбе, клёв быстрее, рыба дороже, особые виды"
+
+messages:
+  prefix: "&6[Квесты] &r"
+  no-permission: "&cУ тебя нет прав на это."
+  players-only: "&cМеню квестов открывается только в игре."
+  completed: "&aКвест выполнен: {quest}&a! Забери награду: &f/квесты"
+  completed-auto: "&aКвест выполнен: {quest}&a! Награда выдана."
+  claimed: "&aНаграда за {quest}&a получена."
+  not-done: "&7Квест ещё не выполнен: &f{progress}/{amount}"
+  already-claimed: "&7Награда уже получена."
+  premium-bonus: "&6✦ Бонус Ферма+ за {quest}&6 получен!"
+  new-day: "&eНовые ежедневные квесты! &f/квесты"
+  reloaded: "&aКвесты перезагружены."
+  reset: "&aКвесты игрока &f{player}&a сброшены: &f{what}"
+  player-not-found: "&cИгрок &f{player}&c не в сети."
+  usage-admin: "&7/квесты reload &8— &fперезагрузить конфиги\n&7/квесты reset <игрок> [daily|weekly|seasonal|story|all] &8— &fсбросить прогресс\n&7/квесты progress <игрок> <тип> [цель|-] [кол-во] &8— &fзасчитать действие\n&7/квесты premium give|take|check <игрок> [срок] &8— &fвыдать / забрать / проверить подписку"
+  unknown-type: "&cНеизвестный тип: &f{type}"
+  progress-added: "&aИгроку &f{player}&a засчитано {type} ×{amount}"
+  player-unknown: "&cИгрок &f{player}&c ещё ни разу не заходил на сервер."
+  premium-given: "&aИгроку &f{player}&a выдана подписка Ферма+ — осталось: &f{time}"
+  premium-received: "&6✦ Тебе выдана подписка Ферма+! &7Осталось: &f{time}"
+  premium-taken: "&aУ игрока &f{player}&a забрана выданная подписка."
+  premium-lost: "&7Твоя подписка Ферма+ закончилась."
+  premium-none: "&7У игрока &f{player}&7 нет выданной подписки."
+  premium-check: "&7Подписка &f{player}&7: осталось &f{time}"
+  premium-check-perm: "&7У &f{player}&7 подписка через право (LuckPerms/донат), командой не управляется."
+  premium-bad-term: "&cНепонятный срок: &f{term}&c. Примеры: 30d, 12h, 1w, 1d12h, forever"
+  premium-forever: "навсегда"
+
+# Тексты в меню
+gui:
+  back: "&c← Назад"
+  close: "&cЗакрыть"
+  prev-page: "&e← Страница {page}"
+  next-page: "&eСтраница {page} →"
+  title-paged: "{name} &8({page}/{pages})"
+  click-open: "&e▶ Нажми, чтобы открыть"
+  click-open-chain: "&e▶ Нажми, чтобы открыть историю"
+  # Полоска прогресса: 20 символов bar-char, заполненные — bar-full, остальные — bar-empty
+  bar-char: "|"
+  bar-full: "&a"
+  bar-empty: "&8"
+  status-progress: "&7Прогресс: &f{progress}&7/&f{amount} &8({percent}%)"
+  status-left: "&7⌛ Осталось: &f{left}"
+  status-ready: "&a&l✔ Нажми, чтобы забрать награду!"
+  status-claimed: "&8✔ Награда получена"
+  ready-name: "&a✔ {quest}"
+  claimed-name: "&8✔ &7{quest}"
+  claimed-icon: LIME_STAINED_GLASS_PANE
+  rewards-title: "&6✦ Награда:"
+  resets-in: "&7⌚ Обновятся через &f{time}"
+  season-name: "&7Сезон: {season}"
+  season-ends-in: "&7⌚ Закончится через &f{time}"
+  no-season: "&7Сейчас сезонных квестов нет"
+  done-count: "&7Выполнено: &f{done}/{total}"
+  chains-count: "&7Пройдено историй: &f{done}/{total}"
+  ready-count: "&a&l✔ Наград ждёт: {count}"
+  story-step: "&d✎ Шаг &f{step}/{total}"
+  story-progress: "&7Пройдено шагов: &f{done}/{total}"
+  story-current: "&7Сейчас: {quest}"
+  story-ready: "&a&l✔ Награда за шаг ждёт!"
+  story-done: "&a✔ История пройдена"
+  story-locked-name: "&6⛔ &7{chain}"
+  step-done-name: "&a✔ Шаг {step}: &7{quest}"
+  step-done-icon: LIME_STAINED_GLASS_PANE
+  step-passed: "&a✔ Пройдено"
+  step-locked-name: "&8⛔ Шаг {step}: ???"
+  step-locked-icon: GRAY_DYE
+  step-locked-lore: ["&7Откроется после шага &f{prev}&7."]
+  empty: "&7Здесь пока пусто"
+  premium-left: "&7Осталось: &f{time}"
+  # Профиль (голова игрока сверху главного меню)
+  profile:
+    name: "<gradient:#4facfe:#00f2fe>{player}</gradient>"
+    premium-on: "&a✔ активна"
+    premium-off: "&8✘ нет"
+    lore:
+      - "&7Наград ждёт: &a{ready}"
+      - ""
+      - "&7Сюжет: &f{story}/{story_total} &7шагов"
+      - "{story_bar}"
+      - ""
+      - "&7{premium}&7: {premium_state}"
+  # Стекло под категориями в главном меню
+  indicator:
+    ready:    { icon: LIME_STAINED_GLASS_PANE,   name: "&a✔ Есть награды!" }
+    progress: { icon: YELLOW_STAINED_GLASS_PANE, name: "&e⌛ В процессе" }
+    done:     { icon: GREEN_STAINED_GLASS_PANE,  name: "&2✔ Всё выполнено" }
+    empty:    { icon: GRAY_STAINED_GLASS_PANE,   name: "&7Пусто" }

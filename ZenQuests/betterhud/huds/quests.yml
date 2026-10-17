@@ -1,0 +1,11 @@
+# Ежедневные квесты ZenQuests: до 4 плашек под временем года, пока квест не выполнен (%zenquests_hud_*%)
+quests:
+  layouts:
+    21:
+      name: quests
+      gui:
+      x: 100
+      y: 0
+      pixel:
+        x: 0
+        y: 0

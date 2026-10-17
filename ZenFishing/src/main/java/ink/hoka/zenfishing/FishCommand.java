@@ -1,0 +1,119 @@
+package ink.hoka.zenfishing;
+
+import ink.hoka.zenfishing.util.Text;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * /рыбалка                — меню
+ * /рыбалка продать        — продать всю рыбу
+ * /рыбалка топ            — топ рыбаков
+ * /рыбалка reload | rod [игрок] [уровень] | stats <игрок>
+ */
+public final class FishCommand implements CommandExecutor, TabCompleter {
+
+    private final ZenFishing plugin;
+
+    public FishCommand(ZenFishing plugin) { this.plugin = plugin; }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        String sub = args.length == 0 ? "" : args[0].toLowerCase(Locale.ROOT);
+        switch (sub) {
+            case "" -> {
+                if (!(sender instanceof Player p)) { plugin.msg(sender, "players-only"); if (sender.hasPermission("zenfishing.admin")) plugin.msg(sender, "usage-admin"); return true; }
+                if (!p.hasPermission("zenfishing.use")) { plugin.msg(p, "no-permission"); return true; }
+                plugin.menu().openMain(p);
+            }
+            case "продать", "sell" -> {
+                if (!(sender instanceof Player p)) { plugin.msg(sender, "players-only"); return true; }
+                if (!p.hasPermission("zenfishing.use")) { plugin.msg(p, "no-permission"); return true; }
+                plugin.sellAll(p);
+            }
+            case "топ", "top" -> top(sender);
+            case "reload", "rod", "stats" -> {
+                if (!sender.hasPermission("zenfishing.admin")) { plugin.msg(sender, "no-permission"); return true; }
+                admin(sender, sub, args);
+            }
+            default -> plugin.msg(sender, sender.hasPermission("zenfishing.admin") ? "usage-admin" : "usage");
+        }
+        return true;
+    }
+
+    private void admin(CommandSender sender, String sub, String[] args) {
+        switch (sub) {
+            case "reload" -> { plugin.reloadAll(); plugin.msg(sender, "reloaded", "fish", plugin.fish().size()); }
+            case "rod" -> {
+                Player target = args.length >= 2 ? Bukkit.getPlayerExact(args[1]) : sender instanceof Player p ? p : null;
+                if (target == null) { plugin.msg(sender, "player-not-found", "player", args.length >= 2 ? args[1] : "?"); return; }
+                int level = 1;
+                if (args.length >= 3) { try { level = Integer.parseInt(args[2]); } catch (NumberFormatException e) { plugin.msg(sender, "usage-admin"); return; } }
+                ItemStack rod = plugin.rods().create(level, target);
+                for (ItemStack rest : target.getInventory().addItem(rod).values()) target.getWorld().dropItemNaturally(target.getLocation(), rest);
+                plugin.msg(sender, "rod-given", "player", target.getName(), "level", plugin.rods().level(rod));
+            }
+            case "stats" -> {
+                if (args.length < 2) { plugin.msg(sender, "usage-admin"); return; }
+                OfflinePlayer t = offline(args[1]);
+                if (t == null) { plugin.msg(sender, "player-unknown", "player", args[1]); return; }
+                PlayerStats s = plugin.stats().peek(t);
+                plugin.msg(sender, "stats", "player", t.getName() != null ? t.getName() : args[1], "caught", s.caught, "known", s.known(),
+                        "total", plugin.fish().size(), "best", best(s), "earned", Text.num(s.earned));
+            }
+        }
+    }
+
+    public String best(PlayerStats s) {
+        Fish f = plugin.fish().get(s.bestFish);
+        return f == null ? "—" : f.rarity().color() + f.name() + " &f" + Text.num(s.bestWeight) + " кг";
+    }
+
+    private void top(CommandSender sender) {
+        List<PlayerStats> all = plugin.stats().everyone();
+        all.sort(Comparator.comparingInt((PlayerStats s) -> s.caught).reversed());
+        plugin.msg(sender, "top-header");
+        int n = 0;
+        for (PlayerStats s : all) {
+            if (s.caught <= 0 || ++n > 10) break;
+            plugin.msg(sender, "top-line", "n", n, "player", s.name, "value", s.caught + " рыбы, рекорд " + best(s));
+        }
+    }
+
+    private OfflinePlayer offline(String name) {
+        OfflinePlayer t = Bukkit.getPlayerExact(name);
+        return t != null ? t : Bukkit.getOfflinePlayerIfCached(name);
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        boolean admin = sender.hasPermission("zenfishing.admin");
+        if (args.length == 1) {
+            List<String> l = new ArrayList<>(List.of("продать", "топ"));
+            if (admin) l.addAll(List.of("reload", "rod", "stats"));
+            return filter(l, args[0]);
+        }
+        if (!admin) return List.of();
+        if (args.length == 2 && (args[0].equalsIgnoreCase("rod") || args[0].equalsIgnoreCase("stats"))) return filter(names(), args[1]);
+        if (args.length == 3 && args[0].equalsIgnoreCase("rod")) return filter(List.of("1", "10", "25", "50"), args[2]);
+        return List.of();
+    }
+
+    private List<String> names() { List<String> n = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) n.add(p.getName()); return n; }
+
+    private List<String> filter(List<String> opts, String pre) {
+        List<String> out = new ArrayList<>();
+        for (String o : opts) if (o.toLowerCase(Locale.ROOT).startsWith(pre.toLowerCase(Locale.ROOT))) out.add(o);
+        return out;
+    }
+}

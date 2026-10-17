@@ -1,0 +1,10 @@
+.gradle/
+build/
+out/
+bin/
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.DS_Store

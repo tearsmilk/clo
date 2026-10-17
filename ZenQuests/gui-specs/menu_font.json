@@ -1,0 +1,103 @@
+{
+  "providers": [
+    {
+      "type": "space",
+      "advances": {
+        "\ue100": -38,
+        "\ue101": -191,
+        "\ue102": -1,
+        "\ue103": -237
+      }
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/menu/main.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        "\ue000"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/menu/daily.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        "\ue001"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/menu/weekly.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        "\ue002"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/menu/seasonal.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        "\ue003"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/menu/story.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        "\ue004"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/menu/chain.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        "\ue005"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/scene/scene_tl.png",
+      "ascent": 30,
+      "height": 120,
+      "chars": [
+        "\ue010"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/scene/scene_tr.png",
+      "ascent": 30,
+      "height": 120,
+      "chars": [
+        "\ue011"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/scene/scene_bl.png",
+      "ascent": -90,
+      "height": 119,
+      "chars": [
+        "\ue012"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "zenquests:gui/scene/scene_br.png",
+      "ascent": -90,
+      "height": 119,
+      "chars": [
+        "\ue013"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+name: ZenFishing
+version: '${version}'
+main: ink.hoka.zenfishing.ZenFishing
+api-version: '1.21'
+description: Рыбалка — редкая рыба, прокачка удочки, бонусы Ферма+
+website: https://hoka.ink
+authors: [nakuZen]
+softdepend: [Vault, Nexo, PlaceholderAPI, ZenQuests]
+
+commands:
+  fishing:
+    description: Меню рыбалки
+    usage: /рыбалка
+    aliases: [рыбалка, рыба, fish, zenfishing, zf]
+
+permissions:
+  zenfishing.use:
+    description: Меню рыбалки и продажа рыбы
+    default: true
+  zenfishing.admin:
+    description: /рыбалка reload, rod, stats
+    default: op
