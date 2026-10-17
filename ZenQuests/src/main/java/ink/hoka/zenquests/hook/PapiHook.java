@@ -16,7 +16,7 @@ import java.time.Duration;
  *   %zenquests_premium%        — true / false
  *   %zenquests_premium_left%   — сколько осталось («3 д 4 ч», «навсегда») или пусто
  *   %zenquests_hud_<n>_active% — 1, если есть n-й (1..4) невыполненный ежедневный квест, иначе 0 (для BetterHud)
- *   %zenquests_hud_<n>_name% / _progress / _amount / _percent / _left — его название без цветов и прогресс
+ *   %zenquests_hud_<n>_name% / _desc / _progress / _amount / _percent / _left — название, первая строка описания, прогресс
  *   %zenquests_hud_count%      — сколько ежедневных ещё не выполнено
  */
 public final class PapiHook extends PlaceholderExpansion {
@@ -78,6 +78,7 @@ public final class PapiHook extends PlaceholderExpansion {
         return switch (what) {
             case "active" -> "1";
             case "name" -> Text.strip(e.quest().name()).trim();
+            case "desc" -> e.quest().description().isEmpty() ? "" : Text.strip(e.quest().description().get(0)).trim();
             case "progress" -> String.valueOf(prog);
             case "amount" -> String.valueOf(amount);
             case "left" -> String.valueOf(amount - prog);
