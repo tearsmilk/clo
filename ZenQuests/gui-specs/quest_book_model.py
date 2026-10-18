@@ -69,10 +69,11 @@ model = {"credit": "ZenQuests quest_book_model.py", "texture_size": [64, 64],
                      "ground": {"rotation": [0, 0, 0], "translation": [0, 1, 0], "scale": [0.5, 0.5, 0.5]},
                      "fixed": {"rotation": [90, 0, 0], "scale": [1, 1, 1]},
                      "head": {"rotation": [0, 0, 0], "translation": [0, 14, 0], "scale": [1, 1, 1]},
-                     "thirdperson_righthand": {"rotation": [-60, 0, 0], "translation": [0, 3, 1], "scale": [0.55, 0.55, 0.55]},
-                     "thirdperson_lefthand": {"rotation": [-60, 0, 0], "translation": [0, 3, 1], "scale": [0.55, 0.55, 0.55]},
-                     "firstperson_righthand": {"rotation": [-50, 20, 0], "translation": [1, 3, 0], "scale": [0.6, 0.6, 0.6]},
-                     "firstperson_lefthand": {"rotation": [-50, -20, 0], "translation": [1, 3, 0], "scale": [0.6, 0.6, 0.6]}}}
+                     # в руках: книга повёрнута страницами к лицу (наклон к камере), крупнее
+                     "thirdperson_righthand": {"rotation": [-75, 0, 0], "translation": [0, 3.5, 1.5], "scale": [0.75, 0.75, 0.75]},
+                     "thirdperson_lefthand": {"rotation": [-75, 0, 0], "translation": [0, 3.5, 1.5], "scale": [0.75, 0.75, 0.75]},
+                     "firstperson_righthand": {"rotation": [-65, 15, 0], "translation": [-2, 5, -3], "scale": [1.0, 1.0, 1.0]},
+                     "firstperson_lefthand": {"rotation": [-65, -15, 0], "translation": [2, 5, -3], "scale": [1.0, 1.0, 1.0]}}}
 json.dump(model, open(OUT_M, 'w'), separators=(',', ':'))
 print('book ok')
 
