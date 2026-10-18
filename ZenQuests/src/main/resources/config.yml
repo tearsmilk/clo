@@ -122,8 +122,8 @@ premium:
   # Значок подписки для таба/чата через PlaceholderAPI: %zenquests_premium_badge% — badge, если подписка есть,
   # иначе badge-none. По умолчанию — глиф Nexo premium_badge (plugins/Nexo/glyphs/zenquests.yml), картинка в ресурспаке.
   # char в glyphs/zenquests.yml НЕ задавать руками: Nexo назначает его сам при reload и записывает в файл — оттуда и брать.
-  # В TakuCore roles.yml:  tab: { suffix: " %zenquests_premium_badge%" }
-  badge: "\uA41D "  # символ глифа premium_badge (+ пробел до ника) — Nexo сам назначает его и пишет в glyphs/zenquests.yml
+  # В TakuCore roles.yml:  tab: { suffix: "&f%zenquests_premium_badge%" }
+  badge: " \uA41D"  # символ глифа premium_badge (пробел после ника + значок) — Nexo сам назначает его и пишет в glyphs/zenquests.yml
   badge-none: ""
   name: "<gradient:#ffd34e:#ff9f1c>Ферма+</gradient>"
   quest-tag: "&6✦ Задание {premium}"
