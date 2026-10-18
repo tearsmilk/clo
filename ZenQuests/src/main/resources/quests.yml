@@ -941,6 +941,75 @@ story:
         rewards:
           lines: ['&f• 3 000 монет', '&f• 1000 опыта']
           commands: ['coins give {player} 3000', 'minecraft:xp add {player} 1000 points']
+  quiet-harbor:
+    name: <gradient:#38b6ff:#5ce1e6>Тихая гавань</gradient>
+    icon: FISHING_ROD
+    description: ['&7Долина ожила, а у пристани ждёт', '&7старая лодка и непуганая рыба.', '&7Продолжение хроник: рыбацкая глава.']
+    steps:
+      first-cast:
+        name: '&fГлава I. Первая поклёвка'
+        icon: FISHING_ROD
+        description: ['&8«На пристани пахнет тиной и смолой. Дед говорил: рыба тут есть.»', '&7Поймай любую рыбу.']
+        objective: {type: CATCH_FISH, amount: 5}
+        rewards:
+          lines: ['&f• 300 монет', '&f• 100 опыта', '&f• 8 семян пшеницы']
+          commands: ['coins give {player} 300', 'minecraft:xp add {player} 100 points', 'minecraft:give {player} wheat_seeds 8']
+      fish-market:
+        name: '&fГлава II. Рыбный рынок'
+        icon: GOLD_NUGGET
+        description: ['&8«Торговка на рынке берёт всё, что шевелится.»', '&7Заработай монеты (продавай улов и урожай).']
+        objective: {type: EARN, targets: [COINS], amount: 1500}
+        rewards:
+          lines: ['&f• 400 монет', '&f• 120 опыта']
+          commands: ['coins give {player} 400', 'minecraft:xp add {player} 120 points']
+      night-shift:
+        name: '&fГлава III. Ночная смена'
+        icon: LANTERN
+        description: ['&8«Ночью озеро другое: тихое и щедрое.»', '&7Поймай рыбу ночью.']
+        objective: {type: CATCH_NIGHT, amount: 10}
+        rewards:
+          lines: ['&f• 500 монет', '&f• 150 опыта']
+          commands: ['coins give {player} 500', 'minecraft:xp add {player} 150 points']
+      predators:
+        name: '&fГлава IV. Хищники'
+        icon: TRIPWIRE_HOOK
+        description: ['&8«Что-то крупное рвёт сети у камышей.»', '&7Поймай щук, судаков, сомов, угрей или налимов.']
+        objective: {type: CATCH_FISH, targets: [pike, zander, catfish, eel, burbot], amount: 10}
+        rewards:
+          lines: ['&f• 600 монет', '&f• 200 опыта']
+          commands: ['coins give {player} 600', 'minecraft:xp add {player} 200 points']
+      galley:
+        name: '&fГлава V. Камбуз'
+        icon: CAMPFIRE
+        description: ['&8«Рыбаки вернулись голодные, кухня не остывает.»', '&7Приготовь продукты на кухне.']
+        objective: {type: COOK, amount: 15}
+        rewards:
+          lines: ['&f• 700 монет', '&f• 250 опыта']
+          commands: ['coins give {player} 700', 'minecraft:xp add {player} 250 points']
+      deep-water:
+        name: '&fГлава VI. Глубокая вода'
+        icon: PRISMARINE_SHARD
+        description: ['&8«За отмелью дно уходит в темноту.»', '&7Поймай редкую рыбу: осётр, тунец, лосось, барракуда, морской окунь, кои, лазурная форель, групер, рыба-клоун или иглобрюх.']
+        objective: {type: CATCH_FISH, targets: [sturgeon, tuna, salmon, barracuda, sea_bass, koi, azure_trout, grouper, clownfish, pufferfish], amount: 5}
+        rewards:
+          lines: ['&f• 900 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 900', 'minecraft:xp add {player} 300 points']
+      winter-stock:
+        name: '&fГлава VII. Запасы на зиму'
+        icon: BARREL
+        description: ['&8«Ферму никто не отменял: рыба рыбой, а амбар сам не наполнится.»', '&7Собери урожай.']
+        objective: {type: CROP_HARVEST, amount: 300}
+        rewards:
+          lines: ['&f• 1 000 монет', '&f• 350 опыта']
+          commands: ['coins give {player} 1000', 'minecraft:xp add {player} 350 points']
+      lake-master:
+        name: '<gradient:#38b6ff:#5ce1e6>Глава VIII. Хозяин глубин</gradient>'
+        icon: HEART_OF_THE_SEA
+        description: ['&8«Старики шепчут о рыбе, которую никто не вытащил.»', '&7Поймай эпическую или легендарную рыбу.']
+        objective: {type: CATCH_FISH, targets: [golden_carp, swordfish, marsh_king, beluga, mola, ice_pike, crystal_pike, moon_fish, farm_legend, goldfish, sea_dragon, kraken_calf], amount: 1}
+        rewards:
+          lines: ['&f• 3 000 монет', '&f• 1000 опыта', '&f• Удочка 10 уровня']
+          commands: ['coins give {player} 3000', 'minecraft:xp add {player} 1000 points', 'рыбалка rod {player} 10']
   farm-life:
     premium: true
     name: '&6Фермерская жизнь'

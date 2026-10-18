@@ -19,6 +19,7 @@ import java.util.Locale;
  * /рыбалка                — меню
  * /рыбалка продать        — продать всю рыбу
  * /рыбалка топ            — топ рыбаков
+ * /рыбалка журнал [игрок] — выдать рыбацкий журнал (другому — zenfishing.admin)
  * /рыбалка reload | rod [игрок] [уровень] | stats <игрок>
  */
 public final class FishCommand implements CommandExecutor, TabCompleter {
@@ -42,6 +43,18 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
                 plugin.sellAll(p);
             }
             case "топ", "top" -> top(sender);
+            case "журнал", "journal", "book" -> {
+                Player target;
+                if (args.length >= 2) {
+                    if (!sender.hasPermission("zenfishing.admin")) { plugin.msg(sender, "no-permission"); return true; }
+                    target = Bukkit.getPlayerExact(args[1]);
+                    if (target == null) { plugin.msg(sender, "player-not-found", "player", args[1]); return true; }
+                } else if (sender instanceof Player p) target = p;
+                else { plugin.msg(sender, "players-only"); return true; }
+                if (!target.hasPermission("zenfishing.use")) { plugin.msg(sender, "no-permission"); return true; }
+                plugin.journal().give(target);
+                plugin.msg(sender, "journal-given-to", "player", target.getName());
+            }
             case "reload", "rod", "stats" -> {
                 if (!sender.hasPermission("zenfishing.admin")) { plugin.msg(sender, "no-permission"); return true; }
                 admin(sender, sub, args);
@@ -99,12 +112,12 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission("zenfishing.admin");
         if (args.length == 1) {
-            List<String> l = new ArrayList<>(List.of("продать", "топ"));
+            List<String> l = new ArrayList<>(List.of("продать", "топ", "журнал"));
             if (admin) l.addAll(List.of("reload", "rod", "stats"));
             return filter(l, args[0]);
         }
         if (!admin) return List.of();
-        if (args.length == 2 && (args[0].equalsIgnoreCase("rod") || args[0].equalsIgnoreCase("stats"))) return filter(names(), args[1]);
+        if (args.length == 2 && (args[0].equalsIgnoreCase("rod") || args[0].equalsIgnoreCase("stats") || args[0].equalsIgnoreCase("журнал") || args[0].equalsIgnoreCase("journal"))) return filter(names(), args[1]);
         if (args.length == 3 && args[0].equalsIgnoreCase("rod")) return filter(List.of("1", "10", "25", "50"), args[2]);
         return List.of();
     }

@@ -20,6 +20,7 @@ public final class ZenFishing extends JavaPlugin {
     private Economy economy;
     private StatsStore stats;
     private FishMenu menu;
+    private FishJournal journal;
 
     @Override
     public void onEnable() {
@@ -33,6 +34,8 @@ public final class ZenFishing extends JavaPlugin {
         menu = new FishMenu(this);
         getServer().getPluginManager().registerEvents(new FishingListener(this), this);
         getServer().getPluginManager().registerEvents(menu, this);
+        journal = new FishJournal(this);
+        getServer().getPluginManager().registerEvents(journal, this);
         ink.hoka.zenfishing.hook.PapiHook.tryRegister(this);
         PluginCommand cmd = getCommand("fishing");
         if (cmd != null) { FishCommand fc = new FishCommand(this); cmd.setExecutor(fc); cmd.setTabCompleter(fc); }
@@ -51,6 +54,7 @@ public final class ZenFishing extends JavaPlugin {
     public Economy economy() { return economy; }
     public StatsStore stats() { return stats; }
     public FishMenu menu() { return menu; }
+    public FishJournal journal() { return journal; }
     public boolean quests() { return Bukkit.getPluginManager().getPlugin("ZenQuests") != null; }
 
     /** Ферма+: право premium.permission или подписка, выданная в ZenQuests (/квесты premium give). */

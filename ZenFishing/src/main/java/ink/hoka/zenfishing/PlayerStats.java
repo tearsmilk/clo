@@ -17,6 +17,7 @@ public final class PlayerStats {
     public String bestFish = null;      // самая редкая пойманная
     public int bestRarity = -1;
     public final Map<String, Integer> count = new HashMap<>();
+    public boolean journalGiven = false;   // рыбацкий журнал уже выдавался при входе
     public boolean dirty = false;
 
     public int known() { return count.size(); }
@@ -39,6 +40,7 @@ public final class PlayerStats {
         d.earned = y.getDouble("earned", 0);
         d.bestFish = y.getString("best.fish", null);
         d.bestRarity = y.getInt("best.rarity", -1);
+        d.journalGiven = y.getBoolean("journal-given", false);
         ConfigurationSection c = y.getConfigurationSection("count");
         if (c != null) for (String k : c.getKeys(false)) d.count.put(k, c.getInt(k));
         return d;
@@ -51,6 +53,7 @@ public final class PlayerStats {
         y.set("earned", earned);
         y.set("best.fish", bestFish);
         y.set("best.rarity", bestRarity);
+        y.set("journal-given", journalGiven);
         for (Map.Entry<String, Integer> e : count.entrySet()) y.set("count." + e.getKey(), e.getValue());
         file.getParentFile().mkdirs();
         y.save(file);
