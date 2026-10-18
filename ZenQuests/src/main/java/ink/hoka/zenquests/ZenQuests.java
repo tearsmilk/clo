@@ -37,6 +37,11 @@ public final class ZenQuests extends JavaPlugin {
         getServer().getPluginManager().registerEvents(menu, this);
         book = new QuestBook(this);
         getServer().getPluginManager().registerEvents(book, this);
+        FarmFly ffly = new FarmFly(this);
+        getServer().getPluginManager().registerEvents(ffly, this);
+        PluginCommand fc = getCommand("ffly");
+        if (fc != null) fc.setExecutor(ffly);
+        Bukkit.getScheduler().runTaskTimer(this, new ObtainTracker(this), 40L, 20L);
         ink.hoka.zenquests.hook.TakuFarmersHook.tryRegister(this);
         ink.hoka.zenquests.hook.PapiHook.tryRegister(this);
 
@@ -82,6 +87,7 @@ public final class ZenQuests extends JavaPlugin {
     public void msg(CommandSender to, String key, Object... kv) {
         String s = getConfig().getString("messages." + key);
         if (s == null || s.isEmpty()) return;
+        s = s.replace("{premium}", getConfig().getString("premium.name", "&6Ферма+"));
         for (int i = 0; i + 1 < kv.length; i += 2) s = s.replace("{" + kv[i] + "}", String.valueOf(kv[i + 1]));
         String prefix = getConfig().getString("messages.prefix", "");
         for (String line : s.split("\n")) to.sendMessage(Text.parse(prefix + line));

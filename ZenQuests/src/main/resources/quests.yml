@@ -22,6 +22,7 @@
 #                   COOK          закончить готовку на станции               цель: id станции
 #                   COOK_ITEM     приготовить блюдо (сколько выдано)         цель: предмет или id Nexo
 #                   MILL          перемолоть на жёрнове (сколько выдано)     цель: предмет или id Nexo
+#                   OBTAIN        получить предмет в инвентарь (мука из жёрнова) цель: материал или id Nexo (flour)
 #                   FLOUR_SACK    скрафтить мешок муки                       без цели
 #                   EARN / SPEND  заработать / потратить валюту              цель: COINS или GEMS
 #                   FARM_VISIT    зайти на свою ферму                        без цели
@@ -205,7 +206,7 @@ daily:
       name: '&eПодмастерье мельника'
       icon: GRINDSTONE
       description: ['&7Перемели пшеницу на жёрнове']
-      objective: {type: MILL, amount: 4}
+      objective: {type: OBTAIN, targets: [flour], amount: 4}
       rewards:
         lines: ['&f• 250 монет', '&f• 60 опыта']
         commands: ['coins give {player} 250', 'minecraft:xp add {player} 60 points']
@@ -452,7 +453,7 @@ weekly:
       name: '&eМельник'
       icon: GRINDSTONE
       description: ['&7Перемели пшеницу на жёрнове']
-      objective: {type: MILL, amount: 32}
+      objective: {type: OBTAIN, targets: [flour], amount: 32}
       rewards:
         lines: ['&f• 2 000 монет', '&f• 400 опыта']
         commands: ['coins give {player} 2000', 'minecraft:xp add {player} 400 points']
@@ -666,7 +667,7 @@ weekly:
       name: '&6Мастер жёрнова'
       icon: GRINDSTONE
       description: ['&7Перемели пшеницу на жёрнове']
-      objective: {type: MILL, amount: 100}
+      objective: {type: OBTAIN, targets: [flour], amount: 100}
       rewards:
         lines: ['&f• 5 000 монет', '&f• 1000 опыта']
         commands: ['coins give {player} 5000', 'minecraft:xp add {player} 1000 points']
@@ -890,8 +891,8 @@ story:
       old-mill:
         name: '&fГлава VI. Старая мельница'
         icon: GRINDSTONE
-        description: ['&8«Жёрнов скрипит, но ещё мелет.»', '&7Перемели зерно на жёрнове.']
-        objective: {type: MILL, amount: 8}
+        description: ['&8«Жёрнов скрипит, но ещё мелет.»', '&7Получи муку из жёрнова.']
+        objective: {type: OBTAIN, targets: [flour], amount: 8}
         rewards:
           lines: ['&f• 500 монет', '&f• 200 опыта']
           commands: ['coins give {player} 500', 'minecraft:xp add {player} 200 points']

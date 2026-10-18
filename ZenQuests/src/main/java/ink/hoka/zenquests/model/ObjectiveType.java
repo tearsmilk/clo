@@ -34,7 +34,9 @@ public enum ObjectiveType {
     CATCH_FISH,   // поймать рыбу ZenFishing               — цель: id рыбы из fish.yml (carp, sturgeon …) или ANY, +1
     CATCH_RARITY, // поймать рыбу редкости                 — цель: common/uncommon/rare/epic/legendary, +1
     CATCH_NIGHT,  // поймать рыбу ночью                    — цель: id рыбы или ANY, +1
-    CATCH_BIG;    // поймать трофейную рыбу (≥ big-kg)     — цель: id рыбы или ANY, +1
+    CATCH_BIG,    // поймать трофейную рыбу (≥ big-kg)     — цель: id рыбы или ANY, +1
+    // ── предметы ──
+    OBTAIN;       // получить предмет в инвентарь (жёрнов, покупка, подбор…) — цель: материал или id Nexo (flour), + прирост
 
     public static ObjectiveType parse(String s) {
         if (s == null) return null;

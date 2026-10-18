@@ -12,6 +12,10 @@ commands:
     description: Меню квестов
     usage: /квесты
     aliases: [квесты, квест, quest, zenquests, zq]
+  ffly:
+    description: Полёт на своей ферме (Ферма+)
+    usage: /ffly
+    aliases: [фф, farmfly]
 
 permissions:
   zenquests.use:
@@ -20,6 +24,9 @@ permissions:
   zenquests.admin:
     description: /квесты reload, reset, progress и premium
     default: op
+  zenquests.ffly.free:
+    description: /ffly без подписки Ферма+
+    default: false
   zenquests.premium:
     description: Подписка Ферма+ (доп. квесты и бонусные награды)
     default: false
