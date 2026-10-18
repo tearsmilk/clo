@@ -531,6 +531,19 @@ def draw_layers(img, oy, layers, sdir, th):
         if t == 'hub':                    # main-menu kit (hub.py): slate counter, material slabs, keys, sign
             draw_hub(img, oy, L)
             continue
+        if t == 'farm_create':            # 'create farm' menu kit (farm_create.py, HD)
+            import farm_create as fc
+            if L['part'] == 'arch':
+                fc.arch(img, OX, oy, L.get('front_y', 126), L.get('title', 'Создать ферму'))
+            elif L['part'] == 'picture':
+                fc.picture(img, OX, oy, seed=L.get('seed', 5), sign_lines=tuple(L.get('sign', ['Ферма -', 'это твой', 'маленький', 'мир!'])))
+            elif L['part'] == 'floor':
+                fc.floor(img, OX, oy)
+            elif L['part'] == 'button':
+                c, r, w, h = L['slots']
+                fc.button(img, OX, oy, c, r, w, h, L['text'], L.get('color', 'green'))
+            __import__("layers").mark(f"farm_create/{L['part']}")
+            continue
         if t == 'modes':                  # mode-select kit (modes.py): world windows, signpost, soon plank
             draw_modes(img, oy, L)
             continue
@@ -1249,7 +1262,7 @@ def build(spec_path, out):
 
 
 HDK = 1                                  # texture px per GUI px ("hd": 2 = 32x32-style detail)
-HD_LAYERS = {'modes'}                    # layer types whose kits draw natively in HD
+HD_LAYERS = {'modes', 'farm_create'}                    # layer types whose kits draw natively in HD
 
 
 def _check_hd(spec):

@@ -1,0 +1,174 @@
+{
+ "id": "hokaria_farm_create",
+ "namespace": "hokaria",
+ "rows": 6,
+ "hd": 2,
+ "comment": "'Create farm' menu from the user's reference, in HD: stone arch with vines and gems, a window into the farm world with a carved sign, flagstone floor with lanterns, flowers, pumpkins, four coloured stone buttons",
+ "canvas": {
+  "left": 10,
+  "right": 10,
+  "top": 12,
+  "bottom": 0
+ },
+ "container_panel": false,
+ "draw_player_inventory": false,
+ "preview_vanilla_under": true,
+ "draw_free_slots": false,
+ "hide_inventory_label": true,
+ "preview_tooltip": "visit",
+ "layers": [
+  {
+   "type": "farm_create",
+   "part": "arch",
+   "title": "Создать ферму"
+  },
+  {
+   "type": "farm_create",
+   "part": "picture"
+  },
+  {
+   "type": "farm_create",
+   "part": "floor"
+  },
+  {
+   "type": "farm_create",
+   "part": "button",
+   "slots": [
+    3,
+    3,
+    3,
+    1
+   ],
+   "text": "Ферма",
+   "color": "green"
+  },
+  {
+   "type": "farm_create",
+   "part": "button",
+   "slots": [
+    0,
+    4,
+    4,
+    1
+   ],
+   "text": "Ферма",
+   "color": "green"
+  },
+  {
+   "type": "farm_create",
+   "part": "button",
+   "slots": [
+    5,
+    4,
+    4,
+    1
+   ],
+   "text": "В гости",
+   "color": "blue"
+  },
+  {
+   "type": "farm_create",
+   "part": "button",
+   "slots": [
+    0,
+    5,
+    4,
+    1
+   ],
+   "text": "Настройки",
+   "color": "orange"
+  },
+  {
+   "type": "farm_create",
+   "part": "button",
+   "slots": [
+    5,
+    5,
+    4,
+    1
+   ],
+   "text": "Удалить ферму",
+   "color": "red"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "farm_tp",
+   "x": 3,
+   "y": 3,
+   "w": 3,
+   "h": 1,
+   "style": "none",
+   "name": "&a&lФерма",
+   "lore": [
+    "&7Перейти на свою ферму"
+   ],
+   "commands": [
+    "[close]",
+    "[player] farm"
+   ]
+  },
+  {
+   "id": "farm",
+   "x": 0,
+   "y": 4,
+   "w": 4,
+   "h": 1,
+   "style": "none",
+   "name": "&a&lФерма",
+   "lore": [
+    "&7Перейти на свою ферму"
+   ],
+   "commands": [
+    "[close]",
+    "[player] farm"
+   ]
+  },
+  {
+   "id": "visit",
+   "x": 5,
+   "y": 4,
+   "w": 4,
+   "h": 1,
+   "style": "none",
+   "name": "&b&lВ гости",
+   "lore": [
+    "&7Посетить ферму друга"
+   ],
+   "commands": [
+    "[close]",
+    "[player] farm visit"
+   ]
+  },
+  {
+   "id": "settings",
+   "x": 0,
+   "y": 5,
+   "w": 4,
+   "h": 1,
+   "style": "none",
+   "name": "&6&lНастройки",
+   "lore": [
+    "&7Настройки фермы"
+   ],
+   "commands": [
+    "[player] farm settings"
+   ]
+  },
+  {
+   "id": "delete",
+   "x": 5,
+   "y": 5,
+   "w": 4,
+   "h": 1,
+   "style": "none",
+   "name": "&c&lУдалить ферму",
+   "lore": [
+    "&7Безвозвратно удалить ферму"
+   ],
+   "commands": [
+    "[player] farm delete"
+   ]
+  }
+ ]
+}
