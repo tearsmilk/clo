@@ -16,7 +16,7 @@ import java.time.Duration;
  *   %zenquests_premium%        — true / false
  *   %zenquests_premium_left%   — сколько осталось («3 д 4 ч», «навсегда») или пусто
  *   %zenquests_hud_<n>_active% — 1, если есть n-й (1..4) закреплённый и ещё не выполненный квест, иначе 0 (для BetterHud)
- *   %zenquests_hud_<n>_name% / _desc / _progress / _amount / _percent / _left — название, первая строка описания, прогресс
+ *   %zenquests_hud_<n>_name% / _desc / _progress / _amount / _percent / _left — название, строка задания (не цитата «…»), обрезанная до hud.desc-max, прогресс
  *   %zenquests_hud_story_active% / _name / _desc / _progress / _amount — текущий сюжетный квест (отдельный слот сверху)
  *   %zenquests_hud_count%      — сколько закреплённых ещё не выполнено; _cat — категория (daily/weekly/seasonal/story)
  */
@@ -86,7 +86,7 @@ public final class PapiHook extends PlaceholderExpansion {
             case "active" -> "1";
             case "cat" -> e.quest().category().key;
             case "name" -> Text.strip(e.quest().name()).trim();
-            case "desc" -> e.quest().description().isEmpty() ? "" : Text.strip(e.quest().description().get(0)).trim();
+            case "desc" -> hudDesc(e.quest());
             case "progress" -> String.valueOf(prog);
             case "amount" -> String.valueOf(amount);
             case "left" -> String.valueOf(amount - prog);
@@ -100,5 +100,19 @@ public final class PapiHook extends PlaceholderExpansion {
         Player online = p.getPlayer();
         if (online != null) return plugin.quests().isPremium(online);
         return plugin.premium().active(p.getUniqueId());
+    }
+
+    /** Строка задания для плашки: первая строка описания, не являющаяся цитатой («…»), обрезанная до hud.desc-max символов. */
+    private String hudDesc(ink.hoka.zenquests.model.Quest q) {
+        String pick = "";
+        for (String line : q.description()) {
+            String t = Text.strip(line).trim();
+            if (t.isEmpty()) continue;
+            if (pick.isEmpty()) pick = t;
+            if (!t.startsWith("«") && !t.startsWith("\"")) { pick = t; break; }
+        }
+        int max = plugin.getConfig().getInt("hud.desc-max", 30);
+        if (max > 3 && pick.length() > max) pick = pick.substring(0, max - 1).stripTrailing() + "…";
+        return pick;
     }
 }

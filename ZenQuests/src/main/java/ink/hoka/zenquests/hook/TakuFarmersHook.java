@@ -47,6 +47,7 @@ public final class TakuFarmersHook implements Listener {
         h.on(API + "NpcInteractEvent", e -> h.player(e, ObjectiveType.NPC_TALK, str(call(e, "getNpcId")), 1), ok, missing);
         h.on(API + "NpcDialogEvent", e -> h.player(e, ObjectiveType.DIALOG, str(call(e, "getDialogId")), 1), ok, missing);
         h.on(API + "EconomyChangeEvent", h::economy, ok, missing);
+        h.on(API + "BedActionEvent", h::bed, ok, missing);
 
         if (!ok.isEmpty()) plugin.getLogger().info("TakuFarmers найден — подключено событий: " + ok.size() + " " + ok);
         if (!missing.isEmpty()) plugin.getLogger().warning("TakuFarmers: нет событий " + missing
@@ -107,14 +108,34 @@ public final class TakuFarmersHook implements Listener {
                 int left = after != null && after.isSimilar(result) ? after.getAmount() : 0;
                 int taken = before - left;
                 if (taken <= 0) return;
-                progress(p, ObjectiveType.COOK, station, taken);
-                progress(p, ObjectiveType.COOK_ITEM, itemName(result), taken);
+                cooked(p, station, result, itemName(result), taken);
             });
             return;
         }
         // станции готовки (CookManager/CookMenu): одно событие на одно блюдо
+        cooked(p, station, result, itemName(res), n);
+    }
+
+    /** Разводка по столам: стол семян → SEEDS, жёрнов → MILL (+OBTAIN считает сам трекер), остальное → COOK/COOK_ITEM. */
+    private void cooked(Player p, String station, ItemStack result, String item, int n) {
+        if ("seed_table".equals(station)) { progress(p, ObjectiveType.SEEDS, item, n); return; }
+        if ("millstone".equals(station)) { progress(p, ObjectiveType.MILL, item, n); return; }
         progress(p, ObjectiveType.COOK, station, n);
-        progress(p, ObjectiveType.COOK_ITEM, itemName(res), n);
+        progress(p, ObjectiveType.COOK_ITEM, item, n);
+    }
+
+    /** BedActionEvent (API 1.1): грядки — прополка, полив, колодец, удобрение, посадка, сбор. */
+    private void bed(Event e) {
+        if (!(call(e, "getPlayer") instanceof Player p)) return;
+        String action = str(call(e, "getAction"));
+        String crop = str(call(e, "getCropId"));
+        if (action == null) return;
+        ObjectiveType t = switch (action) {
+            case "WEED" -> ObjectiveType.WEED; case "WATER" -> ObjectiveType.WATER; case "WATER_ALL" -> ObjectiveType.WELL;
+            case "FERTILIZE" -> ObjectiveType.FERTILIZE; case "PLANT" -> ObjectiveType.BED_PLANT; case "HARVEST" -> ObjectiveType.BED_HARVEST;
+            default -> null;
+        };
+        if (t != null) progress(p, t, crop, 1);
     }
 
     private void mill(Event e) {

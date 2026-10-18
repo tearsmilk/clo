@@ -30,6 +30,14 @@ public enum ObjectiveType {
     FARM_VISIT,   // зайти на свою ферму                   — без цели, +1
     NPC_TALK,     // клик по NPC                           — цель: id NPC, +1
     DIALOG,       // диалог с NPC (F)                      — цель: id диалога, +1
+    SEEDS,        // переработать растения в семена на столе семян — цель: id семян (seed_wheat …) или ANY, + сколько забрано
+    // ── грядки TakuFarmers (BedActionEvent, API 1.1+) ── цель: id культуры грядки (farm_wheat, farm_tomato …) или ANY
+    WEED,         // прополоть грядку мотыгой              +1
+    WATER,        // полить грядку лейкой                  +1
+    WELL,         // полить все грядки волшебным колодцем  без цели, +1 за использование
+    FERTILIZE,    // удобрить грядку                       +1
+    BED_PLANT,    // посадить на грядку                    +1
+    BED_HARVEST,  // дорастить и срезать культуру на грядке +1
     // ── рыбалка ZenFishing ──
     CATCH_FISH,   // поймать рыбу ZenFishing               — цель: id рыбы из fish.yml (carp, sturgeon …) или ANY, +1
     CATCH_RARITY, // поймать рыбу редкости                 — цель: common/uncommon/rare/epic/legendary, +1

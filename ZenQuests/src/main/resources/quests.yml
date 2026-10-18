@@ -27,6 +27,12 @@
 #                   FARM_VISIT    зайти на свою ферму                        без цели
 #                   NPC_TALK      кликнуть по NPC                            цель: id NPC
 #                   DIALOG        поговорить с NPC (F)                       цель: id диалога
+#                   SEEDS         переработать растения в семена (стол семян) цель: id семян (seed_wheat …) или ANY
+#                 Грядки TakuFarmers (нужен TakuFarmers с API 1.1+), цель: id культуры грядки (farm_wheat …) или ANY:
+#                   WEED          прополоть грядку мотыгой       WATER     полить грядку лейкой
+#                   WELL          полить всё волшебным колодцем  FERTILIZE удобрить грядку
+#                   BED_PLANT     посадить на грядку             BED_HARVEST дорастить и срезать культуру на грядке
+#                   Салат: OBTAIN с целью summer_salad (получить салат в инвентарь) или COOK_ITEM summer_salad
 #      targets    — что именно (имена Minecraft). Пусто или ANY — что угодно.
 #                   Можно шаблоном: "*_LOG" (любые брёвна), "*_ORE" (любая руда)
 #      amount     — сколько
@@ -957,7 +963,7 @@ story:
       fish-market:
         name: '&fГлава II. Рыбный рынок'
         icon: GOLD_NUGGET
-        description: ['&8«Торговка на рынке берёт всё, что шевелится.»', '&7Заработай монеты (продавай улов и урожай).']
+        description: ['&8«Торговка на рынке берёт всё, что шевелится.»', '&7Заработай монеты']
         objective: {type: EARN, targets: [COINS], amount: 1500}
         rewards:
           lines: ['&f• 400 монет', '&f• 120 опыта']
@@ -973,7 +979,7 @@ story:
       predators:
         name: '&fГлава IV. Хищники'
         icon: TRIPWIRE_HOOK
-        description: ['&8«Что-то крупное рвёт сети у камышей.»', '&7Поймай щук, судаков, сомов, угрей или налимов.']
+        description: ['&8«Что-то крупное рвёт сети у камышей.»', '&7Поймай хищную рыбу', '&8(щука, судак, сом, угорь, налим)']
         objective: {type: CATCH_FISH, targets: [pike, zander, catfish, eel, burbot], amount: 10}
         rewards:
           lines: ['&f• 600 монет', '&f• 200 опыта']
@@ -989,7 +995,7 @@ story:
       deep-water:
         name: '&fГлава VI. Глубокая вода'
         icon: PRISMARINE_SHARD
-        description: ['&8«За отмелью дно уходит в темноту.»', '&7Поймай редкую рыбу: осётр, тунец, лосось, барракуда, морской окунь, кои, лазурная форель, групер, рыба-клоун или иглобрюх.']
+        description: ['&8«За отмелью дно уходит в темноту.»', '&7Поймай редкую рыбу', '&8(осётр, тунец, лосось, барракуда, морской окунь,', '&8кои, лазурная форель, групер, рыба-клоун, иглобрюх)']
         objective: {type: CATCH_FISH, targets: [sturgeon, tuna, salmon, barracuda, sea_bass, koi, azure_trout, grouper, clownfish, pufferfish], amount: 5}
         rewards:
           lines: ['&f• 900 монет', '&f• 300 опыта']
@@ -1005,7 +1011,7 @@ story:
       lake-master:
         name: '<gradient:#38b6ff:#5ce1e6>Глава VIII. Хозяин глубин</gradient>'
         icon: HEART_OF_THE_SEA
-        description: ['&8«Старики шепчут о рыбе, которую никто не вытащил.»', '&7Поймай эпическую или легендарную рыбу.']
+        description: ['&8«Старики шепчут о рыбе, которую никто не вытащил.»', '&7Поймай эпическую или легендарную рыбу']
         objective: {type: CATCH_FISH, targets: [golden_carp, swordfish, marsh_king, beluga, mola, ice_pike, crystal_pike, moon_fish, farm_legend, goldfish, sea_dragon, kraken_calf], amount: 1}
         rewards:
           lines: ['&f• 3 000 монет', '&f• 1000 опыта', '&f• Удочка 10 уровня']

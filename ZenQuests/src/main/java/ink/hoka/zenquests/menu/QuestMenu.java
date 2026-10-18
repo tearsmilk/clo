@@ -608,6 +608,7 @@ public final class QuestMenu implements Listener {
             case BREED -> "heart"; case TAME -> "bone"; case WALK -> "boots"; case PLAYTIME -> "clock";
             case CROP_HIT, CROP_HARVEST, CROP_BREAK -> "wheat"; case COOK, COOK_ITEM -> "pot"; case MILL -> "mill";
             case FLOUR_SACK -> "sack"; case EARN, SPEND -> "coin"; case FARM_VISIT -> "house"; case NPC_TALK, DIALOG -> "bubble";
+            case SEEDS, BED_PLANT, WEED, WATER, WELL, FERTILIZE, BED_HARVEST -> "wheat";
         };
     }
 
