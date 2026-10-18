@@ -139,6 +139,8 @@ public final class Rods {
             } else lore.add(Text.parse(fill(l, rod, lvl, xp)));
         }
         m.lore(lore);
+        String tip = c.getString("rod.tooltip-style", "");
+        if (tip != null && !tip.isBlank()) { try { m.setTooltipStyle(NamespacedKey.fromString(tip)); } catch (Throwable ignored) { } }
         rod.setItemMeta(m);
     }
 

@@ -32,14 +32,14 @@ for sheet, names in NAMES.items():
         bb = cell.getbbox()
         if bb is None: print('EMPTY', n); continue
         sp = cell.crop(bb)
-        ico = pixelstyle.fit(sp, 30) if hasattr(pixelstyle, 'fit') else sp.resize((30, 30))
-        canvas = Image.new('RGBA', (32, 32), (0,0,0,0)); canvas.alpha_composite(ico, ((32-ico.width)//2, (32-ico.height)//2))
-        canvas = pixelstyle.quantize(canvas, 20) if hasattr(pixelstyle, 'quantize') else canvas
-        canvas.save(f'x32/{n}.png'); out[n] = canvas
+        ico = pixelstyle.fit(sp, 60) if hasattr(pixelstyle, 'fit') else sp.resize((30, 30))
+        canvas = Image.new('RGBA', (64, 64), (0,0,0,0)); canvas.alpha_composite(ico, ((64-ico.width)//2, (64-ico.height)//2))
+        canvas = pixelstyle.quantize(canvas, 48) if hasattr(pixelstyle, 'quantize') else canvas
+        canvas.save(f'x64/{n}.png'); out[n] = canvas
 # превью: сетка 8 колонок, 4x зум, подписи
-names = list(out); cols = 8; rows = (len(names)+cols-1)//cols; S = 4; cellw, cellh = 32*S+8, 32*S+22
+names = list(out); cols = 8; rows = (len(names)+cols-1)//cols; S = 2; cellw, cellh = 64*S+8, 64*S+22
 pv = Image.new("RGBA", (cols*cellw, rows*cellh), (28, 36, 52, 255)); dr = ImageDraw.Draw(pv)
 for i, n in enumerate(names):
     r, c = divmod(i, cols); x, y = c*cellw+4, r*cellh+4
-    pv.alpha_composite(out[n].resize((32*S, 32*S), Image.NEAREST), (x, y)); dr.text((x, y+32*S+4), n, fill=(220,220,220,255))
-pv.save('preview.png'); print(len(out), 'icons')
+    pv.alpha_composite(out[n].resize((64*S, 64*S), Image.NEAREST), (x, y)); dr.text((x, y+64*S+4), n, fill=(220,220,220,255))
+pv.save('preview64.png'); print(len(out), 'icons')

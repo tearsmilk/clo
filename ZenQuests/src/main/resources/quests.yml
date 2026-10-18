@@ -272,6 +272,50 @@ daily:
       rewards:
         lines: ['&f• 300 монет', '&f• 80 опыта']
         commands: ['coins give {player} 300', 'minecraft:xp add {player} 80 points']
+    night-angler:
+      name: '&9Ночной рыбак'
+      icon: SALMON
+      description: ['&7Поймай рыбу ночью']
+      objective:
+        type: CATCH_NIGHT
+        targets: [ANY]
+        amount: 3
+      rewards:
+        lines: ['&f• 250 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 250', 'minecraft:xp add {player} 60 points']
+    trophy:
+      name: '&9Трофей'
+      icon: TROPICAL_FISH
+      description: ['&7Поймай рыбу тяжелее 10 кг']
+      objective:
+        type: CATCH_BIG
+        targets: [ANY]
+        amount: 1
+      rewards:
+        lines: ['&f• 300 монет', '&f• 80 опыта']
+        commands: ['coins give {player} 300', 'minecraft:xp add {player} 80 points']
+    predator:
+      name: '&bХищник'
+      icon: SALMON
+      description: ['&7Поймай щуку, судака или барракуду']
+      objective:
+        type: CATCH_FISH
+        targets: [pike, zander, barracuda]
+        amount: 2
+      rewards:
+        lines: ['&f• 220 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 220', 'minecraft:xp add {player} 60 points']
+    sea-haul:
+      name: '&bМорской промысел'
+      icon: COD
+      description: ['&7Поймай сельдь, сардину или скумбрию']
+      objective:
+        type: CATCH_FISH
+        targets: [herring, sardine, mackerel]
+        amount: 5
+      rewards:
+        lines: ['&f• 200 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 200', 'minecraft:xp add {player} 50 points']
     gourmet:
       name: '&dГурман'
       icon: COOKED_BEEF
@@ -374,6 +418,17 @@ daily:
       rewards:
         lines: ['&f• 800 монет', '&f• 150 опыта']
         commands: ['coins give {player} 800', 'minecraft:xp add {player} 150 points']
+    royal-catch-plus:
+      name: '&6Царская рыба'
+      icon: SALMON
+      description: ['&7Поймай осетра или белугу']
+      objective:
+        type: CATCH_FISH
+        targets: [sturgeon, beluga]
+        amount: 1
+      rewards:
+        lines: ['&f• 900 монет', '&f• 150 опыта']
+        commands: ['coins give {player} 900', 'minecraft:xp add {player} 150 points']
 weekly:
   count: 3
   quests:
@@ -526,6 +581,50 @@ weekly:
       rewards:
         lines: ['&f• 800 монет', '&f• 200 опыта']
         commands: ['coins give {player} 800', 'minecraft:xp add {player} 200 points']
+    night-fisher:
+      name: '&9Ночной рыболов'
+      icon: SALMON
+      description: ['&7Поймай рыбу ночью']
+      objective:
+        type: CATCH_NIGHT
+        targets: [ANY]
+        amount: 20
+      rewards:
+        lines: ['&f• 1 200 монет', '&f• 200 опыта']
+        commands: ['coins give {player} 1200', 'minecraft:xp add {player} 200 points']
+    collector:
+      name: '&bКоллекционер'
+      icon: TROPICAL_FISH
+      description: ['&7Поймай необычную рыбу или редче']
+      objective:
+        type: CATCH_RARITY
+        targets: [uncommon, rare, epic, legendary]
+        amount: 15
+      rewards:
+        lines: ['&f• 1 500 монет', '&f• 250 опыта']
+        commands: ['coins give {player} 1500', 'minecraft:xp add {player} 250 points']
+    trophy-week:
+      name: '&9Трофейная неделя'
+      icon: PUFFERFISH
+      description: ['&7Поймай рыбу тяжелее 10 кг']
+      objective:
+        type: CATCH_BIG
+        targets: [ANY]
+        amount: 5
+      rewards:
+        lines: ['&f• 1 800 монет', '&f• 300 опыта']
+        commands: ['coins give {player} 1800', 'minecraft:xp add {player} 300 points']
+    pond-jewel:
+      name: '&dЖемчужина пруда'
+      icon: TROPICAL_FISH
+      description: ['&7Поймай карпа кои или золотую рыбку']
+      objective:
+        type: CATCH_FISH
+        targets: [koi, goldfish]
+        amount: 1
+      rewards:
+        lines: ['&f• 2 500 монет', '&f• 400 опыта']
+        commands: ['coins give {player} 2500', 'minecraft:xp add {player} 400 points']
   premium-count: 2
   premium-quests:
     crop-legend-plus:
@@ -582,6 +681,17 @@ weekly:
       rewards:
         lines: ['&f• 4 000 монет', '&f• 800 опыта']
         commands: ['coins give {player} 4000', 'minecraft:xp add {player} 800 points']
+    legend-plus:
+      name: '&6Легенда озера'
+      icon: HEART_OF_THE_SEA
+      description: ['&7Поймай легендарную рыбу']
+      objective:
+        type: CATCH_RARITY
+        targets: [legendary]
+        amount: 1
+      rewards:
+        lines: ['&f• 4 000 монет', '&f• 600 опыта']
+        commands: ['coins give {player} 4000', 'minecraft:xp add {player} 600 points']
 seasons:
   autumn-2026:
     name: <gradient:#f7971e:#ffd200>Осень 2026</gradient>
@@ -637,6 +747,28 @@ seasons:
         rewards:
           lines: ['&f• 1 500 монет', '&f• 300 опыта']
           commands: ['coins give {player} 1500', 'minecraft:xp add {player} 300 points']
+      autumn-night:
+        name: '&9Осенние ночи'
+        icon: SALMON
+        description: ['&7Поймай рыбу ночью']
+        objective:
+          type: CATCH_NIGHT
+          targets: [ANY]
+          amount: 25
+        rewards:
+          lines: ['&f• 2 000 монет', '&f• 350 опыта']
+          commands: ['coins give {player} 2000', 'minecraft:xp add {player} 350 points']
+      autumn-trophy:
+        name: '&9Осенний трофей'
+        icon: PUFFERFISH
+        description: ['&7Поймай рыбу тяжелее 10 кг']
+        objective:
+          type: CATCH_BIG
+          targets: [ANY]
+          amount: 3
+        rewards:
+          lines: ['&f• 2 500 монет', '&f• 400 опыта']
+          commands: ['coins give {player} 2500', 'minecraft:xp add {player} 400 points']
       fair:
         name: '&eЯрмарка'
         icon: GOLD_INGOT

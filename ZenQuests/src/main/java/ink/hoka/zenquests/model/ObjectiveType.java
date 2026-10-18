@@ -32,7 +32,9 @@ public enum ObjectiveType {
     DIALOG,       // диалог с NPC (F)                      — цель: id диалога, +1
     // ── рыбалка ZenFishing ──
     CATCH_FISH,   // поймать рыбу ZenFishing               — цель: id рыбы из fish.yml (carp, sturgeon …) или ANY, +1
-    CATCH_RARITY; // поймать рыбу редкости                 — цель: common/uncommon/rare/epic/legendary, +1
+    CATCH_RARITY, // поймать рыбу редкости                 — цель: common/uncommon/rare/epic/legendary, +1
+    CATCH_NIGHT,  // поймать рыбу ночью                    — цель: id рыбы или ANY, +1
+    CATCH_BIG;    // поймать трофейную рыбу (≥ big-kg)     — цель: id рыбы или ANY, +1
 
     public static ObjectiveType parse(String s) {
         if (s == null) return null;

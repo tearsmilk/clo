@@ -40,11 +40,12 @@ public final class FishingListener implements Listener {
         Player p = e.getPlayer();
         if (e.getState() == PlayerFishEvent.State.FISHING) {
             Rods.Bonus b = plugin.rods().bonus(rod(p, e), plugin.isPremium(p));
-            if (b.bite() > 0) {
+            double bite = Math.min(0.9, b.bite() + (isNight(p) ? plugin.getConfig().getDouble("catch.night.bite-speed", 0) : 0));
+            if (bite > 0) {
                 FishHook h = e.getHook();
                 try {
-                    h.setMinWaitTime((int) Math.max(5, Math.round(100 * (1 - b.bite()))));
-                    h.setMaxWaitTime((int) Math.max(20, Math.round(600 * (1 - b.bite()))));
+                    h.setMinWaitTime((int) Math.max(5, Math.round(100 * (1 - bite))));
+                    h.setMaxWaitTime((int) Math.max(20, Math.round(600 * (1 - bite))));
                 } catch (Throwable ignored) { }
             }
             return;
@@ -57,14 +58,17 @@ public final class FishingListener implements Listener {
         boolean premium = plugin.isPremium(p);
         Rods.Bonus b = plugin.rods().bonus(rod, premium);
         Location where = e.getHook().getLocation();
-        Fish f = plugin.fish().roll(where, b.luck(), premium);
+        boolean night = isNight(p);
+        double luck = b.luck() + (night ? plugin.getConfig().getDouble("catch.night.luck", 0) : 0);
+        Fish f = plugin.fish().roll(where, luck, premium);
         if (f == null) return;
         double weight = plugin.fish().rollWeight(f, b.big());
         item.setItemStack(plugin.items().create(f, weight, p));
         handleCatch(p, f, weight, rod, b, false);
+        if (night && plugin.getConfig().getBoolean("catch.night.message", true) && f.rarity().order() >= 2) plugin.msg(p, "night-bite");
 
         if (ThreadLocalRandom.current().nextDouble() < b.dbl()) {
-            Fish f2 = plugin.fish().roll(where, b.luck(), premium);
+            Fish f2 = plugin.fish().roll(where, luck, premium);
             if (f2 != null) {
                 double w2 = plugin.fish().rollWeight(f2, b.big());
                 ItemStack extra = plugin.items().create(f2, w2, p);
@@ -73,6 +77,12 @@ public final class FishingListener implements Listener {
                 handleCatch(p, f2, w2, rod, b, true);
             }
         }
+    }
+
+    /** Ночь в мире игрока: 13000..23000 тиков (от заката до рассвета). */
+    static boolean isNight(Player p) {
+        long t = p.getWorld().getTime();
+        return t >= 13000 && t < 23000;
     }
 
     private void handleCatch(Player p, Fish f, double weight, ItemStack rod, Rods.Bonus b, boolean extra) {
@@ -99,7 +109,7 @@ public final class FishingListener implements Listener {
                 if (plugin.getConfig().getBoolean("catch.sounds", true)) p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 1.2f);
             }
         }
-        if (plugin.quests()) ink.hoka.zenfishing.hook.QuestsHook.progress(p, f, extra);
+        if (plugin.quests()) ink.hoka.zenfishing.hook.QuestsHook.progress(p, f, extra, isNight(p), weight >= plugin.getConfig().getDouble("catch.big-kg", 10));
     }
 
     @EventHandler

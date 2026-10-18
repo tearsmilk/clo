@@ -25,7 +25,8 @@
 - Jar: `./gradlew build` в `ZenFishing/` → `plugins/ZenFishing-<версия>.jar`, старый удалить; деплой и рестарт как у ZenQuests.
 - Конфиги: `plugins/ZenFishing/config.yml`, `fish.yml`; `/рыбалка reload`. Продажа — Vault (экономика монет TakuFarmers).
 - Своей подписки нет: бонусы рыбалки даёт Ферма+ из ZenQuests (право `zenquests.premium` / `QuestsAPI.isPremium`). Квесты на рыбу —
-  типы `CATCH_FISH` (цель id рыбы) и `CATCH_RARITY`. rurukaFish с сервера удалён (jar), папка `plugins/rurukaFish` оставлена.
+  типы `CATCH_FISH` (цель id рыбы), `CATCH_RARITY`, `CATCH_NIGHT`, `CATCH_BIG` (≥ `catch.big-kg`). Ночью (13000–23000) клёв и удача выше
+  (`catch.night`). Тултип `zenfishing:sea` на удочке, рыбе и меню. Текстуры рыбы 64x64. rurukaFish удалён (jar), папка оставлена.
 
 ## ZenGroups (группы/права) — тот же сервер
 - Jar: `./gradlew build` в `ZenGroups/` → `plugins/ZenGroups-<версия>.jar`; деплой и рестарт как у ZenQuests.

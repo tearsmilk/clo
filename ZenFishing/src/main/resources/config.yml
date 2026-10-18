@@ -20,6 +20,8 @@ rod:
     double: { name: "Двойной улов",  per-point: 0.02, max: 10, cost-base: 200, cost-growth: 1.35 }   # шанс второй рыбы
     sell:   { name: "Цена",          per-point: 0.04, max: 10, cost-base: 180, cost-growth: 1.35 }   # дороже продажа
     big:    { name: "Крупная рыба",  per-point: 0.05, max: 9,  cost-base: 150, cost-growth: 1.35 }   # рыба тяжелее
+  # Свой стиль подсказки удочки (ресурспак assets/zenfishing/textures/gui/sprites/tooltip/sea_*.png). Пусто — обычный.
+  tooltip-style: "zenfishing:sea"
   name: "&b🎣 Удочка &7[&fур. {level}&7]"
   name-max: "&b🎣 Удочка &7[&6МАКС&7]"
   # {tracks} — по строке track-line на каждую прокачанную ветку; {free} — свободные очки
@@ -48,6 +50,15 @@ catch:
   # Своя текстура рыбы из ресурспака: шаблон модели предмета, {id} — id рыбы из fish.yml
   # (assets/zenfishing/items/fish/<id>.json). Пусто "" — ванильные предметы. У рыбы можно задать свой model.
   item-model: "zenfishing:fish/{id}"
+  # Стиль подсказки у пойманной рыбы (как у удочки). Пусто — обычный.
+  tooltip-style: "zenfishing:sea"
+  # Ночью (13000–23000 тиков) клюёт лучше: прибавка к скорости клёва и к удаче (доли)
+  night:
+    bite-speed: 0.3
+    luck: 0.15
+    message: true     # «Ночной клёв!» при редкой рыбе ночью
+  # От какого веса рыба считается трофейной (квесты CATCH_BIG)
+  big-kg: 10
   # Подпись на рыбе
   name: "{color}{fish} &7({weight} кг)"
   lore:
@@ -92,7 +103,7 @@ menu:
   corner: CYAN_STAINED_GLASS_PANE
   background: BLACK_STAINED_GLASS_PANE
   # Стиль подсказки из ресурспака (как у квестов). Пусто "" — обычный.
-  tooltip-style: "zenquests:farm"
+  tooltip-style: "zenfishing:sea"
   # Нарисованные фоны (ресурспак assets/zenfishing/font/menu.json + textures/gui/menu, scene): та же схема, что у квестов.
   textures:
     enabled: true
@@ -160,6 +171,7 @@ messages:
   usage-admin: "&7/рыбалка reload &8— &fперезагрузить\n&7/рыбалка rod [игрок] [уровень] &8— &fвыдать удочку\n&7/рыбалка stats <игрок> &8— &fстатистика\n&7Подписка Ферма+ — /квесты premium give|take|check"
   usage: "&7/рыбалка &8— &fменю\n&7/рыбалка продать &8— &fпродать всю рыбу\n&7/рыбалка топ &8— &fтоп рыбаков"
   caught: "{color}Поймана {fish} &7({weight} кг) {color}— {rarity}&7! &8+{xp} опыта удочки"
+  night-bite: "&9🌙 Ночной клёв! &7Ночью рыба идёт лучше."
   caught-double: "&b✦ Двойной улов! &7Ещё одна рыба: {color}{fish}"
   announce: "&b🎣 &f{player} &7поймал {color}{fish} &7({weight} кг) — {color}{rarity}&7!"
   record: "&6★ Новый личный рекорд: {color}{fish} &6{weight} кг!"

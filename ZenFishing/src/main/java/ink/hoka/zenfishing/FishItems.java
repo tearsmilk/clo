@@ -45,6 +45,8 @@ public final class FishItems {
         m.lore(lore);
         String model = f.model() != null ? f.model() : plugin.getConfig().getString("catch.item-model", "").replace("{id}", f.id());
         if (model != null && !model.isBlank()) { try { m.setItemModel(NamespacedKey.fromString(model)); } catch (Throwable ignored) { } }
+        String tip = plugin.getConfig().getString("catch.tooltip-style", "");
+        if (tip != null && !tip.isBlank()) { try { m.setTooltipStyle(NamespacedKey.fromString(tip)); } catch (Throwable ignored) { } }
         it.setItemMeta(m);
         return it;
     }

@@ -13,8 +13,12 @@
 - Превью: `preview_main.png`, `preview_rod.png`.
 
 ## Текстуры рыбы
-`fish-icons/*.png` (32x32, 44 видов) — сгенерированы Figma AI тремя листами 4x4 (`fish-icons/_sheet*.png`, промпт — список
+`fish-icons/*.png` (64x64, 44 видов; `fish_icons_cut.py` режет листы с fit 60 + quantize 48) — сгенерированы Figma AI тремя листами 4x4 (`fish-icons/_sheet*.png`, промпт — список
 рыб по рядам на магентовом фоне), нарезаны по клеткам `fish_icons_cut.py` (мусор соседних клеток отфильтрован по связным
 компонентам, затем `pixelstyle.fit(30)` + `quantize(20)`). Пак: `assets/zenfishing/textures/item/fish/<id>.png`,
 `models/item/fish/<id>.json` (generated), `items/fish/<id>.json`; плагин ставит модель `zenfishing:fish/<id>`
 (`catch.item-model` в config.yml) — отдельных yml предметов Nexo нет. Превью — `fish_icons_preview.png`.
+
+## Тултип «море»
+`tooltip/sea_background.png`, `tooltip/sea_frame.png` (40x40, nine_slice border 12, как farm у квестов) → `assets/zenfishing/textures/gui/sprites/tooltip/`.
+Ставится на удочку (`rod.tooltip-style`), пойманную рыбу (`catch.tooltip-style`) и меню (`menu.tooltip-style`) — `zenfishing:sea`. Превью — `tooltip/preview_sea_tooltip.png`.
