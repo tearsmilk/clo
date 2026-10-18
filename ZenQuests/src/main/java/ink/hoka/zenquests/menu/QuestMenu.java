@@ -603,7 +603,7 @@ public final class QuestMenu implements Listener {
     /** Эмблема по типу задания — имя слоя в ресурспаке. */
     static String emblem(ObjectiveType t) {
         return switch (t) {
-            case BREAK -> "pickaxe"; case PLACE -> "block"; case KILL -> "sword"; case FISH, CATCH_FISH, CATCH_RARITY, CATCH_NIGHT, CATCH_BIG -> "fish";
+            case BREAK -> "pickaxe"; case PLACE -> "block"; case KILL -> "sword"; case FISH, CATCH_FISH, CATCH_RARITY, CATCH_NIGHT, CATCH_BIG -> "fish"; case OBTAIN -> "sack";
             case CRAFT -> "craft"; case SMELT -> "furnace"; case EAT -> "apple"; case ENCHANT -> "ench";
             case BREED -> "heart"; case TAME -> "bone"; case WALK -> "boots"; case PLAYTIME -> "clock";
             case CROP_HIT, CROP_HARVEST, CROP_BREAK -> "wheat"; case COOK, COOK_ITEM -> "pot"; case MILL -> "mill";
