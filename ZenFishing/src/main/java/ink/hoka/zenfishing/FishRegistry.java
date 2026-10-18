@@ -77,13 +77,13 @@ public final class FishRegistry {
         double x = rnd.nextDouble() * total;
         int pick = 0;
         for (int i = 0; i < w.length; i++) { x -= w[i]; if (x <= 0) { pick = i; break; } }
-        Set<String> groups = biomeGroups(hook);
+        Set<String> groups = hook == null ? null : biomeGroups(hook);
         for (int i = pick; i >= 0; i--) {
             List<Fish> c = new ArrayList<>();
             for (Fish f : fish.values()) {
                 if (f.rarity() != rs.get(i)) continue;
                 if (f.premium() && !premium) continue;
-                if (!f.biomes().isEmpty() && Collections.disjoint(f.biomes(), groups)) continue;
+                if (groups != null && !f.biomes().isEmpty() && Collections.disjoint(f.biomes(), groups)) continue;
                 c.add(f);
             }
             if (!c.isEmpty()) return c.get(rnd.nextInt(c.size()));

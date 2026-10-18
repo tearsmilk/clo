@@ -52,7 +52,7 @@ public final class FishingListener implements Listener {
         }
         if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH) return;
         if (!(e.getCaught() instanceof Item item)) return;
-        if (!VANILLA_FISH.contains(item.getItemStack().getType())) return;   // хлам и сокровища — ванильные
+        // любой улов (рыба, хлам, сокровища) заменяется нашей рыбой — ванильных предметов с удочки нет
 
         ItemStack rod = rod(p, e);
         boolean premium = plugin.isPremium(p);
@@ -61,6 +61,7 @@ public final class FishingListener implements Listener {
         boolean night = isNight(p);
         double luck = b.luck() + (night ? plugin.getConfig().getDouble("catch.night.luck", 0) : 0);
         Fish f = plugin.fish().roll(where, luck, premium);
+        if (f == null) f = plugin.fish().roll(null, luck, premium);   // в биоме ничего не водится — любая рыба
         if (f == null) return;
         item.setItemStack(plugin.items().create(f, 0, p));
         handleCatch(p, f, rod, b, false);

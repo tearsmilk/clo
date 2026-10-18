@@ -72,8 +72,8 @@ model = {"credit": "ZenQuests quest_book_model.py", "texture_size": [64, 64],
                      # в руках: книга повёрнута страницами к лицу (наклон к камере), крупнее
                      "thirdperson_righthand": {"rotation": [-75, 0, 0], "translation": [0, 3.5, 1.5], "scale": [0.75, 0.75, 0.75]},
                      "thirdperson_lefthand": {"rotation": [-75, 0, 0], "translation": [0, 3.5, 1.5], "scale": [0.75, 0.75, 0.75]},
-                     "firstperson_righthand": {"rotation": [-65, 15, 0], "translation": [-2, 5, -3], "scale": [1.0, 1.0, 1.0]},
-                     "firstperson_lefthand": {"rotation": [-65, -15, 0], "translation": [2, 5, -3], "scale": [1.0, 1.0, 1.0]}}}
+                     "firstperson_righthand": {"rotation": [70, -15, 0], "translation": [1, -1, -1.5], "scale": [0.85, 0.85, 0.85]},
+                     "firstperson_lefthand": {"rotation": [70, 15, 0], "translation": [-1, -1, -1.5], "scale": [0.85, 0.85, 0.85]}}}
 json.dump(model, open(OUT_M, 'w'), separators=(',', ':'))
 print('book ok')
 

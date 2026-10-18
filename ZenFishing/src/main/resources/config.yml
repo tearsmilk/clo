@@ -168,7 +168,7 @@ messages:
   caught: "{color}Поймана {fish}&7! &8+{xp} опыта удочки"
   night-bite: "&9🌙 Ночной клёв! &7Ночью рыба идёт лучше."
   caught-double: "&b✦ Двойной улов! &7Ещё одна рыба: {color}{fish}"
-  announce: "&b🎣 &f{player} &7поймал {color}{fish} &7— {color}{rarity}&7!"
+  announce: "&b🎣 &f{player} &7поймал {color}{fish}&7!"
   new-species: "&6★ Новый вид в коллекции: {color}{fish} &7({known}/{total})"
   level-up: "&b🎣 Удочка прокачана до &fуровня {level}&b!"
   level-max: "&6✦ Удочка достигла максимального уровня!"
