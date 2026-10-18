@@ -107,6 +107,12 @@ public final class FishingListener implements Listener {
         if (plugin.quests()) ink.hoka.zenfishing.hook.QuestsHook.progress(p, f, extra, isNight(p), false);
     }
 
+    /** Удочки не ломаются (rod.unbreakable): урон прочности отменяется у любой удочки. */
+    @EventHandler(ignoreCancelled = true)
+    public void onDamage(org.bukkit.event.player.PlayerItemDamageEvent e) {
+        if (e.getItem().getType() == Material.FISHING_ROD && plugin.getConfig().getBoolean("rod.unbreakable", true)) e.setCancelled(true);
+    }
+
     @EventHandler
     public void onQuit(PlayerQuitEvent e) { plugin.stats().unload(e.getPlayer().getUniqueId()); }
 }
