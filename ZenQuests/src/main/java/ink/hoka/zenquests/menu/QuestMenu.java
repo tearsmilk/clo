@@ -223,6 +223,7 @@ public final class QuestMenu implements Listener {
             for (String l : plugin.getConfig().getStringList("premium.locked-lore")) lore.add(fill(l, "count", locked));
             items.add(icon("locked", item(lockedIcon(), premiumText("premium.locked-name", "count", locked), lore, false, Math.min(64, locked))));
             placers.add(() -> deny(p));
+            pins.add(null);
         }
 
         Holder h = new Holder();
@@ -511,7 +512,7 @@ public final class QuestMenu implements Listener {
         for (int i = 0; i < INNER.length && from + i < items.size(); i++) {
             h.inv.setItem(INNER[i], items.get(from + i));
             h.actions.put(INNER[i], actions.get(from + i));
-            if (rightActions != null && rightActions.get(from + i) != null) h.rightActions.put(INNER[i], rightActions.get(from + i));
+            if (rightActions != null && from + i < rightActions.size() && rightActions.get(from + i) != null) h.rightActions.put(INNER[i], rightActions.get(from + i));
         }
     }
 
