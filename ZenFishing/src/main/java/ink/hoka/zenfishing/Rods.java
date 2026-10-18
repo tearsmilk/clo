@@ -21,7 +21,7 @@ import java.util.List;
 public final class Rods {
 
     /** Ветки прокачки — ключи rod.upgrades.<id>, порядок — порядок в меню. */
-    public static final String[] TRACKS = {"luck", "bite", "double", "sell", "big"};
+    public static final String[] TRACKS = {"luck", "bite", "double", "sell", "xp"};
 
     /** Бонусы удочки в руке: доли (0.25 = +25%). */
     public record Bonus(int level, double luck, double bite, double dbl, double sell, double big, double xpMul) {}
@@ -90,12 +90,12 @@ public final class Rods {
     /** Бонусы удочки (с учётом подписки игрока). Без удочки — уровень 0 и только подписка. */
     public Bonus bonus(ItemStack rod, boolean premium) {
         double luck = 0, bite = 0, dbl = 0, sell = 0, big = 0, xp = 1;
-        if (isRod(rod)) { luck = trackValue(rod, 0); bite = trackValue(rod, 1); dbl = trackValue(rod, 2); sell = trackValue(rod, 3); big = trackValue(rod, 4); }
+        if (isRod(rod)) { luck = trackValue(rod, 0); bite = trackValue(rod, 1); dbl = trackValue(rod, 2); sell = trackValue(rod, 3); xp += trackValue(rod, 4); }
         var c = plugin.getConfig();
         if (premium) {
             luck += c.getDouble("premium.luck", 0); bite += c.getDouble("premium.bite-speed", 0);
             dbl += c.getDouble("premium.double-catch", 0); sell += c.getDouble("premium.sell-bonus", 0);
-            xp = c.getDouble("premium.xp-multiplier", 1);
+            xp *= c.getDouble("premium.xp-multiplier", 1);
         }
         return new Bonus(level(rod), luck, Math.min(0.9, bite), Math.min(0.95, dbl), sell, big, xp);
     }

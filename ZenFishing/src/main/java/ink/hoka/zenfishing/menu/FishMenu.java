@@ -119,16 +119,16 @@ public final class FishMenu implements Listener {
         out.add(cfg("top.lore-caught", "&bПо улову:"));
         int n = 0;
         for (PlayerStats s : all) { if (s.caught <= 0 || ++n > 5) break; out.add(fill(line, "n", n, "player", s.name, "value", s.caught)); }
-        all.sort(Comparator.comparingDouble((PlayerStats s) -> s.bestWeight).reversed());
-        out.add(""); out.add(cfg("top.lore-biggest", "&bСамая крупная рыба:"));
+        all.sort(Comparator.comparingInt((PlayerStats s) -> s.known()).reversed());
+        out.add(""); out.add(cfg("top.lore-biggest", "&bПо видам:"));
         n = 0;
-        for (PlayerStats s : all) { if (s.bestWeight <= 0 || ++n > 5) break; out.add(fill(line, "n", n, "player", s.name, "value", bestText(s))); }
+        for (PlayerStats s : all) { if (s.known() <= 0 || ++n > 5) break; out.add(fill(line, "n", n, "player", s.name, "value", s.known() + "/" + plugin.fish().size())); }
         return out;
     }
 
     private String bestText(PlayerStats s) {
         Fish f = plugin.fish().get(s.bestFish);
-        return f == null ? "—" : f.rarity().color() + f.name() + " &f" + Text.num(s.bestWeight) + " кг";
+        return f == null ? "—" : f.rarity().color() + f.name();
     }
 
     // ── прокачка удочки ──

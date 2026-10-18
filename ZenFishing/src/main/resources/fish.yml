@@ -8,9 +8,7 @@
 #    model       — своя текстура из ресурспака (assets/zenfishing/items/fish/<id>.json); по умолчанию берётся
 #                  zenfishing:fish/<id> (см. catch.item-model в config.yml), "" — без своей модели
 #    rarity      — редкость из rarities
-#    weight      — [мин, макс] вес в кг
-#    price       — базовая цена
-#    price-per-kg — добавка за каждый кг веса
+#    price       — цена продажи (weight и price-per-kg больше не используются)
 #    premium     — true: ловится только с подпиской Ферма+
 #    biomes      — где ловится: пусто — везде; иначе группы OCEAN, RIVER, SWAMP, LUSH, COLD, JUNGLE или ключи
 #                  биомов (minecraft:deep_ocean). Проверяется биом крючка.

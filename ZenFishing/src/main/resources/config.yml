@@ -19,7 +19,7 @@ rod:
     bite:   { name: "Клёв",          per-point: 0.06, max: 10, cost-base: 120, cost-growth: 1.35 }   # быстрее поклёвка
     double: { name: "Двойной улов",  per-point: 0.02, max: 10, cost-base: 200, cost-growth: 1.35 }   # шанс второй рыбы
     sell:   { name: "Цена",          per-point: 0.04, max: 10, cost-base: 180, cost-growth: 1.35 }   # дороже продажа
-    big:    { name: "Крупная рыба",  per-point: 0.05, max: 9,  cost-base: 150, cost-growth: 1.35 }   # рыба тяжелее
+    xp:     { name: "Опыт",          per-point: 0.05, max: 9,  cost-base: 150, cost-growth: 1.35 }   # больше опыта удочке
   # Свой стиль подсказки удочки (ресурспак assets/zenfishing/textures/gui/sprites/tooltip/sea_*.png). Пусто — обычный.
   tooltip-style: "zenfishing:sea"
   name: "&b🎣 Удочка &7[&fур. {level}&7]"
@@ -57,15 +57,9 @@ catch:
     bite-speed: 0.3
     luck: 0.15
     message: true     # «Ночной клёв!» при редкой рыбе ночью
-  # От какого веса рыба считается трофейной (квесты CATCH_BIG)
-  big-kg: 10
-  # Подпись на рыбе
-  name: "{color}{fish} &7({weight} кг)"
-  lore:
-    - "{color}{rarity}"
-    - "&7Вес: &f{weight} кг"
-    - "&7Цена: &e{price} {currency}"
-    - "&8Поймал: {player}, {date}"
+  # Подпись на рыбе: только название (цвет — по редкости). Описание пустое — рыба складывается в стак.
+  name: "{color}{fish}"
+  lore: []
 
 # ── Продажа (/рыбалка продать или кнопка в меню) ──
 sell:
@@ -118,7 +112,7 @@ menu:
     lore:
       - "&7Поймано рыбы: &f{caught}"
       - "&7Открыто видов: &f{known}&7/&f{total}"
-      - "&7Самая крупная: &f{best}"
+      - "&7Самая редкая: &f{best}"
       - "&7Заработано: &e{earned} {currency}"
   rod:
     name: "&bУдочка в руке"
@@ -141,7 +135,7 @@ menu:
       - "&eНажми, чтобы вложить очко"
     lore-max: ["&7Сейчас: &a+{value}%", "", "&6✦ Ветка прокачана полностью"]
     lore-no-points: ["&7Сейчас: &a+{value}%", "&7Следующее очко: &a+{next}%", "", "&cНет свободных очков", "&7Очки дают уровни удочки"]
-    items: { luck: RABBIT_FOOT, bite: CLOCK, double: COD, sell: GOLD_NUGGET, big: SALMON }
+    items: { luck: RABBIT_FOOT, bite: CLOCK, double: COD, sell: GOLD_NUGGET, xp: EXPERIENCE_BOTTLE }
   rod-none:
     name: "&cНет удочки"
     lore: ["&7Возьми удочку в руку", "&7и открой меню снова"]
@@ -154,7 +148,7 @@ menu:
     item: WRITABLE_BOOK
     line: "&7{n}. &f{player} &8— &f{value}"
     lore-caught: "&bПо улову:"
-    lore-biggest: "&bСамая крупная рыба:"
+    lore-biggest: "&bПо видам:"
   premium:
     active: { name: "{premium} &aактивна", lore: ["&7Твои бонусы на рыбалке:", ""], item: GOLDEN_HOE }
     inactive: { name: "{premium}", lore: ["&7С подпиской на рыбалке:", ""], item: WHEAT }
@@ -170,11 +164,11 @@ messages:
   reloaded: "&aКонфиги перезагружены: рыбы — {fish}."
   usage-admin: "&7/рыбалка reload &8— &fперезагрузить\n&7/рыбалка rod [игрок] [уровень] &8— &fвыдать удочку\n&7/рыбалка stats <игрок> &8— &fстатистика\n&7Подписка Ферма+ — /квесты premium give|take|check"
   usage: "&7/рыбалка &8— &fменю\n&7/рыбалка продать &8— &fпродать всю рыбу\n&7/рыбалка топ &8— &fтоп рыбаков"
-  caught: "{color}Поймана {fish} &7({weight} кг) {color}— {rarity}&7! &8+{xp} опыта удочки"
+  caught: "{color}Поймана {fish}&7! &8+{xp} опыта удочки"
   night-bite: "&9🌙 Ночной клёв! &7Ночью рыба идёт лучше."
   caught-double: "&b✦ Двойной улов! &7Ещё одна рыба: {color}{fish}"
-  announce: "&b🎣 &f{player} &7поймал {color}{fish} &7({weight} кг) — {color}{rarity}&7!"
-  record: "&6★ Новый личный рекорд: {color}{fish} &6{weight} кг!"
+  announce: "&b🎣 &f{player} &7поймал {color}{fish} &7— {color}{rarity}&7!"
+  new-species: "&6★ Новый вид в коллекции: {color}{fish} &7({known}/{total})"
   level-up: "&b🎣 Удочка прокачана до &fуровня {level}&b!"
   level-max: "&6✦ Удочка достигла максимального уровня!"
   upgraded: "&b🎣 {track} &7→ &a+{value}%&7. Осталось очков: &e{free}"
@@ -188,7 +182,7 @@ messages:
   rod-given: "&aВыдана удочка &fур. {level} &aигроку &f{player}&a."
   player-not-found: "&cИгрок {player} не в сети."
   player-unknown: "&cИгрок {player} не найден."
-  stats: "&b{player}&7: поймано &f{caught}&7, видов &f{known}&7/&f{total}&7, рекорд &f{best}&7, заработано &e{earned} {currency}"
+  stats: "&b{player}&7: поймано &f{caught}&7, видов &f{known}&7/&f{total}&7, самая редкая &f{best}&7, заработано &e{earned} {currency}"
   top-header: "&b🎣 Топ рыбаков"
   top-line: "&7{n}. &f{player} &8— &f{value}"
   premium-only: "&cЭта рыба только для подписчиков {premium}."

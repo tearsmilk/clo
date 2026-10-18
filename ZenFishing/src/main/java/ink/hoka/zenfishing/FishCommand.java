@@ -76,7 +76,7 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
 
     public String best(PlayerStats s) {
         Fish f = plugin.fish().get(s.bestFish);
-        return f == null ? "—" : f.rarity().color() + f.name() + " &f" + Text.num(s.bestWeight) + " кг";
+        return f == null ? "—" : f.rarity().color() + f.name();
     }
 
     private void top(CommandSender sender) {
@@ -86,7 +86,7 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
         int n = 0;
         for (PlayerStats s : all) {
             if (s.caught <= 0 || ++n > 10) break;
-            plugin.msg(sender, "top-line", "n", n, "player", s.name, "value", s.caught + " рыбы, рекорд " + best(s));
+            plugin.msg(sender, "top-line", "n", n, "player", s.name, "value", s.caught + " рыбы, видов " + s.known());
         }
     }
 

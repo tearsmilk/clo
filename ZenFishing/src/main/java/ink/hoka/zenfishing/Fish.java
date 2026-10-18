@@ -12,5 +12,5 @@ import java.util.Set;
 public record Fish(String id, String name, String item, Rarity rarity, double minWeight, double maxWeight,
                    double price, double pricePerKg, boolean premium, Set<String> biomes, List<String> lore, String model) {
 
-    public double priceFor(double weight) { return price + pricePerKg * weight; }
+    public double priceFor(double weight) { return price; }   // вес больше не используется, цена фиксированная
 }

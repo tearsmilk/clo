@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "ink.hoka"
-version = "1.4.0"
+version = "1.5.0"
 description = "Рыбалка: редкая рыба, прокачка удочки, подписка Рыбак+"
 
 repositories {

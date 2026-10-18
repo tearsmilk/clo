@@ -14,23 +14,20 @@ public final class PlayerStats {
     public String name = "";
     public int caught = 0;
     public double earned = 0;
-    public String bestFish = null;
-    public double bestWeight = 0;
+    public String bestFish = null;      // самая редкая пойманная
+    public int bestRarity = -1;
     public final Map<String, Integer> count = new HashMap<>();
-    public final Map<String, Double> best = new HashMap<>();
     public boolean dirty = false;
 
     public int known() { return count.size(); }
 
-    /** @return true, если это новый личный рекорд по виду */
-    public boolean record(Fish f, double weight) {
+    /** @return true, если этот вид пойман впервые */
+    public boolean record(Fish f) {
         caught++;
-        count.merge(f.id(), 1, Integer::sum);
-        boolean rec = weight > best.getOrDefault(f.id(), 0.0);
-        if (rec) best.put(f.id(), weight);
-        if (weight > bestWeight) { bestWeight = weight; bestFish = f.id(); }
+        boolean first = count.merge(f.id(), 1, Integer::sum) == 1;
+        if (f.rarity().order() > bestRarity) { bestRarity = f.rarity().order(); bestFish = f.id(); }
         dirty = true;
-        return rec;
+        return first;
     }
 
     public static PlayerStats load(File file) {
@@ -41,11 +38,9 @@ public final class PlayerStats {
         d.caught = y.getInt("caught", 0);
         d.earned = y.getDouble("earned", 0);
         d.bestFish = y.getString("best.fish", null);
-        d.bestWeight = y.getDouble("best.weight", 0);
+        d.bestRarity = y.getInt("best.rarity", -1);
         ConfigurationSection c = y.getConfigurationSection("count");
         if (c != null) for (String k : c.getKeys(false)) d.count.put(k, c.getInt(k));
-        ConfigurationSection b = y.getConfigurationSection("records");
-        if (b != null) for (String k : b.getKeys(false)) d.best.put(k, b.getDouble(k));
         return d;
     }
 
@@ -55,9 +50,8 @@ public final class PlayerStats {
         y.set("caught", caught);
         y.set("earned", earned);
         y.set("best.fish", bestFish);
-        y.set("best.weight", bestWeight);
+        y.set("best.rarity", bestRarity);
         for (Map.Entry<String, Integer> e : count.entrySet()) y.set("count." + e.getKey(), e.getValue());
-        for (Map.Entry<String, Double> e : best.entrySet()) y.set("records." + e.getKey(), e.getValue());
         file.getParentFile().mkdirs();
         y.save(file);
         dirty = false;

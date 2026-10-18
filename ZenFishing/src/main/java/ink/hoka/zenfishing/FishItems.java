@@ -37,7 +37,6 @@ public final class FishItems {
         if (m == null) return it;
         PersistentDataContainer pdc = m.getPersistentDataContainer();
         pdc.set(kFish, PersistentDataType.STRING, f.id());
-        pdc.set(kWeight, PersistentDataType.DOUBLE, weight);
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         m.displayName(Text.parse(fill(plugin.getConfig().getString("catch.name", "{fish}"), f, weight, who, date)));
         List<Component> lore = new ArrayList<>();
@@ -74,7 +73,7 @@ public final class FishItems {
         String id = pdc.get(kFish, PersistentDataType.STRING);
         Fish f = plugin.fish().get(id);
         if (f == null) return null;
-        return new Caught(f, pdc.getOrDefault(kWeight, PersistentDataType.DOUBLE, f.minWeight()));
+        return new Caught(f, 0);
     }
 
     /** Базовый предмет: nexo:<id> через NexoItems (рефлексией) или материал. */

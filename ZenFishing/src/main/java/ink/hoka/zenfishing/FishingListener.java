@@ -62,19 +62,17 @@ public final class FishingListener implements Listener {
         double luck = b.luck() + (night ? plugin.getConfig().getDouble("catch.night.luck", 0) : 0);
         Fish f = plugin.fish().roll(where, luck, premium);
         if (f == null) return;
-        double weight = plugin.fish().rollWeight(f, b.big());
-        item.setItemStack(plugin.items().create(f, weight, p));
-        handleCatch(p, f, weight, rod, b, false);
+        item.setItemStack(plugin.items().create(f, 0, p));
+        handleCatch(p, f, rod, b, false);
         if (night && plugin.getConfig().getBoolean("catch.night.message", true) && f.rarity().order() >= 2) plugin.msg(p, "night-bite");
 
         if (ThreadLocalRandom.current().nextDouble() < b.dbl()) {
             Fish f2 = plugin.fish().roll(where, luck, premium);
             if (f2 != null) {
-                double w2 = plugin.fish().rollWeight(f2, b.big());
-                ItemStack extra = plugin.items().create(f2, w2, p);
+                ItemStack extra = plugin.items().create(f2, 0, p);
                 for (ItemStack rest : p.getInventory().addItem(extra).values()) p.getWorld().dropItemNaturally(p.getLocation(), rest);
-                plugin.msg(p, "caught-double", "color", f2.rarity().color(), "fish", f2.name(), "weight", ink.hoka.zenfishing.util.Text.num(w2));
-                handleCatch(p, f2, w2, rod, b, true);
+                plugin.msg(p, "caught-double", "color", f2.rarity().color(), "fish", f2.name());
+                handleCatch(p, f2, rod, b, true);
             }
         }
     }
@@ -85,19 +83,16 @@ public final class FishingListener implements Listener {
         return t >= 13000 && t < 23000;
     }
 
-    private void handleCatch(Player p, Fish f, double weight, ItemStack rod, Rods.Bonus b, boolean extra) {
+    private void handleCatch(Player p, Fish f, ItemStack rod, Rods.Bonus b, boolean extra) {
         PlayerStats st = plugin.stats().get(p);
-        boolean record = st.record(f, weight);
+        boolean first = st.record(f);
         int xp = (int) Math.round(f.rarity().xp() * b.xpMul());
-        if (!extra) plugin.msg(p, "caught", "color", f.rarity().color(), "fish", f.name(), "weight", ink.hoka.zenfishing.util.Text.num(weight),
-                "rarity", f.rarity().name(), "xp", xp);
-        if (record && st.count.getOrDefault(f.id(), 0) > 1)
-            plugin.msg(p, "record", "color", f.rarity().color(), "fish", f.name(), "weight", ink.hoka.zenfishing.util.Text.num(weight));
+        if (!extra) plugin.msg(p, "caught", "color", f.rarity().color(), "fish", f.name(), "rarity", f.rarity().name(), "xp", xp);
+        if (first) plugin.msg(p, "new-species", "color", f.rarity().color(), "fish", f.name(), "known", st.known(), "total", plugin.fish().size());
         Rarity from = plugin.fish().rarity(plugin.getConfig().getString("catch.announce-from", "epic").toLowerCase(Locale.ROOT));
         if (from != null && f.rarity().order() >= from.order())
             for (Player o : Bukkit.getOnlinePlayers()) if (o != p)
-                plugin.msg(o, "announce", "player", p.getName(), "color", f.rarity().color(), "fish", f.name(),
-                        "weight", ink.hoka.zenfishing.util.Text.num(weight), "rarity", f.rarity().name());
+                plugin.msg(o, "announce", "player", p.getName(), "color", f.rarity().color(), "fish", f.name(), "rarity", f.rarity().name());
         if (plugin.getConfig().getBoolean("catch.sounds", true)) {
             if (f.rarity().order() >= 2) p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.8f, 1.4f);
             if (f.rarity().order() >= 4) p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
@@ -109,7 +104,7 @@ public final class FishingListener implements Listener {
                 if (plugin.getConfig().getBoolean("catch.sounds", true)) p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 1.2f);
             }
         }
-        if (plugin.quests()) ink.hoka.zenfishing.hook.QuestsHook.progress(p, f, extra, isNight(p), weight >= plugin.getConfig().getDouble("catch.big-kg", 10));
+        if (plugin.quests()) ink.hoka.zenfishing.hook.QuestsHook.progress(p, f, extra, isNight(p), false);
     }
 
     @EventHandler

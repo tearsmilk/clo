@@ -22,3 +22,9 @@
 ## Тултип «море»
 `tooltip/sea_background.png`, `tooltip/sea_frame.png` (160x160 = 4x при логических 40x40, nine_slice border 12; рама 4 px из балки, столба и бухт верёвки причала, фон — тёмная стена причала) → `assets/zenfishing/textures/gui/sprites/tooltip/`.
 Ставится на удочку (`rod.tooltip-style`), пойманную рыбу (`catch.tooltip-style`) и меню (`menu.tooltip-style`) — `zenfishing:sea`. Превью — `tooltip/preview_sea_tooltip.png`.
+
+## 3D-модели рыбы
+`fish_models3d.py SRC OUT` режет спрайт 64x64 на 12 вертикальных ломтиков-параллелепипедов (толщина по профилю: толще
+в середине, тоньше к хвосту), боковые грани — UV спрайта, торцы — узкие полоски. Модели → `assets/zenfishing/models/item/fish/<id>.json`
+(заменяют плоские `item/generated`). Пример — `fish_model3d_example.json`, грубый рендер — `fish_3d_preview.png`.
+У рыбы-предмета больше нет веса, редкости и автора в подписи: имя = название цветом редкости, описание пустое (стакается).
