@@ -22,4 +22,14 @@ public final class QuestsHook {
             if (extra) m.invoke(null, p, "FISH", ink.hoka.zenfishing.FishItems.base(f.item()).getType().name(), 1);
         } catch (Throwable ignored) { }
     }
+
+    /** Продажа рыбы: FISH_EARN (цель — валюта, + сумма, округлённая до монеты). */
+    public static void sold(Player p, double amount, String currency) {
+        int n = (int) Math.round(amount);
+        if (n <= 0) return;
+        try {
+            Class<?> api = Class.forName("ink.hoka.zenquests.QuestsAPI");
+            api.getMethod("progress", Player.class, String.class, String.class, int.class).invoke(null, p, "FISH_EARN", currency == null || currency.isBlank() ? "COINS" : currency, n);
+        } catch (Throwable ignored) { }
+    }
 }

@@ -10,6 +10,7 @@
 #                   BREAK   сломать блок        PLACE    поставить блок
 #                   KILL    убить моба/игрока   FISH     выловить (ванильный предмет)
 #                   CATCH_FISH   поймать рыбу ZenFishing   цель: id рыбы из fish.yml (carp, sturgeon …) или ANY
+#                   FISH_EARN    заработать продажей рыбы (ZenFishing)   цель: COINS
 #                   CRAFT   скрафтить           SMELT    забрать из печи
 #                   EAT     съесть/выпить       ENCHANT  зачаровать
 #                   BREED   развести            TAME     приручить
@@ -32,6 +33,7 @@
 #                   WEED          прополоть грядку мотыгой       WATER     полить грядку лейкой
 #                   WELL          полить всё волшебным колодцем  FERTILIZE удобрить грядку
 #                   BED_PLANT     посадить на грядку             BED_HARVEST дорастить и срезать культуру на грядке
+#                   BED_PLACE     поставить грядку (без цели)
 #                   Салат: OBTAIN с целью summer_salad (получить салат в инвентарь) или COOK_ITEM summer_salad
 #      targets    — что именно (имена Minecraft). Пусто или ANY — что угодно.
 #                   Можно шаблоном: "*_LOG" (любые брёвна), "*_ORE" (любая руда)
@@ -63,6 +65,38 @@
 daily:
   count: 3
   quests:
+    waterer:
+      name: '&bПоливальщик'
+      icon: WATER_BUCKET
+      description: ['&7Полей грядки лейкой']
+      objective: {type: WATER, amount: 20}
+      rewards:
+        lines: ['&f• 150 монет']
+        commands: ['coins give {player} 150']
+    weeder:
+      name: '&aЧистые грядки'
+      icon: IRON_HOE
+      description: ['&7Прополи грядки мотыгой']
+      objective: {type: WEED, amount: 10}
+      rewards:
+        lines: ['&f• 150 монет']
+        commands: ['coins give {player} 150']
+    bed-sowing:
+      name: '&eПосевная'
+      icon: WHEAT_SEEDS
+      description: ['&7Посади растения на грядки']
+      objective: {type: BED_PLANT, amount: 15}
+      rewards:
+        lines: ['&f• 120 монет']
+        commands: ['coins give {player} 120']
+    fertilizing:
+      name: '&6Подкормка'
+      icon: BONE_MEAL
+      description: ['&7Удобри грядки']
+      objective: {type: FERTILIZE, amount: 3}
+      rewards:
+        lines: ['&f• 200 монет']
+        commands: ['coins give {player} 200']
     harvester:
       name: '&eЖнец'
       icon: WHEAT
@@ -438,6 +472,22 @@ daily:
 weekly:
   count: 3
   quests:
+    bed-gardener:
+      name: '&aОгородник'
+      icon: COMPOSTER
+      description: ['&7Дорасти и срежь культуры на грядках']
+      objective: {type: BED_HARVEST, amount: 60}
+      rewards:
+        lines: ['&f• 2 000 монет']
+        commands: ['coins give {player} 2000']
+    expansion:
+      name: '&eРасширение'
+      icon: FARMLAND
+      description: ['&7Поставь новые грядки']
+      objective: {type: BED_PLACE, amount: 5}
+      rewards:
+        lines: ['&f• 800 монет']
+        commands: ['coins give {player} 800']
     online:
       name: '&fЗавсегдатай'
       icon: CLOCK
@@ -947,6 +997,27 @@ story:
         rewards:
           lines: ['&f• 3 000 монет', '&f• 1000 опыта']
           commands: ['coins give {player} 3000', 'minecraft:xp add {player} 1000 points']
+  first-bed:
+    name: <gradient:#8fd36b:#4caf50>Первая грядка</gradient>
+    icon: FARMLAND
+    description: ['&7Своя грядка — свой урожай.', '&7Поставь её и посади первое растение.']
+    steps:
+      place-bed:
+        name: '&fГлава I. Первая грядка'
+        icon: FARMLAND
+        description: ['&8«Земля тут мягкая — самое то.»', '&7Поставь грядку на своей ферме.']
+        objective: {type: BED_PLACE, amount: 1}
+        rewards:
+          lines: ['&f• 100 монет']
+          commands: ['coins give {player} 100']
+      plant-bed:
+        name: '&fГлава II. Первые всходы'
+        icon: WHEAT_SEEDS
+        description: ['&8«Семечко в землю — и жди.»', '&7Посади растение на грядку.']
+        objective: {type: BED_PLANT, amount: 1}
+        rewards:
+          lines: ['&f• 100 монет', '&f• 8 семян пшеницы']
+          commands: ['coins give {player} 100', 'minecraft:give {player} wheat_seeds 8']
   quiet-harbor:
     name: <gradient:#38b6ff:#5ce1e6>Тихая гавань</gradient>
     icon: FISHING_ROD
@@ -963,8 +1034,8 @@ story:
       fish-market:
         name: '&fГлава II. Рыбный рынок'
         icon: GOLD_NUGGET
-        description: ['&8«Торговка на рынке берёт всё, что шевелится.»', '&7Заработай монеты']
-        objective: {type: EARN, targets: [COINS], amount: 1500}
+        description: ['&8«Торговка на рынке берёт всё, что шевелится.»', '&7Заработай монет продажей рыбы']
+        objective: {type: FISH_EARN, targets: [COINS], amount: 1500}
         rewards:
           lines: ['&f• 400 монет', '&f• 120 опыта']
           commands: ['coins give {player} 400', 'minecraft:xp add {player} 120 points']

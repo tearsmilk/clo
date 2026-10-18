@@ -95,6 +95,7 @@ public final class ZenFishing extends JavaPlugin {
         p.getInventory().setStorageContents(inv);
         PlayerStats st = stats.get(p);
         st.earned += s.amount(); st.dirty = true;
+        ink.hoka.zenfishing.hook.QuestsHook.sold(p, s.amount(), "COINS");
         msg(p, "sold", "count", s.count(), "amount", Text.num(s.amount()), "currency", currency());
         return s;
     }

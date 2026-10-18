@@ -132,7 +132,7 @@ public final class TakuFarmersHook implements Listener {
         if (action == null) return;
         ObjectiveType t = switch (action) {
             case "WEED" -> ObjectiveType.WEED; case "WATER" -> ObjectiveType.WATER; case "WATER_ALL" -> ObjectiveType.WELL;
-            case "FERTILIZE" -> ObjectiveType.FERTILIZE; case "PLANT" -> ObjectiveType.BED_PLANT; case "HARVEST" -> ObjectiveType.BED_HARVEST;
+            case "FERTILIZE" -> ObjectiveType.FERTILIZE; case "PLANT" -> ObjectiveType.BED_PLANT; case "PLACE" -> ObjectiveType.BED_PLACE; case "HARVEST" -> ObjectiveType.BED_HARVEST;
             default -> null;
         };
         if (t != null) progress(p, t, crop, 1);
