@@ -5,7 +5,7 @@ quests:
   texts:
     1:
       name: default_font
-      pattern: "<image:quest_story> <#E9B8FF>✦ [papi:zenquests_hud_story_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_story_desc]  <#9BE37D>[papi:zenquests_hud_story_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_story_amount]"
+      pattern: "<image:quest_story> <#E9B8FF>✦ [papi:zenquests_hud_story_name]  <#9BE37D>[papi:zenquests_hud_story_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_story_amount]"
       background: background
       align: right
       layer: 1
