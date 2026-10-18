@@ -20,3 +20,14 @@ badge_vip:
   font: minecraft:default
   ascent: 8
   height: 9
+# Копии значков TakuCore (badges.yml) в шрифте minecraft:default — чтобы ZenGroups мог отдавать их голым символом в таб/чат
+zg_badge_admin:
+  texture: gui/badge_admin
+  font: minecraft:default
+  ascent: 8
+  height: 9
+zg_badge_player:
+  texture: gui/badge_player
+  font: minecraft:default
+  ascent: 8
+  height: 9

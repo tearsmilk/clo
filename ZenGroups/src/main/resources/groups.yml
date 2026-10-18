@@ -10,16 +10,17 @@
 #    inherits     — права каких групп наследовать (список)
 # ==========================================================
 
-# Значки — глифы Nexo ({glyph:имя} превращается в символ при выводе): badge_admin, badge_player — старые (glyphs/badges.yml),
-# badge_moder, badge_media, badge_vipplus, badge_vip — glyphs/zengroups.yml, текстуры assets/zengroups/textures/font.
+# Значки — глифы Nexo ({glyph:имя} превращается в символ при выводе через %nexo_<имя>%). Все — в glyphs/zengroups.yml
+# с font: minecraft:default (иначе в таб попадёт не символ, а тег): zg_badge_admin/zg_badge_player — те же текстуры, что у
+# badges.yml TakuCore; badge_moder, badge_media, badge_vipplus, badge_vip — assets/zengroups/textures/font.
 
 player:
   display: "Игрок"
   weight: 0
-  tab-prefix: "{glyph:badge_player} "
+  tab-prefix: "{glyph:zg_badge_player} "
   tab-suffix: ""
-  chat-prefix: "{glyph:badge_player} &7"
-  name-prefix: "{glyph:badge_player} "
+  chat-prefix: "{glyph:zg_badge_player} &7"
+  name-prefix: "{glyph:zg_badge_player} "
 
 vip:
   display: "VIP"
@@ -56,7 +57,7 @@ moder:
 admin:
   display: "Админ"
   weight: 100
-  tab-prefix: "{glyph:badge_admin} "
-  chat-prefix: "{glyph:badge_admin} &c"
-  name-prefix: "{glyph:badge_admin} "
+  tab-prefix: "{glyph:zg_badge_admin} "
+  chat-prefix: "{glyph:zg_badge_admin} &c"
+  name-prefix: "{glyph:zg_badge_admin} "
   inherits: [moder]

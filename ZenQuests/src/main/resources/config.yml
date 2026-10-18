@@ -15,6 +15,18 @@ bossbar:
   enabled: false
   seconds: 3
 
+# Книга квестов — предмет, открывающий меню по ПКМ (3D-модель из ресурспака: assets/zenquests/models/item/quest_book.json)
+book:
+  enabled: true
+  give-on-join: true     # выдать при первом входе (один раз; потом — /квесты book [игрок])
+  model: "zenquests:quest_book"
+  name: "<gradient:#ff9f1c:#ff3d1f>📖 Книга квестов</gradient>"
+  lore:
+    - "&7Все твои задания, истории"
+    - "&7и награды в одной книге."
+    - ""
+    - "&eПКМ — открыть"
+
 # Плашки квестов в BetterHud (%zenquests_hud_<n>_*%): показываются закреплённые квесты (ПКМ по квесту в меню)
 hud:
   max-pinned: 4          # сколько квестов игрок может закрепить сам (ПКМ в меню)
@@ -155,7 +167,7 @@ messages:
   reloaded: "&aКвесты перезагружены."
   reset: "&aКвесты игрока &f{player}&a сброшены: &f{what}"
   player-not-found: "&cИгрок &f{player}&c не в сети."
-  usage-admin: "&7/квесты reload &8— &fперезагрузить конфиги\n&7/квесты reset <игрок> [daily|weekly|seasonal|story|all] &8— &fсбросить прогресс\n&7/квесты progress <игрок> <тип> [цель|-] [кол-во] &8— &fзасчитать действие\n&7/квесты premium give|take|check <игрок> [срок] &8— &fвыдать / забрать / проверить подписку"
+  usage-admin: "&7/квесты reload &8— &fперезагрузить конфиги\n&7/квесты reset <игрок> [daily|weekly|seasonal|story|all] &8— &fсбросить прогресс\n&7/квесты progress <игрок> <тип> [цель|-] [кол-во] &8— &fзасчитать действие\n&7/квесты premium give|take|check <игрок> [срок] &8— &fвыдать / забрать / проверить подписку\n&7/квесты book [игрок] &8— &fвыдать книгу квестов"
   unknown-type: "&cНеизвестный тип: &f{type}"
   progress-added: "&aИгроку &f{player}&a засчитано {type} ×{amount}"
   player-unknown: "&cИгрок &f{player}&c ещё ни разу не заходил на сервер."
@@ -166,6 +178,8 @@ messages:
   premium-none: "&7У игрока &f{player}&7 нет выданной подписки."
   premium-check: "&7Подписка &f{player}&7: осталось &f{time}"
   premium-check-perm: "&7У &f{player}&7 подписка через право (LuckPerms/донат), командой не управляется."
+  book-given: "&6📖 Тебе выдана Книга квестов — ПКМ по ней открывает задания."
+  book-given-to: "&aКнига квестов выдана игроку &f{player}&a."
   pinned: "&e📌 Квест {quest}&e закреплён в худе."
   unpinned: "&7📌 Квест {quest}&7 откреплён."
   pin-full: "&cВ худе уже {max} квестов — открепи какой-нибудь."

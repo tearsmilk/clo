@@ -19,6 +19,7 @@ public final class ZenQuests extends JavaPlugin {
     private QuestManager quests;
     private QuestMenu menu;
     private PremiumStore premium;
+    private QuestBook book;
 
     @Override
     public void onEnable() {
@@ -34,6 +35,8 @@ public final class ZenQuests extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new ProgressListener(this), this);
         getServer().getPluginManager().registerEvents(menu, this);
+        book = new QuestBook(this);
+        getServer().getPluginManager().registerEvents(book, this);
         ink.hoka.zenquests.hook.TakuFarmersHook.tryRegister(this);
         ink.hoka.zenquests.hook.PapiHook.tryRegister(this);
 
@@ -74,6 +77,7 @@ public final class ZenQuests extends JavaPlugin {
     public QuestManager quests() { return quests; }
     public QuestMenu menu() { return menu; }
     public PremiumStore premium() { return premium; }
+    public QuestBook book() { return book; }
 
     public void msg(CommandSender to, String key, Object... kv) {
         String s = getConfig().getString("messages." + key);

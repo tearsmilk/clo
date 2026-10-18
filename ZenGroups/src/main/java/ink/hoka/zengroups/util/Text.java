@@ -44,6 +44,13 @@ public final class Text {
     }
 
     private static String glyphChar(String name) {
+        // 1) PlaceholderAPI Nexo: %nexo_<id>% → символ (для глифов в font minecraft:default); тег <glyph:…> значит шрифт не тот
+        try {
+            Class<?> papi = Class.forName("me.clip.placeholderapi.PlaceholderAPI");
+            Object r = papi.getMethod("setPlaceholders", org.bukkit.OfflinePlayer.class, String.class).invoke(null, null, "%nexo_" + name + "%");
+            if (r instanceof String v && !v.isEmpty() && !v.startsWith("%") && !v.startsWith("<")) return v;
+        } catch (Throwable ignored) { }
+        // 2) напрямую через API Nexo
         try {
             Class<?> fonts = Class.forName("com.nexomc.nexo.api.NexoFonts");
             Object g = fonts.getMethod("glyphFromName", String.class).invoke(null, name);

@@ -78,6 +78,12 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
                     plugin.msg(sender, "progress-added", "player", target.getName(), "type", type.name(), "amount", amount);
             }
             case "premium" -> premium(sender, args);
+            case "book" -> {
+                Player target = args.length >= 2 ? Bukkit.getPlayerExact(args[1]) : sender instanceof Player p ? p : null;
+                if (target == null) { plugin.msg(sender, "player-not-found", "player", args.length >= 2 ? args[1] : "?"); return true; }
+                plugin.book().give(target);
+                plugin.msg(sender, "book-given-to", "player", target.getName());
+            }
             default -> plugin.msg(sender, "usage-admin");
         }
         return true;
@@ -125,7 +131,7 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!sender.hasPermission("zenquests.admin")) return List.of();
-        if (args.length == 1) return filter(List.of("reload", "reset", "progress", "premium"), args[0]);
+        if (args.length == 1) return filter(List.of("reload", "reset", "progress", "premium", "book"), args[0]);
         if (args[0].equalsIgnoreCase("premium")) {
             if (args.length == 2) return filter(PREMIUM, args[1]);
             if (args.length == 3) {
@@ -141,7 +147,7 @@ public final class QuestCommand implements CommandExecutor, TabCompleter {
             for (ObjectiveType t : ObjectiveType.values()) types.add(t.name());
             return filter(types, args[2]);
         }
-        if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("progress"))) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("reset") || args[0].equalsIgnoreCase("progress") || args[0].equalsIgnoreCase("book"))) {
             List<String> names = new ArrayList<>();
             for (Player p : Bukkit.getOnlinePlayers()) names.add(p.getName());
             return filter(names, args[1]);
