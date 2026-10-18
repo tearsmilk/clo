@@ -1,0 +1,435 @@
+{
+ "id": "hokaria_quests",
+ "namespace": "hokaria",
+ "rows": 5,
+ "theme": "stone",
+ "container_panel": false,
+ "inventory_panel": "vanilla",
+ "hide_inventory_label": true,
+ "canvas": {
+  "left": 30,
+  "right": 30,
+  "top": 17
+ },
+ "header": {
+  "text": "Квесты",
+  "style": "ribbon",
+  "case": "keep",
+  "width": 150,
+  "color": "#b3303c"
+ },
+ "open_commands": [
+  "quests",
+  "kvesty"
+ ],
+ "preview_tooltip": "info",
+ "layers": [
+  {
+   "type": "wall",
+   "box": [
+    -14,
+    0,
+    204,
+    116
+   ],
+   "color": "#3a4466",
+   "seed": 7
+  },
+  {
+   "type": "pillar",
+   "box": [
+    -26,
+    -4,
+    14,
+    112
+   ],
+   "color": "#5a6988"
+  },
+  {
+   "type": "pillar",
+   "box": [
+    188,
+    -4,
+    14,
+    112
+   ],
+   "color": "#5a6988"
+  },
+  {
+   "type": "brazier",
+   "box": [
+    -27,
+    -17,
+    16,
+    14
+   ],
+   "color": "#3a4466"
+  },
+  {
+   "type": "brazier",
+   "box": [
+    187,
+    -17,
+    16,
+    14
+   ],
+   "color": "#3a4466"
+  },
+  {
+   "type": "banner",
+   "box": [
+    -31,
+    8,
+    26,
+    74
+   ],
+   "color": "#b3303c",
+   "seed": 1
+  },
+  {
+   "type": "banner",
+   "box": [
+    181,
+    8,
+    26,
+    74
+   ],
+   "color": "#b3303c",
+   "seed": 2
+  },
+  {
+   "type": "flourish",
+   "box": [
+    38,
+    13,
+    100,
+    18
+   ]
+  },
+  {
+   "type": "note",
+   "box": [
+    10,
+    24,
+    15,
+    19
+   ],
+   "seed": 2
+  },
+  {
+   "type": "note",
+   "box": [
+    3,
+    56,
+    13,
+    15
+   ],
+   "seed": 5,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    33,
+    76,
+    10,
+    12
+   ],
+   "seed": 8,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    151,
+    24,
+    15,
+    19
+   ],
+   "seed": 3
+  },
+  {
+   "type": "note",
+   "box": [
+    160,
+    56,
+    13,
+    15
+   ],
+   "seed": 6,
+   "seal": null
+  },
+  {
+   "type": "note",
+   "box": [
+    133,
+    76,
+    10,
+    12
+   ],
+   "seed": 9,
+   "seal": null
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    2,
+    1,
+    5,
+    1
+   ],
+   "kind": "gold"
+  },
+  {
+   "type": "divider",
+   "box": [
+    36,
+    59,
+    104,
+    7
+   ]
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    3,
+    3,
+    3,
+    1
+   ],
+   "kind": "gold"
+  },
+  {
+   "type": "rubble",
+   "box": [
+    -30,
+    78,
+    80,
+    42
+   ],
+   "shape": "left",
+   "color": "#5a6988",
+   "size": [
+    5,
+    9
+   ],
+   "seed": 4
+  },
+  {
+   "type": "rubble",
+   "box": [
+    126,
+    78,
+    80,
+    42
+   ],
+   "shape": "right",
+   "color": "#5a6988",
+   "size": [
+    5,
+    9
+   ],
+   "seed": 7
+  },
+  {
+   "type": "rubble",
+   "box": [
+    -30,
+    88,
+    37,
+    46
+   ],
+   "shape": "band",
+   "round_bottom": true,
+   "color": "#5a6988",
+   "size": [
+    6,
+    10
+   ],
+   "seed": 21,
+   "above": true
+  },
+  {
+   "type": "rubble",
+   "box": [
+    -4,
+    95,
+    46,
+    24
+   ],
+   "shape": "left",
+   "round_bottom": true,
+   "color": "#5a6988",
+   "size": [
+    6,
+    10
+   ],
+   "seed": 11,
+   "above": true
+  },
+  {
+   "type": "rubble",
+   "box": [
+    169,
+    88,
+    37,
+    46
+   ],
+   "shape": "band",
+   "round_bottom": true,
+   "color": "#5a6988",
+   "size": [
+    6,
+    10
+   ],
+   "seed": 22,
+   "above": true
+  },
+  {
+   "type": "rubble",
+   "box": [
+    134,
+    95,
+    46,
+    24
+   ],
+   "shape": "right",
+   "round_bottom": true,
+   "color": "#5a6988",
+   "size": [
+    6,
+    10
+   ],
+   "seed": 12,
+   "above": true
+  }
+ ],
+ "buttons": [
+  {
+   "id": "prev",
+   "x": 3,
+   "y": 3,
+   "style": "none",
+   "icon": "sprite:arrow_gold",
+   "icon_flip": true,
+   "name": "&6« Назад",
+   "lore": [
+    "&7Предыдущая страница квестов"
+   ],
+   "commands": [
+    "[openguimenu] hokaria_quests"
+   ]
+  },
+  {
+   "id": "info",
+   "x": 4,
+   "y": 3,
+   "style": "none",
+   "icon": "sprite:page",
+   "name": "&e&lДоска квестов",
+   "lore": [
+    "&7Бери задания у жителей деревни,",
+    "&7сдавай урожай и получай награды.",
+    "",
+    "&a» Квест открывается каждый день"
+   ]
+  },
+  {
+   "id": "next",
+   "x": 5,
+   "y": 3,
+   "style": "none",
+   "icon": "sprite:arrow_gold",
+   "name": "&6Вперёд »",
+   "lore": [
+    "&7Следующая страница квестов"
+   ],
+   "commands": [
+    "[openguimenu] hokaria_quests"
+   ]
+  }
+ ],
+ "nexo_items": [
+  {
+   "id": "hokaria_quest_new",
+   "icon": "sprite:quest_new",
+   "name": "<gold>Новый квест"
+  },
+  {
+   "id": "hokaria_quest_done",
+   "icon": "sprite:quest_done",
+   "name": "<green>Квест выполнен"
+  },
+  {
+   "id": "hokaria_quest_locked",
+   "icon": "sprite:quest_locked",
+   "name": "<gray>Квест закрыт"
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "quest_1",
+   "material": "nexo-hokaria_quest_done",
+   "slot": 11,
+   "display_name": "&a✔ Первый урожай",
+   "lore": [
+    "&7Собери 32 пшеницы",
+    "",
+    "&aВыполнено"
+   ],
+   "preview": "sprite:quest_done"
+  },
+  {
+   "id": "quest_2",
+   "material": "nexo-hokaria_quest_new",
+   "slot": 12,
+   "display_name": "&6! Рыбный день",
+   "lore": [
+    "&7Поймай 10 рыб",
+    "&7Награда: &e50 монет"
+   ],
+   "left_click_commands": [
+    "[player] quests start fish"
+   ],
+   "preview": "sprite:quest_new"
+  },
+  {
+   "id": "quest_3",
+   "material": "nexo-hokaria_quest_new",
+   "slot": 13,
+   "display_name": "&6! Охота",
+   "lore": [
+    "&7Добудь 5 шкур",
+    "&7Награда: &e80 монет"
+   ],
+   "left_click_commands": [
+    "[player] quests start hunt"
+   ],
+   "preview": "sprite:quest_new"
+  },
+  {
+   "id": "quest_4",
+   "material": "nexo-hokaria_quest_new",
+   "slot": 14,
+   "display_name": "&6! Ярмарка",
+   "lore": [
+    "&7Продай 3 тыквы на рынке",
+    "&7Награда: &e40 монет"
+   ],
+   "left_click_commands": [
+    "[player] quests start fair"
+   ],
+   "preview": "sprite:quest_new"
+  },
+  {
+   "id": "quest_5",
+   "material": "nexo-hokaria_quest_locked",
+   "slot": 15,
+   "display_name": "&7Закрыто",
+   "lore": [
+    "&7Откроется на 5 уровне"
+   ],
+   "preview": "sprite:quest_locked"
+  }
+ ]
+}

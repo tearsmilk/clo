@@ -1,0 +1,458 @@
+"""Tiny pixel font: 5x7 capitals + lowercase with descenders (Latin + Cyrillic), digits, punctuation.
+
+Minecraft GUI textures live at 1 texture pixel = 1 GUI pixel, so labels baked into a
+texture must be real pixel glyphs, not anti-aliased TTF text. Glyph cells are 9 rows: capitals and
+lowercase sit on row 6, descenders (g p q y р у д ц щ ф) use rows 7-8. '\n' starts a new line.
+Characters without a glyph fall back to their uppercase form, then to a gap.
+"""
+from PIL import Image
+
+_G = {}
+
+def _add(chars, rows):
+    for ch in chars:
+        _G[ch] = rows
+
+# --- Latin (Cyrillic look-alikes share the same bitmap) ---
+_add("AА", [".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#"])
+_add("BВ", ["####.", "#...#", "#...#", "####.", "#...#", "#...#", "####."])
+_add("CС", [".###.", "#...#", "#....", "#....", "#....", "#...#", ".###."])
+_add("D", ["####.", "#...#", "#...#", "#...#", "#...#", "#...#", "####."])
+_add("EЕЁ", ["#####", "#....", "#....", "####.", "#....", "#....", "#####"])
+_add("F", ["#####", "#....", "#....", "####.", "#....", "#....", "#...."])
+_add("G", [".###.", "#...#", "#....", "#.###", "#...#", "#...#", ".###."])
+_add("HН", ["#...#", "#...#", "#...#", "#####", "#...#", "#...#", "#...#"])
+_add("I", ["###", ".#.", ".#.", ".#.", ".#.", ".#.", "###"])
+_add("J", ["..###", "...#.", "...#.", "...#.", "#..#.", "#..#.", ".##.."])
+_add("KК", ["#...#", "#..#.", "#.#..", "##...", "#.#..", "#..#.", "#...#"])
+_add("L", ["#....", "#....", "#....", "#....", "#....", "#....", "#####"])
+_add("MМ", ["#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#"])
+_add("N", ["#...#", "##..#", "#.#.#", "#..##", "#...#", "#...#", "#...#"])
+_add("OО", [".###.", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."])
+_add("PР", ["####.", "#...#", "#...#", "####.", "#....", "#....", "#...."])
+_add("Q", [".###.", "#...#", "#...#", "#...#", "#.#.#", "#..#.", ".##.#"])
+_add("R", ["####.", "#...#", "#...#", "####.", "#.#..", "#..#.", "#...#"])
+_add("S", [".####", "#....", "#....", ".###.", "....#", "....#", "####."])
+_add("TТ", ["#####", "..#..", "..#..", "..#..", "..#..", "..#..", "..#.."])
+_add("U", ["#...#", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."])
+_add("V", ["#...#", "#...#", "#...#", "#...#", "#...#", ".#.#.", "..#.."])
+_add("W", ["#...#", "#...#", "#...#", "#.#.#", "#.#.#", "##.##", "#...#"])
+_add("XХ", ["#...#", "#...#", ".#.#.", "..#..", ".#.#.", "#...#", "#...#"])
+_add("Y", ["#...#", "#...#", ".#.#.", "..#..", "..#..", "..#..", "..#.."])
+_add("Z", ["#####", "....#", "...#.", "..#..", ".#...", "#....", "#####"])
+# --- Cyrillic-only shapes ---
+_add("Б", ["#####", "#....", "#....", "####.", "#...#", "#...#", "####."])
+_add("Г", ["#####", "#....", "#....", "#....", "#....", "#....", "#...."])
+_add("Д", [".###.", ".#.#.", ".#.#.", ".#.#.", ".#.#.", "#####", "#...#"])
+_add("Ж", ["#.#.#", "#.#.#", ".###.", "..#..", ".###.", "#.#.#", "#.#.#"])
+_add("З", [".###.", "#...#", "....#", "..##.", "....#", "#...#", ".###."])
+_add("И", ["#...#", "#...#", "#..##", "#.#.#", "##..#", "#...#", "#...#"])
+_add("Й", [".#.#.", "#...#", "#..##", "#.#.#", "##..#", "#...#", "#...#"])
+_add("Л", ["..###", ".#..#", ".#..#", ".#..#", ".#..#", ".#..#", "#...#"])
+_add("П", ["#####", "#...#", "#...#", "#...#", "#...#", "#...#", "#...#"])
+_add("У", ["#...#", "#...#", "#...#", ".####", "....#", "....#", "####."])
+_add("Ф", ["..#..", ".###.", "#.#.#", "#.#.#", "#.#.#", ".###.", "..#.."])
+_add("Ц", ["#..#.", "#..#.", "#..#.", "#..#.", "#..#.", "#####", "....#"])
+_add("Ч", ["#...#", "#...#", "#...#", ".####", "....#", "....#", "....#"])
+_add("Ш", ["#.#.#", "#.#.#", "#.#.#", "#.#.#", "#.#.#", "#.#.#", "#####"])
+_add("Щ", ["#.#.#", "#.#.#", "#.#.#", "#.#.#", "#.#.#", "#####", "....#"])
+_add("Ъ", ["##...", ".#...", ".#...", ".###.", ".#..#", ".#..#", ".###."])
+_add("Ы", ["#...#", "#...#", "#...#", "##..#", "#.#.#", "#.#.#", "##..#"])
+_add("Ь", ["#....", "#....", "#....", "####.", "#...#", "#...#", "####."])
+_add("Э", [".###.", "#...#", "....#", ".####", "....#", "#...#", ".###."])
+_add("Ю", ["#..#.", "#.#.#", "#.#.#", "###.#", "#.#.#", "#.#.#", "#..#."])
+_add("Я", [".####", "#...#", "#...#", ".####", "..#.#", ".#..#", "#...#"])
+# --- lowercase (x-height rows 2-6, ascenders from row 0, descenders rows 7-8) ---
+_add("aа", [".....", ".....", ".###.", "....#", ".####", "#...#", ".####"])
+_add("b", ["#....", "#....", "####.", "#...#", "#...#", "#...#", "####."])
+_add("cс", [".....", ".....", ".###.", "#....", "#....", "#....", ".###."])
+_add("d", ["....#", "....#", ".####", "#...#", "#...#", "#...#", ".####"])
+_add("eе", [".....", ".....", ".###.", "#...#", "#####", "#....", ".###."])
+_add("f", ["..##", ".#..", "####", ".#..", ".#..", ".#..", ".#.."])
+_add("g", [".....", ".....", ".####", "#...#", "#...#", "#...#", ".####", "....#", "####."])
+_add("h", ["#....", "#....", "####.", "#...#", "#...#", "#...#", "#...#"])
+_add("i", ["#", ".", "#", "#", "#", "#", "#"])
+_add("j", ["...#", "....", "...#", "...#", "...#", "...#", "...#", "#..#", ".##."])
+_add("k", ["#...", "#...", "#..#", "#.#.", "##..", "#.#.", "#..#"])
+_add("l", ["#.", "#.", "#.", "#.", "#.", "#.", ".#"])
+_add("m", [".....", ".....", "##.#.", "#.#.#", "#.#.#", "#...#", "#...#"])
+_add("n", [".....", ".....", "####.", "#...#", "#...#", "#...#", "#...#"])
+_add("oо", [".....", ".....", ".###.", "#...#", "#...#", "#...#", ".###."])
+_add("pр", [".....", ".....", "####.", "#...#", "#...#", "#...#", "####.", "#....", "#...."])
+_add("q", [".....", ".....", ".####", "#...#", "#...#", "#...#", ".####", "....#", "....#"])
+_add("r", [".....", ".....", "#.##.", "##..#", "#....", "#....", "#...."])
+_add("s", [".....", ".....", ".####", "#....", ".###.", "....#", "####."])
+_add("t", [".#..", ".#..", "####", ".#..", ".#..", ".#..", "..##"])
+_add("u", [".....", ".....", "#...#", "#...#", "#...#", "#...#", ".####"])
+_add("v", [".....", ".....", "#...#", "#...#", "#...#", ".#.#.", "..#.."])
+_add("w", [".....", ".....", "#...#", "#...#", "#.#.#", "#.#.#", ".####"])
+_add("xх", [".....", ".....", "#...#", ".#.#.", "..#..", ".#.#.", "#...#"])
+_add("yу", [".....", ".....", "#...#", "#...#", "#...#", "#...#", ".####", "....#", "####."])
+_add("z", [".....", ".....", "#####", "...#.", "..#..", ".#...", "#####"])
+_add("б", ["..###", ".#...", "#....", "####.", "#...#", "#...#", ".###."])
+_add("в", [".....", ".....", "####.", "#...#", "####.", "#...#", "####."])
+_add("г", [".....", ".....", "#####", "#....", "#....", "#....", "#...."])
+_add("д", [".....", ".....", ".###.", ".#.#.", ".#.#.", ".#.#.", "#####", "#...#", "....."])
+_add("ё", [".#.#.", ".....", ".###.", "#...#", "#####", "#....", ".###."])
+_add("ж", [".....", ".....", "#.#.#", "#.#.#", ".###.", "#.#.#", "#.#.#"])
+_add("з", [".....", ".....", "####.", "....#", ".###.", "....#", "####."])
+_add("и", [".....", ".....", "#...#", "#..##", "#.#.#", "##..#", "#...#"])
+_add("й", [".#.#.", "..#..", "#...#", "#..##", "#.#.#", "##..#", "#...#"])
+_add("к", [".....", ".....", "#..#.", "#.#..", "##...", "#.#..", "#..#."])
+_add("л", [".....", ".....", "..###", ".#..#", ".#..#", ".#..#", "#...#"])
+_add("м", [".....", ".....", "#...#", "##.##", "#.#.#", "#...#", "#...#"])
+_add("н", [".....", ".....", "#...#", "#...#", "#####", "#...#", "#...#"])
+_add("п", [".....", ".....", "#####", "#...#", "#...#", "#...#", "#...#"])
+_add("т", [".....", ".....", "#####", "..#..", "..#..", "..#..", "..#.."])
+_add("ф", ["..#..", "..#..", ".###.", "#.#.#", "#.#.#", "#.#.#", ".###.", "..#..", "..#.."])
+_add("ц", [".....", ".....", "#..#.", "#..#.", "#..#.", "#..#.", "#####", "....#", "....."])
+_add("ч", [".....", ".....", "#...#", "#...#", ".####", "....#", "....#"])
+_add("ш", [".....", ".....", "#.#.#", "#.#.#", "#.#.#", "#.#.#", "#####"])
+_add("щ", [".....", ".....", "#.#.#", "#.#.#", "#.#.#", "#.#.#", "#####", "....#", "....."])
+_add("ъ", [".....", ".....", "##...", ".#...", ".###.", ".#..#", ".###."])
+_add("ы", [".....", ".....", "#...#", "#...#", "##..#", "#.#.#", "##..#"])
+_add("ь", [".....", ".....", "#....", "#....", "####.", "#...#", "####."])
+_add("э", [".....", ".....", ".###.", "#...#", "..###", "#...#", ".###."])
+_add("ю", [".....", ".....", "#..#.", "#.#.#", "###.#", "#.#.#", "#..#."])
+_add("я", [".....", ".....", ".####", "#...#", ".####", ".#..#", "#...#"])
+# --- digits ---
+_add("0", [".###.", "#...#", "#..##", "#.#.#", "##..#", "#...#", ".###."])
+_add("1", ["..#..", ".##..", "..#..", "..#..", "..#..", "..#..", ".###."])
+_add("2", [".###.", "#...#", "....#", "...#.", "..#..", ".#...", "#####"])
+_add("3", ["####.", "....#", "....#", ".###.", "....#", "....#", "####."])
+_add("4", ["#...#", "#...#", "#...#", "#####", "....#", "....#", "....#"])
+_add("5", ["#####", "#....", "####.", "....#", "....#", "#...#", ".###."])
+_add("6", [".###.", "#....", "#....", "####.", "#...#", "#...#", ".###."])
+_add("7", ["#####", "....#", "...#.", "..#..", "..#..", "..#..", "..#.."])
+_add("8", [".###.", "#...#", "#...#", ".###.", "#...#", "#...#", ".###."])
+_add("9", [".###.", "#...#", "#...#", ".####", "....#", "....#", ".###."])
+# --- punctuation ---
+_add(" ", ["...", "...", "...", "...", "...", "...", "..."])
+_add(".", [".", ".", ".", ".", ".", ".", "#"])
+_add(",", ["..", "..", "..", "..", "..", ".#", "#."])
+_add("!", ["#", "#", "#", "#", "#", ".", "#"])
+_add("?", [".###.", "#...#", "....#", "...#.", "..#..", ".....", "..#.."])
+_add(":", [".", "#", ".", ".", ".", "#", "."])
+_add("-", ["...", "...", "...", "###", "...", "...", "..."])
+_add("+", [".....", "..#..", "..#..", "#####", "..#..", "..#..", "....."])
+_add("/", ["....#", "...#.", "...#.", "..#..", ".#...", ".#...", "#...."])
+_add("%", ["##..#", "##.#.", "...#.", "..#..", ".#...", ".#.##", "#..##"])
+_add("»", [".....", "#.#..", ".#.#.", "..#.#", ".#.#.", "#.#..", "....."])
+_add("«", [".....", "..#.#", ".#.#.", "#.#..", ".#.#.", "..#.#", "....."])
+_add("'", ["#", "#", ".", ".", ".", ".", "."])
+_add("&", [".##..", "#..#.", ".##..", ".#...", "#.#.#", "#..#.", ".##.#"])
+_add("(", [".#", "#.", "#.", "#.", "#.", "#.", ".#"])
+_add(")", ["#.", ".#", ".#", ".#", ".#", ".#", "#."])
+
+GLYPH_H = 9          # cell height incl. descenders
+CAP_H = 7            # visual height of a capital-only line
+LINE_H = 10          # line advance for multi-line text
+SPACING = 1
+
+
+def _glyph(ch, narrow=False):
+    g = _G.get(ch) or _G.get(ch.upper()) or _G[" "]
+    g = g + ["." * len(g[0])] * (GLYPH_H - len(g))
+    return _narrow(g) if narrow else g
+
+
+def _narrow(rows):
+    """Narrow face for tight labels: trim an empty last column, then drop one column that repeats a
+    neighbour (closest to the middle) - 'н', 'о', 'а' lose a column of their counter, stems stay."""
+    if len(rows[0]) > 1 and all(r[-1] == "." for r in rows) and ch_used(rows):
+        rows = [r[:-1] for r in rows]
+    w = len(rows[0])
+    if w < 4:
+        return rows
+    cols = ["".join(r[c] for r in rows) for c in range(w)]
+    for c in sorted(range(1, w - 1), key=lambda c: abs(c - (w - 1) / 2)):
+        if cols[c] == cols[c - 1] or cols[c] == cols[c + 1]:
+            return [r[:c] + r[c + 1:] for r in rows]
+    return rows
+
+
+def ch_used(rows):
+    return any("#" in r for r in rows)
+
+
+def _line_width(line, spacing, narrow=False):
+    if not line:
+        return 0
+    return sum(len(_glyph(c, narrow)[0]) for c in line) + spacing * (len(line) - 1)
+
+
+def text_width(text, scale=1, spacing=SPACING, narrow=False):
+    return max((_line_width(l, spacing, narrow) for l in text.split("\n")), default=0) * scale
+
+
+def text_height(text, scale=1):
+    lines = text.split("\n")
+    has_desc = any(c in "gjpqyрудцщфд" for c in lines[-1])
+    last = GLYPH_H if has_desc else CAP_H
+    return ((len(lines) - 1) * LINE_H + last) * scale
+
+
+def draw_text(img, x, y, text, color, scale=1, shadow=None, outline=None, spacing=SPACING, align="left",
+              narrow=False):
+    """Draw text with its top-left at (x, y). color/shadow/outline are RGBA tuples.
+
+    shadow: Minecraft-style 1px drop shadow (down-right). outline: 1px ring around glyphs.
+    align: 'left' or 'center' (lines centred inside the block's width).
+    narrow: 4 px wide letters (see _narrow) for labels that do not fit, e.g. "Настройки" on a 3-slot tile.
+    """
+    lines = text.split("\n")
+    bw = text_width(text, spacing=spacing, narrow=narrow)
+    mask = Image.new("L", (bw + 2, (len(lines) - 1) * LINE_H + GLYPH_H + 2), 0)
+    mp = mask.load()
+    for li, line in enumerate(lines):
+        cx = 1 + ((bw - _line_width(line, spacing, narrow)) // 2 if align == "center" else 0)
+        for ch in line:
+            rows = _glyph(ch, narrow)
+            for j, row in enumerate(rows):
+                for i, c in enumerate(row):
+                    if c == "#":
+                        mp[cx + i, 1 + li * LINE_H + j] = 255
+            cx += len(rows[0]) + spacing
+    if scale != 1:
+        mask = mask.resize((mask.width * scale, mask.height * scale), Image.NEAREST)
+    ox, oy = x - scale, y - scale
+    if outline:
+        for dx in (-scale, 0, scale):
+            for dy in (-scale, 0, scale):
+                if dx or dy:
+                    img.paste(outline, (ox + dx, oy + dy), mask)
+    if shadow:
+        img.paste(shadow, (ox + scale, oy + scale), mask)
+    img.paste(color, (ox, oy), mask)
+
+
+def _mask(text, spacing=SPACING, scale=1):
+    lines = text.split("\n")
+    bw = text_width(text, spacing=spacing)
+    m = Image.new("L", (bw, (len(lines) - 1) * LINE_H + GLYPH_H), 0)
+    mp = m.load()
+    for li, line in enumerate(lines):
+        cx = (bw - _line_width(line, spacing)) // 2
+        for ch in line:
+            rows = _glyph(ch)
+            for j, row in enumerate(rows):
+                for i, c in enumerate(row):
+                    if c == "#":
+                        mp[cx + i, li * LINE_H + j] = 255
+            cx += len(rows[0]) + spacing
+    if scale != 1:
+        m = m.resize((m.width * scale, m.height * scale), Image.NEAREST)
+    return m
+
+
+def _block_spacing(scale):
+    # each letter gets a 1px outline on both sides; keep >=1px of background between letters
+    return max(1, -(-3 // scale))
+
+
+def block_text_size(text, scale=3):
+    m = _mask(text, spacing=_block_spacing(scale), scale=scale)
+    return m.width + 4, m.height + 4
+
+
+def draw_block_text(img, x, y, text, top="#D8D8D8", bottom="#6E6A68", outline="#111111", shadow="#000000",
+                    scale=3, cracks=True, seed=3, depth=0, side=None):
+    """Chunky 'Minecraft logo' lettering: light upper part, darker lower third, 1px outline,
+    a 1px drop shadow and a few crack pixels. (x, y) is the top-left of the outline box."""
+    import random
+    from PIL import ImageFilter
+
+    def rgba(c):
+        if isinstance(c, tuple):
+            return c
+        c = c.lstrip('#')
+        return (int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16), 255)
+
+    m = _mask(text, spacing=_block_spacing(scale), scale=scale)
+    pad = 2
+    full = Image.new("L", (m.width + 2 * pad, m.height + 2 * pad), 0)
+    full.paste(m, (pad, pad))
+    ring = full.filter(ImageFilter.MaxFilter(3))                     # 1px outline
+    if depth:                                                        # extruded 3D side, Redstone-Labs style
+        sc = rgba(side) if side else tuple(max(0, int(v * 0.55)) for v in rgba(bottom)[:3]) + (255,)
+        for d in range(depth, 0, -1):
+            img.paste(rgba(outline), (x + d, y + d + 1), ring)
+            img.paste(sc, (x + d, y + d), full)
+    img.paste(rgba(shadow), (x + 1, y + 1), ring)
+    img.paste(rgba(outline), (x, y), ring)
+    face = Image.new("RGBA", full.size, rgba(top))
+    fp = face.load()
+    rnd = random.Random(seed)
+    cap_px = 7 * scale
+    tc, bc = rgba(top), rgba(bottom)
+    for yy in range(full.height):
+        rel = (yy - pad) % (LINE_H * scale)
+        lower = rel >= cap_px * 0.62
+        for xx in range(full.width):
+            c = bc if lower else tc
+            if cracks and full.getpixel((xx, yy)) and rnd.random() < 0.04:
+                c = tuple(max(0, v - 38) for v in c[:3]) + (255,)
+            fp[xx, yy] = c
+    img.paste(face, (x, y), full)
+
+
+# ----------------------------------------------------------------------------- material lettering
+
+# Ramps per material: outline, dark, mid, light, sheen. Style taken from pixel "slab" title fonts: every letter
+# is a stacked pair of blocks - a light upper block and a mid-tone lower block - with lit top edges, shaded
+# bottom edges, a sheen line and a dark base, inside a 1px near-black outline.
+MATERIALS = {
+    'steel':   ('#1c1b2b', '#506275', '#6c8294', '#859aa9', '#b3c2ca'),
+    'gold':    ('#33182a', '#b55a41', '#d9893f', '#ebcc5b', '#faec82'),
+    'wood':    ('#2a1810', '#733e39', '#b86f50', '#e4a672', '#ead4aa'),
+    'emerald': ('#102a24', '#265c42', '#3e8948', '#63c74d', '#c5e07c'),
+    'crimson': ('#2a0e18', '#662031', '#a83333', '#e43b44', '#f6a08a'),
+    'stone':   ('#181425', '#3a4466', '#5a6988', '#8b9bb4', '#c0cbdc'),
+    'snow':    ('#262b44', '#8b9bb4', '#c0cbdc', '#e8eef5', '#ffffff'),
+}
+
+
+def _slab_glyph(ch, scale, condensed=False):
+    """Glyph rows at `scale`. condensed=True narrows letters like slab title fonts: only columns that carry a
+    vertical stroke (a run of >= 3 pixels) stay `scale` px wide, the rest become `scale - 1` (a 5x7 capital ->
+    ~7x14 at scale 2). Narrower but diagonals get thin - use it only when the title does not fit."""
+    rows = _glyph(ch)
+    w = len(rows[0])
+    if scale == 1 and condensed == 'bold':              # small bold: 2px stems, 1px joins, 7 rows tall
+        widths = []
+        for c in range(w):
+            run = best = 0
+            for r in rows:
+                run = run + 1 if r[c] == '#' else 0
+                best = max(best, run)
+            widths.append(2 if best >= 3 else 1)
+        return [''.join(r[c] * widths[c] for c in range(w)) for r in rows]
+    if scale == 1:
+        return rows
+    if not condensed:
+        return [''.join(c * scale for c in r) for r in rows for _ in range(scale)]
+    widths = []
+    for c in range(w):
+        run = best = 0
+        for r in rows:
+            run = run + 1 if r[c] == '#' else 0
+            best = max(best, run)
+        widths.append(scale if best >= 3 else max(1, scale - 1))
+    out = []
+    for r in rows:
+        line = ''.join(r[c] * widths[c] for c in range(w))
+        out += [line] * scale
+    return out
+
+
+def _slab_mask(text, scale, gap, condensed=False):
+    lines = text.split("\n")
+    glyphs = [[_slab_glyph(ch, scale, condensed) for ch in line] for line in lines]
+    widths = [sum(len(g[0]) for g in gl) + gap * max(0, len(gl) - 1) for gl in glyphs]
+    W = max(widths, default=0)
+    H = ((len(lines) - 1) * LINE_H + GLYPH_H) * scale
+    m = Image.new("L", (max(1, W), H), 0)
+    mp = m.load()
+    for li, gl in enumerate(glyphs):
+        cx = (W - widths[li]) // 2
+        for g in gl:
+            for j, row in enumerate(g):
+                for i, c in enumerate(row):
+                    if c == "#":
+                        mp[cx + i, li * LINE_H * scale + j] = 255
+            cx += len(g[0]) + gap
+    return m
+
+
+def _round_corners(mask):
+    """Cut the outer pixel of every convex corner of a >= 2x2 block (slab letters look cut, not stamped)."""
+    src = mask.copy().load()
+    mp = mask.load()
+    W, H = mask.size
+    on = lambda x, y: 0 <= x < W and 0 <= y < H and src[x, y] > 0
+    for y in range(H):
+        for x in range(W):
+            if not on(x, y):
+                continue
+            for dx, dy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
+                if (not on(x + dx, y) and not on(x, y + dy) and not on(x + dx, y + dy)
+                        and on(x - dx, y) and on(x, y - dy) and on(x - dx, y - dy)):
+                    mp[x, y] = 0
+                    break
+    return mask
+
+
+def material_text_size(text, scale=2, outline=True, gap=None, condensed=False):
+    g = gap if gap is not None else (2 if outline else 1)
+    m = _slab_mask(text, scale, g, condensed)
+    o = 1 if outline else 0
+    return m.width + 2 * o + 1, m.height + 2 * o + 1
+
+
+def material_text_height(text, scale=2, outline=True):
+    """Height without empty descender rows (for vertical centring)."""
+    o = 1 if outline else 0
+    return text_height(text, scale) + 2 * o + 1
+
+
+def draw_material_text(img, x, y, text, material='steel', scale=2, outline=True, shadow=True, gap=None,
+                       condensed=False):
+    """Title lettering in a material (steel, gold, wood, emerald, crimson, stone, snow or a 5-colour tuple
+    outline, dark, mid, light, sheen). (x, y) is the top-left of the outline box. scale 2 = 10x14 capitals with
+    2px strokes (Latin + Cyrillic). Each letter is a light upper block over a mid-tone lower block with a sheen line
+    under each block top, a sheen line above a dark 2px base, and shaded undersides, inside a 1px near-black
+    outline (dark counters). outline=False gives the soft engraved variant (light top, mid, dark base).
+    gap: px between letter bodies (2 = the two outlines meet; keep >= 2 with outline so letters never merge)."""
+    def rgba(c):
+        if isinstance(c, tuple):
+            return c if len(c) == 4 else tuple(c) + (255,)
+        c = c.lstrip('#')
+        return (int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16), 255)
+
+    O, D, M, L, S = [rgba(c) for c in (MATERIALS[material] if isinstance(material, str) else material)]
+    g = gap if gap is not None else (2 if outline else 1)
+    m = _slab_mask(text, scale, g, condensed)
+    if scale > 1 or condensed == 'bold':
+        m = _round_corners(m)
+    o = 1 if outline else 0
+    full = Image.new('L', (m.width + 2 * o, m.height + 2 * o), 0)
+    full.paste(m, (o, o))
+    fp = full.load()
+    W, H = full.size
+    face = Image.new('RGBA', full.size, (0, 0, 0, 0))
+    px = face.load()
+    cap = 7 * scale
+    half = cap // 2
+    for yy in range(H):
+        rel = (yy - o) % (LINE_H * scale)
+        for xx in range(W):
+            if not fp[xx, yy]:
+                continue
+            down = yy == H - 1 or not fp[xx, yy + 1]
+            inner = 0 < xx < W - 1 and fp[xx - 1, yy] and fp[xx + 1, yy]
+            if outline:
+                c = L if rel < half else M
+                if condensed == 'bold' and scale == 1:
+                    c = L if rel < 3 else M
+                    if down:
+                        c = D
+                    px[xx, yy] = c
+                    continue
+                if down or (scale > 1 and cap - 2 <= rel < cap) or (scale == 1 and rel == cap - 1):
+                    c = D                                    # shaded underside / dark base
+                elif scale > 1 and rel == cap - 3:
+                    c = S                                    # sheen above the base
+                elif scale > 1 and inner and rel in (1, half + 1):
+                    c = S                                    # sheen just under each block's top
+            else:
+                c = S if rel < cap * 0.4 else (L if rel < cap - scale else D)
+            px[xx, yy] = c
+    if outline:
+        from PIL import ImageFilter
+        ring = full.filter(ImageFilter.MaxFilter(3))
+        if shadow:
+            img.paste(O, (x + 1, y + 1), ring)
+        img.paste(O, (x, y), ring)
+    elif shadow:
+        img.paste(D, (x + 1, y + 1), full)
+    img.alpha_composite(face, (x, y))

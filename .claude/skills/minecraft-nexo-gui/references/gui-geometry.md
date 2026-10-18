@@ -1,0 +1,99 @@
+# GUI geometry for title-glyph menus
+
+All numbers are GUI pixels (what Minecraft calls "scaled" pixels; at GUI scale 3 one GUI pixel is 3x3 screen pixels).
+A glyph texture drawn with `height` equal to its pixel height is exactly 1 texture pixel = 1 GUI pixel, which is
+why menu textures are authored 1:1 and kept under Nexo's 256x256 glyph limit.
+
+## Chest-type containers (9 columns, 1-6 rows) - the usual menu
+
+| rows | DeluxeMenus `size` | window (w x h) | container slot boxes y | player inv boxes y | hotbar boxes y | "Inventory" label y |
+|------|-----|-----------|----------------------|------|------|------|
+| 1 | 9  | 176 x 132 | 17 | 48 | 106 | 38 |
+| 2 | 18  | 176 x 150 | 17, 35 | 66 | 124 | 56 |
+| 3 | 27  | 176 x 168 | 17, 35, 53 | 84 | 142 | 74 |
+| 4 | 36  | 176 x 186 | 17 ... 71 | 102 | 160 | 92 |
+| 5 | 45  | 176 x 204 | 17 ... 89 | 120 | 178 | 110 |
+| 6 | 54  | 176 x 222 | 17 ... 107 | 138 | 196 | 128 |
+
+Formulas (rows = r):
+- window height `114 + 18r`
+- container slot `(col,row)` outer 18x18 box at `x = 7 + 18*col`, `y = 17 + 18*row`; the item itself is the 16x16 inside it at +1,+1
+- slot index = `row*9 + col` (0 top-left, the order DeluxeMenus `slot`/`slots` use)
+- player inventory slot boxes at `y = 18r + 30 + 18*i`, hotbar boxes at `18r + 88` (vanilla ChestMenu places the
+  items at `103 + (r-4)*18` and `161 + (r-4)*18`, i.e. one pixel inside those boxes)
+- vanilla draws the title at `(8, 6)` and the "Inventory" label at `(8, 18r + 20)`
+
+## Placing the glyph
+
+Minecraft draws the title as a text line whose first character starts at x=8, y=6 inside the window.
+A bitmap glyph's top edge lands `ascent` pixels above the baseline, and the baseline is 7px below the line top, so
+
+```
+glyph top  = 6 + 7 - ascent = 13 - ascent      (relative to the window top)
+glyph left = 8 + sum of preceding <shift:N>
+```
+
+So a texture whose (0,0) should coincide with the window's (0,0) uses **`ascent: 13` and `<shift:-8>`**.
+If the texture has `p` transparent rows above the window art, use `ascent: 13 + p`. `ascent` must be <= `height`.
+If the art sticks out `L` px to the left of the window (banners, pillars), shift `-8 - L`: the texture's x = L is
+the window's left edge. Width and height still max out at 256, e.g. 30 + 176 + 30 = 236.
+
+### Scenes that replace the window
+The vanilla chest background is drawn first and stays visible wherever the glyph is transparent, so a scene
+must be opaque over the whole 176 x (114 + 18r) rectangle (except the 3 cut corner pixels vanilla also has).
+Typical split: scene art from y = 0 to 18r + 23, then a separate panel for the player inventory from 18r + 23 to
+the bottom (7px border above the first inventory row, like the sides). The client prints the "Инвентарь" label at
+(8, 18r + 20) **on top of the glyph** - either keep that spot calm or hide the label with a lang override
+(`container.inventory` = "" in the pack's lang files; this affects every chest menu).
+Treat 13/-8 as the computed starting point and confirm in-game: the Nexo GUI Visualizer
+(https://nexomc.com/tools/gui-visualizer) or the Glypher client mod show the exact fit; nudge by 1px if needed.
+
+Rows 1-3 use the small chest screen and rows 4-6 the large one, but both keep the same top-left origin, so the
+same ascent/shift works for every row count as long as the texture is authored for that row count's height.
+
+After the glyph the text cursor has advanced `width + 1` pixels. To print readable title text on top of the art,
+shift back: `<shift:-8><glyph:menu><shift:-177>Title` for a 176px-wide glyph (the builder does this when the spec
+has `title_text`). Usually it is nicer to bake the title into the texture with the pixel font.
+
+## Layering - what draws over what
+
+1. vanilla container background (the generic chest texture)
+2. the title glyph (your art) - it covers the vanilla background entirely if it is opaque
+3. item icons (an `item_model: nexo:empty` item draws nothing, so your painted button stays visible)
+4. slot hover highlight: a white 16x16 overlay on the hovered slot. It still appears over painted buttons, so
+   design buttons that look fine with one 16x16 cell lightened (sunburst / gradient tiles do; tiny text does not)
+5. tooltip of the hovered item (the button's `display_name`/`lore`)
+
+Because the glyph is part of the title, anything that recolours titles (legacy `&7` before the glyph) tints it -
+start the title with `<white>`, or rely on Nexo forcing glyphs to white unless `:colorable` is used.
+
+## Other screens
+
+Title glyphs work on any container with a title. Widths are 176 unless noted.
+
+| screen | size | notes |
+|--------|------|-------|
+| hopper (5 slots) | 176 x 133 | slots at x = 44 + 18*i, y = 20 |
+| dispenser/dropper (3x3) | 176 x 166 | slots at x = 62 + 18*c, y = 17 + 18*r |
+| furnace / smoker / blast | 176 x 166 | fixed vanilla widgets (fuel, arrow) still render |
+| shulker box | 176 x 166 | same grid as a 3-row chest |
+| anvil | 176 x 166 | has a text field - good for search/rename inputs |
+
+For anything bigger than 256px or wider than the window (full-screen menus), split the texture into a
+Multi-Bitmap Glyph (see nexo-reference.md) or several glyphs joined with `<shift>`.
+
+## HD menus ("32x32" detail: 2 texture px per GUI px)
+A bitmap glyph is drawn at `height / texture height` scale, so a texture twice the GUI size with `height` = GUI
+height renders 2 texture px per GUI px: pixels half the size of the vanilla ones, like a 32x32 resource pack.
+`"hd": 2` in a spec does it (`gui_builder.py`, HD kits only - `modes_hd.py`):
+- The art is drawn natively at 2x. It is never upscaled, or the detail is fake.
+- Minecraft stitches every glyph into a 256x256 font atlas, so the texture is cut into tiles of at most
+  256x256. Each tile is a glyph with `height` = tile height / 2, and `ascent` = menu ascent minus the
+  tile's GUI y offset. Tiles of lower rows have negative ascents: the client checks only ascent <= height.
+- The title joins the tiles with shifts. After a bitmap glyph the client advances
+  `round(rightmost opaque column x scale) + 1`, so the builder measures each tile and emits the exact
+  `<shift>` to the next tile's x, for example
+  `<shift:-24><glyph:m_0_0><shift:-1><glyph:m_0_1><shift:-209><glyph:m_1_0><shift:-1><glyph:m_1_1>`.
+- Caveat: at an odd GUI scale (3) one HD pixel is 1.5 screen px, so pixel sizes alternate 1/2. It is crisp
+  at GUI scale 2 and 4, and at GUI scale 1 the half pixels merge. Tell the user and check in game.
+- The vanilla player inventory below stays 1x (the client draws it). Only the menu art is HD.

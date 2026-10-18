@@ -1,0 +1,81 @@
+{
+ "id": "hokaria_safe",
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "steel",
+ "canvas": {
+  "left": 8,
+  "right": 66,
+  "top": 8,
+  "bottom": 0
+ },
+ "container_panel": false,
+ "draw_player_inventory": false,
+ "preview_vanilla_under": true,
+ "layers": [
+  {
+   "type": "safe",
+   "part": "box3d",
+   "h": 134,
+   "side": 5,
+   "top": 5,
+   "base": 2
+  },
+  {
+   "type": "safe",
+   "part": "case",
+   "rows": 6,
+   "h": 134
+  },
+  {
+   "type": "safe",
+   "part": "recess",
+   "box": [
+    6,
+    16,
+    169,
+    124
+   ]
+  },
+  {
+   "type": "safe",
+   "part": "open_door",
+   "side": "right",
+   "x": -8,
+   "y0": 10,
+   "y1": 123,
+   "width": 44,
+   "thick": 9,
+   "top_thick": 3,
+   "hinge_ys": [
+    18,
+    92
+   ],
+   "hinge_h": 24,
+   "grow_top": 3,
+   "grow_bot": 10
+  },
+  {
+   "type": "safe",
+   "part": "hinge_blocks",
+   "x": 176,
+   "ys": [
+    18,
+    92
+   ],
+   "h": 24,
+   "side": "right",
+   "leaf": true,
+   "leaf_w": 6
+  },
+  {
+   "type": "safe",
+   "part": "nameplate",
+   "x": 88,
+   "y": -5,
+   "text": "СЕЙФ"
+  }
+ ],
+ "draw_free_slots": true,
+ "hide_inventory_label": true
+}

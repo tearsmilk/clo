@@ -1,0 +1,15 @@
+{
+  "id": "hokaria_royal_chest",
+  "namespace": "hokaria",
+  "rows": 6,
+  "theme": "royal",
+  "canvas": {"left": 40, "right": 40, "top": 17, "bottom": 0},
+  "header": {"text": "", "style": "bracket_tab"},
+  "royal_ornaments": {"banners": true, "emblem": true, "rails": true, "crystals": true, "meanders": true},
+  "section_divider": {"gem": true},
+  "hotbar_frame": true,
+  "corner_brackets": true,
+  "hide_inventory_label": true,
+  "open_commands": ["royalchest"],
+  "buttons": []
+}

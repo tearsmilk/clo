@@ -1,0 +1,278 @@
+{
+ "id": "hokaria_main_menu",
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "vanilla",
+ "comment": "main menu in the house style: material slabs on a slate counter; the player's own head shows in slot 22 inside the profile portrait",
+ "canvas": {
+  "left": 1,
+  "right": 1,
+  "top": 17,
+  "bottom": 0
+ },
+ "container_panel": false,
+ "draw_player_inventory": false,
+ "preview_vanilla_under": true,
+ "draw_free_slots": false,
+ "hide_inventory_label": true,
+ "layers": [
+  {
+   "type": "hub",
+   "part": "backdrop"
+  },
+  {
+   "type": "hub",
+   "part": "sign",
+   "text": "МЕНЮ",
+   "y": -16
+  },
+  {
+   "type": "hub",
+   "part": "tile",
+   "slots": [
+    0,
+    0,
+    3,
+    4
+   ],
+   "material": "leather",
+   "label": "Боевой\nпропуск",
+   "art": "medallion",
+   "seed": 2
+  },
+  {
+   "type": "hub",
+   "part": "tile",
+   "slots": [
+    3,
+    0,
+    3,
+    5
+   ],
+   "material": "planks",
+   "label": "Профиль",
+   "art": "portrait",
+   "head_slot": 22,
+   "seed": 3
+  },
+  {
+   "type": "hub",
+   "part": "tile",
+   "slots": [
+    6,
+    0,
+    3,
+    4
+   ],
+   "material": "stone",
+   "label": "Выбор\nсервера",
+   "art": "portal",
+   "seed": 4
+  },
+  {
+   "type": "hub",
+   "part": "tile",
+   "slots": [
+    0,
+    4,
+    3,
+    2
+   ],
+   "material": "velvet",
+   "label": "Магазин",
+   "art": "chest",
+   "seed": 5
+  },
+  {
+   "type": "hub",
+   "part": "tile",
+   "slots": [
+    6,
+    4,
+    3,
+    1
+   ],
+   "material": "cloth",
+   "label": "Вики",
+   "art": "book",
+   "seed": 6
+  },
+  {
+   "type": "hub",
+   "part": "tile",
+   "slots": [
+    3,
+    5,
+    3,
+    1
+   ],
+   "material": "steel",
+   "label": "Настройки",
+   "narrow": true,
+   "seed": 7
+  },
+  {
+   "type": "hub",
+   "part": "key",
+   "slot": 51,
+   "brand": "discord"
+  },
+  {
+   "type": "hub",
+   "part": "key",
+   "slot": 52,
+   "brand": "youtube"
+  },
+  {
+   "type": "hub",
+   "part": "key",
+   "slot": 53,
+   "brand": "tiktok"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "battlepass",
+   "x": 0,
+   "y": 0,
+   "w": 3,
+   "h": 4,
+   "style": "none",
+   "name": "&6&lБоевой пропуск",
+   "lore": [
+    "&7Задания сезона и награды"
+   ],
+   "commands": [
+    "[player] battlepass"
+   ]
+  },
+  {
+   "id": "profile",
+   "x": 3,
+   "y": 0,
+   "w": 3,
+   "h": 5,
+   "style": "none",
+   "name": "&e&lПрофиль",
+   "lore": [
+    "&7Статистика и достижения"
+   ],
+   "commands": [
+    "[player] profile"
+   ],
+   "dm": {
+    "priority": 1
+   }
+  },
+  {
+   "id": "servers",
+   "x": 6,
+   "y": 0,
+   "w": 3,
+   "h": 4,
+   "style": "none",
+   "name": "&d&lВыбор сервера",
+   "lore": [
+    "&7Перейти на другой сервер"
+   ],
+   "commands": [
+    "[player] server"
+   ]
+  },
+  {
+   "id": "shop",
+   "x": 0,
+   "y": 4,
+   "w": 3,
+   "h": 2,
+   "style": "none",
+   "name": "&a&lМагазин",
+   "lore": [
+    "&7Купить и продать"
+   ],
+   "commands": [
+    "[player] shop"
+   ]
+  },
+  {
+   "id": "wiki",
+   "x": 6,
+   "y": 4,
+   "w": 3,
+   "h": 1,
+   "style": "none",
+   "name": "&9&lВики",
+   "lore": [
+    "&7Гайды по серверу"
+   ],
+   "commands": [
+    "[close]",
+    "[message] &9Вики: &fhttps://example.com/wiki"
+   ]
+  },
+  {
+   "id": "settings",
+   "x": 3,
+   "y": 5,
+   "w": 3,
+   "h": 1,
+   "style": "none",
+   "name": "&7&lНастройки",
+   "lore": [
+    "&7Чат, звук, уведомления"
+   ],
+   "commands": [
+    "[player] settings"
+   ]
+  },
+  {
+   "id": "discord",
+   "x": 6,
+   "y": 5,
+   "style": "none",
+   "name": "&9Discord",
+   "commands": [
+    "[close]",
+    "[message] &9Discord: &fhttps://discord.gg/example"
+   ]
+  },
+  {
+   "id": "youtube",
+   "x": 7,
+   "y": 5,
+   "style": "none",
+   "name": "&cYouTube",
+   "commands": [
+    "[close]",
+    "[message] &cYouTube: &fhttps://youtube.com/@example"
+   ]
+  },
+  {
+   "id": "tiktok",
+   "x": 8,
+   "y": 5,
+   "style": "none",
+   "name": "&fTikTok",
+   "commands": [
+    "[close]",
+    "[message] &fTikTok: &fhttps://tiktok.com/@example"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "profile_head",
+   "material": "head-%player_name%",
+   "slot": 22,
+   "priority": 0,
+   "display_name": "&e&lПрофиль",
+   "lore": [
+    "&7Статистика и достижения"
+   ],
+   "left_click_commands": [
+    "[player] profile"
+   ],
+   "preview": "hub:head"
+  }
+ ]
+}

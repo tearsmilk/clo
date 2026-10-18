@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hokaria Art Generator</title>
+<meta name="description" content="Генератор уютных пиксельных аниме-картинок для Minecraft-сервера Hokaria.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #2a1a2e;
+    --bg-2: #3b2340;
+    --panel: #fff6e6;
+    --panel-2: #f6e6c8;
+    --ink: #3a1a08;
+    --ink-soft: #7a5638;
+    --gold: #ffd34a;
+    --gold-dark: #e8901e;
+    --green: #4f7a30;
+    --green-dark: #22401a;
+    --blue: #3e86b8;
+    --red: #b8433e;
+    --border: #3a1a08;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Pixelify Sans", system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at top, #f79a5b55 0%, transparent 60%),
+      linear-gradient(180deg, #5a2e7a 0%, var(--bg-2) 45%, var(--bg) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    padding: 24px 16px 64px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 24px; }
+  h1 {
+    font-family: "Press Start 2P", monospace;
+    font-size: clamp(28px, 7vw, 56px);
+    margin: 8px 0 12px;
+    letter-spacing: 2px;
+    background: linear-gradient(180deg, #fff6b8 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(4px 4px 0 #2a0e22) drop-shadow(-2px -2px 0 var(--border)) drop-shadow(2px -2px 0 var(--border)) drop-shadow(-2px 2px 0 var(--border));
+  }
+  .subtitle { color: #fff; font-size: 18px; letter-spacing: 2px; text-shadow: 3px 3px 0 #2a0e22; }
+
+  .panel {
+    background: var(--panel);
+    border: 4px solid var(--border);
+    box-shadow: 0 6px 0 #00000055, inset 0 4px 0 #ffffffaa, inset 0 -6px 0 #00000014;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  label { display: block; font-weight: 700; font-size: 18px; margin: 0 0 6px; }
+  .hint { font-size: 14px; color: var(--ink-soft); margin: 4px 0 0; }
+  textarea, input[type=text], input[type=password], select {
+    width: 100%;
+    font: inherit; font-size: 17px; color: var(--ink);
+    background: #fffdf7;
+    border: 3px solid var(--border);
+    padding: 10px 12px;
+    outline: none;
+  }
+  textarea { min-height: 110px; resize: vertical; }
+  textarea:focus, input:focus, select:focus { box-shadow: 0 0 0 3px var(--gold); }
+  .field { margin-bottom: 16px; }
+  .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+  .btn {
+    font-family: "Press Start 2P", monospace;
+    font-size: 13px; letter-spacing: 1px;
+    color: #fff; text-shadow: 2px 2px 0 #0006;
+    background: var(--green);
+    border: 4px solid var(--green-dark);
+    box-shadow: inset 0 4px 0 #ffffff55, inset 0 -5px 0 #00000040;
+    padding: 14px 18px;
+    cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active { transform: translateY(2px); }
+  .btn:disabled { filter: grayscale(0.7); cursor: progress; }
+  .btn.secondary { background: #c98a2b; border-color: #6b4210; }
+  .btn.ghost { background: #8a7a6a; border-color: #4a3a2a; font-size: 11px; padding: 10px 12px; }
+  .btn.primary { flex: 1 1 220px; font-size: 15px; }
+
+  details.settings summary { cursor: pointer; font-weight: 700; font-size: 18px; }
+  details.settings[open] summary { margin-bottom: 14px; }
+
+  .status { color: #fff; text-align: center; min-height: 24px; margin: 4px 0 14px; text-shadow: 2px 2px 0 #2a0e22; font-size: 17px; }
+  .status.error { color: #ffb3a8; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 4px solid var(--border); box-shadow: 0 6px 0 #00000055; }
+  .card .img {
+    aspect-ratio: var(--ar, 3/2);
+    background: repeating-linear-gradient(45deg, var(--panel-2) 0 12px, #efdcb8 12px 24px);
+    display: grid; place-items: center;
+    overflow: hidden;
+  }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: auto; cursor: zoom-in; }
+  .card .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-top: 4px solid var(--border); font-size: 14px; color: var(--ink-soft); }
+  .card .bar a, .card .bar button {
+    font: inherit; font-weight: 700; color: var(--ink); background: var(--gold); border: 3px solid var(--border);
+    padding: 4px 10px; text-decoration: none; cursor: pointer;
+  }
+  .loader { font-family: "Press Start 2P", monospace; font-size: 12px; color: var(--ink-soft); animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+  .card.failed .img { background: #f3d2c8; color: var(--red); padding: 12px; text-align: center; }
+
+  .viewer { position: fixed; inset: 0; background: #000c; display: none; place-items: center; padding: 16px; z-index: 10; cursor: zoom-out; }
+  .viewer.open { display: grid; }
+  .viewer img { max-width: 100%; max-height: 100%; border: 4px solid var(--border); }
+
+  footer { text-align: center; color: #ffffffaa; font-size: 14px; margin-top: 32px; }
+  footer a { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="subtitle">🌾 MINECRAFT VILLAGE SERVER 🎣</div>
+    <h1>HOKARIA</h1>
+    <div class="subtitle">ART GENERATOR</div>
+  </header>
+
+  <section class="panel">
+    <div class="field">
+      <label for="description">📝 Описание</label>
+      <textarea id="description" placeholder="cute anime farmer girl with a straw hat and a bundle of wheat, standing in a golden field"></textarea>
+      <p class="hint">Лучше писать по-английски. Стиль, свет и качество допишутся сами — опиши только кто это и что делает.</p>
+    </div>
+    <div class="field">
+      <label for="negative">🚫 Чего НЕ должно быть <span class="hint">(необязательно)</span></label>
+      <input type="text" id="negative" placeholder="extra fingers, text, watermark">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="style">🎨 Стиль</label>
+        <select id="style"></select>
+      </div>
+      <div class="field">
+        <label for="shape">🖼️ Размер</label>
+        <select id="shape">
+          <option value="1024x576">Широкий 16:9 — 1024×576</option>
+          <option value="768x512">Пейзаж 3:2 — 768×512</option>
+          <option value="512x768">Портрет 2:3 — 512×768</option>
+          <option value="768x768">Квадрат — 768×768</option>
+          <option value="1024x512">Баннер 2:1 — 1024×512</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="count">🔢 Сколько?</label>
+        <select id="count">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="4" selected>4</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+    </div>
+    <div class="btns">
+      <button class="btn primary" id="generate">GENERATE</button>
+      <button class="btn secondary" id="random" title="Случайная идея">🎲 RANDOM</button>
+    </div>
+  </section>
+
+  <details class="panel settings" id="settings">
+    <summary>⚙️ Настройки движка</summary>
+    <div class="field">
+      <label for="engine">Движок</label>
+      <select id="engine">
+        <option value="pollinations">Pollinations — бесплатно, без регистрации (качество попроще, водяной знак)</option>
+        <option value="hf">Hugging Face FLUX.1-schnell — нужен свой токен (качество выше)</option>
+      </select>
+    </div>
+    <div class="field" id="hfField">
+      <label for="hfToken">Токен Hugging Face</label>
+      <input type="password" id="hfToken" placeholder="hf_..." autocomplete="off">
+      <p class="hint">Создай бесплатно: huggingface.co → Settings → Access Tokens → «Create new token» (тип «Read» или с правом «Make calls to Inference Providers»). Токен хранится только в этом браузере.</p>
+    </div>
+  </details>
+
+  <div class="status" id="status"></div>
+  <div class="grid" id="grid"></div>
+
+  <footer>Сделано для сервера Hokaria · картинки рисует <span id="engineName">Pollinations</span></footer>
+</div>
+
+<div class="viewer" id="viewer"><img alt=""></div>
+
+<script>
+(() => {
+  const STYLES = [
+    {
+      name: '🌾 Cozy Pixel Anime — персонаж',
+      prompt: d => `${d}, one cute anime character, visible from head to mid-thigh, big shiny expressive anime eyes, rosy blush, clean symmetrical face, detailed 16-bit pixel art, chunky clearly visible square pixels, painterly pixel shading with soft dithering, cozy anime RPG game look, cozy farming sim key art, warm golden-hour lighting, soft rim light, vibrant warm colors, masterpiece, best quality, ultra detailed`,
+      negative: 'text, letters, words, watermark, logo, signature, blurry, low quality, jpeg artifacts, extra fingers, missing fingers, deformed hands, extra arms, extra legs, distorted face, asymmetric eyes, cross-eyed, cropped head, multiple characters, realistic photo, 3d render, dark gloomy colors, nsfw',
+    },
+    {
+      name: '🏡 Cozy Pixel — пейзаж без людей',
+      prompt: d => `${d}, wide landscape, no people, cozy countryside village, detailed 16-bit pixel art, chunky clearly visible square pixels, painterly pixel shading with soft dithering, cozy anime RPG game background art, warm golden-hour sunset lighting, glowing windows, fireflies, vibrant warm colors, masterpiece, best quality, ultra detailed`,
+      negative: 'people, humans, characters, text, letters, words, watermark, logo, signature, blurry, low quality, jpeg artifacts, modern buildings, cars, power lines, realistic photo, 3d render, distorted perspective',
+    },
+    {
+      name: '🎏 Cozy Pixel — сцена с персонажами',
+      prompt: d => `${d}, one single coherent scene, characters painted in the same style and lighting as the background, detailed 16-bit pixel art, chunky clearly visible square pixels, painterly pixel shading with soft dithering, cozy anime RPG game key art, warm golden-hour lighting, vibrant warm colors, masterpiece, best quality, ultra detailed`,
+      negative: 'text, letters, words, watermark, logo, signature, blurry, low quality, jpeg artifacts, extra fingers, deformed hands, distorted faces, asymmetric eyes, realistic photo, 3d render, nsfw',
+    },
+    {
+      name: 'Без стиля',
+      prompt: d => d,
+      negative: '',
+    },
+  ];
+
+  const RANDOM = 'cute anime {farmer|fisher|hunter|beekeeper|shepherd|baker} girl {in a golden wheat field|on a wooden dock by a river|at the edge of an autumn forest|in a cozy village square|next to a red-roofed farmhouse|in a blooming apple orchard}, {holding a bundle of wheat|holding a big fish|with a longbow|with a glowing lantern|with a basket of apples|with a fluffy red fox cub}, {at golden-hour sunset|on a warm summer evening|under fireflies|in autumn with falling leaves|on a snowy winter evening}';
+
+  const $ = id => document.getElementById(id);
+  const els = {
+    description: $('description'), negative: $('negative'), style: $('style'), shape: $('shape'),
+    count: $('count'), generate: $('generate'), random: $('random'), engine: $('engine'),
+    hfToken: $('hfToken'), hfField: $('hfField'), status: $('status'), grid: $('grid'),
+    viewer: $('viewer'), engineName: $('engineName'),
+  };
+
+  STYLES.forEach((s, i) => els.style.add(new Option(s.name, i)));
+
+  // Per-viewer conveniences only; the page works without storage.
+  const store = {
+    get(k) { try { return localStorage.getItem('hokaria.' + k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem('hokaria.' + k, v); } catch {} },
+  };
+  for (const k of ['description', 'negative', 'style', 'shape', 'count', 'engine', 'hfToken']) {
+    const v = store.get(k);
+    if (v !== null) els[k].value = v;
+    els[k].addEventListener('change', () => store.set(k, els[k].value));
+    els[k].addEventListener('input', () => store.set(k, els[k].value));
+  }
+
+  const syncEngine = () => {
+    const hf = els.engine.value === 'hf';
+    els.hfField.style.display = hf ? '' : 'none';
+    els.engineName.textContent = hf ? 'Hugging Face FLUX' : 'Pollinations';
+  };
+  els.engine.addEventListener('change', syncEngine);
+  syncEngine();
+
+  const expand = t => t.replace(/\{([^{}]*)\}/g, (_, opts) => { const o = opts.split('|'); return o[Math.floor(Math.random() * o.length)]; });
+  els.random.addEventListener('click', () => {
+    els.description.value = expand(RANDOM);
+    store.set('description', els.description.value);
+  });
+
+  const setStatus = (msg, error = false) => { els.status.textContent = msg; els.status.classList.toggle('error', error); };
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  // The anonymous tier rejects fetch() from web pages (CORS requests carry an Origin header),
+  // but serves plain <img> loads, so the image is loaded as an <img> with no referrer.
+  const loadImg = url => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.referrerPolicy = 'no-referrer';
+    img.onload = () => resolve(url);
+    img.onerror = () => reject(new Error('Pollinations не отдал картинку'));
+    img.src = url;
+  });
+
+  async function viaPollinations(prompt, negative, w, h, seed) {
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}` +
+      (negative ? `&negative_prompt=${encodeURIComponent(negative)}` : '');
+    // Anonymous use is rate-limited to roughly one image at a time, so retry with a pause.
+    for (let attempt = 1; ; attempt++) {
+      try { return await loadImg(url); }
+      catch (e) {
+        if (attempt >= 4) throw new Error('Pollinations сейчас перегружен, попробуй через минуту');
+        setStatus(`Сервис занят, жду и пробую ещё раз (${attempt}/3)…`);
+        await sleep(6000 * attempt);
+      }
+    }
+  }
+
+  async function viaHuggingFace(prompt, negative, w, h, seed) {
+    const token = els.hfToken.value.trim();
+    if (!token) throw new Error('Вставь токен Hugging Face в настройках движка');
+    const res = await fetch('https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'image/png' },
+      body: JSON.stringify({ inputs: prompt, parameters: { width: w, height: h, seed, negative_prompt: negative || undefined, num_inference_steps: 4 } }),
+    });
+    if (!res.ok) {
+      let detail = '';
+      try { detail = (await res.json()).error || ''; } catch {}
+      if (res.status === 401) throw new Error('Токен Hugging Face не подошёл');
+      if (res.status === 402 || res.status === 429) throw new Error('Закончились бесплатные генерации Hugging Face, попробуй позже или переключись на Pollinations');
+      throw new Error(`Hugging Face ответил ${res.status} ${detail}`);
+    }
+    return res.blob();
+  }
+
+  function makeCard(w, h) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.setProperty('--ar', `${w}/${h}`);
+    card.innerHTML = '<div class="img"><span class="loader">РИСУЮ...</span></div><div class="bar"><span>…</span></div>';
+    els.grid.prepend(card);
+    return card;
+  }
+
+  // `result` is a Blob (Hugging Face) or a remote image URL (Pollinations).
+  function fillCard(card, result, label) {
+    const isBlob = result instanceof Blob;
+    const url = isBlob ? URL.createObjectURL(result) : result;
+    const img = new Image();
+    img.referrerPolicy = 'no-referrer';
+    img.src = url;
+    img.alt = label;
+    img.addEventListener('click', () => { els.viewer.querySelector('img').src = url; els.viewer.classList.add('open'); });
+    card.querySelector('.img').replaceChildren(img);
+    const bar = card.querySelector('.bar');
+    bar.replaceChildren();
+    const span = document.createElement('span'); span.textContent = label;
+    const a = document.createElement('a');
+    a.href = url;
+    if (isBlob) {
+      a.download = `hokaria-${Date.now()}.${result.type.includes('png') ? 'png' : 'jpg'}`;
+      a.textContent = 'Скачать';
+    } else {
+      // A cross-origin image can't be force-downloaded; open it so it can be saved from there.
+      a.target = '_blank'; a.rel = 'noreferrer';
+      a.textContent = 'Открыть';
+    }
+    bar.append(span, a);
+  }
+
+  function failCard(card, msg) {
+    card.classList.add('failed');
+    card.querySelector('.img').textContent = msg;
+    card.querySelector('.bar span').textContent = 'ошибка';
+  }
+
+  els.viewer.querySelector('img').referrerPolicy = 'no-referrer';
+  els.viewer.addEventListener('click', () => els.viewer.classList.remove('open'));
+
+  els.generate.addEventListener('click', async () => {
+    const desc = els.description.value.trim() || els.description.placeholder;
+    const style = STYLES[Number(els.style.value)] || STYLES[0];
+    const prompt = style.prompt(desc);
+    const negative = [els.negative.value.trim(), style.negative].filter(Boolean).join(', ');
+    const [w, h] = els.shape.value.split('x').map(Number);
+    const n = Number(els.count.value);
+    const run = els.engine.value === 'hf' ? viaHuggingFace : viaPollinations;
+
+    els.generate.disabled = true;
+    const cards = Array.from({ length: n }, () => makeCard(w, h));
+    let done = 0, failed = 0;
+    // One at a time: the free tiers of both engines rate-limit parallel requests.
+    for (const card of cards) {
+      if (run === viaPollinations && card !== cards[0]) await sleep(3000);
+      setStatus(`Рисую ${done + failed + 1} из ${n}…`);
+      const seed = Math.floor(Math.random() * 1e9);
+      try {
+        fillCard(card, await run(prompt, negative, w, h, seed), `seed ${seed}`);
+        done++;
+      } catch (e) {
+        failCard(card, e.message || String(e));
+        failed++;
+        if (/токен|закончились/i.test(e.message)) { cards.slice(cards.indexOf(card) + 1).forEach(c => c.remove()); break; }
+      }
+    }
+    setStatus(failed ? `Готово: ${done}, с ошибкой: ${failed}` : `Готово! Нажми на картинку, чтобы открыть крупно.`, failed > 0 && done === 0);
+    els.generate.disabled = false;
+  });
+
+  els.description.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); els.generate.click(); }
+  });
+})();
+</script>
+</body>
+</html>

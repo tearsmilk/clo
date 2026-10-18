@@ -1,0 +1,268 @@
+{
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "vanilla",
+ "canvas": {
+  "left": 40,
+  "right": 40,
+  "top": 34,
+  "bottom": 0
+ },
+ "draw_free_slots": false,
+ "id": "hokaria_shop_stacks",
+ "layers": [
+  {
+   "type": "shop",
+   "part": "stall",
+   "sign": "МАГАЗИН",
+   "hanging": "ХОКАРИЯ"
+  },
+  {
+   "type": "shop",
+   "part": "banner",
+   "x": 88,
+   "y": 22,
+   "text": "КУПИТЬ СТАКАМИ"
+  },
+  {
+   "type": "shop",
+   "part": "group",
+   "slots": [
+    1,
+    2,
+    7
+   ],
+   "color": "green"
+  },
+  {
+   "type": "shop",
+   "part": "button",
+   "slots": [
+    3,
+    4,
+    3,
+    1
+   ],
+   "color": "red",
+   "text": "ОТМЕНА"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "cancel",
+   "x": 3,
+   "y": 4,
+   "w": 3,
+   "style": "none",
+   "name": "&cОтмена",
+   "commands": [
+    "[openguimenu] hokaria_shop_items"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "stack1",
+   "material": "BREAD",
+   "amount": 64,
+   "slot": 19,
+   "display_name": "&6Хлеб x64",
+   "lore": [
+    "&7Цена: &e320 монет",
+    "",
+    "&fЛКМ &7- купить"
+   ],
+   "left_click_requirement": {
+    "requirements": {
+     "money": {
+      "type": "has money",
+      "amount": 320
+     }
+    },
+    "deny_commands": [
+     "[message] &cНе хватает монет"
+    ]
+   },
+   "left_click_commands": [
+    "[takemoney] 320",
+    "[console] give %player_name% bread 64",
+    "[close]"
+   ],
+   "preview": "item:loaf:bread"
+  },
+  {
+   "id": "stack2",
+   "material": "BREAD",
+   "amount": 64,
+   "slot": 20,
+   "display_name": "&6Хлеб x128",
+   "lore": [
+    "&7Цена: &e640 монет",
+    "",
+    "&fЛКМ &7- купить"
+   ],
+   "left_click_requirement": {
+    "requirements": {
+     "money": {
+      "type": "has money",
+      "amount": 640
+     }
+    },
+    "deny_commands": [
+     "[message] &cНе хватает монет"
+    ]
+   },
+   "left_click_commands": [
+    "[takemoney] 640",
+    "[console] give %player_name% bread 128",
+    "[close]"
+   ],
+   "preview": "item:loaf:bread"
+  },
+  {
+   "id": "stack3",
+   "material": "BREAD",
+   "amount": 64,
+   "slot": 21,
+   "display_name": "&6Хлеб x192",
+   "lore": [
+    "&7Цена: &e960 монет",
+    "",
+    "&fЛКМ &7- купить"
+   ],
+   "left_click_requirement": {
+    "requirements": {
+     "money": {
+      "type": "has money",
+      "amount": 960
+     }
+    },
+    "deny_commands": [
+     "[message] &cНе хватает монет"
+    ]
+   },
+   "left_click_commands": [
+    "[takemoney] 960",
+    "[console] give %player_name% bread 192",
+    "[close]"
+   ],
+   "preview": "item:loaf:bread"
+  },
+  {
+   "id": "stack4",
+   "material": "BREAD",
+   "amount": 64,
+   "slot": 22,
+   "display_name": "&6Хлеб x256",
+   "lore": [
+    "&7Цена: &e1280 монет",
+    "",
+    "&fЛКМ &7- купить"
+   ],
+   "left_click_requirement": {
+    "requirements": {
+     "money": {
+      "type": "has money",
+      "amount": 1280
+     }
+    },
+    "deny_commands": [
+     "[message] &cНе хватает монет"
+    ]
+   },
+   "left_click_commands": [
+    "[takemoney] 1280",
+    "[console] give %player_name% bread 256",
+    "[close]"
+   ],
+   "preview": "item:loaf:bread"
+  },
+  {
+   "id": "stack5",
+   "material": "BREAD",
+   "amount": 64,
+   "slot": 23,
+   "display_name": "&6Хлеб x320",
+   "lore": [
+    "&7Цена: &e1600 монет",
+    "",
+    "&fЛКМ &7- купить"
+   ],
+   "left_click_requirement": {
+    "requirements": {
+     "money": {
+      "type": "has money",
+      "amount": 1600
+     }
+    },
+    "deny_commands": [
+     "[message] &cНе хватает монет"
+    ]
+   },
+   "left_click_commands": [
+    "[takemoney] 1600",
+    "[console] give %player_name% bread 320",
+    "[close]"
+   ],
+   "preview": "item:loaf:bread"
+  },
+  {
+   "id": "stack6",
+   "material": "BREAD",
+   "amount": 64,
+   "slot": 24,
+   "display_name": "&6Хлеб x384",
+   "lore": [
+    "&7Цена: &e1920 монет",
+    "",
+    "&fЛКМ &7- купить"
+   ],
+   "left_click_requirement": {
+    "requirements": {
+     "money": {
+      "type": "has money",
+      "amount": 1920
+     }
+    },
+    "deny_commands": [
+     "[message] &cНе хватает монет"
+    ]
+   },
+   "left_click_commands": [
+    "[takemoney] 1920",
+    "[console] give %player_name% bread 384",
+    "[close]"
+   ],
+   "preview": "item:loaf:bread"
+  },
+  {
+   "id": "stack7",
+   "material": "BREAD",
+   "amount": 64,
+   "slot": 25,
+   "display_name": "&6Хлеб x448",
+   "lore": [
+    "&7Цена: &e2240 монет",
+    "",
+    "&fЛКМ &7- купить"
+   ],
+   "left_click_requirement": {
+    "requirements": {
+     "money": {
+      "type": "has money",
+      "amount": 2240
+     }
+    },
+    "deny_commands": [
+     "[message] &cНе хватает монет"
+    ]
+   },
+   "left_click_commands": [
+    "[takemoney] 2240",
+    "[console] give %player_name% bread 448",
+    "[close]"
+   ],
+   "preview": "item:loaf:bread"
+  }
+ ]
+}

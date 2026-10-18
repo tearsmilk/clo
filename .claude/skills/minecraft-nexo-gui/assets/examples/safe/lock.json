@@ -1,0 +1,128 @@
+{
+ "id": "hokaria_safe_lock",
+ "namespace": "hokaria",
+ "rows": 6,
+ "theme": "steel",
+ "canvas": {
+  "left": 8,
+  "right": 10,
+  "top": 8,
+  "bottom": 0
+ },
+ "container_panel": false,
+ "draw_player_inventory": false,
+ "preview_vanilla_under": true,
+ "draw_free_slots": false,
+ "comment": "classic safe: dial + 3-spoke handle, hinges on the right; one menu per handle angle (variants), each click turns it, the last opens the vault",
+ "layers": [
+  {
+   "type": "safe",
+   "part": "box3d",
+   "h": 134,
+   "side": 5,
+   "top": 5,
+   "base": 2
+  },
+  {
+   "type": "safe",
+   "part": "case",
+   "rows": 6,
+   "h": 134
+  },
+  {
+   "type": "safe",
+   "part": "door_inset",
+   "box": [
+    10,
+    10,
+    165,
+    123
+   ]
+  },
+  {
+   "type": "safe",
+   "part": "hinge_blocks",
+   "x": 176,
+   "ys": [
+    18,
+    92
+   ],
+   "h": 24,
+   "side": "right",
+   "leaf": true,
+   "leaf_w": 6,
+   "door_strap": 20
+  },
+  {
+   "type": "safe",
+   "part": "nameplate",
+   "x": 88,
+   "y": -5,
+   "text": "СЕЙФ"
+  },
+  {
+   "type": "safe",
+   "part": "dial",
+   "x": 88,
+   "y": 28,
+   "r": 11
+  },
+  {
+   "type": "safe",
+   "part": "handle",
+   "x": 88,
+   "y": 80,
+   "length": 30,
+   "angle": "${angle}"
+  }
+ ],
+ "open_commands": [
+  "${opencmd}"
+ ],
+ "buttons": [
+  {
+   "id": "handle",
+   "x": 2,
+   "y": 1,
+   "w": 5,
+   "h": 5,
+   "style": "none",
+   "name": "&6Крути ручку",
+   "lore": [
+    "&7Поверни ручку, чтобы открыть сейф"
+   ],
+   "commands": [
+    "${c1}",
+    "${c2}",
+    "${c3}"
+   ]
+  }
+ ],
+ "variants": [
+  {
+   "id": "0",
+   "angle": 0,
+   "opencmd": "safe",
+   "c1": "[sound] BLOCK_IRON_TRAPDOOR_OPEN",
+   "c2": "[openguimenu] hokaria_safe_lock_1",
+   "c3": "[sound] BLOCK_CHAIN_PLACE"
+  },
+  {
+   "id": "1",
+   "angle": 40,
+   "opencmd": "safe_turn_1",
+   "c1": "[sound] BLOCK_IRON_TRAPDOOR_OPEN",
+   "c2": "[openguimenu] hokaria_safe_lock_2",
+   "c3": "[sound] BLOCK_CHAIN_PLACE"
+  },
+  {
+   "id": "2",
+   "angle": 80,
+   "opencmd": "safe_turn_2",
+   "c1": "[sound] BLOCK_IRON_DOOR_OPEN",
+   "c2": "[close]",
+   "c3": "[player] pv 1"
+  }
+ ],
+ "hide_inventory_label": true
+}
