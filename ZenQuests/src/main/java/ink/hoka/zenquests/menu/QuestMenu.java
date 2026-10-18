@@ -45,6 +45,7 @@ public final class QuestMenu implements Listener {
     /** Владелец инвентаря: что делать при клике по слоту. */
     private static final class Holder implements InventoryHolder {
         final Map<Integer, Runnable> actions = new HashMap<>();
+        final Map<Integer, Runnable> rightActions = new HashMap<>();   // ПКМ: закрепить/открепить в худе
         Inventory inv;
         @Override public Inventory getInventory() { return inv; }
     }
@@ -204,6 +205,7 @@ public final class QuestMenu implements Listener {
         es.sort(Comparator.comparingInt(e -> qm.isClaimed(p, e) ? 2 : qm.isDone(p, e) ? 0 : 1));
 
         List<Runnable> placers = new ArrayList<>();
+        List<Runnable> pins = new ArrayList<>();
         List<ItemStack> items = new ArrayList<>();
         for (QuestManager.Entry e : es) {
             items.add(questItem(p, e, null));
@@ -213,6 +215,7 @@ public final class QuestMenu implements Listener {
                 qm.claim(p, e);
                 openCategory(p, c, page);
             });
+            pins.add(qm.isClaimed(p, e) ? null : () -> { click(p); qm.togglePin(p, e); openCategory(p, c, page); });
         }
         int locked = lockedCount(p, c);
         if (locked > 0) {
@@ -230,7 +233,7 @@ public final class QuestMenu implements Listener {
         frame(inv, catMat(c, "pane", Material.GRAY_STAINED_GLASS_PANE), catMat(c, "corner", Material.BLACK_STAINED_GLASS_PANE));
 
         inv.setItem(HEADER, categoryHeader(p, c, es));
-        place(h, items, placers, pg);
+        place(h, items, placers, pins, pg);
         if (items.isEmpty()) {
             String text = c == Category.SEASONAL && plugin.registry().activeSeason(qm.today()) == null ? gui("no-season") : gui("empty");
             inv.setItem(22, icon("empty", item(Material.BARRIER, text, List.of(), false, 1)));
@@ -328,9 +331,11 @@ public final class QuestMenu implements Listener {
 
         List<ItemStack> items = new ArrayList<>();
         List<Runnable> placers = new ArrayList<>();
+        List<Runnable> pins = new ArrayList<>();
         for (int i = 0; i < total; i++) {
             Quest q = ch.steps().get(i);
             int n = i + 1;
+            pins.add(null);
             if (i < step) {
                 List<String> lore = new ArrayList<>(q.description());
                 lore.add("");
@@ -341,6 +346,7 @@ public final class QuestMenu implements Listener {
             } else if (i == step && !locked) {
                 QuestManager.Entry e = entry(ch, i);
                 items.add(questItem(p, e, gui("story-step", "step", n, "total", total)));
+                pins.set(pins.size() - 1, () -> { click(p); qm.togglePin(p, e); openChain(p, chainId, page); });
                 placers.add(() -> {
                     if (!qm.isDone(p, e)) { deny(p); qm.claim(p, e); return; }
                     qm.claim(p, e);
@@ -374,7 +380,7 @@ public final class QuestMenu implements Listener {
         if (step >= total) { hl.add(""); hl.add(gui("story-done")); }
         inv.setItem(HEADER, item(ch.icon(), ch.name(), hl, step >= total, 1));
 
-        place(h, items, placers, pg);
+        place(h, items, placers, pins, pg);
         nav(h, p, pg, pages, np -> openChain(p, chainId, np), () -> openStory(p, 0));
         p.openInventory(inv);
     }
@@ -410,6 +416,8 @@ public final class QuestMenu implements Listener {
         if (claimed) lore.add(gui("status-claimed"));
         else if (done) lore.add(gui("status-ready"));
         else lore.add(gui("status-left", "left", q.amount() - prog));
+        boolean pinned = !claimed && qm.isPinned(p, e);
+        if (!claimed) lore.add(gui(pinned ? "unpin-hint" : "pin-hint"));
 
         if (claimed) {
             ItemStack it = item(mat(plugin.getConfig().getString("gui.claimed-icon"), Material.LIME_STAINED_GLASS_PANE),
@@ -417,6 +425,7 @@ public final class QuestMenu implements Listener {
             return questCards() ? questCard(it, q, "claimed") : icon("claimed", it);
         }
         String name = done ? gui("ready-name", "quest", q.name()) : q.name();
+        if (pinned) name = gui("pinned-name", "quest", name);
         return questCard(item(q.icon(), name, lore, done, 1), q, done ? "ready" : "active");
     }
 
@@ -465,7 +474,7 @@ public final class QuestMenu implements Listener {
         e.setCancelled(true);
         if (!(e.getWhoClicked() instanceof Player)) return;
         if (e.getClickedInventory() == null || !(e.getClickedInventory().getHolder() instanceof Holder)) return;
-        Runnable r = h.actions.get(e.getSlot());
+        Runnable r = e.isRightClick() && h.rightActions.containsKey(e.getSlot()) ? h.rightActions.get(e.getSlot()) : h.actions.get(e.getSlot());
         if (r != null) r.run();
     }
 
@@ -495,11 +504,14 @@ public final class QuestMenu implements Listener {
     }
 
     /** Разложить предметы страницы по внутренним слотам. */
-    private void place(Holder h, List<ItemStack> items, List<Runnable> actions, int page) {
+    private void place(Holder h, List<ItemStack> items, List<Runnable> actions, int page) { place(h, items, actions, null, page); }
+
+    private void place(Holder h, List<ItemStack> items, List<Runnable> actions, List<Runnable> rightActions, int page) {
         int from = page * INNER.length;
         for (int i = 0; i < INNER.length && from + i < items.size(); i++) {
             h.inv.setItem(INNER[i], items.get(from + i));
             h.actions.put(INNER[i], actions.get(from + i));
+            if (rightActions != null && rightActions.get(from + i) != null) h.rightActions.put(INNER[i], rightActions.get(from + i));
         }
     }
 

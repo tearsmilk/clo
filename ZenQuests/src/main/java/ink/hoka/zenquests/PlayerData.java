@@ -28,6 +28,8 @@ public final class PlayerData {
     public final Map<String, Integer> progress = new HashMap<>();
     public final Set<String> claimed = new HashSet<>();
     public final Map<String, Integer> storyStep = new HashMap<>();   // цепочка → номер текущего шага
+    public final List<String> pinned = new ArrayList<>();            // ключи квестов, закреплённых в худе (по порядку)
+    public boolean pinnedInit = false;                                 // ежедневные уже закреплялись автоматически
     public boolean dirty = false;
 
     public int get(String key) { return progress.getOrDefault(key, 0); }
@@ -36,6 +38,7 @@ public final class PlayerData {
     public void clearPrefix(String prefix) {
         progress.keySet().removeIf(k -> k.startsWith(prefix));
         claimed.removeIf(k -> k.startsWith(prefix));
+        pinned.removeIf(k -> k.startsWith(prefix));
         dirty = true;
     }
 
@@ -57,6 +60,8 @@ public final class PlayerData {
             catch (NumberFormatException ignored) { }
         }
         d.claimed.addAll(y.getStringList("claimed"));
+        d.pinned.addAll(y.getStringList("pinned"));
+        d.pinnedInit = y.getBoolean("pinned-init", false);
         ConfigurationSection st = y.getConfigurationSection("story");
         if (st != null) for (String chain : st.getKeys(false)) d.storyStep.put(chain, st.getInt(chain, 0));
         return d;
@@ -74,6 +79,8 @@ public final class PlayerData {
         for (Map.Entry<String, Integer> e : progress.entrySet()) pr.add(e.getKey() + "=" + e.getValue());
         y.set("progress", pr);
         y.set("claimed", new ArrayList<>(claimed));
+        y.set("pinned", new ArrayList<>(pinned));
+        y.set("pinned-init", pinnedInit);
         for (Map.Entry<String, Integer> e : storyStep.entrySet()) y.set("story." + e.getKey(), e.getValue());
         file.getParentFile().mkdirs();
         y.save(file);

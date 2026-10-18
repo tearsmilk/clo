@@ -10,10 +10,15 @@ timezone: "Europe/Moscow"
 # true — награда выдаётся сразу при выполнении; false — игрок забирает её в меню
 auto-claim: false
 
-# Полоска прогресса сверху экрана на пару секунд, когда квест продвинулся
+# Полоска прогресса сверху экрана на пару секунд, когда квест продвинулся (выключена: прогресс виден в плашках BetterHud)
 bossbar:
-  enabled: true
+  enabled: false
   seconds: 3
+
+# Плашки квестов в BetterHud (%zenquests_hud_<n>_*%): показываются закреплённые квесты (ПКМ по квесту в меню)
+hud:
+  max-pinned: 4          # сколько квестов можно закрепить
+  auto-pin-daily: true   # новые ежедневные закрепляются сами при выдаче (открепить можно вручную)
 
 # Не засчитывать ломание блоков, которые поставили игроки (защита от «поставил-сломал»).
 # Помнит до рестарта сервера.
@@ -160,6 +165,9 @@ messages:
   premium-none: "&7У игрока &f{player}&7 нет выданной подписки."
   premium-check: "&7Подписка &f{player}&7: осталось &f{time}"
   premium-check-perm: "&7У &f{player}&7 подписка через право (LuckPerms/донат), командой не управляется."
+  pinned: "&e📌 Квест {quest}&e закреплён в худе."
+  unpinned: "&7📌 Квест {quest}&7 откреплён."
+  pin-full: "&cВ худе уже {max} квестов — открепи какой-нибудь."
   premium-bad-term: "&cНепонятный срок: &f{term}&c. Примеры: 30d, 12h, 1w, 1d12h, forever"
   premium-forever: "навсегда"
 
@@ -180,6 +188,9 @@ gui:
   status-left: "&7⌛ Осталось: &f{left}"
   status-ready: "&a&l✔ Нажми, чтобы забрать награду!"
   status-claimed: "&8✔ Награда получена"
+  pin-hint: "&8ПКМ — закрепить в худе"
+  unpin-hint: "&e📌 Закреплено в худе &8(ПКМ — открепить)"
+  pinned-name: "&e📌 {quest}"
   ready-name: "&a✔ {quest}"
   claimed-name: "&8✔ &7{quest}"
   claimed-icon: LIME_STAINED_GLASS_PANE

@@ -15,9 +15,9 @@ import java.time.Duration;
  *   %zenquests_premium_badge%  — значок Ферма+ (premium.badge из config.yml) или пусто — для таба/чата
  *   %zenquests_premium%        — true / false
  *   %zenquests_premium_left%   — сколько осталось («3 д 4 ч», «навсегда») или пусто
- *   %zenquests_hud_<n>_active% — 1, если есть n-й (1..4) невыполненный ежедневный квест, иначе 0 (для BetterHud)
+ *   %zenquests_hud_<n>_active% — 1, если есть n-й (1..4) закреплённый и ещё не выполненный квест, иначе 0 (для BetterHud)
  *   %zenquests_hud_<n>_name% / _desc / _progress / _amount / _percent / _left — название, первая строка описания, прогресс
- *   %zenquests_hud_count%      — сколько ежедневных ещё не выполнено
+ *   %zenquests_hud_count%      — сколько закреплённых ещё не выполнено; _cat — категория (daily/weekly/seasonal/story)
  */
 public final class PapiHook extends PlaceholderExpansion {
 
@@ -64,7 +64,7 @@ public final class PapiHook extends PlaceholderExpansion {
         Player p = op.getPlayer();
         if (p == null) return key.endsWith("active") || key.equals("count") ? "0" : "";
         java.util.List<ink.hoka.zenquests.QuestManager.Entry> open = new java.util.ArrayList<>();
-        for (ink.hoka.zenquests.QuestManager.Entry e : plugin.quests().entries(p, ink.hoka.zenquests.model.Category.DAILY))
+        for (ink.hoka.zenquests.QuestManager.Entry e : plugin.quests().pinnedEntries(p))
             if (!plugin.quests().isDone(p, e)) open.add(e);
         if (key.equals("count")) return String.valueOf(open.size());
         int us = key.indexOf('_');
@@ -77,6 +77,7 @@ public final class PapiHook extends PlaceholderExpansion {
         int prog = Math.min(plugin.quests().data(p).get(e.key()), e.quest().amount()), amount = e.quest().amount();
         return switch (what) {
             case "active" -> "1";
+            case "cat" -> e.quest().category().key;
             case "name" -> Text.strip(e.quest().name()).trim();
             case "desc" -> e.quest().description().isEmpty() ? "" : Text.strip(e.quest().description().get(0)).trim();
             case "progress" -> String.valueOf(prog);

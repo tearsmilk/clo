@@ -21,6 +21,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -135,6 +136,9 @@ public final class QuestManager {
             d.dailyPeriod = day;
             d.dirty = true;
             if (notify && hadBefore && !d.daily.isEmpty()) plugin.msg(p, "new-day");
+            autoPinDaily(p);
+        } else if (!d.pinnedInit) {
+            autoPinDaily(p);   // первый вход после обновления: закрепить уже выданные ежедневные
         }
         String week = weekKey(today);
         if (d.weeklyPremium.isEmpty() && !reg.weeklyPremiumPool().isEmpty() && week.equals(d.weeklyPeriod)) {
@@ -253,6 +257,58 @@ public final class QuestManager {
             plugin.msg(p, "completed", "quest", e.quest().name());
         }
         save(p);
+    }
+
+    // ── закрепление в худе (BetterHud) ──
+
+    public int maxPinned() { return Math.max(1, plugin.getConfig().getInt("hud.max-pinned", 4)); }
+
+    public boolean isPinned(Player p, Entry e) { return data(p).pinned.contains(e.key()); }
+
+    /** Все квесты игрока по всем категориям (для поиска закреплённых по ключу). */
+    private List<Entry> allEntries(Player p) {
+        List<Entry> out = new ArrayList<>();
+        for (Category c : Category.values()) out.addAll(entries(p, c));
+        return out;
+    }
+
+    /** Закреплённые квесты по порядку; устаревшие и уже выполненные/полученные ключи вычищаются. */
+    public List<Entry> pinnedEntries(Player p) {
+        PlayerData d = data(p);
+        if (d.pinned.isEmpty()) return List.of();
+        Map<String, Entry> byKey = new HashMap<>();
+        for (Entry e : allEntries(p)) byKey.put(e.key(), e);
+        List<Entry> out = new ArrayList<>();
+        boolean changed = false;
+        for (Iterator<String> it = d.pinned.iterator(); it.hasNext(); ) {
+            String k = it.next();
+            Entry e = byKey.get(k);
+            if (e == null || isClaimed(p, e)) { it.remove(); changed = true; continue; }
+            out.add(e);
+        }
+        if (changed) d.dirty = true;
+        return out;
+    }
+
+    /** Закрепить/открепить. @return новое состояние; сообщение игроку уже отправлено. */
+    public boolean togglePin(Player p, Entry e) {
+        PlayerData d = data(p);
+        if (d.pinned.remove(e.key())) { d.dirty = true; plugin.msg(p, "unpinned", "quest", e.quest().name()); return false; }
+        if (pinnedEntries(p).size() >= maxPinned()) { plugin.msg(p, "pin-full", "max", maxPinned()); return true; }
+        d.pinned.add(e.key()); d.dirty = true;
+        plugin.msg(p, "pinned", "quest", e.quest().name());
+        return true;
+    }
+
+    /** Новые ежедневные закрепляются сами (hud.auto-pin-daily), пока есть место. */
+    private void autoPinDaily(Player p) {
+        PlayerData d = data(p);
+        d.pinnedInit = true; d.dirty = true;
+        if (!plugin.getConfig().getBoolean("hud.auto-pin-daily", true)) return;
+        for (Entry e : entries(p, Category.DAILY)) {
+            if (d.pinned.size() >= maxPinned()) break;
+            if (!d.pinned.contains(e.key())) { d.pinned.add(e.key()); d.dirty = true; }
+        }
     }
 
     /** Забрать награду (из меню). @return сообщение уже отправлено игроку. */
