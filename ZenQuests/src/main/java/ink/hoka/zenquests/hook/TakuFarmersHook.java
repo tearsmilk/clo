@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import ink.hoka.zenquests.ZenQuests;
@@ -84,11 +85,35 @@ public final class TakuFarmersHook implements Listener {
         if (brk) progress(p, ObjectiveType.CROP_BREAK, crop, 1);
     }
 
+    /** Слот выхода у столов TakuFarmers (скалка, жёрнов, кухня). */
+    private static final int TABLE_OUT = 15;
+
     private void cook(Event e) {
         if (!(call(e, "getPlayer") instanceof Player p)) return;
-        progress(p, ObjectiveType.COOK, str(call(e, "getStationId")), 1);
+        String station = str(call(e, "getStationId"));
         Object res = call(e, "getResult");
-        int n = res instanceof ItemStack it ? Math.max(1, it.getAmount()) : 1;
+        ItemStack result = res instanceof ItemStack it ? it : null;
+        int n = result == null ? 1 : Math.max(1, result.getAmount());
+        // TakuFarmers 18.10+: столы (скалка, жёрнов, кухня) шлют CookCompleteEvent на КАЖДЫЙ клик по слоту выхода, ещё до
+        // того как предмет забран (и даже если забрать не удалось). Поэтому считаем не события, а сколько предметов
+        // реально ушло из слота: сравниваем содержимое на следующем тике.
+        Inventory top = p.getOpenInventory().getTopInventory();
+        ItemStack slot = top.getSize() > TABLE_OUT ? top.getItem(TABLE_OUT) : null;
+        if (result != null && slot != null && slot.isSimilar(result) && slot.getAmount() == result.getAmount()) {
+            int before = slot.getAmount();
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                Inventory t2 = p.getOpenInventory().getTopInventory();
+                ItemStack after = t2 == top ? t2.getItem(TABLE_OUT) : null;
+                int left = after != null && after.isSimilar(result) ? after.getAmount() : 0;
+                int taken = before - left;
+                if (taken <= 0) return;
+                progress(p, ObjectiveType.COOK, station, taken);
+                progress(p, ObjectiveType.COOK_ITEM, itemName(result), taken);
+            });
+            return;
+        }
+        // станции готовки (CookManager/CookMenu): одно событие на одно блюдо
+        progress(p, ObjectiveType.COOK, station, n);
         progress(p, ObjectiveType.COOK_ITEM, itemName(res), n);
     }
 
