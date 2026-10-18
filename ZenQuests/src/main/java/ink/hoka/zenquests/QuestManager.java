@@ -263,7 +263,27 @@ public final class QuestManager {
 
     public int maxPinned() { return Math.max(1, plugin.getConfig().getInt("hud.max-pinned", 4)); }
 
-    public boolean isPinned(Player p, Entry e) { return data(p).pinned.contains(e.key()); }
+    public boolean isPinned(Player p, Entry e) {
+        if (isStory(e)) { Entry cur = currentStory(p); return cur != null && cur.key().equals(e.key()) && data(p).storyPinned; }
+        return data(p).pinned.contains(e.key());
+    }
+
+    private static boolean isStory(Entry e) { return e.key().startsWith("story:"); }
+
+    /** Текущий сюжетный квест: шаг первой (по quests.yml) незавершённой и доступной цепочки. Он один — его и держим в худе. */
+    public Entry currentStory(Player p) {
+        if (!plugin.getConfig().getBoolean("hud.story-pin", true)) return null;
+        List<Entry> st = entries(p, Category.STORY);
+        return st.isEmpty() ? null : st.get(0);
+    }
+
+    /** Сюжетный квест для худа или null (откреплён, нет цепочек, всё пройдено). Выполненный, но не полученный — тоже показываем. */
+    public Entry hudStory(Player p) {
+        PlayerData d = data(p);
+        if (!d.storyPinned) return null;
+        Entry e = currentStory(p);
+        return e == null || isClaimed(p, e) ? null : e;
+    }
 
     /** Все квесты игрока по всем категориям (для поиска закреплённых по ключу). */
     private List<Entry> allEntries(Player p) {
@@ -283,7 +303,7 @@ public final class QuestManager {
         for (Iterator<String> it = d.pinned.iterator(); it.hasNext(); ) {
             String k = it.next();
             Entry e = byKey.get(k);
-            if (e == null || isClaimed(p, e)) { it.remove(); changed = true; continue; }
+            if (e == null || isClaimed(p, e) || k.startsWith("story:")) { it.remove(); changed = true; continue; }
             out.add(e);
         }
         if (changed) d.dirty = true;
@@ -293,6 +313,11 @@ public final class QuestManager {
     /** Закрепить/открепить. @return новое состояние; сообщение игроку уже отправлено. */
     public boolean togglePin(Player p, Entry e) {
         PlayerData d = data(p);
+        if (isStory(e)) {   // сюжетный — отдельный слот сверху: флаг вкл/выкл, сам квест всегда текущий шаг
+            d.storyPinned = !d.storyPinned; d.dirty = true;
+            plugin.msg(p, d.storyPinned ? "pinned" : "unpinned", "quest", e.quest().name());
+            return d.storyPinned;
+        }
         if (d.pinned.remove(e.key())) { d.dirty = true; plugin.msg(p, "unpinned", "quest", e.quest().name()); return false; }
         if (pinnedEntries(p).size() >= maxPinned()) { plugin.msg(p, "pin-full", "max", maxPinned()); return true; }
         d.pinned.add(e.key()); d.dirty = true;

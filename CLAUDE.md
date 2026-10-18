@@ -39,7 +39,7 @@
 
 ## BetterHud — плашки ежедневных квестов
 - ZenQuests отдаёт `%zenquests_hud_<n>_active|name|desc|progress|amount|cat%` (n 1..4, закреплённые ПКМ в меню и не выполненные;
-  новые ежедневные закрепляются сами, `hud.auto-pin-daily`; боссбар прогресса выключен). В BetterHud: `huds/quests.yml`,
+  сюжетный — отдельный верхний слот `%zenquests_hud_story_*%`, всегда текущий шаг, ПКМ скрывает; автозакреп ежедневных выключен; боссбар выключен). В BetterHud: `huds/quests.yml`,
   блок `quests:` в конце `layouts/default-layout.yml`, иконка `assets/icons/quest.png` + запись в `texts/default_font.yml`, `quests` в
   `default-hud` config.yml. Исходники — `ZenQuests/betterhud/`. Бэкап старого layout — `plugins/BetterHud/default-layout.yml.bak-quests`
   (не класть .bak в `layouts/` — BetterHud ругается). BetterHud собирает свой пак в `Nexo/pack/external_packs/modernhud`.

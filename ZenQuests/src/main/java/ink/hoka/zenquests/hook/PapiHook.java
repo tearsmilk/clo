@@ -17,6 +17,7 @@ import java.time.Duration;
  *   %zenquests_premium_left%   — сколько осталось («3 д 4 ч», «навсегда») или пусто
  *   %zenquests_hud_<n>_active% — 1, если есть n-й (1..4) закреплённый и ещё не выполненный квест, иначе 0 (для BetterHud)
  *   %zenquests_hud_<n>_name% / _desc / _progress / _amount / _percent / _left — название, первая строка описания, прогресс
+ *   %zenquests_hud_story_active% / _name / _desc / _progress / _amount — текущий сюжетный квест (отдельный слот сверху)
  *   %zenquests_hud_count%      — сколько закреплённых ещё не выполнено; _cat — категория (daily/weekly/seasonal/story)
  */
 public final class PapiHook extends PlaceholderExpansion {
@@ -69,11 +70,17 @@ public final class PapiHook extends PlaceholderExpansion {
         if (key.equals("count")) return String.valueOf(open.size());
         int us = key.indexOf('_');
         if (us <= 0) return null;
-        int n;
-        try { n = Integer.parseInt(key.substring(0, us)); } catch (NumberFormatException ex) { return null; }
         String what = key.substring(us + 1);
-        if (n < 1 || n > open.size()) return what.equals("active") ? "0" : "";
-        ink.hoka.zenquests.QuestManager.Entry e = open.get(n - 1);
+        ink.hoka.zenquests.QuestManager.Entry e;
+        if (key.startsWith("story_")) {   // сюжетный слот — отдельно, всегда сверху
+            e = plugin.quests().hudStory(p);
+            if (e == null) return what.equals("active") ? "0" : "";
+        } else {
+            int n;
+            try { n = Integer.parseInt(key.substring(0, us)); } catch (NumberFormatException ex) { return null; }
+            if (n < 1 || n > open.size()) return what.equals("active") ? "0" : "";
+            e = open.get(n - 1);
+        }
         int prog = Math.min(plugin.quests().data(p).get(e.key()), e.quest().amount()), amount = e.quest().amount();
         return switch (what) {
             case "active" -> "1";
