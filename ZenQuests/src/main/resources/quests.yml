@@ -10,7 +10,6 @@
 #                   BREAK   сломать блок        PLACE    поставить блок
 #                   KILL    убить моба/игрока   FISH     выловить (ванильный предмет)
 #                   CATCH_FISH   поймать рыбу ZenFishing   цель: id рыбы из fish.yml (carp, sturgeon …) или ANY
-#                   CATCH_RARITY поймать рыбу редкости     цель: common, uncommon, rare, epic, legendary
 #                   CRAFT   скрафтить           SMELT    забрать из печи
 #                   EAT     съесть/выпить       ENCHANT  зачаровать
 #                   BREED   развести            TAME     приручить
@@ -265,10 +264,10 @@ daily:
     rare-catch:
       name: '&9Редкий улов'
       icon: TROPICAL_FISH
-      description: ['&7Поймай редкую рыбу']
+      description: ['&7Поймай осетра, тунца или лосося']
       objective:
-        type: CATCH_RARITY
-        targets: [rare, epic, legendary]
+        type: CATCH_FISH
+        targets: [sturgeon, tuna, salmon]
         amount: 1
       rewards:
         lines: ['&f• 300 монет', '&f• 80 опыта']
@@ -411,10 +410,10 @@ daily:
     rare-fish-plus:
       name: '&6Трофей'
       icon: PUFFERFISH
-      description: ['&7Поймай эпическую или легендарную рыбу']
+      description: ['&7Поймай белугу, меч-рыбу или золотого карпа']
       objective:
-        type: CATCH_RARITY
-        targets: [epic, legendary]
+        type: CATCH_FISH
+        targets: [beluga, swordfish, golden_carp]
         amount: 1
       rewards:
         lines: ['&f• 800 монет', '&f• 150 опыта']
@@ -596,10 +595,10 @@ weekly:
     collector:
       name: '&bКоллекционер'
       icon: TROPICAL_FISH
-      description: ['&7Поймай необычную рыбу или редче']
+      description: ['&7Поймай щук, судаков, сомов или форель']
       objective:
-        type: CATCH_RARITY
-        targets: [uncommon, rare, epic, legendary]
+        type: CATCH_FISH
+        targets: [pike, zander, catfish, trout]
         amount: 15
       rewards:
         lines: ['&f• 1 500 монет', '&f• 250 опыта']
@@ -685,10 +684,10 @@ weekly:
     legend-plus:
       name: '&6Легенда озера'
       icon: HEART_OF_THE_SEA
-      description: ['&7Поймай легендарную рыбу']
+      description: ['&7Поймай Лунную рыбу или Хозяина озера']
       objective:
-        type: CATCH_RARITY
-        targets: [legendary]
+        type: CATCH_FISH
+        targets: [moon_fish, farm_legend]
         amount: 1
       rewards:
         lines: ['&f• 4 000 монет', '&f• 600 опыта']
@@ -762,10 +761,10 @@ seasons:
       autumn-rare:
         name: '&9Осенние трофеи'
         icon: PUFFERFISH
-        description: ['&7Поймай редкую рыбу или лучше']
+        description: ['&7Поймай осетра, тунца или лосося']
         objective:
-          type: CATCH_RARITY
-          targets: [rare, epic, legendary]
+          type: CATCH_FISH
+          targets: [sturgeon, tuna, salmon]
           amount: 5
         rewards:
           lines: ['&f• 2 500 монет', '&f• 400 опыта']
