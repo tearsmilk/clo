@@ -24,7 +24,10 @@
 Ставится на удочку (`rod.tooltip-style`), пойманную рыбу (`catch.tooltip-style`) и меню (`menu.tooltip-style`) — `zenfishing:sea`. Превью — `tooltip/preview_sea_tooltip.png`.
 
 ## 3D-модели рыбы
-`fish_models3d.py SRC OUT` режет спрайт 64x64 на 12 вертикальных ломтиков-параллелепипедов (толщина по профилю: толще
-в середине, тоньше к хвосту), боковые грани — UV спрайта, торцы — узкие полоски. Модели → `assets/zenfishing/models/item/fish/<id>.json`
-(заменяют плоские `item/generated`). Пример — `fish_model3d_example.json`, грубый рендер — `fish_3d_preview.png`.
-У рыбы-предмета больше нет веса, редкости и автора в подписи: имя = название цветом редкости, описание пустое (стакается).
+`fish_models3d.py SPRITES OUT_MODELS OUT_TEXTURES [preview.png]` — параметрические объёмные модели (как в Blockbench): тело из
+ступенчатых сегментов по профилю рыбы, раздвоенный хвост под углом, ступенчатый спинной, анальный и грудные плавники;
+типы тела standard / long / eel / sword / round / mola / flat / kraken / dragon / fancy (словарь KIND). Текстура-атлас 64x64
+на вид рисуется процедурно по палитре спрайта (спина/бок/брюхо/плавники, чешуя, узор из PATTERN, глаз и рот у морды)
+→ `assets/zenfishing/textures/item/fish3d/<id>.png`, модели → `assets/zenfishing/models/item/fish/<id>.json`.
+Спрайты 64x64 (`fish-icons/`) остаются источником палитры. Превью рендера — `fish_3d_preview.png`.
+У рыбы-предмета нет веса, редкости и автора: имя = название цветом редкости, описание пустое (стакается).
