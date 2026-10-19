@@ -80,6 +80,16 @@ public final class FishJournal implements Listener {
         if (e.getHand() != EquipmentSlot.HAND) return;
         Player p = e.getPlayer();
         if (!p.hasPermission("zenfishing.use")) { plugin.msg(p, "no-permission"); return; }
+        refresh(p, e.getItem());
         plugin.menu().openMain(p);
+    }
+
+    /** Старый журнал (выдан без модели/с другим именем) подменяем свежим: модель и текст берутся из конфига. */
+    private void refresh(Player p, ItemStack held) {
+        ItemStack fresh = create();
+        ItemMeta a = held.getItemMeta(), b = fresh.getItemMeta();
+        boolean same = java.util.Objects.equals(a.hasItemModel() ? a.getItemModel() : null, b.hasItemModel() ? b.getItemModel() : null)
+                && java.util.Objects.equals(a.displayName(), b.displayName()) && java.util.Objects.equals(a.lore(), b.lore());
+        if (!same) p.getInventory().setItemInMainHand(fresh);
     }
 }
