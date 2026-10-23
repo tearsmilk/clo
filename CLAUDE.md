@@ -4,6 +4,9 @@
 - Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87.jar` (исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
   `ZenGroups/` — `src/main/java` и `src/main/resources` подключены в Noratrum; их собственных gradle/plugin.yml больше нет).
   Отдельных jar ZenQuests/ZenFishing/ZenGroups на сервере НЕТ — не заливать, иначе дубли PAPI/Vault.
+- **Никогда не перезаписывать jar поверх работающего с тем же именем**: JVM грузит классы лениво, и до рестарта консоль флудит
+  NoClassDefFoundError (23.10, FishMenu$Holder). Порядок: залить под новым именем (`Noratrum-o012mk23f87-<n>.jar`), удалить старый, рестарт.
+  Если панель показывает «offline» при работающем сервере — консольные команды не доходят, рестарт только руками владельца.
 - Папки на сервере: `plugins/Noratrum/config.yml` (общий: modules.*, plugins-command), `plugins/Noratrum/quests/` (бывш. plugins/ZenQuests —
   quests.yml мастер-копия тут!), `plugins/Noratrum/fishing/`, `plugins/Noratrum/groups/`. Старые папки перенесены автоматически 23.10.
 - Модуль = `ink.hoka.noratrum.Module` (реализует `Plugin`, делегирует в Noratrum; своё имя → неймспейсы ключей `zenquests:`, `zenfishing:`
