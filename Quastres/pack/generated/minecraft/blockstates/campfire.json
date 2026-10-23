@@ -1,0 +1,46 @@
+{
+ "variants": {
+  "facing=south,lit=false,signal_fire=false": {
+   "model": "quastres:block/palm_wood_slab"
+  },
+  "facing=south,lit=false,signal_fire=true": {
+   "model": "minecraft:block/campfire_off"
+  },
+  "facing=south,lit=true": {
+   "model": "minecraft:block/campfire"
+  },
+  "facing=west,lit=false,signal_fire=false": {
+   "model": "quastres:block/aspen_wood_slab"
+  },
+  "facing=west,lit=false,signal_fire=true": {
+   "model": "minecraft:block/campfire_off",
+   "y": 90
+  },
+  "facing=west,lit=true": {
+   "model": "minecraft:block/campfire",
+   "y": 90
+  },
+  "facing=north,lit=false,signal_fire=false": {
+   "model": "quastres:block/birch_wood_slab"
+  },
+  "facing=north,lit=false,signal_fire=true": {
+   "model": "minecraft:block/campfire_off",
+   "y": 180
+  },
+  "facing=north,lit=true": {
+   "model": "minecraft:block/campfire",
+   "y": 180
+  },
+  "facing=east,lit=false,signal_fire=false": {
+   "model": "quastres:block/pine_wood_slab"
+  },
+  "facing=east,lit=false,signal_fire=true": {
+   "model": "minecraft:block/campfire_off",
+   "y": 270
+  },
+  "facing=east,lit=true": {
+   "model": "minecraft:block/campfire",
+   "y": 270
+  }
+ }
+}

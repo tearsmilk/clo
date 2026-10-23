@@ -1,0 +1,14 @@
+name: Quastres
+version: '1.0.0'
+main: ink.hoka.quastres.Quastres
+bootstrapper: ink.hoka.quastres.QuastresBootstrap
+api-version: '1.21'
+description: Полублоки сверх лимита Carpentry — на состояниях костра (campfire / soul_campfire, потушенный)
+authors: [nakuZen]
+website: https://hoka.ink
+dependencies:
+  server:
+    Nexo:
+      load: BEFORE
+      required: false
+      join-classpath: true

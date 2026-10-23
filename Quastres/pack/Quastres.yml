@@ -1,0 +1,30 @@
+# Предметы полублоков Quastres (генерируется pack/make_pack.py из blocks.yml плагина — править там).
+# Модель — та же, что у поставленного блока; сам блок ставит плагин Quastres (ПКМ), Nexo тут только предмет.
+birch_wood_slab:
+  itemname: <#E3DCCB>Берёза-полублок
+  material: PAPER
+  lore:
+  - <gray>Полублок Quastres. Ставится ПКМ.
+  Pack:
+    model: quastres:block/birch_wood_slab
+palm_wood_slab:
+  itemname: <#C9A26A>Пальма-полублок
+  material: PAPER
+  lore:
+  - <gray>Полублок Quastres. Ставится ПКМ.
+  Pack:
+    model: quastres:block/palm_wood_slab
+aspen_wood_slab:
+  itemname: <#CFD6C2>Осина-полублок
+  material: PAPER
+  lore:
+  - <gray>Полублок Quastres. Ставится ПКМ.
+  Pack:
+    model: quastres:block/aspen_wood_slab
+pine_wood_slab:
+  itemname: <#8A6238>Сосна-полублок
+  material: PAPER
+  lore:
+  - <gray>Полублок Quastres. Ставится ПКМ.
+  Pack:
+    model: quastres:block/pine_wood_slab

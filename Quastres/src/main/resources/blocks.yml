@@ -1,0 +1,34 @@
+# Полублоки Quastres. Каждый — одно состояние потушенного костра: base (campfire | soul_campfire) × facing (north/south/west/east)
+# × signal (true/false) = 16 слотов. Модель на каждое состояние лежит в паке (assets/minecraft/blockstates/campfire.json,
+# soul_campfire.json → assets/quastres/models/block/<id>.json), её генерирует pack/make_pack.py по этому же файлу.
+# item — id предмета Nexo (plugins/Nexo/items/Quastres.yml, модель quastres:block/<id>); без Nexo плагин делает свой предмет.
+# После правок: python3 make_pack.py, залить пак, `nexo reload all`, `/quastres reload`.
+slabs:
+  birch_wood_slab:
+    name: "<#E3DCCB>Берёза-полублок"
+    base: campfire
+    facing: north
+    signal: false
+    textures: { top: orsess:block/slab_birch_wood, side: orsess:block/slab_birch_wood_side, bottom: orsess:block/slab_birch_wood }
+    sound: wood
+  palm_wood_slab:
+    name: "<#C9A26A>Пальма-полублок"
+    base: campfire
+    facing: south
+    signal: false
+    textures: { top: orsess:block/slab_palm_wood, side: orsess:block/slab_palm_wood_side, bottom: orsess:block/slab_palm_wood }
+    sound: wood
+  aspen_wood_slab:
+    name: "<#CFD6C2>Осина-полублок"
+    base: campfire
+    facing: west
+    signal: false
+    textures: { top: orsess:block/slab_aspen_wood, side: orsess:block/slab_aspen_wood_side, bottom: orsess:block/slab_aspen_wood }
+    sound: wood
+  pine_wood_slab:
+    name: "<#8A6238>Сосна-полублок"
+    base: campfire
+    facing: east
+    signal: false
+    textures: { top: orsess:block/slab_pine_wood, side: orsess:block/slab_pine_wood_side, bottom: orsess:block/slab_pine_wood }
+    sound: wood
