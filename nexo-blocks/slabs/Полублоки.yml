@@ -1,7 +1,10 @@
-# Группа «Полублоки» — плиты Carpentry (addon Nexo, тип SLAB: 4 варианта на базе вощёных медных плит).
-# Боковые текстуры — верхняя половина исходного блока (у дёрна видна трава с краем, низ срезан): slab_*_side.png,
-# генератор — nexo-blocks/slabs/make_slab_textures.py в репо. Занятые варианты: 1 дёрн, 2 песок, 3 walnut_slab (Дерево.yml), 4 дуб.
-# Пример ashen_oak_slab из carpentry_blocks.yml отключён (вариант 1 занят дёрном), бэкап carpentry_blocks.yml.bak-slabs.
+# Группа «Полублоки» — плиты Carpentry (addon Nexo, тип SLAB: ВСЕГО 4 варианта на базе вощёных медных плит, больше движок не даёт).
+# Боковые текстуры — верхняя половина исходного блока, продублированная в обе половины (block/slab берёт uv 8..16, slab_top — 0..8),
+# так виден верх блока, а низ срезан. Генератор — nexo-blocks/slabs/make_slab_textures.py в репо.
+# Дёрн: биомной окраски у плит нет (у медных плит нет tint-провайдера на клиенте), поэтому трава тонирована ярким зелёным.
+# Занятые варианты: 1 дёрн, 2 песок, 3 walnut_slab (Дерево.yml), 4 дуб (oak_wood).
+# Берёза (birch_wood) готова ниже, но выключена: свободного варианта нет. Чтобы включить — освободить слот и поставить её custom_variation.
+# Пример ashen_oak_slab из carpentry_blocks.yml отключён (бэкап carpentry_blocks.yml.bak-slabs).
 grass_slab:
   itemname: "<#7CC24E>Дёрн-полублок"
   lore: ["<gray>Половина блока дёрна."]
@@ -28,16 +31,29 @@ sand_slab:
     custom_block:
       type: SLAB
       custom_variation: 2
-oak_slab_custom:
-  itemname: "<#B8945A>Дуб-полублок"
-  lore: ["<gray>Половина блока дубовых досок."]
+oak_wood_slab:
+  itemname: "<#A8793F>Дуб-полублок"
+  lore: ["<gray>Половина блока дубовой древесины (кора)."]
   Pack:
     parent_model: block/slab
     textures:
-      top: orsess:block/slab_oak
-      side: orsess:block/slab_oak_side
-      bottom: orsess:block/slab_oak
+      top: orsess:block/slab_oak_wood
+      side: orsess:block/slab_oak_wood_side
+      bottom: orsess:block/slab_oak_wood
   Mechanics:
     custom_block:
       type: SLAB
       custom_variation: 4
+# birch_wood_slab:
+#   itemname: "<#E3DCCB>Берёза-полублок"
+#   lore: ["<gray>Половина блока берёзовой древесины (кора)."]
+#   Pack:
+#     parent_model: block/slab
+#     textures:
+#       top: orsess:block/slab_birch_wood
+#       side: orsess:block/slab_birch_wood_side
+#       bottom: orsess:block/slab_birch_wood
+#   Mechanics:
+#     custom_block:
+#       type: SLAB
+#       custom_variation: 3   # ← занят walnut_slab; нужен свободный вариант 1–4

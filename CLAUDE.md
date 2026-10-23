@@ -50,6 +50,8 @@
   (не класть .bak в `layouts/` — BetterHud ругается). BetterHud собирает свой пак в `Nexo/pack/external_packs/modernhud`.
 
 ## Nexo Carpentry — полублоки (plugins/carpentry-1.6.1.jar)
-- Тип `SLAB` даёт только 4 варианта (вощёные медные плиты). Заняты: 1 дёрн, 2 песок (`items/Полублоки.yml`), 3 ореховая (`Дерево.yml`),
-  4 дуб. Пример `ashen_oak_slab` в `carpentry_blocks.yml` закомментирован (бэкап `.bak-slabs`). STAIR: 1 ashen, 2 walnut.
+- Тип `SLAB` даёт только 4 варианта (вощёные медные плиты), жёстко в jar. Заняты: 1 дёрн, 2 песок, 4 дуб-кора (`items/Полублоки.yml`),
+  3 ореховая (`Дерево.yml`). Берёза-кора готова (текстуры в паке, блок закомментирован) — ждёт свободного слота.
+  Пример `ashen_oak_slab` в `carpentry_blocks.yml` закомментирован (бэкап `.bak-slabs`). STAIR: 1 ashen, 2 walnut.
+- Биомной окраски у таких плит нет (клиент не тонирует медные плиты) — трава дёрна затонирована ярким зелёным (#7FD645).
 - Текстуры плит — `pack/assets/orsess/textures/block/slab_*.png`, исходники и генератор в репо `nexo-blocks/slabs/` (из ванильного client.jar).
