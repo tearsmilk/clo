@@ -1,0 +1,248 @@
+# ==========================================================
+#  ZenFishing — рыбалка (https://hoka.ink)
+#  Рыба — в fish.yml. Перезагрузка без рестарта: /рыбалка reload
+#  Цвета: MiniMessage (<gradient:#a:#b>, <#ff8800>) и &-коды.
+# ==========================================================
+
+# ── Удочка: уровень и опыт хранятся на самом предмете (любая удочка при первом улове становится прокачиваемой) ──
+rod:
+  unbreakable: true      # удочки не ломаются (флаг на предмете + отмена урона прочности)
+  max-level: 50
+  # Опыт до следующего уровня: xp-base × xp-growth^(уровень−1)   (1→2: 100, 2→3: 125, 10→11: ~750 …)
+  xp-base: 100
+  xp-growth: 1.25
+  # Сколько очков прокачки даёт каждый новый уровень. Очки вкладываются в ветки в меню /рыбалка → Прокачка.
+  points-per-level: 1
+  # Ветки: per-point — бонус за одно очко (0.02 = 2%), max — очков в ветке, cost-base × cost-growth^вложено — цена
+  # очередного очка в монетах (0 — бесплатно). Сумма max всех веток = (max-level − 1) × points-per-level.
+  upgrades:
+    luck:   { name: "Удача",         per-point: 0.08, max: 10, cost-base: 150, cost-growth: 1.35 }   # шанс редкой рыбы
+    bite:   { name: "Клёв",          per-point: 0.06, max: 10, cost-base: 120, cost-growth: 1.35 }   # быстрее поклёвка
+    double: { name: "Двойной улов",  per-point: 0.02, max: 10, cost-base: 200, cost-growth: 1.35 }   # шанс второй рыбы
+    sell:   { name: "Цена",          per-point: 0.04, max: 10, cost-base: 180, cost-growth: 1.35 }   # дороже продажа
+    xp:     { name: "Опыт",          per-point: 0.05, max: 9,  cost-base: 150, cost-growth: 1.35 }   # больше опыта удочке
+  # Свой стиль подсказки удочки (ресурспак assets/zenfishing/textures/gui/sprites/tooltip/sea_*.png). Пусто — обычный.
+  tooltip-style: "zenfishing:sea"
+  name: "&b🎣 Удочка &7[&fур. {level}&7]"
+  name-max: "&b🎣 Удочка &7[&6МАКС&7]"
+  # {tracks} — по строке track-line на каждую прокачанную ветку; {free} — свободные очки
+  lore:
+    - "&8──────────────"
+    - "&7Опыт: &f{xp}&7/&f{need}"
+    - "{bar}"
+    - "&8──────────────"
+    - "{tracks}"
+    - "&7Свободных очков: &e{free}"
+  lore-max:
+    - "&8──────────────"
+    - "&6✦ Максимальный уровень"
+    - "&8──────────────"
+    - "{tracks}"
+    - "&7Свободных очков: &e{free}"
+  track-line: "&7{track}: &a+{value}% &8({points})"
+  bar: { length: 20, filled: "&b▮", empty: "&8▮" }
+
+# ── Улов ──
+catch:
+  # От какой редкости и выше сообщать всему серверу: common, uncommon, rare, epic, legendary, none
+  announce-from: epic
+  sounds: true
+  # Шансы редкостей (относительные веса) — в fish.yml у каждой редкости
+  # Своя текстура рыбы из ресурспака: шаблон модели предмета, {id} — id рыбы из fish.yml
+  # (assets/zenfishing/items/fish/<id>.json). Пусто "" — ванильные предметы. У рыбы можно задать свой model.
+  item-model: "zenfishing:fish/{id}"
+  # Стиль подсказки у пойманной рыбы (как у удочки). Пусто — обычный.
+  tooltip-style: "zenfishing:sea"
+  # Ночью (13000–23000 тиков) клюёт лучше: прибавка к скорости клёва и к удаче (доли)
+  night:
+    bite-speed: 0.3
+    luck: 0.15
+    message: true     # «Ночной клёв!» при редкой рыбе ночью
+  # Подпись на рыбе: только название (цвет — по редкости). Описание пустое — рыба складывается в стак.
+  name: "{color}{fish}"
+  lore: []
+
+# ── Продажа (/рыбалка продать или кнопка в меню) ──
+sell:
+  # auto — Vault, если есть, иначе команда; vault; command
+  method: auto
+  # Команда консоли, если нет Vault. {player} — ник, {amount} — сумма
+  command: "eco give {player} {amount}"
+  currency: "монет"
+
+# ── Ферма+ — подписка из ZenQuests (право zenquests.premium или /квесты premium give <ник> [срок]). Бонусы на рыбалке: ──
+premium:
+  permission: "zenquests.premium"
+  name: "<gradient:#ffd34e:#ff9f1c>Ферма+</gradient>"
+  xp-multiplier: 1.5     # опыт удочки ×1.5
+  luck: 0.25             # +25% к шансу редкой рыбы
+  bite-speed: 0.2        # клёв на 20% быстрее
+  double-catch: 0.05     # +5% к шансу второй рыбы
+  sell-bonus: 0.15       # +15% к цене
+  upgrade-discount: 0.2  # скидка 20% на прокачку удочки за монеты
+  exclusive-fish: true   # рыба с premium: true в fish.yml ловится только подписчикам
+  perks:
+    - "&7• Опыт удочки &6×1.5"
+    - "&7• Шанс редкой рыбы &6+25%"
+    - "&7• Клёв быстрее на &620%"
+    - "&7• Вторая рыба за улов &6+5%"
+    - "&7• Рыба дороже на &615%"
+    - "&7• Прокачка удочки дешевле на &620%"
+    - "&7• Особая рыба только для &6Ферма+"
+
+# ── Меню /рыбалка ──
+# Рыбацкий журнал — предмет, открывающий меню рыбалки по ПКМ (3D-модель из ресурспака: assets/zenfishing/models/item/fish_journal.json)
+journal:
+  enabled: true
+  give-on-join: true     # выдать при первом входе (один раз; потом — /рыбалка журнал [игрок])
+  model: "zenfishing:fish_journal"
+  name: "&b📘 Рыбацкий журнал"
+  lore:
+    - "&7ПКМ — открыть меню рыбалки"
+    - "&8Улов, удочка, продажа рыбы"
+
+# ── Рыболовные сети: предмет с 3D-моделью; 4 ПКМ по блокам/воде задают углы, сеть ложится на воду и ловит рыбу сама.
+#    ПКМ по сети — забрать улов, Shift+ПКМ — снять. /рыбалка сеть — купить. Хранятся в nets.yml.
+net:
+  enabled: true
+  price: 500               # цена покупки (/рыбалка сеть); 0 — бесплатно. Списывается через Vault
+  model: "zenfishing:fishing_net"            # предмет в руке (assets/zenfishing/models/item/fishing_net.json)
+  tile-model: "zenfishing:fishing_net_tile"  # плитка 1x1 на воде
+  name: "&b🕸 Рыболовная сеть"
+  lore:
+    - "&7ПКМ по 4 блокам или воде — углы сети"
+    - "&7Ловит рыбу сама, пока ты занят"
+    - "&8ПКМ по сети — забрать улов, Shift+ПКМ — снять"
+  max-size: 6              # максимальная сторона прямоугольника (блоков)
+  min-tiles: 2             # минимум клеток
+  min-water: 0.5           # доля клеток, под которыми должна быть вода
+  max-per-player: 3
+  max-per-player-premium: 5
+  capacity: 8              # сколько рыбы вмещает сеть
+  check-seconds: 60        # как часто сеть пробует поймать
+  chance-per-tile: 0.04    # шанс поимки за проверку на одну клетку (6x6 = 0.6 → потолок max-chance)
+  max-chance: 0.6
+  luck: -0.2               # удача (редкость) относительно удочки: сеть ловит проще
+  night-mult: 1.3          # ночью чаще
+  premium-mult: 1.25       # Ферма+ владельца — чаще
+  offline-premium: false   # считать ли Ферма+ у владельца не в сети (право проверить нельзя)
+  notify: true             # сообщать владельцу о поимке, если он рядом (64 блока)
+
+menu:
+  title: "<gradient:#38b6ff:#5ce1e6>🎣 Рыбалка</gradient>"
+  rod-title: "<gradient:#38b6ff:#5ce1e6>🎣 Прокачка удочки</gradient>"
+  accent: LIGHT_BLUE_STAINED_GLASS_PANE
+  corner: CYAN_STAINED_GLASS_PANE
+  background: BLACK_STAINED_GLASS_PANE
+  # Стиль подсказки из ресурспака (как у квестов). Пусто "" — обычный.
+  tooltip-style: "zenfishing:sea"
+  # Нарисованные фоны (ресурспак assets/zenfishing/font/menu.json + textures/gui/menu, scene): та же схема, что у квестов.
+  textures:
+    enabled: true
+    font: "zenfishing:menu"
+    title: false
+    sequence: "\uE100\uE010\uE102\uE011\uE103\uE012\uE102\uE013\uE103{bg}\uE101"
+    backgrounds: { main: "\uE000", rod: "\uE001" }
+  # Свои иконки кнопок (модели предметов, напр. zenquests:icon_close). Пусто — обычный предмет.
+  icons: { close: "", back: "", prev: "", next: "", sell: "", top: "", premium-active: "", premium-inactive: "", collection: "", unknown: "", rod: "" }
+  profile:
+    name: "&b{player}"
+    lore:
+      - "&7Поймано рыбы: &f{caught}"
+      - "&7Открыто видов: &f{known}&7/&f{total}"
+      - "&7Самая редкая: &f{best}"
+      - "&7Заработано: &e{earned} {currency}"
+  rod:
+    name: "&bУдочка в руке"
+    none: ["&7Возьми удочку в руку,", "&7чтобы увидеть её уровень"]
+  upgrade:
+    name: "&bПрокачка удочки"
+    lore: ["&7Вложи очки в удачу, клёв,", "&7двойной улов, цену и размер рыбы", "", "&eНажми, чтобы открыть"]
+    item: ANVIL
+  # Меню прокачки: шапка — удочка, 5 веток, назад
+  tracks:
+    name: "&b{track} &7[&f{points}&7/&f{max}&7]"
+    name-max: "&b{track} &7[&6МАКС&7]"
+    lore:
+      - "&7Сейчас: &a+{value}%"
+      - "&7Следующее очко: &a+{next}%"
+      - ""
+      - "&7Цена: &e{cost} {currency}"
+      - "&7Свободных очков: &e{free}"
+      - ""
+      - "&eНажми, чтобы вложить очко"
+    lore-max: ["&7Сейчас: &a+{value}%", "", "&6✦ Ветка прокачана полностью"]
+    lore-no-points: ["&7Сейчас: &a+{value}%", "&7Следующее очко: &a+{next}%", "", "&cНет свободных очков", "&7Очки дают уровни удочки"]
+    items: { luck: RABBIT_FOOT, bite: CLOCK, double: COD, sell: GOLD_NUGGET, xp: EXPERIENCE_BOTTLE }
+  rod-none:
+    name: "&cНет удочки"
+    lore: ["&7Возьми удочку в руку", "&7и открой меню снова"]
+  sell:
+    name: "&eПродать всю рыбу"
+    lore: ["&7Рыбы в инвентаре: &f{count}", "&7На сумму: &e{amount} {currency}", "", "&eНажми, чтобы продать"]
+    item: GOLD_INGOT
+  top:
+    name: "&6Топ рыбаков"
+    item: WRITABLE_BOOK
+    line: "&7{n}. &f{player} &8— &f{value}"
+    lore-caught: "&bПо улову:"
+    lore-biggest: "&bПо видам:"
+  premium:
+    active: { name: "{premium} &aактивна", lore: ["&7Твои бонусы на рыбалке:", ""], item: GOLDEN_HOE }
+    inactive: { name: "{premium}", lore: ["&7С подпиской на рыбалке:", ""], item: WHEAT }
+  close: { name: "&cЗакрыть", item: BARRIER }
+  back: { name: "&7← Назад", item: ARROW }
+  prev: { name: "&7← Назад", item: ARROW }
+  next: { name: "&7Вперёд →", item: ARROW }
+
+messages:
+  prefix: "&b🎣 &r"
+  no-permission: "&cНет прав."
+  players-only: "&cТолько для игроков."
+  reloaded: "&aКонфиги перезагружены: рыбы — {fish}."
+  usage-admin: "&7/рыбалка reload &8— &fперезагрузить\n&7/рыбалка rod [игрок] [уровень] &8— &fвыдать удочку\n&7/рыбалка stats <игрок> &8— &fстатистика\n&7/рыбалка журнал [игрок] &8— &fвыдать журнал\n&7/рыбалка сеть <игрок> | list | clear [игрок] &8— &fсети\n&7Подписка Ферма+ — /квесты premium give|take|check"
+  usage: "&7/рыбалка &8— &fменю\n&7/рыбалка продать &8— &fпродать всю рыбу\n&7/рыбалка топ &8— &fтоп рыбаков\n&7/рыбалка журнал &8— &fполучить Рыбацкий журнал\n&7/рыбалка сеть &8— &fкупить рыболовную сеть"
+  journal-given: "&b📘 Тебе выдан Рыбацкий журнал — ПКМ по нему открывает меню рыбалки."
+  journal-given-to: "&aРыбацкий журнал выдан игроку &f{player}&a."
+  net-corner: "&7Угол сети &f{n}&7/4 отмечен. &8Shift+ПКМ — сбросить."
+  net-reset: "&7Углы сети сброшены."
+  net-too-far: "&cСлишком далеко от первого угла (не больше {max} блоков, перепад высоты до 3)."
+  net-same-corner: "&cЭтот угол уже отмечен."
+  net-too-small: "&cСеть слишком маленькая."
+  net-overlap: "&cЗдесь уже стоит сеть."
+  net-no-water: "&cПод сетью должна быть вода (хотя бы половина клеток)."
+  net-limit: "&cУ тебя уже стоит максимум сетей: {max}."
+  net-placed: "&aСеть &f{w}x{l} &aпоставлена. Загляни позже — рыба сама придёт."
+  net-caught: "&7В сеть попалась {color}{fish}&7 ({count}/{max})."
+  net-empty: "&7В сети пока пусто. &8Вмещает до {max} рыб."
+  net-collected: "&aИз сети достано рыбы: &f{count}&a."
+  net-removed: "&7Сеть снята."
+  net-not-yours: "&cЭто сеть игрока &f{player}&c."
+  net-bought: "&aРыболовная сеть у тебя в инвентаре. &7Отметь 4 угла ПКМ по блокам или воде."
+  net-no-money: "&cНужно {price} {currency}."
+  net-given-to: "&aРыболовная сеть выдана игроку &f{player}&a."
+  net-disabled: "&cСети отключены."
+  net-list-empty: "&7Сетей на сервере нет."
+  net-cleared: "&aСнято сетей: &f{count}&a."
+  caught: "{color}Поймана {fish}&7! &8+{xp} опыта удочки"
+  night-bite: "&9🌙 Ночной клёв! &7Ночью рыба идёт лучше."
+  caught-double: "&b✦ Двойной улов! &7Ещё одна рыба: {color}{fish}"
+  announce: "&b🎣 &f{player} &7поймал {color}{fish}&7!"
+  new-species: "&6★ Новый вид в коллекции: {color}{fish} &7({known}/{total})"
+  level-up: "&b🎣 Удочка прокачана до &fуровня {level}&b!"
+  level-max: "&6✦ Удочка достигла максимального уровня!"
+  upgraded: "&b🎣 {track} &7→ &a+{value}%&7. Осталось очков: &e{free}"
+  upgrade-no-rod: "&cВозьми удочку в руку."
+  upgrade-no-points: "&cНет свободных очков — лови рыбу, уровни дают очки."
+  upgrade-max: "&7Эта ветка уже прокачана полностью."
+  upgrade-no-money: "&cНе хватает монет: нужно &e{cost} {currency}&c."
+  sold: "&aПродано рыбы: &f{count} &aна &e{amount} {currency}&a."
+  nothing-to-sell: "&7В инвентаре нет рыбы."
+  sell-unavailable: "&cПродажа сейчас недоступна (нет экономики)."
+  rod-given: "&aВыдана удочка &fур. {level} &aигроку &f{player}&a."
+  player-not-found: "&cИгрок {player} не в сети."
+  player-unknown: "&cИгрок {player} не найден."
+  stats: "&b{player}&7: поймано &f{caught}&7, видов &f{known}&7/&f{total}&7, самая редкая &f{best}&7, заработано &e{earned} {currency}"
+  top-header: "&b🎣 Топ рыбаков"
+  top-line: "&7{n}. &f{player} &8— &f{value}"
+  premium-only: "&cЭта рыба только для подписчиков {premium}."

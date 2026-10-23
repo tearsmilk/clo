@@ -1,0 +1,170 @@
+{
+ "id": "${id}",
+ "namespace": "zenquests",
+ "rows": 6,
+ "theme": "oak",
+ "container_panel": false,
+ "hide_inventory_label": false,
+ "canvas": {
+  "left": 30,
+  "right": 30,
+  "top": 17
+ },
+ "draw_free_slots": false,
+ "variants": [
+  {
+   "id": "daily",
+   "title": "Ежедневные",
+   "ribbon": "#d99a1c",
+   "cloth": "#3e8948",
+   "emblem": "wheat",
+   "title_upper": "ЕЖЕДНЕВНЫЕ"
+  },
+  {
+   "id": "weekly",
+   "title": "Еженедельные",
+   "ribbon": "#2f74b5",
+   "cloth": "#2f74b5",
+   "emblem": "fish",
+   "title_upper": "ЕЖЕНЕДЕЛЬНЫЕ"
+  },
+  {
+   "id": "seasonal",
+   "title": "Сезонные",
+   "ribbon": "#c45f1a",
+   "cloth": "#c45f1a",
+   "emblem": "pumpkin",
+   "title_upper": "СЕЗОННЫЕ"
+  },
+  {
+   "id": "story",
+   "title": "Сюжетные",
+   "ribbon": "#7a3aa3",
+   "cloth": "#7a3aa3",
+   "emblem": "crest",
+   "title_upper": "СЮЖЕТНЫЕ"
+  },
+  {
+   "id": "chain",
+   "title": "История",
+   "ribbon": "#7a3aa3",
+   "cloth": "#7a3aa3",
+   "emblem": "page",
+   "title_upper": "ИСТОРИЯ"
+  }
+ ],
+ "layers": [
+  {
+   "type": "divider",
+   "box": [
+    14,
+    22,
+    60,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "divider",
+   "box": [
+    102,
+    22,
+    60,
+    7
+   ],
+   "gem": "#63c74d"
+  },
+  {
+   "type": "slot_frame",
+   "slot": 4,
+   "color": "#feae34",
+   "inner": "#3e2731"
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    1,
+    1,
+    7,
+    4
+   ],
+   "kind": "wood"
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    3,
+    5,
+    3,
+    1
+   ],
+   "kind": "gold"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "info",
+   "x": 4,
+   "y": 0,
+   "style": "none",
+   "name": "&e${title}",
+   "lore": [
+    "&7Выполнено: &f2/5"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "q1",
+   "material": "PAPER",
+   "slot": 10,
+   "preview": "sprite:quest_done"
+  },
+  {
+   "id": "q2",
+   "material": "PAPER",
+   "slot": 11,
+   "preview": "sprite:quest_new"
+  },
+  {
+   "id": "q3",
+   "material": "PAPER",
+   "slot": 12,
+   "preview": "sprite:quest_new"
+  },
+  {
+   "id": "q4",
+   "material": "PAPER",
+   "slot": 13,
+   "preview": "sprite:quest_locked"
+  },
+  {
+   "id": "prev",
+   "material": "ARROW",
+   "slot": 48,
+   "preview": "sprite:arrow_gold"
+  },
+  {
+   "id": "back",
+   "material": "ARROW",
+   "slot": 49,
+   "preview": "sprite:page"
+  },
+  {
+   "id": "next",
+   "material": "ARROW",
+   "slot": 50,
+   "preview": "sprite:arrow_gold"
+  }
+ ],
+ "header": {
+  "text": "${title_upper}",
+  "style": "ribbon",
+  "font": "bold",
+  "case": "keep",
+  "width": 150,
+  "color": "${ribbon}",
+  "embroidered": "#f2c94c"
+ },
+ "draw_player_inventory": false
+}

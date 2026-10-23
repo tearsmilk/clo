@@ -1,0 +1,162 @@
+
+# Квесты в худе (ZenQuests → PlaceholderAPI): сверху — сюжетный (%zenquests_hud_story_*%), под ним до 4 закреплённых ПКМ
+# (%zenquests_hud_<n>_*%). Закреплённые сдвигаются вниз, когда сюжетный виден, поэтому у каждого два варианта позиции.
+quests:
+  texts:
+    1:
+      name: default_font
+      pattern: "<image:quest_story> <#E9B8FF>✦ [papi:zenquests_hud_story_name]  <#9BE37D>[papi:zenquests_hud_story_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_story_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 34
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)1'"
+          operation: '=='
+    2:
+      name: default_font
+      pattern: "<image:quest> <#FFFFFF>[papi:zenquests_hud_1_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_1_desc]  <#9BE37D>[papi:zenquests_hud_1_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_1_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 56
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_1_active"
+          second: "'(number)1'"
+          operation: '=='
+          gate: and
+        2:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)1'"
+          operation: '=='
+    3:
+      name: default_font
+      pattern: "<image:quest> <#FFFFFF>[papi:zenquests_hud_1_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_1_desc]  <#9BE37D>[papi:zenquests_hud_1_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_1_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 34
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_1_active"
+          second: "'(number)1'"
+          operation: '=='
+          gate: and
+        2:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)0'"
+          operation: '=='
+    4:
+      name: default_font
+      pattern: "<image:quest> <#FFFFFF>[papi:zenquests_hud_2_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_2_desc]  <#9BE37D>[papi:zenquests_hud_2_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_2_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 78
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_2_active"
+          second: "'(number)1'"
+          operation: '=='
+          gate: and
+        2:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)1'"
+          operation: '=='
+    5:
+      name: default_font
+      pattern: "<image:quest> <#FFFFFF>[papi:zenquests_hud_2_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_2_desc]  <#9BE37D>[papi:zenquests_hud_2_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_2_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 56
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_2_active"
+          second: "'(number)1'"
+          operation: '=='
+          gate: and
+        2:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)0'"
+          operation: '=='
+    6:
+      name: default_font
+      pattern: "<image:quest> <#FFFFFF>[papi:zenquests_hud_3_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_3_desc]  <#9BE37D>[papi:zenquests_hud_3_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_3_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 100
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_3_active"
+          second: "'(number)1'"
+          operation: '=='
+          gate: and
+        2:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)1'"
+          operation: '=='
+    7:
+      name: default_font
+      pattern: "<image:quest> <#FFFFFF>[papi:zenquests_hud_3_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_3_desc]  <#9BE37D>[papi:zenquests_hud_3_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_3_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 78
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_3_active"
+          second: "'(number)1'"
+          operation: '=='
+          gate: and
+        2:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)0'"
+          operation: '=='
+    8:
+      name: default_font
+      pattern: "<image:quest> <#FFFFFF>[papi:zenquests_hud_4_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_4_desc]  <#9BE37D>[papi:zenquests_hud_4_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_4_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 122
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_4_active"
+          second: "'(number)1'"
+          operation: '=='
+          gate: and
+        2:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)1'"
+          operation: '=='
+    9:
+      name: default_font
+      pattern: "<image:quest> <#FFFFFF>[papi:zenquests_hud_4_name] <#8F8F8F>— <#D0D0D0>[papi:zenquests_hud_4_desc]  <#9BE37D>[papi:zenquests_hud_4_progress]<#7A7A7A>//<#9BE37D>[papi:zenquests_hud_4_amount]"
+      background: background
+      align: right
+      layer: 1
+      x: -4
+      y: 100
+      conditions:
+        1:
+          first: "(number)papi:zenquests_hud_4_active"
+          second: "'(number)1'"
+          operation: '=='
+          gate: and
+        2:
+          first: "(number)papi:zenquests_hud_story_active"
+          second: "'(number)0'"
+          operation: '=='

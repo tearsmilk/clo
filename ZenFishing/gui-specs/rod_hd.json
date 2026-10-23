@@ -1,0 +1,116 @@
+{
+ "namespace": "zenfishing",
+ "rows": 6,
+ "theme": "oak",
+ "container_panel": false,
+ "hide_inventory_label": false,
+ "canvas": {
+  "left": 30,
+  "right": 30,
+  "top": 17
+ },
+ "draw_free_slots": false,
+ "draw_player_inventory": false,
+ "id": "rod",
+ "layers": [
+  {
+   "type": "divider",
+   "box": [
+    14,
+    22,
+    60,
+    7
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "divider",
+   "box": [
+    102,
+    22,
+    60,
+    7
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "slot_frame",
+   "slot": 4,
+   "color": "#4e9fd6",
+   "inner": "#14213a"
+  },
+  {
+   "type": "flourish",
+   "box": [
+    38,
+    38,
+    100,
+    16
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "slot_bar",
+   "slots": [
+    2,
+    2,
+    5,
+    1
+   ],
+   "kind": "wood",
+   "rim": "#4e9fd6",
+   "inner": "#14213a"
+  },
+  {
+   "type": "divider",
+   "box": [
+    36,
+    78,
+    104,
+    7
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "slot_frame",
+   "slot": 49,
+   "color": "#4e9fd6",
+   "inner": "#14213a"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "x",
+   "x": 2,
+   "y": 2,
+   "style": "none",
+   "name": "&bУдача",
+   "lore": [
+    "&7Сейчас: +8%"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "rod",
+   "material": "FISHING_ROD",
+   "slot": 4,
+   "preview": "sprite:fish"
+  },
+  {
+   "id": "back",
+   "material": "ARROW",
+   "slot": 49,
+   "preview": "sprite:page"
+  }
+ ],
+ "header": {
+  "text": "ПРОКАЧКА",
+  "style": "ribbon",
+  "font": "bold",
+  "case": "keep",
+  "width": 150,
+  "color": "#2f74b5",
+  "embroidered": "#bfefff"
+ }
+}

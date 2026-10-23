@@ -1,0 +1,12 @@
+name: Noratrum
+version: '${version}'
+main: ink.hoka.noratrum.Noratrum
+api-version: '1.21'
+authors: ["fame/ktnqqq"]
+dependencies:
+  server:
+    Vault: { load: BEFORE, required: false, join-classpath: true }
+    PlaceholderAPI: { load: BEFORE, required: false, join-classpath: true }
+    Nexo: { load: BEFORE, required: false, join-classpath: true }
+    TakuFarmers: { load: BEFORE, required: false, join-classpath: true }
+    TakuCore: { load: AFTER, required: false }

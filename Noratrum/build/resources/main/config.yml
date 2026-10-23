@@ -1,0 +1,14 @@
+# Noratrum — общий конфиг. Настройки модулей — в подпапках: quests/, fishing/, groups/ (бывшие ZenQuests, ZenFishing, ZenGroups;
+# их папки из plugins/ перенесены сюда при первом запуске). Команды модулей: /квесты, /рыбалка, /group, /ffly.
+modules:
+  quests: true
+  fishing: true
+  groups: true
+
+# Перехват /plugins и /pl: выдача как у Paper, но сверху секция «Leaf Plugins» (ядро — Leaf).
+# Доступно всем (право noratrum.plugins, по умолчанию true). Отнять право через плагин прав — игрок получит ванильную команду.
+plugins-command:
+  enabled: true
+  leaf-header: "Leaf Plugins"
+  leaf-color: "#8CF58C"        # светло-зелёный заголовок
+  leaf-plugins: [Noratrum, Quastres]   # что показывать в секции Leaf (остальные — Paper / Bukkit по их meta автоматически)

@@ -1,0 +1,63 @@
+# ==========================================================
+#  ZenGroups — группы. Права — в permissions.yml. /group reload после правок.
+#
+#  <id>:
+#    display      — название (в сообщениях и %zengroups_group_display%)
+#    weight       — вес: у игрока с несколькими группами главная — с самым большим весом
+#    tab-prefix / tab-suffix     — в табе
+#    chat-prefix / chat-suffix   — в чате
+#    name-prefix / name-suffix   — над ником (до 64 символов вместе с цветами)
+#    inherits     — права каких групп наследовать (список)
+# ==========================================================
+
+# Значки — глифы Nexo ({glyph:имя} превращается в символ при выводе через %nexo_<имя>%). Все — в glyphs/zengroups.yml
+# с font: minecraft:default (иначе в таб попадёт не символ, а тег): zg_badge_admin/zg_badge_player — те же текстуры, что у
+# badges.yml TakuCore; badge_moder, badge_media, badge_vipplus, badge_vip — assets/zengroups/textures/font.
+
+player:
+  display: "Игрок"
+  weight: 0
+  tab-prefix: "{glyph:zg_badge_player} "
+  tab-suffix: ""
+  chat-prefix: "{glyph:zg_badge_player} &7"
+  name-prefix: "{glyph:zg_badge_player} "
+
+vip:
+  display: "VIP"
+  weight: 20
+  tab-prefix: "{glyph:badge_vip} "
+  chat-prefix: "{glyph:badge_vip} &e"
+  name-prefix: "{glyph:badge_vip} "
+  inherits: [player]
+
+vipplus:
+  display: "VIP+"
+  weight: 30
+  tab-prefix: "{glyph:badge_vipplus} "
+  chat-prefix: "{glyph:badge_vipplus} &6"
+  name-prefix: "{glyph:badge_vipplus} "
+  inherits: [vip]
+
+media:
+  display: "Media"
+  weight: 40
+  tab-prefix: "{glyph:badge_media} "
+  chat-prefix: "{glyph:badge_media} &d"
+  name-prefix: "{glyph:badge_media} "
+  inherits: [vipplus]
+
+moder:
+  display: "Модератор"
+  weight: 60
+  tab-prefix: "{glyph:badge_moder} "
+  chat-prefix: "{glyph:badge_moder} &9"
+  name-prefix: "{glyph:badge_moder} "
+  inherits: [media]
+
+admin:
+  display: "Админ"
+  weight: 100
+  tab-prefix: "{glyph:zg_badge_admin} "
+  chat-prefix: "{glyph:zg_badge_admin} &c"
+  name-prefix: "{glyph:zg_badge_admin} "
+  inherits: [moder]
