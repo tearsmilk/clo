@@ -1,5 +1,18 @@
 # Заметки для Claude по проекту
 
+## Noratrum — ZenQuests + ZenFishing + ZenGroups одним paper-плагином (`Noratrum/`, версия `o012mk23f87`, authors fame/ktnqqq)
+- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87.jar` (исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
+  `ZenGroups/` — `src/main/java` и `src/main/resources` подключены в Noratrum; их собственных gradle/plugin.yml больше нет).
+  Отдельных jar ZenQuests/ZenFishing/ZenGroups на сервере НЕТ — не заливать, иначе дубли PAPI/Vault.
+- Папки на сервере: `plugins/Noratrum/config.yml` (общий: modules.*, plugins-command), `plugins/Noratrum/quests/` (бывш. plugins/ZenQuests —
+  quests.yml мастер-копия тут!), `plugins/Noratrum/fishing/`, `plugins/Noratrum/groups/`. Старые папки перенесены автоматически 23.10.
+- Модуль = `ink.hoka.noratrum.Module` (реализует `Plugin`, делегирует в Noratrum; своё имя → неймспейсы ключей `zenquests:`, `zenfishing:`
+  сохранены; команды старого образца через `registerCommand` → Brigadier-адаптер `LegacyCommands`; права объявлены в `Noratrum.registerPermissions`).
+- `/plugins` и `/pl` перехватываются (`PluginsCommand`): секция «Leaf Plugins» (из `plugins-command.leaf-plugins`), затем Paper/Bukkit —
+  тип определяется по meta плагина автоматически. Право `noratrum.plugins` (default true); без него — ванильная команда.
+- Ниже разделы ZenQuests/ZenFishing/ZenGroups: пути `plugins/Zen*/…` читать как `plugins/Noratrum/<quests|fishing|groups>/…`,
+  «jar ZenX» — как jar Noratrum.
+
 ## ZenQuests → сервер (Pterodactyl, panel.hoka.ink, сервер dafb2994-850a-408e-b4fe-e13e2bf96cbd)
 - Рестарт сервера: команда в консоль **`tfrestart`** (`POST /api/client/servers/<id>/command`, `{"command":"tfrestart"}`).
   Рестартить ВСЕГДА после ЛЮБОЙ заливки на сервер (jar, конфиги, Nexo), даже мелкой, не спрашивая — так хочет владелец.

@@ -24,7 +24,7 @@ public final class Quastres extends JavaPlugin {
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
-        saveResource("blocks.yml", false);
+        if (!new java.io.File(getDataFolder(), "blocks.yml").exists()) saveResource("blocks.yml", false);
         nexo = new NexoBridge(this);
         slabs = new SlabRegistry(this);
         slabs.load();

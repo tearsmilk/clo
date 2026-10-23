@@ -6,7 +6,7 @@ import ink.hoka.zenquests.model.Quest;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -24,7 +24,7 @@ public final class QuestRegistry {
 
     public record Chain(String id, String name, Material icon, List<String> description, List<Quest> steps, boolean premium) {}
 
-    private final JavaPlugin plugin;
+    private final Plugin plugin;
     private int dailyCount = 3, weeklyCount = 3, dailyPremiumCount = 2, weeklyPremiumCount = 2;
     private final List<Quest> dailyPool = new ArrayList<>();
     private final List<Quest> weeklyPool = new ArrayList<>();
@@ -34,7 +34,7 @@ public final class QuestRegistry {
     private final Map<String, Chain> chains = new LinkedHashMap<>();
     private final Map<String, Quest> byKey = new LinkedHashMap<>();   // "daily:id" → квест
 
-    public QuestRegistry(JavaPlugin plugin) { this.plugin = plugin; }
+    public QuestRegistry(Plugin plugin) { this.plugin = plugin; }
 
     public void load(FileConfiguration c) {
         dailyPool.clear(); weeklyPool.clear(); dailyPremiumPool.clear(); weeklyPremiumPool.clear();

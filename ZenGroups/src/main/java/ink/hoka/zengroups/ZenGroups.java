@@ -3,9 +3,9 @@ package ink.hoka.zengroups;
 import ink.hoka.zengroups.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
+import ink.hoka.noratrum.Module;
+import ink.hoka.noratrum.Noratrum;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +14,9 @@ import java.util.Locale;
 import java.util.UUID;
 
 /** Группы и права: groups.yml (группы, префиксы), permissions.yml (права), config.yml (плагин). /group add|set|take. */
-public final class ZenGroups extends JavaPlugin {
+public final class ZenGroups extends Module {
+
+    public ZenGroups(Noratrum host) { super(host, "ZenGroups", "groups"); }
 
     private GroupRegistry registry;
     private UserStore users;
@@ -32,8 +34,8 @@ public final class ZenGroups extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
         ink.hoka.zengroups.hook.VaultHook.tryRegister(this);
         ink.hoka.zengroups.hook.PapiHook.tryRegister(this);
-        PluginCommand cmd = getCommand("group");
-        if (cmd != null) { GroupCommand gc = new GroupCommand(this); cmd.setExecutor(gc); cmd.setTabCompleter(gc); }
+        GroupCommand gc = new GroupCommand(this);
+        registerCommand("group", java.util.List.of("группа", "zengroups", "zg"), gc, gc);
         long period = 20L * Math.max(5, getConfig().getInt("expire-check-seconds", 30));
         Bukkit.getScheduler().runTaskTimer(this, this::checkExpired, period, period);
         for (Player p : Bukkit.getOnlinePlayers()) refresh(p);

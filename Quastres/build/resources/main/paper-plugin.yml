@@ -1,5 +1,5 @@
 name: Quastres
-version: '1.0.1'
+version: '1.0.2'
 main: ink.hoka.quastres.Quastres
 bootstrapper: ink.hoka.quastres.QuastresBootstrap
 api-version: '1.21'

@@ -4,15 +4,17 @@ import ink.hoka.zenfishing.menu.FishMenu;
 import ink.hoka.zenfishing.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
+import ink.hoka.noratrum.Module;
+import ink.hoka.noratrum.Noratrum;
 
 import java.io.File;
 
 /** Рыбалка: редкая рыба (fish.yml), прокачка удочки, бонусы Ферма+ (подписка ZenQuests), меню /рыбалка, продажа улова. */
-public final class ZenFishing extends JavaPlugin {
+public final class ZenFishing extends Module {
+
+    public ZenFishing(Noratrum host) { super(host, "ZenFishing", "fishing"); }
 
     private FishRegistry fish;
     private Rods rods;
@@ -40,8 +42,8 @@ public final class ZenFishing extends JavaPlugin {
         nets = new Nets(this);
         getServer().getPluginManager().registerEvents(nets, this);
         ink.hoka.zenfishing.hook.PapiHook.tryRegister(this);
-        PluginCommand cmd = getCommand("fishing");
-        if (cmd != null) { FishCommand fc = new FishCommand(this); cmd.setExecutor(fc); cmd.setTabCompleter(fc); }
+        FishCommand fc = new FishCommand(this);
+        registerCommand("fishing", java.util.List.of("рыбалка", "рыба", "fish", "zenfishing", "zf"), fc, fc);
         Bukkit.getScheduler().runTaskTimer(this, () -> stats.saveDirty(), 20L * 60, 20L * 60);
         getLogger().info("Загружено рыбы: " + fish.size());
     }
@@ -59,7 +61,7 @@ public final class ZenFishing extends JavaPlugin {
     public FishMenu menu() { return menu; }
     public FishJournal journal() { return journal; }
     public Nets nets() { return nets; }
-    public boolean quests() { return Bukkit.getPluginManager().getPlugin("ZenQuests") != null; }
+    public boolean quests() { return host().quests() != null; }
 
     /** Ферма+: право premium.permission или подписка, выданная в ZenQuests (/квесты premium give). */
     public boolean isPremium(Player p) {

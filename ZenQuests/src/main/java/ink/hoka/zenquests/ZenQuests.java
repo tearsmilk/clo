@@ -5,15 +5,17 @@ import ink.hoka.zenquests.model.ObjectiveType;
 import ink.hoka.zenquests.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
+import ink.hoka.noratrum.Module;
+import ink.hoka.noratrum.Noratrum;
 
 import java.io.File;
 
 /** Квесты: ежедневные, еженедельные, сезонные и сюжетные. Меню /квесты, награды — командами консоли. */
-public final class ZenQuests extends JavaPlugin {
+public final class ZenQuests extends Module {
+
+    public ZenQuests(Noratrum host) { super(host, "ZenQuests", "quests"); }
 
     private QuestRegistry registry;
     private QuestManager quests;
@@ -39,18 +41,13 @@ public final class ZenQuests extends JavaPlugin {
         getServer().getPluginManager().registerEvents(book, this);
         FarmFly ffly = new FarmFly(this);
         getServer().getPluginManager().registerEvents(ffly, this);
-        PluginCommand fc = getCommand("ffly");
-        if (fc != null) fc.setExecutor(ffly);
+        registerCommand("ffly", java.util.List.of("фф", "farmfly"), ffly, null);
         Bukkit.getScheduler().runTaskTimer(this, new ObtainTracker(this), 40L, 20L);
         ink.hoka.zenquests.hook.TakuFarmersHook.tryRegister(this);
         ink.hoka.zenquests.hook.PapiHook.tryRegister(this);
 
-        PluginCommand cmd = getCommand("quests");
-        if (cmd != null) {
-            QuestCommand qc = new QuestCommand(this);
-            cmd.setExecutor(qc);
-            cmd.setTabCompleter(qc);
-        }
+        QuestCommand qc = new QuestCommand(this);
+        registerCommand("quests", java.util.List.of("квесты", "квест", "quest", "zenquests", "zq"), qc, qc);
 
         // минута игры для PLAYTIME + автосохранение изменённых данных
         Bukkit.getScheduler().runTaskTimer(this, () -> {

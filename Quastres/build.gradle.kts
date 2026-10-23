@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "ink.hoka"
-version = "1.0.1"
+version = "1.0.2"
 description = "Quastres: полублоки на состояниях костра (Nexo-предметы, своя модель на каждое состояние)"
 
 repositories {
