@@ -48,3 +48,8 @@
   блок `quests:` в конце `layouts/default-layout.yml`, иконка `assets/icons/quest.png` + запись в `texts/default_font.yml`, `quests` в
   `default-hud` config.yml. Исходники — `ZenQuests/betterhud/`. Бэкап старого layout — `plugins/BetterHud/default-layout.yml.bak-quests`
   (не класть .bak в `layouts/` — BetterHud ругается). BetterHud собирает свой пак в `Nexo/pack/external_packs/modernhud`.
+
+## Nexo Carpentry — полублоки (plugins/carpentry-1.6.1.jar)
+- Тип `SLAB` даёт только 4 варианта (вощёные медные плиты). Заняты: 1 дёрн, 2 песок (`items/Полублоки.yml`), 3 ореховая (`Дерево.yml`),
+  4 дуб. Пример `ashen_oak_slab` в `carpentry_blocks.yml` закомментирован (бэкап `.bak-slabs`). STAIR: 1 ashen, 2 walnut.
+- Текстуры плит — `pack/assets/orsess/textures/block/slab_*.png`, исходники и генератор в репо `nexo-blocks/slabs/` (из ванильного client.jar).

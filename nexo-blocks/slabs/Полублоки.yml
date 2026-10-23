@@ -1,0 +1,43 @@
+# Группа «Полублоки» — плиты Carpentry (addon Nexo, тип SLAB: 4 варианта на базе вощёных медных плит).
+# Боковые текстуры — верхняя половина исходного блока (у дёрна видна трава с краем, низ срезан): slab_*_side.png,
+# генератор — nexo-blocks/slabs/make_slab_textures.py в репо. Занятые варианты: 1 дёрн, 2 песок, 3 walnut_slab (Дерево.yml), 4 дуб.
+# Пример ashen_oak_slab из carpentry_blocks.yml отключён (вариант 1 занят дёрном), бэкап carpentry_blocks.yml.bak-slabs.
+grass_slab:
+  itemname: "<#7CC24E>Дёрн-полублок"
+  lore: ["<gray>Половина блока дёрна."]
+  Pack:
+    parent_model: block/slab
+    textures:
+      top: orsess:block/slab_grass_top
+      side: orsess:block/slab_grass_side
+      bottom: orsess:block/slab_grass_bottom
+  Mechanics:
+    custom_block:
+      type: SLAB
+      custom_variation: 1
+sand_slab:
+  itemname: "<#E8DDA7>Песок-полублок"
+  lore: ["<gray>Половина блока песка."]
+  Pack:
+    parent_model: block/slab
+    textures:
+      top: orsess:block/slab_sand
+      side: orsess:block/slab_sand_side
+      bottom: orsess:block/slab_sand
+  Mechanics:
+    custom_block:
+      type: SLAB
+      custom_variation: 2
+oak_slab_custom:
+  itemname: "<#B8945A>Дуб-полублок"
+  lore: ["<gray>Половина блока дубовых досок."]
+  Pack:
+    parent_model: block/slab
+    textures:
+      top: orsess:block/slab_oak
+      side: orsess:block/slab_oak_side
+      bottom: orsess:block/slab_oak
+  Mechanics:
+    custom_block:
+      type: SLAB
+      custom_variation: 4
