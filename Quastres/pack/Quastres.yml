@@ -28,3 +28,10 @@ pine_wood_slab:
   - <gray>Полублок Quastres. Ставится ПКМ.
   Pack:
     model: quastres:block/pine_wood_slab
+campfire_decor:
+  itemname: <#C77A3C>Костёр (декор)
+  material: PAPER
+  lore:
+  - <gray>Полублок Quastres. Ставится ПКМ.
+  Pack:
+    model: minecraft:block/campfire_off

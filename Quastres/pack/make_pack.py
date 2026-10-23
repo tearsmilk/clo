@@ -19,6 +19,15 @@ def put(path, data, raw=False):
 states = {'campfire': {}, 'soul_campfire': {}}
 items = {}
 for sid, s in cfg.items():
+    if 'model' in s:   # готовая модель (например ванильный потушенный костёр) — без генерации плиты
+        base = s.get('base', 'campfire'); facing = s.get('facing', 'north'); signal = str(bool(s.get('signal', False))).lower()
+        key = f"facing={facing},lit=false,signal_fire={signal}"
+        assert key not in states[base], f'{sid}: состояние {base} {key} уже занято'
+        v = {"model": s['model']}
+        if s.get('y'): v['y'] = s['y']
+        states[base][key] = v
+        items[sid] = {"itemname": s['name'], "material": "PAPER", "lore": ["<gray>Полублок Quastres. Ставится ПКМ."], "Pack": {"model": s['model']}}
+        continue
     t = s['textures']
     model = {"parent": "minecraft:block/block", "textures": {"particle": t['side'], "top": t['top'], "side": t['side'], "bottom": t['bottom']},
              "elements": [{"from": [0, 0, 0], "to": [16, 7, 16], "faces": {
