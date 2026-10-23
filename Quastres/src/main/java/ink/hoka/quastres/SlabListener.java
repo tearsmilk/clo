@@ -92,7 +92,17 @@ public final class SlabListener implements Listener {
                 e.setCancelled(true);
             return;
         }
-        if (c.isLit() && plugin.getConfig().getBoolean("protect-vanilla-campfire", true) && it != null && it.getType().name().endsWith("_SHOVEL")) e.setCancelled(true);
+    }
+
+    /** Обычный костёр ставим «на север» без сигнального флага: потушенный, он попадает в слот campfire/north (декоративный костёр),
+     *  а не в случайную плиту. Для костра душ — то же (слот soul_campfire/north). */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onVanillaPlace(BlockPlaceEvent e) {
+        if (!plugin.getConfig().getBoolean("normalize-vanilla-campfire", true)) return;
+        if (!(e.getBlockPlaced().getBlockData() instanceof Campfire c) || !c.isLit()) return;
+        if (c.getFacing() == BlockFace.NORTH && !c.isSignalFire()) return;
+        c.setFacing(BlockFace.NORTH); c.setSignalFire(false);
+        e.getBlockPlaced().setBlockData(c, false);
     }
 
     @EventHandler(ignoreCancelled = true)

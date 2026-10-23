@@ -5,13 +5,6 @@
 # item — id предмета Nexo (plugins/Nexo/items/Quastres.yml, модель quastres:block/<id>); без Nexo плагин делает свой предмет.
 # После правок: python3 make_pack.py, залить пак, `nexo reload all`, `/quastres reload`.
 slabs:
-  birch_wood_slab:
-    name: "<#E3DCCB>Берёза-полублок"
-    base: campfire
-    facing: north
-    signal: false
-    textures: { top: orsess:block/slab_birch_wood, side: orsess:block/slab_birch_wood_side, bottom: orsess:block/slab_birch_wood }
-    sound: wood
   palm_wood_slab:
     name: "<#C9A26A>Пальма-полублок"
     base: campfire
@@ -35,9 +28,17 @@ slabs:
     sound: wood
   campfire_decor:
     name: "<#C77A3C>Костёр (декор)"
+    base: campfire
+    facing: north
+    signal: false
+    model: minecraft:block/campfire_off   # ванильный потушенный костёр: без огня, дыма и готовки.
+                                          # Слот campfire/north: плагин ставит обычные костры «на север», так что потушенный ванильный костёр = этот блок
+    y: 180
+    sound: wood
+  birch_wood_slab:
+    name: "<#E3DCCB>Берёза-полублок"
     base: soul_campfire
     facing: north
     signal: false
-    model: minecraft:block/campfire_off   # ванильный потушенный костёр: без огня, дыма и готовки
-    y: 180
+    textures: { top: orsess:block/slab_birch_wood, side: orsess:block/slab_birch_wood_side, bottom: orsess:block/slab_birch_wood }
     sound: wood

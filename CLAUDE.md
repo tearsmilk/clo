@@ -58,9 +58,10 @@
 
 ## Quastres — полублоки на костре (paper-plugin, `Quastres/`)
 - Полублок = потушенный костёр в одном состоянии: `base` campfire|soul_campfire × `facing` × `signal` = 16 слотов (`blocks.yml`).
-  Заняты: campfire north берёза, south пальма, west осина, east сосна; soul_campfire north — декоративный костёр (ванильная модель campfire_off). Остальные — ванильные.
+  Заняты: campfire north — декоративный костёр (ванильная модель campfire_off; обычные костры плагин ставит «на север», так что потушенный
+  ванильный костёр = этот блок), south пальма, west осина, east сосна; soul_campfire north берёза. Остальные — ванильные.
 - Пак: `pack/make_pack.py blocks.yml OUT` → `assets/minecraft/blockstates/{campfire,soul_campfire}.json`, `assets/quastres/models/block/*.json`,
   `Quastres.yml` (предметы Nexo, `plugins/Nexo/items/`). Текстуры — `Nexo/pack/assets/orsess/textures/block/slab_*.png`.
 - Jar: `./gradlew build` → `plugins/Quastres-<версия>.jar`; команды Brigadier: `/quastres give <игрок> <id> [n] | list | reload` (`quastres.admin`).
-- Плагин ставит состояние по ПКМ, роняет Nexo-предмет, блокирует поджиг/готовку/физику (сено → signal_fire) и тушение лопатой
-  обычного горящего костра (`protect-vanilla-campfire`). Высота 7/16 — на 1px ниже плиты.
+- Плагин ставит состояние по ПКМ, роняет Nexo-предмет, блокирует поджиг/готовку/физику (сено → signal_fire); обычный костёр при установке
+  поворачивает на север (`normalize-vanilla-campfire`). Высота 7/16 — на 1px ниже плиты.
