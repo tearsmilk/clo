@@ -76,7 +76,7 @@ public final class PluginsCommand implements Listener {
         Comparator<Plugin> byName = Comparator.comparing(p -> p.getName().toLowerCase(Locale.ROOT));
         leaf.sort(byName); paper.sort(byName); bukkit.sort(byName);
 
-        Component info = Component.text("ⓘ ", INFO).hoverEvent(HoverEvent.showText(Component.text("Плагины сервера. Наведи на имя — версия и авторы, клик — /version <имя>.", NamedTextColor.WHITE)));
+        Component info = Component.text("ⓘ ", INFO).hoverEvent(HoverEvent.showText(Component.text("Server plugins. Hover a name for version and authors, click to suggest /version <name>.", NamedTextColor.WHITE)));
         to.sendMessage(info.append(Component.text("Server Plugins (" + all.length + "):", NamedTextColor.WHITE)));
 
         String leafHeader = plugin.getConfig().getString("plugins-command.leaf-header", "Leaf Plugins");
@@ -93,15 +93,29 @@ public final class PluginsCommand implements Listener {
         to.sendMessage(Component.text(" - ", NamedTextColor.DARK_GRAY).append(Component.join(JoinConfiguration.separator(Component.text(", ", NamedTextColor.WHITE)), names)));
     }
 
+    /** Подсказка как у Paper: белые подписи Version / Description / Website / Authors, значения зелёные, авторы через ", " и " and ". */
     private Component name(Plugin p) {
         var meta = p.getPluginMeta();
-        Component hover = Component.text("Версия: ", NamedTextColor.GRAY).append(Component.text(meta.getVersion(), NamedTextColor.WHITE));
-        if (!meta.getAuthors().isEmpty()) hover = hover.append(Component.newline()).append(Component.text("Авторы: ", NamedTextColor.GRAY)).append(Component.text(String.join(", ", meta.getAuthors()), NamedTextColor.WHITE));
-        if (meta.getDescription() != null && !meta.getDescription().isBlank()) hover = hover.append(Component.newline()).append(Component.text(meta.getDescription(), NamedTextColor.GREEN));   // &a
-        if (!p.isEnabled()) hover = hover.append(Component.newline()).append(Component.text("Выключен", DISABLED));
+        Component hover = line("Version: ", meta.getVersion());
+        if (meta.getDescription() != null && !meta.getDescription().isBlank()) hover = hover.append(Component.newline()).append(line("Description: ", meta.getDescription()));
+        if (meta.getWebsite() != null && !meta.getWebsite().isBlank()) hover = hover.append(Component.newline()).append(line("Website: ", meta.getWebsite()));
+        List<String> authors = meta.getAuthors();
+        if (!authors.isEmpty()) {
+            Component list = Component.empty();
+            for (int i = 0; i < authors.size(); i++) {
+                if (i > 0) list = list.append(Component.text(i == authors.size() - 1 ? " and " : ", ", NamedTextColor.WHITE));
+                list = list.append(Component.text(authors.get(i), ENABLED));
+            }
+            hover = hover.append(Component.newline()).append(Component.text("Authors: ", NamedTextColor.WHITE)).append(list);
+        }
+        if (!p.isEnabled()) hover = hover.append(Component.newline()).append(Component.text("Disabled", DISABLED));
         return Component.text(p.getName(), p.isEnabled() ? ENABLED : DISABLED)
                 .decoration(TextDecoration.ITALIC, false)
                 .hoverEvent(HoverEvent.showText(hover))
                 .clickEvent(ClickEvent.suggestCommand("/version " + p.getName()));
+    }
+
+    private static Component line(String label, String value) {
+        return Component.text(label, NamedTextColor.WHITE).append(Component.text(value, ENABLED));
     }
 }
