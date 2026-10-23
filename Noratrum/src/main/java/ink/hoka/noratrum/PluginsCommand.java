@@ -97,7 +97,7 @@ public final class PluginsCommand implements Listener {
         var meta = p.getPluginMeta();
         Component hover = Component.text("Версия: ", NamedTextColor.GRAY).append(Component.text(meta.getVersion(), NamedTextColor.WHITE));
         if (!meta.getAuthors().isEmpty()) hover = hover.append(Component.newline()).append(Component.text("Авторы: ", NamedTextColor.GRAY)).append(Component.text(String.join(", ", meta.getAuthors()), NamedTextColor.WHITE));
-        if (meta.getDescription() != null && !meta.getDescription().isBlank()) hover = hover.append(Component.newline()).append(Component.text(meta.getDescription(), NamedTextColor.WHITE));
+        if (meta.getDescription() != null && !meta.getDescription().isBlank()) hover = hover.append(Component.newline()).append(Component.text(meta.getDescription(), NamedTextColor.GREEN));   // &a
         if (!p.isEnabled()) hover = hover.append(Component.newline()).append(Component.text("Выключен", DISABLED));
         return Component.text(p.getName(), p.isEnabled() ? ENABLED : DISABLED)
                 .decoration(TextDecoration.ITALIC, false)

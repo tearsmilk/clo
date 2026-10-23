@@ -8,7 +8,7 @@
   quests.yml мастер-копия тут!), `plugins/Noratrum/fishing/`, `plugins/Noratrum/groups/`. Старые папки перенесены автоматически 23.10.
 - Модуль = `ink.hoka.noratrum.Module` (реализует `Plugin`, делегирует в Noratrum; своё имя → неймспейсы ключей `zenquests:`, `zenfishing:`
   сохранены; команды старого образца через `registerCommand` → Brigadier-адаптер `LegacyCommands`; права объявлены в `Noratrum.registerPermissions`).
-- `/plugins` и `/pl` перехватываются (`PluginsCommand`): секция «Leaf Plugins» (из `plugins-command.leaf-plugins`), затем Paper/Bukkit —
+- `/plugins` и `/pl` перехватываются (`PluginsCommand`): секция «Leaf Plugins» (из `plugins-command.leaf-plugins`: Noratrum, Quastres), затем Paper/Bukkit —
   тип определяется по meta плагина автоматически. Право `noratrum.plugins` (default true); без него — ванильная команда.
 - Ниже разделы ZenQuests/ZenFishing/ZenGroups: пути `plugins/Zen*/…` читать как `plugins/Noratrum/<quests|fishing|groups>/…`,
   «jar ZenX» — как jar Noratrum.

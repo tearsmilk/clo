@@ -11,4 +11,4 @@ plugins-command:
   enabled: true
   leaf-header: "Leaf Plugins"
   leaf-color: "#8CF58C"        # светло-зелёный заголовок
-  leaf-plugins: [Noratrum]     # что показывать в секции Leaf (остальные — Paper / Bukkit как обычно)
+  leaf-plugins: [Noratrum, Quastres]   # что показывать в секции Leaf (остальные — Paper / Bukkit по их meta автоматически)
