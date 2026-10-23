@@ -21,6 +21,7 @@ public final class ZenFishing extends JavaPlugin {
     private StatsStore stats;
     private FishMenu menu;
     private FishJournal journal;
+    private Nets nets;
 
     @Override
     public void onEnable() {
@@ -36,6 +37,8 @@ public final class ZenFishing extends JavaPlugin {
         getServer().getPluginManager().registerEvents(menu, this);
         journal = new FishJournal(this);
         getServer().getPluginManager().registerEvents(journal, this);
+        nets = new Nets(this);
+        getServer().getPluginManager().registerEvents(nets, this);
         ink.hoka.zenfishing.hook.PapiHook.tryRegister(this);
         PluginCommand cmd = getCommand("fishing");
         if (cmd != null) { FishCommand fc = new FishCommand(this); cmd.setExecutor(fc); cmd.setTabCompleter(fc); }
@@ -44,7 +47,7 @@ public final class ZenFishing extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() { if (stats != null) stats.saveDirty(); }
+    public void onDisable() { if (stats != null) stats.saveDirty(); if (nets != null) nets.save(); }
 
     public void reloadAll() { reloadConfig(); fish.load(); economy.hook(); }
 
@@ -55,6 +58,7 @@ public final class ZenFishing extends JavaPlugin {
     public StatsStore stats() { return stats; }
     public FishMenu menu() { return menu; }
     public FishJournal journal() { return journal; }
+    public Nets nets() { return nets; }
     public boolean quests() { return Bukkit.getPluginManager().getPlugin("ZenQuests") != null; }
 
     /** Ферма+: право premium.permission или подписка, выданная в ZenQuests (/квесты premium give). */

@@ -20,6 +20,7 @@ import java.util.Locale;
  * /рыбалка продать        — продать всю рыбу
  * /рыбалка топ            — топ рыбаков
  * /рыбалка журнал [игрок] — выдать рыбацкий журнал (другому — zenfishing.admin)
+ * /рыбалка сеть           — купить рыболовную сеть (net.price); /рыбалка сеть <игрок> — выдать (admin); /рыбалка сеть list|clear [игрок] (admin)
  * /рыбалка reload | rod [игрок] [уровень] | stats <игрок>
  */
 public final class FishCommand implements CommandExecutor, TabCompleter {
@@ -43,6 +44,7 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
                 plugin.sellAll(p);
             }
             case "топ", "top" -> top(sender);
+            case "сеть", "net" -> net(sender, args);
             case "журнал", "journal", "book" -> {
                 Player target;
                 if (args.length >= 2) {
@@ -62,6 +64,40 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
             default -> plugin.msg(sender, sender.hasPermission("zenfishing.admin") ? "usage-admin" : "usage");
         }
         return true;
+    }
+
+    private void net(CommandSender sender, String[] args) {
+        Nets nets = plugin.nets();
+        if (args.length >= 2 && (args[1].equalsIgnoreCase("list") || args[1].equalsIgnoreCase("clear"))) {
+            if (!sender.hasPermission("zenfishing.admin")) { plugin.msg(sender, "no-permission"); return; }
+            if (args[1].equalsIgnoreCase("list")) {
+                if (nets.all().isEmpty()) { plugin.msg(sender, "net-list-empty"); return; }
+                for (Nets.Net n : nets.all().values()) sender.sendMessage(Text.parse("&7• &f" + nets.describe(n)));
+            } else {
+                java.util.UUID owner = null;
+                if (args.length >= 3) { OfflinePlayer t = offline(args[2]); if (t == null) { plugin.msg(sender, "player-unknown", "player", args[2]); return; } owner = t.getUniqueId(); }
+                plugin.msg(sender, "net-cleared", "count", nets.removeAll(owner));
+            }
+            return;
+        }
+        if (args.length >= 2) {
+            if (!sender.hasPermission("zenfishing.admin")) { plugin.msg(sender, "no-permission"); return; }
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) { plugin.msg(sender, "player-not-found", "player", args[1]); return; }
+            nets.give(target);
+            plugin.msg(sender, "net-given-to", "player", target.getName());
+            return;
+        }
+        if (!(sender instanceof Player p)) { plugin.msg(sender, "players-only"); return; }
+        if (!p.hasPermission("zenfishing.use")) { plugin.msg(p, "no-permission"); return; }
+        if (!nets.enabled()) { plugin.msg(p, "net-disabled"); return; }
+        double price = plugin.getConfig().getDouble("net.price", 500);
+        if (price > 0 && !p.hasPermission("zenfishing.admin")) {
+            if (!plugin.economy().canCharge()) { plugin.msg(p, "sell-unavailable"); return; }
+            if (!plugin.economy().take(p, price)) { plugin.msg(p, "net-no-money", "price", Text.num(price)); return; }
+        }
+        nets.give(p);
+        plugin.msg(p, "net-bought", "price", Text.num(price));
     }
 
     private void admin(CommandSender sender, String sub, String[] args) {
@@ -112,12 +148,13 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission("zenfishing.admin");
         if (args.length == 1) {
-            List<String> l = new ArrayList<>(List.of("продать", "топ", "журнал"));
+            List<String> l = new ArrayList<>(List.of("продать", "топ", "журнал", "сеть"));
             if (admin) l.addAll(List.of("reload", "rod", "stats"));
             return filter(l, args[0]);
         }
         if (!admin) return List.of();
         if (args.length == 2 && (args[0].equalsIgnoreCase("rod") || args[0].equalsIgnoreCase("stats") || args[0].equalsIgnoreCase("журнал") || args[0].equalsIgnoreCase("journal"))) return filter(names(), args[1]);
+        if (args.length == 2 && (args[0].equalsIgnoreCase("сеть") || args[0].equalsIgnoreCase("net"))) { List<String> l = new ArrayList<>(List.of("list", "clear")); l.addAll(names()); return filter(l, args[1]); }
         if (args.length == 3 && args[0].equalsIgnoreCase("rod")) return filter(List.of("1", "10", "25", "50"), args[2]);
         return List.of();
     }
