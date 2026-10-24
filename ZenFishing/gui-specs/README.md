@@ -31,3 +31,10 @@
 → `assets/zenfishing/textures/item/fish3d/<id>.png`, модели → `assets/zenfishing/models/item/fish/<id>.json`.
 Спрайты 64x64 (`fish-icons/`) остаются источником палитры. Превью рендера — `fish_3d_preview.png`.
 У рыбы-предмета нет веса, редкости и автора: имя = название цветом редкости, описание пустое (стакается).
+
+## 3D-рыба на моделях FreshFood (актуально с 24.10)
+`fish_models_ff.py freshfood OUT_MODELS OUT_TEXTURES [preview.png]` — берёт `freshfood/cod_3d.{json,png}` (все виды) и
+`pufferfish_3d` (pufferfish, mola, moon_fish, kraken_calf) из внешнего пака FreshFood (`Nexo/pack/external_packs/FreshFood`) и
+перекрашивает: тело → цвет «бок» вида, плавники/хвост/шипы → цвет «плавники» из `PAL` в `fish_models3d.py`; светлота пикселей
+исходника сохраняется, поэтому рыба остаётся простой (8–10 цветов, крупные пиксели). `fish_models3d.py` — старый параметрический
+генератор, теперь нужен только как источник палитр.

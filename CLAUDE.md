@@ -45,7 +45,7 @@
 - Конфиги: `plugins/ZenFishing/config.yml`, `fish.yml`; `/рыбалка reload`. Продажа — Vault (экономика монет TakuFarmers).
 - Своей подписки нет: бонусы рыбалки даёт Ферма+ из ZenQuests (право `zenquests.premium` / `QuestsAPI.isPremium`). Квесты на рыбу —
   типы `CATCH_FISH` (цель id рыбы), `CATCH_RARITY`, `CATCH_NIGHT`, `CATCH_BIG` (≥ `catch.big-kg`). Ночью (13000–23000) клёв и удача выше
-  (`catch.night`). Тултип `zenfishing:sea` на удочке, рыбе и меню. Текстуры рыбы 64x64, модели объёмные (`gui-specs/fish_models3d.py`).
+  (`catch.night`). Тултип `zenfishing:sea` на удочке, рыбе и меню. Модели рыбы — перекрашенные cod_3d/pufferfish_3d из FreshFood (`gui-specs/fish_models_ff.py`, палитры в `fish_models3d.py`).
   Рыба-предмет без веса/редкости/автора (просто название), стакается; `CATCH_BIG` больше не засчитывается. rurukaFish удалён (jar), папка оставлена.
 
 ## ZenGroups (группы/права) — тот же сервер
