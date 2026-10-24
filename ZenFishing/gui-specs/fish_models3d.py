@@ -16,8 +16,63 @@ PATTERN = {'perch': 'stripes', 'mackerel': 'stripes', 'sea_bass': 'stripes', 'cl
            'trout': 'spots', 'pike': 'spots', 'grouper': 'spots', 'koi': 'patches', 'crystal_pike': 'spots', 'ice_pike': 'spots',
            'pufferfish': 'spots', 'burbot': 'spots', 'azure_trout': 'spots', 'sturgeon': 'scutes', 'beluga': 'scutes', 'gudgeon': 'spots'}
 
-def palette(im):
-    """Цвета по спрайту: спина (верхние ряды силуэта), бок, брюхо, плавники (хвостовая часть), глаз-акцент."""
+# Яркие палитры по видам: (спина, бок, брюхо, плавники). Для видов без записи — из спрайта с усилением насыщенности и яркости.
+PAL = {
+ 'carp': ((214,150,52),(246,200,96),(255,240,190),(232,120,56)),
+ 'perch': ((76,150,60),(158,214,80),(250,240,170),(240,96,40)),
+ 'roach': ((70,110,180),(176,206,240),(255,255,255),(236,80,60)),
+ 'bream': ((150,120,70),(214,190,120),(255,245,210),(120,90,70)),
+ 'herring': ((40,100,170),(150,200,235),(255,255,255),(110,170,220)),
+ 'pike': ((56,120,56),(140,196,86),(236,240,180),(190,110,60)),
+ 'trout': ((90,130,90),(226,160,120),(255,230,210),(230,120,110)),
+ 'catfish': ((70,80,100),(150,160,170),(240,230,200),(130,120,120)),
+ 'mackerel': ((30,110,170),(120,210,230),(255,255,255),(60,140,200)),
+ 'zander': ((80,110,70),(190,200,130),(255,250,220),(110,120,90)),
+ 'sturgeon': ((70,90,110),(160,170,180),(250,245,230),(120,130,140)),
+ 'tuna': ((30,70,150),(110,160,220),(240,245,255),(250,210,60)),
+ 'clownfish': ((236,100,30),(255,150,50),(255,210,120),(255,130,40)),
+ 'pufferfish': ((200,160,60),(246,214,96),(255,250,220),(140,110,60)),
+ 'golden_carp': ((230,160,20),(255,210,60),(255,245,180),(255,170,40)),
+ 'swordfish': ((30,60,160),(90,140,230),(230,240,255),(60,80,200)),
+ 'marsh_king': ((60,110,70),(120,180,90),(220,230,170),(150,120,60)),
+ 'moon_fish': ((120,120,210),(190,200,255),(255,255,255),(220,220,255)),
+ 'farm_legend': ((60,130,110),(110,210,170),(240,255,245),(255,200,80)),
+ 'azure_trout': ((30,120,200),(90,190,250),(230,250,255),(60,160,240)),
+ 'crystal_pike': ((110,190,220),(190,240,255),(255,255,255),(150,220,255)),
+ 'kraken_calf': ((110,60,170),(170,110,230),(240,220,255),(130,80,200)),
+ 'crucian': ((170,140,60),(226,196,96),(255,245,200),(200,110,50)),
+ 'bleak': ((100,130,180),(200,220,245),(255,255,255),(170,190,220)),
+ 'gudgeon': ((120,110,80),(196,180,130),(250,245,220),(150,130,90)),
+ 'ruffe': ((120,120,80),(200,200,120),(250,250,210),(150,150,90)),
+ 'goby': ((110,90,60),(180,150,100),(240,230,200),(140,110,70)),
+ 'sardine': ((50,110,170),(170,210,240),(255,255,255),(120,170,220)),
+ 'tench': ((60,100,50),(130,170,80),(230,230,170),(110,110,60)),
+ 'chub': ((80,110,110),(180,200,190),(255,255,240),(220,110,70)),
+ 'burbot': ((90,80,50),(170,150,100),(240,230,200),(130,110,70)),
+ 'flounder': ((140,110,70),(200,170,120),(255,250,235),(170,140,90)),
+ 'grayling': ((80,90,150),(170,180,230),(250,250,255),(200,90,180)),
+ 'eel': ((60,80,50),(130,150,90),(230,230,180),(110,120,80)),
+ 'salmon': ((80,120,140),(230,140,110),(255,220,200),(200,110,90)),
+ 'barracuda': ((60,110,130),(170,210,220),(255,255,255),(120,160,180)),
+ 'sea_bass': ((70,90,110),(170,190,210),(255,255,255),(120,140,170)),
+ 'koi': ((250,250,250),(255,255,255),(255,255,255),(255,120,60)),
+ 'grouper': ((180,70,60),(240,130,90),(255,220,190),(200,90,70)),
+ 'beluga': ((90,100,120),(190,200,210),(255,255,255),(150,160,170)),
+ 'mola': ((90,110,140),(170,190,210),(240,245,250),(130,150,170)),
+ 'ice_pike': ((90,160,210),(170,230,255),(255,255,255),(130,200,240)),
+ 'goldfish': ((240,120,20),(255,170,40),(255,230,150),(255,140,40)),
+ 'sea_dragon': ((30,120,110),(70,200,170),(220,255,240),(255,190,60)),
+}
+
+def boost(c, sat=1.35, light=1.15):
+    import colorsys
+    h, l, s_ = colorsys.rgb_to_hls(*[v / 255 for v in c])
+    r, g, b = colorsys.hls_to_rgb(h, min(0.92, l * light), min(1.0, s_ * sat))
+    return (int(r * 255), int(g * 255), int(b * 255))
+
+def palette(im, fid=None):
+    """Цвета вида: из PAL, иначе по спрайту (спина/бок/брюхо/плавники) с усилением яркости и насыщенности."""
+    if fid in PAL: return tuple(boost(c, 1.15, 1.08) for c in PAL[fid])
     px = im.load(); W, H = im.size
     pts = [(x, y) for y in range(H) for x in range(W) if px[x, y][3] > 0]
     ys = [y for _, y in pts]; xs = [x for x, _ in pts]
@@ -30,8 +85,7 @@ def palette(im):
     side = avg(lambda x, y: y0 + (y1 - y0) * 0.3 <= y < y0 + (y1 - y0) * 0.7 and x0 + (x1 - x0) * 0.15 < x < x1 - (x1 - x0) * 0.25)
     belly = avg(lambda x, y: y >= y0 + (y1 - y0) * 0.72 and x0 + (x1 - x0) * 0.15 < x < x1 - (x1 - x0) * 0.25)
     fin = avg(lambda x, y: x > x1 - (x1 - x0) * 0.18)
-    back = shade(back, 0.85); belly = mix(belly, (255, 255, 255), 0.2)
-    return back, side, belly, fin
+    return boost(back, 1.4, 1.1), boost(side, 1.4, 1.3), mix(boost(belly, 1.1, 1.4), (255, 255, 255), 0.5), boost(fin, 1.5, 1.25)
 
 def shade(c, k): return tuple(max(0, min(255, int(v * k))) for v in c)
 def mix(a, b, t): return tuple(int(a[i] * (1 - t) + b[i] * t) for i in range(3))
@@ -41,23 +95,25 @@ def make_texture(fid, pal, rnd):
     0..13 x 24..39 хвост; 14..29 x 24..31 спинной плавник; 30..37 x 24..29 грудной; 40..63 x 0..15 плавник большой (дракон)."""
     back, side, belly, fin = pal
     t = Image.new('RGBA', (64, 64), (0, 0, 0, 0)); d = ImageDraw.Draw(t); p = t.load()
-    outline = shade(back, 0.45)
-    # бок: вертикальный градиент спина→бок→брюхо + чешуя
+    outline = shade(back, 0.55)
+    # бок: вертикальный градиент спина→бок→брюхо, блик по верху, лёгкая чешуя (светлая, не затемняющая)
     for y in range(12):
         k = y / 11
-        c = mix(back, side, k * 2) if k < 0.5 else mix(side, belly, (k - 0.5) * 2)
+        c = mix(back, side, k * 2.2) if k < 0.45 else mix(side, belly, (k - 0.45) / 0.55)
+        if y == 1: c = mix(c, (255, 255, 255), 0.35)   # блик
+        if y == 2: c = mix(c, (255, 255, 255), 0.15)
         for x in range(32):
             cc = c
-            if (x + y) % 2 == 0 and 1 <= y <= 10: cc = shade(c, 0.88)   # чешуя
-            if ((x // 2 + y) % 3 == 0) and 2 <= y <= 9: cc = shade(cc, 1.08)
+            if (x + y) % 2 == 0 and 2 <= y <= 10: cc = mix(c, (255, 255, 255), 0.08)   # чешуя — чуть светлее
+            if ((x // 2 + y) % 3 == 0) and 3 <= y <= 9: cc = shade(cc, 0.95)
             p[x, y] = cc + (255,)
     pat = PATTERN.get(fid)
     if pat == 'stripes':
-        for x in range(6, 30, 5): d.line((x, 1, x + 1, 9), fill=shade(back, 0.6) + (255,), width=2)
+        for x in range(6, 30, 5): d.line((x, 1, x + 1, 9), fill=shade(back, 0.7) + (255,), width=2)
     elif pat == 'bands':
         for x in (8, 17, 26): d.rectangle((x, 0, x + 2, 11), fill=(245, 245, 245, 255)); d.line((x - 1, 0, x - 1, 11), fill=outline + (255,)); d.line((x + 3, 0, x + 3, 11), fill=outline + (255,))
     elif pat == 'spots':
-        for _ in range(16): x, y = rnd.randint(4, 29), rnd.randint(1, 8); p[x, y] = shade(back, 0.55) + (255,); p[min(31, x + 1), y] = shade(back, 0.65) + (255,)
+        for _ in range(14): x, y = rnd.randint(4, 29), rnd.randint(1, 8); p[x, y] = shade(fin, 0.8) + (255,); p[min(31, x + 1), y] = fin + (255,)
     elif pat == 'patches':
         for _ in range(4):
             x, y = rnd.randint(3, 24), rnd.randint(0, 6); d.ellipse((x, y, x + rnd.randint(4, 8), y + rnd.randint(3, 5)), fill=(214, 60, 40, 255))
@@ -67,19 +123,19 @@ def make_texture(fid, pal, rnd):
     # контур сверху/снизу, жаберная крышка и глаз у морды (морда — справа, x≈31)
     d.line((0, 0, 31, 0), fill=outline + (255,)); d.line((0, 11, 31, 11), fill=outline + (255,))
     d.line((24, 1, 24, 10), fill=shade(side, 0.75) + (255,))
-    d.rectangle((27, 2, 29, 4), fill=(250, 250, 250, 255)); p[29, 3] = (20, 20, 20, 255); p[28, 4] = (20, 20, 20, 255); p[29, 4] = (20, 20, 20, 255)
+    d.rectangle((26, 1, 29, 4), fill=(255, 255, 255, 255)); d.rectangle((27, 2, 29, 4), fill=(20, 20, 30, 255)); p[27, 2] = (255, 255, 255, 255)   # глаз: белок, зрачок, блик
     d.line((28, 8, 31, 7), fill=outline + (255,)); d.line((30, 8, 31, 9), fill=outline + (255,))   # рот
     # спина и брюхо
     for y in range(12, 18):
-        for x in range(32): p[x, y] = shade(back, 0.9 + 0.1 * ((x + y) % 2)) + (255,)
+        for x in range(32): p[x, y] = (mix(back, (255, 255, 255), 0.25) if y in (14, 15) else shade(back, 0.95 + 0.1 * ((x + y) % 2))) + (255,)   # спина со светлой полосой блика
     for y in range(18, 24):
-        for x in range(32): p[x, y] = shade(belly, 0.95 + 0.05 * ((x + y) % 2)) + (255,)
+        for x in range(32): p[x, y] = mix(belly, (255, 255, 255), 0.3 + 0.05 * ((x + y) % 2)) + (255,)
     # торцы (морда спереди, срез сзади)
     for y in range(12):
         for x in range(32, 40): p[x, y] = mix(back, belly, y / 11) + (255,)
     d.rectangle((32, 0, 39, 11), outline=outline + (255,))
     # хвост: веер с лучами
-    fd, fl = shade(fin, 0.8), shade(fin, 1.15)
+    fd, fl = shade(fin, 0.82), mix(fin, (255, 255, 255), 0.3)
     d.rectangle((0, 24, 13, 39), fill=fin + (255,))
     for y in range(24, 40, 2): d.line((0, y, 13, y + (1 if y % 4 else -1)), fill=fd + (255,))
     d.rectangle((0, 24, 13, 39), outline=outline + (255,))
@@ -129,7 +185,7 @@ def plate(fr, to, part, rot=None):
     if rot: e['rotation'] = rot
     return e
 
-def body_standard(h=6.0, w=3.0, L=13.0, tail=3.0, segs=6, snub=0.55):
+def body_standard(h=6.0, w=3.2, L=13.0, tail=3.0, segs=9, snub=0.55):
     """Тело из segs ступенчатых сегментов по профилю рыбы (пик высоты на 55% длины от хвоста), хвост раздвоенный,
     спинной плавник ступенчатым треугольником, грудные — маленькие пластины под углом."""
     cy = 8.0; els = []; CUR_L[0] = L
@@ -142,7 +198,7 @@ def body_standard(h=6.0, w=3.0, L=13.0, tail=3.0, segs=6, snub=0.55):
         k = prof((i + 0.5) / segs); hh = h * k; ww = w * (0.45 + 0.55 * k)
         els.append(box((x0, cy - hh / 2, 8 - ww / 2), (x1 + 0.01, cy + hh / 2, 8 + ww / 2)))
     # раздвоенный хвост: две лопасти под углом
-    th = h * 0.42
+    th = h * 0.5
     els.append(plate((0, cy, 7.8), (tail + 0.4, cy + th, 8.2), 'tail', rot={'origin': [tail + 0.4, cy, 8], 'axis': 'z', 'angle': -22.5}))
     els.append(plate((0, cy - th, 7.8), (tail + 0.4, cy, 8.2), 'tail', rot={'origin': [tail + 0.4, cy, 8], 'axis': 'z', 'angle': 22.5}))
     # спинной плавник — три ступени
@@ -161,7 +217,7 @@ def body_standard(h=6.0, w=3.0, L=13.0, tail=3.0, segs=6, snub=0.55):
                          rot={'origin': [hx, cy, z], 'axis': 'y', 'angle': 22.5 * sgn}))
     return els
 
-def body_long(): return body_standard(h=3.8, w=2.6, L=14.5, tail=2.2, segs=7, snub=0.45)
+def body_long(): return body_standard(h=3.8, w=2.6, L=14.5, tail=2.2, segs=10, snub=0.45)
 def body_eel():
     els = []; cy = 8.0; CUR_L[0] = 16.0
     for i, (x0, x1, h) in enumerate(((2, 6, 1.8), (6, 10, 2.2), (10, 13.5, 2.0), (13.5, 16, 1.6))):
@@ -230,10 +286,10 @@ DISPLAY = {"gui": {"rotation": [25, 35, 0], "translation": [0, 0, 0], "scale": [
 
 made = []
 for f in sorted(os.listdir(SRC)):
-    if not f.endswith('.png'): continue
+    if not f.endswith('.png') or f.startswith('_'): continue
     fid = f[:-4]; im = Image.open(f'{SRC}/{f}').convert('RGBA')
     rnd = random.Random(hash(fid) & 0xffff)
-    tex = make_texture(fid, palette(im), rnd); tex.save(f'{OUT_T}/{fid}.png')
+    tex = make_texture(fid, palette(im, fid), rnd); tex.save(f'{OUT_T}/{fid}.png')
     els = BUILD[KIND.get(fid, 'standard')]()
     model = {"credit": "ZenFishing fish_models3d.py", "texture_size": [64, 64],
              "textures": {"0": f"zenfishing:item/fish3d/{fid}", "particle": f"zenfishing:item/fish3d/{fid}"},
@@ -260,7 +316,7 @@ if len(sys.argv) > 4:
             P = {'a': (x0, y0, z0), 'b': (x1, y0, z0), 'c': (x1, y1, z0), 'd': (x0, y1, z0), 'e': (x0, y0, z1), 'f': (x1, y0, z1), 'g': (x1, y1, z1), 'h': (x0, y1, z1)}
             # порядок углов грани: (uv0,uv1) → верх-лево … как рисует Minecraft (север смотрит на -z)
             order = {'north': 'cbad', 'south': 'hgfe', 'up': 'hgcd', 'down': 'abfe', 'east': 'gfbc', 'west': 'dhea'}
-            shade_k = {'north': 0.8, 'south': 0.8, 'up': 1.0, 'down': 0.55, 'east': 0.65, 'west': 0.65}
+            shade_k = {'north': 0.8, 'south': 0.8, 'up': 1.0, 'down': 0.6, 'east': 0.7, 'west': 0.7}
             for name, quad in order.items():
                 uv = e['faces'][name]['uv']; u0, v0, u1, v1 = [v * 4 for v in uv]
                 pts = [proj(*P[k]) for k in quad]; depth = sum(p[2] for p in pts) / 4
@@ -281,8 +337,15 @@ if len(sys.argv) > 4:
                 dark = Image.new('RGBA', (320, 320), (0, 0, 0, int(255 * (1 - k)))); face = Image.alpha_composite(face, dark)
             img.paste(face, (0, 0), mask)
         return img
-    show = ['carp', 'perch', 'pike', 'swordfish', 'pufferfish', 'flounder', 'eel', 'koi', 'kraken_calf', 'sea_dragon', 'goldfish', 'clownfish']
-    pv = Image.new('RGBA', (4 * 320, 3 * 320), (70, 90, 80, 255)); dr = ImageDraw.Draw(pv)
+    show = made
+    close = ['carp', 'perch', 'pike', 'clownfish', 'goldfish', 'tuna', 'sea_dragon', 'koi']
+    cl = Image.new('RGBA', (4 * 320, 2 * 320), (54, 72, 92, 255)); dcl = ImageDraw.Draw(cl)
+    for i, fid in enumerate(close):
+        if fid in made: cl.alpha_composite(render(fid), ((i % 4) * 320, (i // 4) * 320)); dcl.text(((i % 4) * 320 + 8, (i // 4) * 320 + 8), fid, fill=(255, 255, 255, 255))
+    cl.save(sys.argv[4].replace('.png', '_close.png'))
+    cols = 8; rows = (len(show) + cols - 1) // cols; T = 200
+    pv = Image.new('RGBA', (cols * T, rows * T), (54, 72, 92, 255)); dr = ImageDraw.Draw(pv)
     for i, fid in enumerate(show):
-        if fid in made: pv.alpha_composite(render(fid), ((i % 4) * 320, (i // 4) * 320)); dr.text(((i % 4) * 320 + 8, (i // 4) * 320 + 8), fid, fill=(255, 255, 255, 255))
+        im = render(fid).resize((T, T), Image.LANCZOS)
+        pv.alpha_composite(im, ((i % cols) * T, (i // cols) * T)); dr.text(((i % cols) * T + 6, (i // cols) * T + 6), fid, fill=(255, 255, 255, 255))
     pv.save(sys.argv[4]); print('preview ok')
