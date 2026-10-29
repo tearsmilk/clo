@@ -20,7 +20,7 @@ import java.util.Locale;
  * /рыбалка продать        — продать всю рыбу
  * /рыбалка топ            — топ рыбаков
  * /рыбалка журнал [игрок] — выдать рыбацкий журнал (другому — zenfishing.admin)
- * /рыбалка сеть           — купить рыболовную сеть (net.price); /рыбалка сеть <игрок> — выдать (admin); /рыбалка сеть list|clear [игрок] (admin)
+ * /рыбалка сеть [игрок]   — выдать рыболовную сеть себе/игроку; list | clear [игрок] — только zenfishing.admin (вся команда админская)
  * /рыбалка reload | rod [игрок] [уровень] | stats <игрок>
  */
 public final class FishCommand implements CommandExecutor, TabCompleter {
@@ -44,7 +44,7 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
                 plugin.sellAll(p);
             }
             case "топ", "top" -> top(sender);
-            case "сеть", "net" -> net(sender, args);
+            case "сеть", "net" -> { if (!sender.hasPermission("zenfishing.admin")) { plugin.msg(sender, "no-permission"); return true; } net(sender, args); }
             case "журнал", "journal", "book" -> {
                 Player target;
                 if (args.length >= 2) {
@@ -54,6 +54,7 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
                 } else if (sender instanceof Player p) target = p;
                 else { plugin.msg(sender, "players-only"); return true; }
                 if (!target.hasPermission("zenfishing.use")) { plugin.msg(sender, "no-permission"); return true; }
+                if (!sender.hasPermission("zenfishing.admin") && plugin.journal().has(target)) { plugin.msg(sender, "journal-already"); return true; }
                 plugin.journal().give(target);
                 plugin.msg(sender, "journal-given-to", "player", target.getName());
             }
@@ -91,13 +92,8 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player p)) { plugin.msg(sender, "players-only"); return; }
         if (!p.hasPermission("zenfishing.use")) { plugin.msg(p, "no-permission"); return; }
         if (!nets.enabled()) { plugin.msg(p, "net-disabled"); return; }
-        double price = plugin.getConfig().getDouble("net.price", 500);
-        if (price > 0 && !p.hasPermission("zenfishing.admin")) {
-            if (!plugin.economy().canCharge()) { plugin.msg(p, "sell-unavailable"); return; }
-            if (!plugin.economy().take(p, price)) { plugin.msg(p, "net-no-money", "price", Text.num(price)); return; }
-        }
         nets.give(p);
-        plugin.msg(p, "net-bought", "price", Text.num(price));
+        plugin.msg(p, "net-given-to", "player", p.getName());
     }
 
     private void admin(CommandSender sender, String sub, String[] args) {
@@ -148,8 +144,8 @@ public final class FishCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean admin = sender.hasPermission("zenfishing.admin");
         if (args.length == 1) {
-            List<String> l = new ArrayList<>(List.of("продать", "топ", "журнал", "сеть"));
-            if (admin) l.addAll(List.of("reload", "rod", "stats"));
+            List<String> l = new ArrayList<>(List.of("продать", "топ", "журнал"));
+            if (admin) l.addAll(List.of("сеть", "reload", "rod", "stats"));
             return filter(l, args[0]);
         }
         if (!admin) return List.of();

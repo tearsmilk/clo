@@ -1,5 +1,5 @@
 """Тултип «море» v3 — по образцу Simple Tooltips (Rare, синий): скруглённая светло-голубая рамка 2 px с тёмной обводкой,
-тёмно-синяя заливка, внутренняя вписанная панель чуть темнее со своей скруглённой кромкой, завитки-волны и пузырьки в углах.
+тёмно-синяя заливка, внутренняя вписанная панель чуть темнее со своей скруглённой кромкой, без декора (v3.1).
 Спрайты 160x160 (4x от логических 40x40), nine_slice border 12 (48 px); декор только в угловых тайлах — они не растягиваются.
 Запуск: python3 make_sea_tooltip.py OUT_DIR [preview.png]  (MCFONT=путь к mcfont.py — шрифт Minecraft в превью)"""
 import sys, os, math
@@ -8,8 +8,8 @@ from PIL import Image, ImageDraw
 OUT = sys.argv[1]; os.makedirs(OUT, exist_ok=True)
 S, B, SC = 160, 48, 4
 def px(c, a=255): return c + (a,)
-OUTLINE = (6, 30, 56)
-RIM, RIM_L, RIM_D = (44, 150, 206), (120, 206, 240), (28, 110, 164)
+OUTLINE = (14, 52, 88)
+RIM, RIM_L, RIM_D = (58, 172, 228), (120, 212, 245), (40, 136, 192)
 FILL = (14, 72, 116)
 INNER, INNER_RIM = (10, 58, 98), (8, 46, 80)
 DECO = (36, 120, 170)
@@ -19,22 +19,7 @@ d.rounded_rectangle((0, 0, S - 1, S - 1), radius=3 * SC, fill=px(FILL))
 d.rounded_rectangle((3 * SC, 3 * SC, S - 1 - 3 * SC, S - 1 - 3 * SC), radius=2 * SC, fill=px(INNER_RIM))
 d.rounded_rectangle((4 * SC, 4 * SC, S - 1 - 4 * SC, S - 1 - 4 * SC), radius=2 * SC, fill=px(INNER))
 
-def swirl(img, cx, cy, r, col, turns=1.6, flip=1):
-    dd = ImageDraw.Draw(img); pts = []; n = 40
-    for i in range(n):
-        t = i / (n - 1); a = t * turns * 2 * math.pi * flip; rr = r * (0.15 + 0.85 * t)
-        pts.append((cx + math.cos(a) * rr, cy + math.sin(a) * rr))
-    dd.line(pts, fill=px(col, 200), width=SC)
-def bubble(img, cx, cy, r, col):
-    dd = ImageDraw.Draw(img)
-    dd.ellipse((cx - r, cy - r, cx + r, cy + r), outline=px(col, 220), width=SC)
-    dd.rectangle((cx - r // 2, cy - r // 2, cx - r // 2 + SC - 1, cy - r // 2 + SC - 1), fill=px((200, 240, 255), 230))
-
-# декор в углах внутренней панели: завиток ближе к углу, пузырёк рядом
-for (ox, oy, fx, fy) in ((0, 0, 1, 1), (S - B, 0, -1, 1), (0, S - B, 1, -1), (S - B, S - B, -1, -1)):
-    cx = ox + (7 * SC if fx > 0 else B - 7 * SC); cy = oy + (7 * SC if fy > 0 else B - 7 * SC)
-    swirl(bg, cx, cy, 2.2 * SC, DECO, flip=fx * fy)
-    bubble(bg, ox + (10 * SC if fx > 0 else B - 10 * SC), oy + (5 * SC if fy > 0 else B - 5 * SC), SC, DECO)
+# без декора в углах (v3.1): чистая панель
 
 fr = Image.new('RGBA', (S, S), (0, 0, 0, 0)); f = ImageDraw.Draw(fr)
 f.rounded_rectangle((0, 0, S - 1, S - 1), radius=3 * SC, fill=px(OUTLINE))
