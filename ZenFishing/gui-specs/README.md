@@ -20,7 +20,7 @@
 (`catch.item-model` в config.yml) — отдельных yml предметов Nexo нет. Превью — `fish_icons_preview.png`.
 
 ## Тултип «море»
-`tooltip/make_sea_tooltip.py OUT [preview]` → `sea_background.png`, `sea_frame.png` (160x160 = 4x при логических 40x40, nine_slice border 12; v2 29.10: подводный фон с лучами света и бледными пузырьками, рама — голубое стекло со скруглёнными углами и пузырьками на углах) → `assets/zenfishing/textures/gui/sprites/tooltip/`.
+`tooltip/make_sea_tooltip.py OUT [preview]` → `sea_background.png`, `sea_frame.png` (160x160 = 4x при логических 40x40, nine_slice border 12; v3 29.10 по образцу Simple Tooltips Rare: скруглённая голубая рамка 2 px с обводкой, тёмно-синяя заливка, внутренняя панель, завитки и пузырьки в углах) → `assets/zenfishing/textures/gui/sprites/tooltip/`.
 Ставится на удочку (`rod.tooltip-style`), пойманную рыбу (`catch.tooltip-style`) и меню (`menu.tooltip-style`) — `zenfishing:sea`. Превью — `tooltip/preview_sea_tooltip.png`.
 
 ## 3D-модели рыбы
