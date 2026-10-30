@@ -1,7 +1,6 @@
 
-# Вываживание ZenFishing: фон, 24 клетки зоны, 24 позиции маркера, до 5 точек попаданий. У каждой картинки ОДНО условие:
-# плагин отдаёт %zenfishing_fight_zone_<i>%, _marker_<i>, _hit_<i>, _todo_<i> = 1/0 (несколько условий в BetterHud не срабатывали).
-# Поправки по скриншоту 30.10: зона +2 px, точки (строка y=15) +37 px — BetterHud центрирует каждую строку отдельно. Слои только 0 и 1 (как у рабочих HUD сервера; слои 2–3 не рисовались). align: center — x это смещение центра картинки от центра экрана (клетка 6 px, полоса 148 px). Имена картинок уникальны на позицию.
+# Вываживание ZenFishing: полоса, 24 клетки зоны, 24 позиции маркера, точки попаданий (hit/todo_<всего>_<i>, по центру).
+# Все картинки шириной с полосу и стоят с x: 0 — одно условие на картинку (%zenfishing_fight_*% = 1/0). Генерируется make_fight.py.
 fishfight:
   images:
     1:
@@ -19,8 +18,8 @@ fishfight:
       name: fight_zone_0
       align: center
       layer: 1
-      x: -67
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_0"
@@ -30,8 +29,8 @@ fishfight:
       name: fight_zone_1
       align: center
       layer: 1
-      x: -61
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_1"
@@ -41,8 +40,8 @@ fishfight:
       name: fight_zone_2
       align: center
       layer: 1
-      x: -55
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_2"
@@ -52,8 +51,8 @@ fishfight:
       name: fight_zone_3
       align: center
       layer: 1
-      x: -49
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_3"
@@ -63,8 +62,8 @@ fishfight:
       name: fight_zone_4
       align: center
       layer: 1
-      x: -43
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_4"
@@ -74,8 +73,8 @@ fishfight:
       name: fight_zone_5
       align: center
       layer: 1
-      x: -37
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_5"
@@ -85,8 +84,8 @@ fishfight:
       name: fight_zone_6
       align: center
       layer: 1
-      x: -31
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_6"
@@ -96,8 +95,8 @@ fishfight:
       name: fight_zone_7
       align: center
       layer: 1
-      x: -25
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_7"
@@ -107,8 +106,8 @@ fishfight:
       name: fight_zone_8
       align: center
       layer: 1
-      x: -19
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_8"
@@ -118,8 +117,8 @@ fishfight:
       name: fight_zone_9
       align: center
       layer: 1
-      x: -13
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_9"
@@ -129,8 +128,8 @@ fishfight:
       name: fight_zone_10
       align: center
       layer: 1
-      x: -7
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_10"
@@ -140,8 +139,8 @@ fishfight:
       name: fight_zone_11
       align: center
       layer: 1
-      x: -1
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_11"
@@ -151,8 +150,8 @@ fishfight:
       name: fight_zone_12
       align: center
       layer: 1
-      x: 5
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_12"
@@ -162,8 +161,8 @@ fishfight:
       name: fight_zone_13
       align: center
       layer: 1
-      x: 11
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_13"
@@ -173,8 +172,8 @@ fishfight:
       name: fight_zone_14
       align: center
       layer: 1
-      x: 17
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_14"
@@ -184,8 +183,8 @@ fishfight:
       name: fight_zone_15
       align: center
       layer: 1
-      x: 23
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_15"
@@ -195,8 +194,8 @@ fishfight:
       name: fight_zone_16
       align: center
       layer: 1
-      x: 29
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_16"
@@ -206,8 +205,8 @@ fishfight:
       name: fight_zone_17
       align: center
       layer: 1
-      x: 35
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_17"
@@ -217,8 +216,8 @@ fishfight:
       name: fight_zone_18
       align: center
       layer: 1
-      x: 41
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_18"
@@ -228,8 +227,8 @@ fishfight:
       name: fight_zone_19
       align: center
       layer: 1
-      x: 47
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_19"
@@ -239,8 +238,8 @@ fishfight:
       name: fight_zone_20
       align: center
       layer: 1
-      x: 53
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_20"
@@ -250,8 +249,8 @@ fishfight:
       name: fight_zone_21
       align: center
       layer: 1
-      x: 59
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_21"
@@ -261,8 +260,8 @@ fishfight:
       name: fight_zone_22
       align: center
       layer: 1
-      x: 65
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_22"
@@ -272,8 +271,8 @@ fishfight:
       name: fight_zone_23
       align: center
       layer: 1
-      x: 71
-      y: 2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_23"
@@ -283,8 +282,8 @@ fishfight:
       name: fight_marker_0
       align: center
       layer: 1
-      x: -69
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_0"
@@ -294,8 +293,8 @@ fishfight:
       name: fight_marker_1
       align: center
       layer: 1
-      x: -63
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_1"
@@ -305,8 +304,8 @@ fishfight:
       name: fight_marker_2
       align: center
       layer: 1
-      x: -57
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_2"
@@ -316,8 +315,8 @@ fishfight:
       name: fight_marker_3
       align: center
       layer: 1
-      x: -51
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_3"
@@ -327,8 +326,8 @@ fishfight:
       name: fight_marker_4
       align: center
       layer: 1
-      x: -45
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_4"
@@ -338,8 +337,8 @@ fishfight:
       name: fight_marker_5
       align: center
       layer: 1
-      x: -39
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_5"
@@ -349,8 +348,8 @@ fishfight:
       name: fight_marker_6
       align: center
       layer: 1
-      x: -33
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_6"
@@ -360,8 +359,8 @@ fishfight:
       name: fight_marker_7
       align: center
       layer: 1
-      x: -27
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_7"
@@ -371,8 +370,8 @@ fishfight:
       name: fight_marker_8
       align: center
       layer: 1
-      x: -21
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_8"
@@ -382,8 +381,8 @@ fishfight:
       name: fight_marker_9
       align: center
       layer: 1
-      x: -15
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_9"
@@ -393,8 +392,8 @@ fishfight:
       name: fight_marker_10
       align: center
       layer: 1
-      x: -9
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_10"
@@ -404,8 +403,8 @@ fishfight:
       name: fight_marker_11
       align: center
       layer: 1
-      x: -3
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_11"
@@ -415,8 +414,8 @@ fishfight:
       name: fight_marker_12
       align: center
       layer: 1
-      x: 3
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_12"
@@ -426,8 +425,8 @@ fishfight:
       name: fight_marker_13
       align: center
       layer: 1
-      x: 9
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_13"
@@ -437,8 +436,8 @@ fishfight:
       name: fight_marker_14
       align: center
       layer: 1
-      x: 15
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_14"
@@ -448,8 +447,8 @@ fishfight:
       name: fight_marker_15
       align: center
       layer: 1
-      x: 21
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_15"
@@ -459,8 +458,8 @@ fishfight:
       name: fight_marker_16
       align: center
       layer: 1
-      x: 27
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_16"
@@ -470,8 +469,8 @@ fishfight:
       name: fight_marker_17
       align: center
       layer: 1
-      x: 33
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_17"
@@ -481,8 +480,8 @@ fishfight:
       name: fight_marker_18
       align: center
       layer: 1
-      x: 39
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_18"
@@ -492,8 +491,8 @@ fishfight:
       name: fight_marker_19
       align: center
       layer: 1
-      x: 45
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_19"
@@ -503,8 +502,8 @@ fishfight:
       name: fight_marker_20
       align: center
       layer: 1
-      x: 51
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_20"
@@ -514,8 +513,8 @@ fishfight:
       name: fight_marker_21
       align: center
       layer: 1
-      x: 57
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_21"
@@ -525,8 +524,8 @@ fishfight:
       name: fight_marker_22
       align: center
       layer: 1
-      x: 63
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_22"
@@ -536,120 +535,340 @@ fishfight:
       name: fight_marker_23
       align: center
       layer: 1
-      x: 69
-      y: -2
+      x: 0
+      y: 0
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_23"
           second: "'(number)1'"
           operation: '=='
     50:
-      name: fight_hit_0
+      name: fight_hit_1_0
       align: center
       layer: 1
-      x: 19
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_hit_0"
+          first: "(number)papi:zenfishing_fight_hit_1_0"
           second: "'(number)1'"
           operation: '=='
     51:
-      name: fight_todo_0
+      name: fight_todo_1_0
       align: center
       layer: 1
-      x: 19
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_todo_0"
+          first: "(number)papi:zenfishing_fight_todo_1_0"
           second: "'(number)1'"
           operation: '=='
     52:
-      name: fight_hit_1
+      name: fight_hit_2_0
       align: center
       layer: 1
-      x: 28
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_hit_1"
+          first: "(number)papi:zenfishing_fight_hit_2_0"
           second: "'(number)1'"
           operation: '=='
     53:
-      name: fight_todo_1
+      name: fight_todo_2_0
       align: center
       layer: 1
-      x: 28
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_todo_1"
+          first: "(number)papi:zenfishing_fight_todo_2_0"
           second: "'(number)1'"
           operation: '=='
     54:
-      name: fight_hit_2
+      name: fight_hit_2_1
       align: center
       layer: 1
-      x: 37
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_hit_2"
+          first: "(number)papi:zenfishing_fight_hit_2_1"
           second: "'(number)1'"
           operation: '=='
     55:
-      name: fight_todo_2
+      name: fight_todo_2_1
       align: center
       layer: 1
-      x: 37
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_todo_2"
+          first: "(number)papi:zenfishing_fight_todo_2_1"
           second: "'(number)1'"
           operation: '=='
     56:
-      name: fight_hit_3
+      name: fight_hit_3_0
       align: center
       layer: 1
-      x: 46
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_hit_3"
+          first: "(number)papi:zenfishing_fight_hit_3_0"
           second: "'(number)1'"
           operation: '=='
     57:
-      name: fight_todo_3
+      name: fight_todo_3_0
       align: center
       layer: 1
-      x: 46
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_todo_3"
+          first: "(number)papi:zenfishing_fight_todo_3_0"
           second: "'(number)1'"
           operation: '=='
     58:
-      name: fight_hit_4
+      name: fight_hit_3_1
       align: center
       layer: 1
-      x: 55
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_hit_4"
+          first: "(number)papi:zenfishing_fight_hit_3_1"
           second: "'(number)1'"
           operation: '=='
     59:
-      name: fight_todo_4
+      name: fight_todo_3_1
       align: center
       layer: 1
-      x: 55
-      y: 15
+      x: 0
+      y: 17
       conditions:
         1:
-          first: "(number)papi:zenfishing_fight_todo_4"
+          first: "(number)papi:zenfishing_fight_todo_3_1"
+          second: "'(number)1'"
+          operation: '=='
+    60:
+      name: fight_hit_3_2
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_3_2"
+          second: "'(number)1'"
+          operation: '=='
+    61:
+      name: fight_todo_3_2
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_3_2"
+          second: "'(number)1'"
+          operation: '=='
+    62:
+      name: fight_hit_4_0
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_4_0"
+          second: "'(number)1'"
+          operation: '=='
+    63:
+      name: fight_todo_4_0
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_4_0"
+          second: "'(number)1'"
+          operation: '=='
+    64:
+      name: fight_hit_4_1
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_4_1"
+          second: "'(number)1'"
+          operation: '=='
+    65:
+      name: fight_todo_4_1
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_4_1"
+          second: "'(number)1'"
+          operation: '=='
+    66:
+      name: fight_hit_4_2
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_4_2"
+          second: "'(number)1'"
+          operation: '=='
+    67:
+      name: fight_todo_4_2
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_4_2"
+          second: "'(number)1'"
+          operation: '=='
+    68:
+      name: fight_hit_4_3
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_4_3"
+          second: "'(number)1'"
+          operation: '=='
+    69:
+      name: fight_todo_4_3
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_4_3"
+          second: "'(number)1'"
+          operation: '=='
+    70:
+      name: fight_hit_5_0
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_5_0"
+          second: "'(number)1'"
+          operation: '=='
+    71:
+      name: fight_todo_5_0
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_5_0"
+          second: "'(number)1'"
+          operation: '=='
+    72:
+      name: fight_hit_5_1
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_5_1"
+          second: "'(number)1'"
+          operation: '=='
+    73:
+      name: fight_todo_5_1
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_5_1"
+          second: "'(number)1'"
+          operation: '=='
+    74:
+      name: fight_hit_5_2
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_5_2"
+          second: "'(number)1'"
+          operation: '=='
+    75:
+      name: fight_todo_5_2
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_5_2"
+          second: "'(number)1'"
+          operation: '=='
+    76:
+      name: fight_hit_5_3
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_5_3"
+          second: "'(number)1'"
+          operation: '=='
+    77:
+      name: fight_todo_5_3
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_5_3"
+          second: "'(number)1'"
+          operation: '=='
+    78:
+      name: fight_hit_5_4
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_hit_5_4"
+          second: "'(number)1'"
+          operation: '=='
+    79:
+      name: fight_todo_5_4
+      align: center
+      layer: 1
+      x: 0
+      y: 17
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_todo_5_4"
           second: "'(number)1'"
           operation: '=='

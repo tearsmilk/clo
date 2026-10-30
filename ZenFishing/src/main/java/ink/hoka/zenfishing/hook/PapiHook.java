@@ -45,6 +45,13 @@ public final class PapiHook extends PlaceholderExpansion {
                 try {
                     int i = Integer.parseInt(sub.substring(us + 1)); String k = sub.substring(0, us);
                     if (st == null) return "0";
+                    // hit_<всего>_<i> / todo_<всего>_<i> — точки по центру под полосой: «1» только если нужно ровно <всего> нажатий
+                    int us2 = k.lastIndexOf('_');
+                    if (us2 > 0 && (k.startsWith("hit_") || k.startsWith("todo_"))) {
+                        int n = Integer.parseInt(k.substring(us2 + 1)); boolean hit = k.startsWith("hit_");
+                        if (st.need() != n || i >= n) return "0";
+                        return (hit ? i < st.hits() : i >= st.hits()) ? "1" : "0";
+                    }
                     switch (k) {
                         case "zone": return i >= st.zoneStart() && i < st.zoneStart() + st.zoneLen() ? "1" : "0";
                         case "marker": return st.pos() == i ? "1" : "0";
