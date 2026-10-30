@@ -1,0 +1,6 @@
+# Полоса вываживания ZenFishing (plugins/BetterHud/assets/fight/*.png)
+fight_bar: {type: single, file: fight/bar.png}
+fight_zone: {type: single, file: fight/zone.png}
+fight_marker: {type: single, file: fight/marker.png}
+fight_hit: {type: single, file: fight/hit.png}
+fight_todo: {type: single, file: fight/todo.png}

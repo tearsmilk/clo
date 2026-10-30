@@ -75,6 +75,7 @@ catch:
 minigame:
   enabled: true
   title: true
+  display: betterhud     # betterhud — графическая полоса над экшенбаром (huds/fishfight в BetterHud, плейсхолдеры %zenfishing_fight_*%); actionbar — текстовая
   bar-length: 24
   timeout-ticks: 70
   misses-allowed: 0

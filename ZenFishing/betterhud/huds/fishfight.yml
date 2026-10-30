@@ -1,0 +1,11 @@
+# Вываживание ZenFishing: полоса чуть выше экшенбара, видна только во время борьбы (%zenfishing_fight_active%)
+fishfight:
+  layouts:
+    31:
+      name: fishfight
+      gui:
+        x: 50
+        y: 100
+      pixel:
+        x: 0
+        y: -78

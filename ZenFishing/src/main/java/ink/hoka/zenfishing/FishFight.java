@@ -41,6 +41,14 @@ public final class FishFight implements Listener {
         }
     }
 
+    /** Снимок борьбы для плейсхолдеров (BetterHud). */
+    public record State(int pos, int zoneStart, int zoneLen, int hits, int need, boolean inZone) {}
+    public State state(Player p) {
+        Fight g = fights.get(p.getUniqueId());
+        return g == null ? null : new State((int) Math.round(g.pos), g.zoneStart, g.zoneLen, g.hits, g.need, inZone(g));
+    }
+    private boolean actionbar() { return !"betterhud".equalsIgnoreCase(cfg().getString("display", "actionbar")); }
+
     private final ZenFishing plugin;
     private final FishingListener catcher;
     private final Map<UUID, Fight> fights = new HashMap<>();
@@ -91,7 +99,7 @@ public final class FishFight implements Listener {
         if (g.pos <= 0) { g.pos = 0; g.dir = 1; }
         if (++g.sinceHit > cfg().getInt("timeout-ticks", 70)) { escape(g, "fight-timeout"); return; }
         if (!plugin.rods().isRod(g.p.getInventory().getItemInMainHand()) && !plugin.rods().isRod(g.p.getInventory().getItemInOffHand())) { escape(g, "fight-escape"); return; }
-        g.p.sendActionBar(bar(g));
+        if (actionbar()) g.p.sendActionBar(bar(g));
     }
 
     private boolean inZone(Fight g) { int m = (int) Math.round(g.pos); return m >= g.zoneStart && m < g.zoneStart + g.zoneLen; }
@@ -122,7 +130,7 @@ public final class FishFight implements Listener {
             // следующая фаза: новая зона, чуть быстрее
             g.speed *= cfg().getDouble("speed-up", 1.12);
             newZone(g);
-            g.p.sendActionBar(bar(g));
+            if (actionbar()) g.p.sendActionBar(bar(g));
         } else {
             g.misses++;
             g.p.playSound(g.p.getLocation(), Sound.ENTITY_ITEM_BREAK, 0.6f, 0.7f);

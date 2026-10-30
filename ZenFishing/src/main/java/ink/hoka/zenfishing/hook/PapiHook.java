@@ -36,6 +36,19 @@ public final class PapiHook extends PlaceholderExpansion {
     public String onRequest(OfflinePlayer p, String params) {
         if (p == null) return "";
         Player on = p.getPlayer();
+        if (params.toLowerCase().startsWith("fight_")) {
+            ink.hoka.zenfishing.FishFight.State st = on == null || plugin.fight() == null ? null : plugin.fight().state(on);
+            switch (params.toLowerCase().substring(6)) {
+                case "active": return st == null ? "0" : "1";
+                case "pos": return st == null ? "-1" : String.valueOf(st.pos());
+                case "zone_start": return st == null ? "0" : String.valueOf(st.zoneStart());
+                case "zone_end": return st == null ? "0" : String.valueOf(st.zoneStart() + st.zoneLen());
+                case "hits": return st == null ? "0" : String.valueOf(st.hits());
+                case "need": return st == null ? "0" : String.valueOf(st.need());
+                case "in_zone": return st != null && st.inZone() ? "1" : "0";
+                default: return null;
+            }
+        }
         switch (params.toLowerCase()) {
             case "premium": return String.valueOf(on != null && plugin.isPremium(on));
             case "level": case "xp": case "need": {
