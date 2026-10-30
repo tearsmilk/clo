@@ -11,6 +11,7 @@ for i in range(CELLS):
     z = canvas(); z.alpha_composite(zone, (2 + CELL * i, BAR_Y + (bar.height - zone.height) // 2)); z.save(f'assets/fight/full/zone_{i}.png')
     m = canvas(); m.alpha_composite(marker, (2 + CELL * i, 0)); m.save(f'assets/fight/full/marker_{i}.png')
 DOT, GAP, MAXN = hit.width, 2, 5
+OVER_Y = 3   # BetterHud рисует слой 1 на ~3 px выше слоя 0 (скриншот 30.10) — компенсация для зоны и маркера
 for n in range(1, MAXN + 1):
     x0 = (W - (n * DOT + (n - 1) * GAP)) // 2
     for i in range(n):
@@ -28,7 +29,7 @@ with open('layouts/fishfight-layout.append.yml', 'w', encoding='utf-8') as f:
             '# Все картинки шириной с полосу и стоят с x: 0 — одно условие на картинку (%zenfishing_fight_*% = 1/0). Генерируется make_fight.py.\n'
             'fishfight:\n  images:\n')
     for k, (name, _) in enumerate(imgs, 1):
-        y = DOT and (H + 1) if name.startswith(('fight_hit', 'fight_todo')) else 0
+        y = (H + 1) if name.startswith(('fight_hit', 'fight_todo')) else (0 if name == 'fight_bar' else OVER_Y)
         f.write(f'    {k}:\n      name: {name}\n      align: center\n      layer: {0 if name == "fight_bar" else 1}\n      x: 0\n      y: {y}\n'
                 f'      conditions:\n        1:\n          first: "(number)papi:{ph(name)}"\n          second: "\'(number)1\'"\n          operation: \'==\'\n')
 print('images:', len(imgs))

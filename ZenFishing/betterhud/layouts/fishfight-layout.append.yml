@@ -19,7 +19,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_0"
@@ -30,7 +30,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_1"
@@ -41,7 +41,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_2"
@@ -52,7 +52,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_3"
@@ -63,7 +63,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_4"
@@ -74,7 +74,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_5"
@@ -85,7 +85,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_6"
@@ -96,7 +96,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_7"
@@ -107,7 +107,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_8"
@@ -118,7 +118,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_9"
@@ -129,7 +129,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_10"
@@ -140,7 +140,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_11"
@@ -151,7 +151,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_12"
@@ -162,7 +162,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_13"
@@ -173,7 +173,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_14"
@@ -184,7 +184,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_15"
@@ -195,7 +195,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_16"
@@ -206,7 +206,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_17"
@@ -217,7 +217,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_18"
@@ -228,7 +228,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_19"
@@ -239,7 +239,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_20"
@@ -250,7 +250,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_21"
@@ -261,7 +261,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_22"
@@ -272,7 +272,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_zone_23"
@@ -283,7 +283,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_0"
@@ -294,7 +294,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_1"
@@ -305,7 +305,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_2"
@@ -316,7 +316,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_3"
@@ -327,7 +327,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_4"
@@ -338,7 +338,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_5"
@@ -349,7 +349,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_6"
@@ -360,7 +360,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_7"
@@ -371,7 +371,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_8"
@@ -382,7 +382,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_9"
@@ -393,7 +393,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_10"
@@ -404,7 +404,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_11"
@@ -415,7 +415,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_12"
@@ -426,7 +426,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_13"
@@ -437,7 +437,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_14"
@@ -448,7 +448,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_15"
@@ -459,7 +459,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_16"
@@ -470,7 +470,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_17"
@@ -481,7 +481,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_18"
@@ -492,7 +492,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_19"
@@ -503,7 +503,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_20"
@@ -514,7 +514,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_21"
@@ -525,7 +525,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_22"
@@ -536,7 +536,7 @@ fishfight:
       align: center
       layer: 1
       x: 0
-      y: 0
+      y: 3
       conditions:
         1:
           first: "(number)papi:zenfishing_fight_marker_23"
