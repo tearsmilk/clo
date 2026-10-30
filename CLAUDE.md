@@ -1,7 +1,7 @@
 # Заметки для Claude по проекту
 
 ## Noratrum — ZenQuests + ZenFishing + ZenGroups одним paper-плагином (`Noratrum/`, версия `o012mk23f87`, authors fame/ktnqqq)
-- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-5`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
+- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-6`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
   `ZenGroups/` — `src/main/java` и `src/main/resources` подключены в Noratrum; их собственных gradle/plugin.yml больше нет).
   Отдельных jar ZenQuests/ZenFishing/ZenGroups на сервере НЕТ — не заливать, иначе дубли PAPI/Vault.
 - **Никогда не перезаписывать jar поверх работающего с тем же именем**: JVM грузит классы лениво, и до рестарта консоль флудит

@@ -1,7 +1,7 @@
 """Фон меню прокачки удочки (ZenFishing): 236x239 как остальные фоны (глиф шрифта zenfishing:menu, ascent 30),
 GUI сундука 6 рядов начинается в точке (30, 17), слот (col,row) — x = 38 + col*18, y = 35 + row*18; инвентарь y = 157, хотбар y = 215.
 Всё прозрачно, кроме вертикальной плашки на колонках 1..7 (от заголовка до хотбара). В плашке: лента-заголовок, гнездо удочки
-(слот 4), кнопка «УЛУЧШИТЬ» на 3 слота (48–50) и гнёзда инвентаря/хотбара колонок 1..7 (предметы игрока скрыты пакетами через TakuFarmers ContainerSkin).
+(большая картинка 3x3 на слотах 12..14/21..23/30..32), кнопка «УЛУЧШИТЬ» на 3 слота (48–50) и гнёзда инвентаря/хотбара колонок 1..7 (предметы игрока скрыты пакетами через TakuFarmers ContainerSkin).
 Запуск: MCFONT=<папка с mcfont.py> python3 upgrade_bg.py OUT.png"""
 import sys, os
 from PIL import Image, ImageDraw
@@ -46,12 +46,14 @@ cx = (PX0 + PX1) // 2
 title = 'УДОЧКА'
 d.rectangle((PX0 + 6, 5, PX1 - 6, 15), fill=OUTLINE + (255,)); d.rectangle((PX0 + 7, 6, PX1 - 7, 14), fill=RIM_D + (255,))
 text(cx - tw(title) // 2, 6, title, '#dff6ff')
-# гнездо удочки — слот 4 (row 0, col 4)
-socket(sx(4), sy(0))
-# декоративные линии к гнезду
-for dx in (-2, 2): d.line((sx(4) + 8 + dx * 12, sy(0) + 8, sx(4) + 8 + dx * 22, sy(0) + 8), fill=RIM_D + (255,))
+# удочка — большая картинка на слотах 12..14/21..23/30..32 (невидимые предметы с подсказкой удочки)
+# большая удочка: ванильная текстура 16x16 ×3 = 48 px по центру блока 3x3 слота (cols 3..5, rows 1..3)
+rod = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'art', 'fishing_rod_vanilla.png')).convert('RGBA').resize((48, 48), Image.NEAREST)
+bx, by = sx(3) + (54 - 48) // 2, sy(1) + (54 - 48) // 2
+sh = Image.new('RGBA', rod.size, (0, 0, 0, 0)); sh.paste((4, 20, 40, 120), (0, 0), rod.split()[3])
+img.alpha_composite(sh, (bx + 2, by + 2)); img.alpha_composite(rod, (bx, by))
 # разделитель и подпись
-d.line((PX0 + 8, sy(1) + 12, PX1 - 8, sy(1) + 12), fill=OUTLINE + (255,)); d.line((PX0 + 8, sy(1) + 13, PX1 - 8, sy(1) + 13), fill=RIM_D + (255,))
+d.line((PX0 + 8, sy(4) + 4, PX1 - 8, sy(4) + 4), fill=OUTLINE + (255,)); d.line((PX0 + 8, sy(4) + 5, PX1 - 8, sy(4) + 5), fill=RIM_D + (255,))
 # кнопка «УЛУЧШИТЬ» — слоты 48,49,50 (row 5, cols 3..5)
 bx0, by0, bx1, by1 = sx(3) - 1, sy(5) - 1, sx(5) + 16, sy(5) + 16
 d.rectangle((bx0, by0, bx1, by1), fill=BTN_D + (255,))
@@ -59,9 +61,5 @@ d.rectangle((bx0 + 1, by0 + 1, bx1 - 1, by1 - 2), fill=BTN + (255,))
 d.line((bx0 + 1, by0 + 1, bx1 - 1, by0 + 1), fill=BTN_L + (255,)); d.line((bx0 + 1, by0 + 1, bx0 + 1, by1 - 2), fill=BTN_L + (255,))
 btn = 'УЛУЧШИТЬ'
 text((bx0 + bx1) // 2 - tw(btn) // 2 + 1, by0 + 5, btn, '#3c2406', shadow=False)
-# инвентарь и хотбар — гнёзда только в колонках 2..6
-d.line((PX0 + 8, INV_Y - 8, PX1 - 8, INV_Y - 8), fill=OUTLINE + (255,)); d.line((PX0 + 8, INV_Y - 7, PX1 - 8, INV_Y - 7), fill=RIM_D + (255,))
-for r in range(3):
-    for c in range(1, 8): socket(sx(c), INV_Y + r * 18)
-for c in range(1, 8): socket(sx(c), HOT_Y)
+# инвентарь и хотбар — ничего не рисуем: сплошная плашка (предметы игрока скрыты пакетами через TakuFarmers)
 img.save(OUT); print('upgrade bg ok', img.size)

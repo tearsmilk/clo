@@ -47,7 +47,7 @@ public final class FishMenu implements Listener {
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
     private static final int ROD = 2, PROFILE = 4, PREMIUM = 6, SELL = 22, TOP = 24, CLOSE = 49;
     // меню улучшения (вертикальная плашка, колонки 1..7): удочка и кнопка на 3 слота; всё остальное — подсказки
-    private static final int U_ROD = 4;
+    private static final int[] U_ROD = {12, 13, 14, 21, 22, 23, 30, 31, 32};   // большая удочка на фоне: 3x3 невидимых предмета с её подсказкой
     private static final int[] U_BUTTON = {48, 49, 50};
     private static final char SHIFT_TO_EDGE = '', SHIFT_BACK = '';
 
@@ -146,7 +146,7 @@ public final class FishMenu implements Listener {
         frame(inv);
         ItemStack rod = rodInHand(p);
         if (rod == null) {
-            inv.setItem(U_ROD, item(Material.FISHING_ROD, cfg("rod-none.name", "Нет удочки"), cfgList("rod-none.lore"), false));
+            for (int slot : U_ROD) inv.setItem(slot, invisible(cfg("rod-none.name", "Нет удочки"), cfgList("rod-none.lore")));
             hideInventory(p);
             p.openInventory(inv);
             return;
@@ -155,7 +155,7 @@ public final class FishMenu implements Listener {
         ItemStack show = rod.clone();
         ItemMeta m = show.getItemMeta();
         if (m != null) { m.addItemFlags(ItemFlag.values()); if (tooltipStyle() != null) try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { } show.setItemMeta(m); }
-        inv.setItem(U_ROD, icon("rod", show));
+        for (int slot : U_ROD) inv.setItem(slot, invisibleLike(show));
 
         boolean prem = plugin.isPremium(p);
         int lvl = rods.level(rod), tier = rods.tier(rod);
@@ -233,6 +233,18 @@ public final class FishMenu implements Listener {
         }
     }
     private boolean hideWarned;
+
+    /** Невидимый предмет с именем и описанием другого предмета (подсказка удочки на большой картинке). */
+    private ItemStack invisibleLike(ItemStack src) {
+        ItemStack it = new ItemStack(Material.PAPER);
+        ItemMeta m = it.getItemMeta(); ItemMeta sm = src.getItemMeta();
+        if (m != null && sm != null) {
+            m.displayName(sm.displayName()); m.lore(sm.lore()); m.addItemFlags(ItemFlag.values());
+            if (tooltipStyle() != null) try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { }
+            it.setItemMeta(m);
+        }
+        return icon("empty", it);
+    }
 
     /** Невидимый предмет-кнопка (модель menu.icons.empty), текст — только в подсказке; фон рисует плашка. */
     private ItemStack invisible(String name, List<String> lore) {
