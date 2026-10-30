@@ -7,5 +7,5 @@ fishfight:
         x: 50
         y: 100
       pixel:
-        x: 0
+        x: 2
         y: -78
