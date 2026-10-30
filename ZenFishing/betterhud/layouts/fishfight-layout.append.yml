@@ -1,13 +1,13 @@
 
 # Вываживание ZenFishing: фон, 24 клетки зоны, 24 позиции маркера, до 5 точек попаданий. У каждой картинки ОДНО условие:
 # плагин отдаёт %zenfishing_fight_zone_<i>%, _marker_<i>, _hit_<i>, _todo_<i> = 1/0 (несколько условий в BetterHud не срабатывали).
-# align: center — x это смещение центра картинки от центра экрана (клетка 6 px, полоса 148 px). Имена картинок уникальны на позицию.
+# Слои только 0 и 1 (как у рабочих HUD сервера; слои 2–3 не рисовались). align: center — x это смещение центра картинки от центра экрана (клетка 6 px, полоса 148 px). Имена картинок уникальны на позицию.
 fishfight:
   images:
     1:
       name: fight_bar
       align: center
-      layer: 1
+      layer: 0
       x: 0
       y: 0
       conditions:
@@ -18,7 +18,7 @@ fishfight:
     2:
       name: fight_zone_0
       align: center
-      layer: 2
+      layer: 1
       x: -69
       y: 2
       conditions:
@@ -29,7 +29,7 @@ fishfight:
     3:
       name: fight_zone_1
       align: center
-      layer: 2
+      layer: 1
       x: -63
       y: 2
       conditions:
@@ -40,7 +40,7 @@ fishfight:
     4:
       name: fight_zone_2
       align: center
-      layer: 2
+      layer: 1
       x: -57
       y: 2
       conditions:
@@ -51,7 +51,7 @@ fishfight:
     5:
       name: fight_zone_3
       align: center
-      layer: 2
+      layer: 1
       x: -51
       y: 2
       conditions:
@@ -62,7 +62,7 @@ fishfight:
     6:
       name: fight_zone_4
       align: center
-      layer: 2
+      layer: 1
       x: -45
       y: 2
       conditions:
@@ -73,7 +73,7 @@ fishfight:
     7:
       name: fight_zone_5
       align: center
-      layer: 2
+      layer: 1
       x: -39
       y: 2
       conditions:
@@ -84,7 +84,7 @@ fishfight:
     8:
       name: fight_zone_6
       align: center
-      layer: 2
+      layer: 1
       x: -33
       y: 2
       conditions:
@@ -95,7 +95,7 @@ fishfight:
     9:
       name: fight_zone_7
       align: center
-      layer: 2
+      layer: 1
       x: -27
       y: 2
       conditions:
@@ -106,7 +106,7 @@ fishfight:
     10:
       name: fight_zone_8
       align: center
-      layer: 2
+      layer: 1
       x: -21
       y: 2
       conditions:
@@ -117,7 +117,7 @@ fishfight:
     11:
       name: fight_zone_9
       align: center
-      layer: 2
+      layer: 1
       x: -15
       y: 2
       conditions:
@@ -128,7 +128,7 @@ fishfight:
     12:
       name: fight_zone_10
       align: center
-      layer: 2
+      layer: 1
       x: -9
       y: 2
       conditions:
@@ -139,7 +139,7 @@ fishfight:
     13:
       name: fight_zone_11
       align: center
-      layer: 2
+      layer: 1
       x: -3
       y: 2
       conditions:
@@ -150,7 +150,7 @@ fishfight:
     14:
       name: fight_zone_12
       align: center
-      layer: 2
+      layer: 1
       x: 3
       y: 2
       conditions:
@@ -161,7 +161,7 @@ fishfight:
     15:
       name: fight_zone_13
       align: center
-      layer: 2
+      layer: 1
       x: 9
       y: 2
       conditions:
@@ -172,7 +172,7 @@ fishfight:
     16:
       name: fight_zone_14
       align: center
-      layer: 2
+      layer: 1
       x: 15
       y: 2
       conditions:
@@ -183,7 +183,7 @@ fishfight:
     17:
       name: fight_zone_15
       align: center
-      layer: 2
+      layer: 1
       x: 21
       y: 2
       conditions:
@@ -194,7 +194,7 @@ fishfight:
     18:
       name: fight_zone_16
       align: center
-      layer: 2
+      layer: 1
       x: 27
       y: 2
       conditions:
@@ -205,7 +205,7 @@ fishfight:
     19:
       name: fight_zone_17
       align: center
-      layer: 2
+      layer: 1
       x: 33
       y: 2
       conditions:
@@ -216,7 +216,7 @@ fishfight:
     20:
       name: fight_zone_18
       align: center
-      layer: 2
+      layer: 1
       x: 39
       y: 2
       conditions:
@@ -227,7 +227,7 @@ fishfight:
     21:
       name: fight_zone_19
       align: center
-      layer: 2
+      layer: 1
       x: 45
       y: 2
       conditions:
@@ -238,7 +238,7 @@ fishfight:
     22:
       name: fight_zone_20
       align: center
-      layer: 2
+      layer: 1
       x: 51
       y: 2
       conditions:
@@ -249,7 +249,7 @@ fishfight:
     23:
       name: fight_zone_21
       align: center
-      layer: 2
+      layer: 1
       x: 57
       y: 2
       conditions:
@@ -260,7 +260,7 @@ fishfight:
     24:
       name: fight_zone_22
       align: center
-      layer: 2
+      layer: 1
       x: 63
       y: 2
       conditions:
@@ -271,7 +271,7 @@ fishfight:
     25:
       name: fight_zone_23
       align: center
-      layer: 2
+      layer: 1
       x: 69
       y: 2
       conditions:
@@ -282,7 +282,7 @@ fishfight:
     26:
       name: fight_marker_0
       align: center
-      layer: 3
+      layer: 1
       x: -69
       y: -2
       conditions:
@@ -293,7 +293,7 @@ fishfight:
     27:
       name: fight_marker_1
       align: center
-      layer: 3
+      layer: 1
       x: -63
       y: -2
       conditions:
@@ -304,7 +304,7 @@ fishfight:
     28:
       name: fight_marker_2
       align: center
-      layer: 3
+      layer: 1
       x: -57
       y: -2
       conditions:
@@ -315,7 +315,7 @@ fishfight:
     29:
       name: fight_marker_3
       align: center
-      layer: 3
+      layer: 1
       x: -51
       y: -2
       conditions:
@@ -326,7 +326,7 @@ fishfight:
     30:
       name: fight_marker_4
       align: center
-      layer: 3
+      layer: 1
       x: -45
       y: -2
       conditions:
@@ -337,7 +337,7 @@ fishfight:
     31:
       name: fight_marker_5
       align: center
-      layer: 3
+      layer: 1
       x: -39
       y: -2
       conditions:
@@ -348,7 +348,7 @@ fishfight:
     32:
       name: fight_marker_6
       align: center
-      layer: 3
+      layer: 1
       x: -33
       y: -2
       conditions:
@@ -359,7 +359,7 @@ fishfight:
     33:
       name: fight_marker_7
       align: center
-      layer: 3
+      layer: 1
       x: -27
       y: -2
       conditions:
@@ -370,7 +370,7 @@ fishfight:
     34:
       name: fight_marker_8
       align: center
-      layer: 3
+      layer: 1
       x: -21
       y: -2
       conditions:
@@ -381,7 +381,7 @@ fishfight:
     35:
       name: fight_marker_9
       align: center
-      layer: 3
+      layer: 1
       x: -15
       y: -2
       conditions:
@@ -392,7 +392,7 @@ fishfight:
     36:
       name: fight_marker_10
       align: center
-      layer: 3
+      layer: 1
       x: -9
       y: -2
       conditions:
@@ -403,7 +403,7 @@ fishfight:
     37:
       name: fight_marker_11
       align: center
-      layer: 3
+      layer: 1
       x: -3
       y: -2
       conditions:
@@ -414,7 +414,7 @@ fishfight:
     38:
       name: fight_marker_12
       align: center
-      layer: 3
+      layer: 1
       x: 3
       y: -2
       conditions:
@@ -425,7 +425,7 @@ fishfight:
     39:
       name: fight_marker_13
       align: center
-      layer: 3
+      layer: 1
       x: 9
       y: -2
       conditions:
@@ -436,7 +436,7 @@ fishfight:
     40:
       name: fight_marker_14
       align: center
-      layer: 3
+      layer: 1
       x: 15
       y: -2
       conditions:
@@ -447,7 +447,7 @@ fishfight:
     41:
       name: fight_marker_15
       align: center
-      layer: 3
+      layer: 1
       x: 21
       y: -2
       conditions:
@@ -458,7 +458,7 @@ fishfight:
     42:
       name: fight_marker_16
       align: center
-      layer: 3
+      layer: 1
       x: 27
       y: -2
       conditions:
@@ -469,7 +469,7 @@ fishfight:
     43:
       name: fight_marker_17
       align: center
-      layer: 3
+      layer: 1
       x: 33
       y: -2
       conditions:
@@ -480,7 +480,7 @@ fishfight:
     44:
       name: fight_marker_18
       align: center
-      layer: 3
+      layer: 1
       x: 39
       y: -2
       conditions:
@@ -491,7 +491,7 @@ fishfight:
     45:
       name: fight_marker_19
       align: center
-      layer: 3
+      layer: 1
       x: 45
       y: -2
       conditions:
@@ -502,7 +502,7 @@ fishfight:
     46:
       name: fight_marker_20
       align: center
-      layer: 3
+      layer: 1
       x: 51
       y: -2
       conditions:
@@ -513,7 +513,7 @@ fishfight:
     47:
       name: fight_marker_21
       align: center
-      layer: 3
+      layer: 1
       x: 57
       y: -2
       conditions:
@@ -524,7 +524,7 @@ fishfight:
     48:
       name: fight_marker_22
       align: center
-      layer: 3
+      layer: 1
       x: 63
       y: -2
       conditions:
@@ -535,7 +535,7 @@ fishfight:
     49:
       name: fight_marker_23
       align: center
-      layer: 3
+      layer: 1
       x: 69
       y: -2
       conditions:
@@ -546,7 +546,7 @@ fishfight:
     50:
       name: fight_hit_0
       align: center
-      layer: 2
+      layer: 1
       x: -18
       y: 15
       conditions:
@@ -557,7 +557,7 @@ fishfight:
     51:
       name: fight_todo_0
       align: center
-      layer: 2
+      layer: 1
       x: -18
       y: 15
       conditions:
@@ -568,7 +568,7 @@ fishfight:
     52:
       name: fight_hit_1
       align: center
-      layer: 2
+      layer: 1
       x: -9
       y: 15
       conditions:
@@ -579,7 +579,7 @@ fishfight:
     53:
       name: fight_todo_1
       align: center
-      layer: 2
+      layer: 1
       x: -9
       y: 15
       conditions:
@@ -590,7 +590,7 @@ fishfight:
     54:
       name: fight_hit_2
       align: center
-      layer: 2
+      layer: 1
       x: 0
       y: 15
       conditions:
@@ -601,7 +601,7 @@ fishfight:
     55:
       name: fight_todo_2
       align: center
-      layer: 2
+      layer: 1
       x: 0
       y: 15
       conditions:
@@ -612,7 +612,7 @@ fishfight:
     56:
       name: fight_hit_3
       align: center
-      layer: 2
+      layer: 1
       x: 9
       y: 15
       conditions:
@@ -623,7 +623,7 @@ fishfight:
     57:
       name: fight_todo_3
       align: center
-      layer: 2
+      layer: 1
       x: 9
       y: 15
       conditions:
@@ -634,7 +634,7 @@ fishfight:
     58:
       name: fight_hit_4
       align: center
-      layer: 2
+      layer: 1
       x: 18
       y: 15
       conditions:
@@ -645,7 +645,7 @@ fishfight:
     59:
       name: fight_todo_4
       align: center
-      layer: 2
+      layer: 1
       x: 18
       y: 15
       conditions:
