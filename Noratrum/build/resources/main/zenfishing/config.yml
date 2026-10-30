@@ -155,7 +155,7 @@ menu:
     # отдельная последовательность для фона (без сцены по краям): меню улучшения — только вертикальная плашка
     sequences: { upgrade: "\uE100\uE002\uE101" }
   # Свои иконки кнопок (модели предметов, напр. zenquests:icon_close). Пусто — обычный предмет.
-  icons: { close: "", back: "", prev: "", next: "", sell: "", top: "", premium-active: "", premium-inactive: "", collection: "", unknown: "", rod: "", empty: "zenquests:icon_empty" }
+  icons: { close: "", back: "", prev: "", next: "", sell: "", top: "", premium-active: "", premium-inactive: "", collection: "", unknown: "", rod: "", empty: "zenfishing:invisible" }
   profile:
     name: "&b{player}"
     lore:
@@ -166,28 +166,23 @@ menu:
   rod:
     name: "&bУдочка в руке"
     none: ["&7Возьми удочку в руку,", "&7чтобы увидеть её уровень"]
-  # Меню улучшения (F с удочкой в руке; фон — вертикальная плашка): удочка (4), сведения (12..14), ступень (31), кнопка (48..50)
+  # Меню улучшения (F с удочкой в руке; фон — вертикальная плашка на колонках 1..7): удочка (4) и кнопка «Улучшить» (48..50).
+  # Уровень, опыт и бонусы — в подсказке удочки; требования ступени — в подсказке кнопки. Предметы игрока скрыты (через TakuFarmers).
   upgrade:
     open-on-swap: true
-    level: { name: "&bУровень удочки: &f{level}", lore: ["&7Опыт: &f{xp}&7/&f{need}", "{bar}", "", "&8Уровень растёт от рыбалки"] }
-    bonus: { name: "&bБонусы удочки &7[&f{tier}&7/&f{max-tier}&7]", lore: ["&7Текущая ступень даёт:"], none: "&8пока ничего — улучши удочку" }
-    money: { name: "&eМонеты: &f{money} {currency}", lore: ["&7Улучшение стоит монет", "&7и требует уровень удочки"] }
-    next:
-      name: "&bСтупень {next-tier} &7из &f{max-tier}"
-      lore: ["&7Даст:"]
+    hide-inventory: true
+    button:
+      name: "&a▶ Улучшить &7— ступень &f{next-tier}&7/&f{max-tier}"
+      name-locked: "&c▶ Улучшить &7— ступень &f{next-tier}&7/&f{max-tier}"
+      lore: ["&7Монет: &e{money} {currency}", "", "&7Следующая ступень даст:"]
       req-level-ok: "&a✔ &7Уровень удочки: &f{need-level}"
       req-level-no: "&c✘ &7Уровень удочки: &f{need-level} &8(сейчас {level})"
       req-money-ok: "&a✔ &7Цена: &e{cost} {currency}"
       req-money-no: "&c✘ &7Цена: &e{cost} {currency} &8(есть {money})"
-      name-max: "&6✦ Максимальная ступень"
-      lore-max: ["&7Удочка улучшена полностью"]
-    button:
-      name: "&a▶ Улучшить"
-      lore: ["&7Ступень {tier} → &f{next-tier}", "&7Спишется: &e{cost} {currency}", "", "&eНажми, чтобы улучшить"]
-      name-locked: "&c▶ Улучшить"
-      lore-locked: ["&7Нужен уровень удочки &f{need-level}", "&7и &e{cost} {currency}"]
-      name-max: "&7▶ Улучшить"
-      lore-max: ["&8Максимум"]
+      hint: "&eНажми, чтобы улучшить"
+      hint-locked: "&cПока недоступно"
+      name-max: "&6✦ Удочка улучшена полностью"
+      lore-max: ["&7Ступень &f{tier}&7/&f{max-tier}"]
   rod-none:
     name: "&cНет удочки"
     lore: ["&7Возьми удочку в руку", "&7и открой меню снова"]

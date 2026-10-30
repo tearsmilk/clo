@@ -46,8 +46,8 @@ public final class FishMenu implements Listener {
             10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25,
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
     private static final int ROD = 2, PROFILE = 4, PREMIUM = 6, SELL = 22, TOP = 24, CLOSE = 49;
-    // меню улучшения (вертикальная плашка, колонки 2..6): удочка, три сведения, следующая ступень, кнопка на 3 слота
-    private static final int U_ROD = 4, U_LEVEL = 12, U_BONUS = 13, U_MONEY = 14, U_NEXT = 31;
+    // меню улучшения (вертикальная плашка, колонки 1..7): удочка и кнопка на 3 слота; всё остальное — подсказки
+    private static final int U_ROD = 4;
     private static final int[] U_BUTTON = {48, 49, 50};
     private static final char SHIFT_TO_EDGE = '', SHIFT_BACK = '';
 
@@ -147,6 +147,7 @@ public final class FishMenu implements Listener {
         ItemStack rod = rodInHand(p);
         if (rod == null) {
             inv.setItem(U_ROD, item(Material.FISHING_ROD, cfg("rod-none.name", "Нет удочки"), cfgList("rod-none.lore"), false));
+            hideInventory(p);
             p.openInventory(inv);
             return;
         }
@@ -162,29 +163,23 @@ public final class FishMenu implements Listener {
         double money = plugin.economy().balance(p), cost = rods.nextCost(rod, prem);
         Object[] kv = {"level", lvl, "xp", rods.xp(rod), "need", rods.need(lvl), "bar", rods.bar(lvl, rods.xp(rod)), "tier", tier, "max-tier", rods.maxTier(),
                 "money", Text.num(money), "cost", Text.num(cost), "need-level", next == null ? "-" : next.level(), "next-tier", tier + 1};
-        // сведения: уровень удочки, бонусы ступени, кошелёк
-        inv.setItem(U_LEVEL, invisible(fill(cfg("upgrade.level.name", "&bУровень удочки"), kv), fillAll(cfgList("upgrade.level.lore"), kv)));
-        List<String> bl = fillAll(cfgList("upgrade.bonus.lore"), kv);
-        if (cur != null) bl.addAll(rods.bonusLines(cur)); else bl.add(cfg("upgrade.bonus.none", "&8нет"));
-        inv.setItem(U_BONUS, invisible(fill(cfg("upgrade.bonus.name", "&bБонусы удочки"), kv), bl));
-        inv.setItem(U_MONEY, invisible(fill(cfg("upgrade.money.name", "&eМонеты"), kv), fillAll(cfgList("upgrade.money.lore"), kv)));
-        // следующая ступень
         if (next == null) {
-            inv.setItem(U_NEXT, invisible(fill(cfg("upgrade.next.name-max", "&6Максимум"), kv), fillAll(cfgList("upgrade.next.lore-max"), kv)));
             for (int slot : U_BUTTON) inv.setItem(slot, invisible(fill(cfg("upgrade.button.name-max", "&7Улучшить"), kv), fillAll(cfgList("upgrade.button.lore-max"), kv)));
         } else {
-            boolean okLevel = lvl >= next.level(), okMoney = money >= cost || cost <= 0;
-            List<String> nl = fillAll(cfgList("upgrade.next.lore"), kv);
-            nl.addAll(rods.bonusLines(next));
-            nl.add(""); nl.add(fill(cfg(okLevel ? "upgrade.next.req-level-ok" : "upgrade.next.req-level-no", "&7Уровень: {need-level}"), kv));
-            nl.add(fill(cfg(okMoney ? "upgrade.next.req-money-ok" : "upgrade.next.req-money-no", "&7Цена: {cost}"), kv));
-            inv.setItem(U_NEXT, invisible(fill(cfg("upgrade.next.name", "&bСтупень {next-tier}"), kv), nl));
-            boolean can = okLevel && okMoney;
+            boolean okLevel = lvl >= next.level(), okMoney = money >= cost || cost <= 0, can = okLevel && okMoney;
+            List<String> bl = fillAll(cfgList("upgrade.button.lore"), kv);
+            bl.addAll(rods.bonusLines(next));
+            bl.add("");
+            bl.add(fill(cfg(okLevel ? "upgrade.button.req-level-ok" : "upgrade.button.req-level-no", "&7Уровень: {need-level}"), kv));
+            bl.add(fill(cfg(okMoney ? "upgrade.button.req-money-ok" : "upgrade.button.req-money-no", "&7Цена: {cost}"), kv));
+            bl.add("");
+            bl.add(cfg(can ? "upgrade.button.hint" : "upgrade.button.hint-locked", can ? "&eНажми, чтобы улучшить" : "&cПока недоступно"));
             for (int slot : U_BUTTON) {
-                inv.setItem(slot, invisible(fill(cfg(can ? "upgrade.button.name" : "upgrade.button.name-locked", "&aУлучшить"), kv), fillAll(cfgList(can ? "upgrade.button.lore" : "upgrade.button.lore-locked"), kv)));
+                inv.setItem(slot, invisible(fill(cfg(can ? "upgrade.button.name" : "upgrade.button.name-locked", "&aУлучшить"), kv), bl));
                 h.actions.put(slot, () -> upgrade(p));
             }
         }
+        hideInventory(p);
         p.openInventory(inv);
     }
 
@@ -216,6 +211,28 @@ public final class FishMenu implements Listener {
         if (!p.hasPermission("zenfishing.use")) return;
         openUpgrade(p);
     }
+
+    /**
+     * Скрыть предметы игрока и ванильную рамку инвентаря на время меню: TakuFarmers (perf.ContainerSkin) умеет это пакетами
+     * для своих панелей; тянемся к его экземпляру через CookManager.skin. Нет TakuFarmers — просто ничего не скрываем.
+     * Вызывать ДО openInventory: ContainerSkin сам снимает скрытие при закрытии окна.
+     */
+    private void hideInventory(Player p) {
+        if (!plugin.getConfig().getBoolean("menu.upgrade.hide-inventory", true)) return;
+        try {
+            org.bukkit.plugin.Plugin tf = Bukkit.getPluginManager().getPlugin("TakuFarmers");
+            if (tf == null || !tf.isEnabled()) return;
+            Object cooking = tf.getClass().getMethod("cooking").invoke(tf);
+            if (cooking == null) return;
+            java.lang.reflect.Field f = cooking.getClass().getDeclaredField("skin"); f.setAccessible(true);
+            Object skin = f.get(cooking);
+            if (skin == null) return;
+            skin.getClass().getMethod("hideInventory", Player.class, int.class).invoke(skin, p, 54);
+        } catch (Throwable t) {
+            if (!hideWarned) { plugin.getLogger().warning("Не удалось скрыть инвентарь через TakuFarmers ContainerSkin: " + t); hideWarned = true; }
+        }
+    }
+    private boolean hideWarned;
 
     /** Невидимый предмет-кнопка (модель menu.icons.empty), текст — только в подсказке; фон рисует плашка. */
     private ItemStack invisible(String name, List<String> lore) {

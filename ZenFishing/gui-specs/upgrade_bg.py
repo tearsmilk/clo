@@ -1,7 +1,7 @@
 """Фон меню прокачки удочки (ZenFishing): 236x239 как остальные фоны (глиф шрифта zenfishing:menu, ascent 30),
 GUI сундука 6 рядов начинается в точке (30, 17), слот (col,row) — x = 38 + col*18, y = 35 + row*18; инвентарь y = 157, хотбар y = 215.
-Всё прозрачно, кроме вертикальной плашки на колонках 2..6 (от заголовка до хотбара). В плашке: лента-заголовок, гнездо удочки
-(слот 4), три гнезда сведений (12, 13, 14), гнездо улучшения (31), кнопка «УЛУЧШИТЬ» на 3 слота (48–50) и гнёзда инвентаря/хотбара колонок 2..6.
+Всё прозрачно, кроме вертикальной плашки на колонках 1..7 (от заголовка до хотбара). В плашке: лента-заголовок, гнездо удочки
+(слот 4), подпись, кнопка «УЛУЧШИТЬ» на 3 слота (48–50) и гнёзда инвентаря/хотбара колонок 1..7 (предметы игрока скрыты пакетами через TakuFarmers ContainerSkin).
 Запуск: MCFONT=<папка с mcfont.py> python3 upgrade_bg.py OUT.png"""
 import sys, os
 from PIL import Image, ImageDraw
@@ -23,7 +23,7 @@ BTN, BTN_L, BTN_D, BTN_TXT = (242, 193, 78), (255, 228, 140), (170, 120, 30), (6
 
 img = Image.new('RGBA', (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(img)
 # плашка: колонки 2..6 → x от sx(2)-5 до sx(7)+4 (слот 16 px + зазоры)
-PX0, PX1 = sx(2) - 6, sx(6) + 16 + 5
+PX0, PX1 = sx(1) - 6, sx(7) + 16 + 5
 PY0, PY1 = 0, H - 1
 d.rounded_rectangle((PX0, PY0, PX1, PY1), radius=4, fill=OUTLINE + (255,))
 d.rounded_rectangle((PX0 + 1, PY0 + 1, PX1 - 1, PY1 - 1), radius=3, fill=RIM + (255,))
@@ -50,15 +50,10 @@ text(cx - tw(title) // 2, 6, title, '#dff6ff')
 socket(sx(4), sy(0))
 # декоративные линии к гнезду
 for dx in (-2, 2): d.line((sx(4) + 8 + dx * 12, sy(0) + 8, sx(4) + 8 + dx * 22, sy(0) + 8), fill=RIM_D + (255,))
-# сведения — слоты 12, 13, 14 (row 1, cols 3..5)
-panel(PX0 + 5, sy(1) - 3, PX1 - 5, sy(1) + 19)
-for c in (3, 4, 5): socket(sx(c), sy(1))
 # разделитель и подпись
-d.line((PX0 + 8, sy(2) + 4, PX1 - 8, sy(2) + 4), fill=OUTLINE + (255,)); d.line((PX0 + 8, sy(2) + 5, PX1 - 8, sy(2) + 5), fill=RIM_D + (255,))
+d.line((PX0 + 8, sy(1) + 12, PX1 - 8, sy(1) + 12), fill=OUTLINE + (255,)); d.line((PX0 + 8, sy(1) + 13, PX1 - 8, sy(1) + 13), fill=RIM_D + (255,))
 lbl = 'УЛУЧШЕНИЕ'
-text(cx - tw(lbl) // 2, sy(2) + 9, lbl, '#9bd9f5')
-# слот 31 (row 3, col 4) — следующий уровень (требования)
-socket(sx(4), sy(3))
+text(cx - tw(lbl) // 2, sy(4) - 4, lbl, '#9bd9f5')
 # кнопка «УЛУЧШИТЬ» — слоты 48,49,50 (row 5, cols 3..5)
 bx0, by0, bx1, by1 = sx(3) - 1, sy(5) - 1, sx(5) + 16, sy(5) + 16
 d.rectangle((bx0, by0, bx1, by1), fill=BTN_D + (255,))
@@ -69,6 +64,6 @@ text((bx0 + bx1) // 2 - tw(btn) // 2 + 1, by0 + 5, btn, '#3c2406', shadow=False)
 # инвентарь и хотбар — гнёзда только в колонках 2..6
 d.line((PX0 + 8, INV_Y - 8, PX1 - 8, INV_Y - 8), fill=OUTLINE + (255,)); d.line((PX0 + 8, INV_Y - 7, PX1 - 8, INV_Y - 7), fill=RIM_D + (255,))
 for r in range(3):
-    for c in range(2, 7): socket(sx(c), INV_Y + r * 18)
-for c in range(2, 7): socket(sx(c), HOT_Y)
+    for c in range(1, 8): socket(sx(c), INV_Y + r * 18)
+for c in range(1, 8): socket(sx(c), HOT_Y)
 img.save(OUT); print('upgrade bg ok', img.size)
