@@ -1112,3 +1112,27 @@ fishfight:
           first: "(number)papi:zenfishing_fight_hits"
           second: 4
           operation: '<='
+    99:
+      name: fight_marker
+      align: center
+      layer: 3
+      x: 90
+      y: -2
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_active"
+          second: 1
+          operation: '=='
+  texts:
+    1:
+      name: default_font
+      pattern: "<white>pos [papi:zenfishing_fight_pos] zone [papi:zenfishing_fight_zone_start]-[papi:zenfishing_fight_zone_end] hits [papi:zenfishing_fight_hits]/[papi:zenfishing_fight_need]"
+      align: center
+      layer: 2
+      x: 0
+      y: 26
+      conditions:
+        1:
+          first: "(number)papi:zenfishing_fight_active"
+          second: 1
+          operation: '=='

@@ -20,7 +20,7 @@ dependencies {
 }
 
 // Модули живут в прежних папках репо (исходники, gui-specs, betterhud, nexo) — подключаем их исходники и ресурсы.
-val modules = mapOf("zenquests" to "../ZenQuests", "zenfishing" to "../ZenFishing", "zengroups" to "../ZenGroups")
+val modules = mapOf("zenquests" to "../ZenQuests", "zenfishing" to "../ZenFishing", "zengroups" to "../ZenGroups", "zenboosters" to "../ZenBoosters")
 
 sourceSets.main {
     java.srcDirs(modules.values.map { "$it/src/main/java" })

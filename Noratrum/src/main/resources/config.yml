@@ -4,6 +4,7 @@ modules:
   quests: true
   fishing: true
   groups: true
+  boosters: true   # бустеры: /бустер, папка boosters/
 
 # Перехват /plugins и /pl: выдача как у Paper, но сверху секция «Leaf Plugins» (ядро — Leaf).
 # Доступно всем (право noratrum.plugins, по умолчанию true). Отнять право через плагин прав — игрок получит ванильную команду.

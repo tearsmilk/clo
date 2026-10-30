@@ -41,11 +41,12 @@ public final class FishingListener implements Listener {
         if (e.getState() == PlayerFishEvent.State.FISHING) {
             Rods.Bonus b = plugin.rods().bonus(rod(p, e), plugin.isPremium(p));
             double bite = Math.min(0.9, b.bite() + (isNight(p) ? plugin.getConfig().getDouble("catch.night.bite-speed", 0) : 0));
-            if (bite > 0) {
+            double boost = ink.hoka.zenboosters.BoostersAPI.multiplier(p, "fishing");   // бустер клёва: ожидание делится на множитель
+            if (bite > 0 || boost > 1) {
                 FishHook h = e.getHook();
                 try {
-                    h.setMinWaitTime((int) Math.max(5, Math.round(100 * (1 - bite))));
-                    h.setMaxWaitTime((int) Math.max(20, Math.round(600 * (1 - bite))));
+                    h.setMinWaitTime((int) Math.max(5, Math.round(100 * (1 - bite) / boost)));
+                    h.setMaxWaitTime((int) Math.max(20, Math.round(600 * (1 - bite) / boost)));
                 } catch (Throwable ignored) { }
             }
             return;

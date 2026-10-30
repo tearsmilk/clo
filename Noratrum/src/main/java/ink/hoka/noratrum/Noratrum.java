@@ -3,6 +3,7 @@ package ink.hoka.noratrum;
 import ink.hoka.zenfishing.ZenFishing;
 import ink.hoka.zengroups.ZenGroups;
 import ink.hoka.zenquests.ZenQuests;
+import ink.hoka.zenboosters.ZenBoosters;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
@@ -14,14 +15,14 @@ import java.util.List;
 /**
  * Noratrum — квесты (бывший ZenQuests), рыбалка (ZenFishing) и группы (ZenGroups) одним paper-плагином.
  * Папка plugins/Noratrum: config.yml (общий) + quests/, fishing/, groups/ (конфиги и данные модулей).
- * Порядок включения: группы → квесты → рыбалка (рыбалка берёт Ферма+ из квестов).
+ * Порядок включения: группы → бустеры → квесты → рыбалка (рыбалка берёт Ферма+ из квестов и множители из бустеров).
  */
 public final class Noratrum extends JavaPlugin {
 
     private static Noratrum instance;
     private final List<Module> modules = new ArrayList<>();
     private LegacyCommands commands;
-    private ZenGroups groups; private ZenQuests quests; private ZenFishing fishing;
+    private ZenGroups groups; private ZenQuests quests; private ZenFishing fishing; private ZenBoosters boosters;
 
     public static Noratrum get() { return instance; }
 
@@ -33,6 +34,7 @@ public final class Noratrum extends JavaPlugin {
         registerPermissions();
 
         if (getConfig().getBoolean("modules.groups", true)) modules.add(groups = new ZenGroups(this));
+        if (getConfig().getBoolean("modules.boosters", true)) modules.add(boosters = new ZenBoosters(this));
         if (getConfig().getBoolean("modules.quests", true)) modules.add(quests = new ZenQuests(this));
         if (getConfig().getBoolean("modules.fishing", true)) modules.add(fishing = new ZenFishing(this));
         for (Module m : modules) {
@@ -57,6 +59,7 @@ public final class Noratrum extends JavaPlugin {
     public ZenGroups groups() { return groups; }
     public ZenQuests quests() { return quests; }
     public ZenFishing fishing() { return fishing; }
+    public ZenBoosters boosters() { return boosters; }
 
     /** Права из бывших plugin.yml (paper-plugin.yml их не объявляет). */
     private void registerPermissions() {
@@ -67,6 +70,7 @@ public final class Noratrum extends JavaPlugin {
         perm("zenfishing.use", "Меню рыбалки и продажа рыбы", PermissionDefault.TRUE);
         perm("zenfishing.admin", "/рыбалка reload, rod, stats, сети", PermissionDefault.OP);
         perm("zengroups.admin", "Команды /group", PermissionDefault.OP);
+        perm("zenboosters.admin", "Команды /бустер", PermissionDefault.OP);
         perm("noratrum.plugins", "Видеть /plugins и /pl в выдаче Noratrum (секция Leaf). Отнять — вернётся ванильная команда", PermissionDefault.TRUE);
     }
 

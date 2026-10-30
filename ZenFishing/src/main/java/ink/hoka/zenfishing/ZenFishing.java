@@ -93,6 +93,7 @@ public final class ZenFishing extends Module {
             n += it.getAmount();
             sum += c.fish().priceFor(c.weight()) * (1 + b.sell()) * it.getAmount();
         }
+        sum *= ink.hoka.zenboosters.BoostersAPI.multiplier(p, "coins");   // бустер монет
         return new Sale(n, Math.round(sum * 100.0) / 100.0);
     }
 
