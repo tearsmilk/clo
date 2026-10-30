@@ -1,7 +1,7 @@
 # Заметки для Claude по проекту
 
 ## Noratrum — ZenQuests + ZenFishing + ZenGroups одним paper-плагином (`Noratrum/`, версия `o012mk23f87`, authors fame/ktnqqq)
-- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-6`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
+- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-7`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
   `ZenGroups/` — `src/main/java` и `src/main/resources` подключены в Noratrum; их собственных gradle/plugin.yml больше нет).
   Отдельных jar ZenQuests/ZenFishing/ZenGroups на сервере НЕТ — не заливать, иначе дубли PAPI/Vault.
 - **Никогда не перезаписывать jar поверх работающего с тем же именем**: JVM грузит классы лениво, и до рестарта консоль флудит
@@ -47,6 +47,9 @@
 - Конфиги: `plugins/ZenFishing/config.yml`, `fish.yml`; `/рыбалка reload`. Продажа — Vault (экономика монет TakuFarmers).
 - Удочка: уровень/опыт от рыбалки; улучшение — ступени `rod.tiers` (уровень + монеты Vault), одна кнопка в меню по **F** с удочкой в руке
   (`FishMenu.openUpgrade`, фон `upgrade.png`, `gui-specs/upgrade_bg.py`); веток/очков больше нет, в `/рыбалка` прокачки нет.
+- Вываживание (`FishFight`, config `minigame`): после подсечки предмет с крючка убирается, в экшенбаре бегает маркер, игрок жмёт Shift
+  в зелёной зоне `hits` раз (по редкости: 1..5), зона уже и маркер быстрее у редкой рыбы; промах/пауза — рыба срывается; успех →
+  `FishingListener.deliver` (обычный улов, двойной улов, опыт). Во время борьбы новый заброс отменяется.
 - Своей подписки нет: бонусы рыбалки даёт Ферма+ из ZenQuests (право `zenquests.premium` / `QuestsAPI.isPremium`). Квесты на рыбу —
   типы `CATCH_FISH` (цель id рыбы), `CATCH_RARITY`, `CATCH_NIGHT`, `CATCH_BIG` (≥ `catch.big-kg`). Ночью (13000–23000) клёв и удача выше
   (`catch.night`). Тултип `zenfishing:sea` на удочке, рыбе и меню. Модели рыбы — перекрашенные cod_3d/pufferfish_3d из FreshFood (`gui-specs/fish_models_ff.py`, палитры в `fish_models3d.py`).

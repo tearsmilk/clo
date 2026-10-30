@@ -24,6 +24,7 @@ public final class ZenFishing extends Module {
     private FishMenu menu;
     private FishJournal journal;
     private Nets nets;
+    private FishFight fight;
 
     @Override
     public void onEnable() {
@@ -35,7 +36,10 @@ public final class ZenFishing extends Module {
         economy = new Economy(this); economy.hook();
         stats = new StatsStore(this);
         menu = new FishMenu(this);
-        getServer().getPluginManager().registerEvents(new FishingListener(this), this);
+        FishingListener fl = new FishingListener(this);
+        getServer().getPluginManager().registerEvents(fl, this);
+        fight = new FishFight(this, fl);
+        getServer().getPluginManager().registerEvents(fight, this);
         getServer().getPluginManager().registerEvents(menu, this);
         journal = new FishJournal(this);
         getServer().getPluginManager().registerEvents(journal, this);
@@ -49,7 +53,7 @@ public final class ZenFishing extends Module {
     }
 
     @Override
-    public void onDisable() { if (stats != null) stats.saveDirty(); if (nets != null) nets.save(); }
+    public void onDisable() { if (fight != null) fight.cancelAll(); if (stats != null) stats.saveDirty(); if (nets != null) nets.save(); }
 
     public void reloadAll() { reloadConfig(); fish.load(); economy.hook(); rods.reloadTiers(); }
 
@@ -61,6 +65,7 @@ public final class ZenFishing extends Module {
     public FishMenu menu() { return menu; }
     public FishJournal journal() { return journal; }
     public Nets nets() { return nets; }
+    public FishFight fight() { return fight; }
     public boolean quests() { return host().quests() != null; }
 
     /** Ферма+: право premium.permission или подписка, выданная в ZenQuests (/квесты premium give). */

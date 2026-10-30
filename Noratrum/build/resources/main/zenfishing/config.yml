@@ -68,6 +68,35 @@ catch:
   name: "{color}{fish}"
   lore: []
 
+# ── Вываживание (мини-игра после поклёвки) ──
+# Когда рыба клюнула и игрок подсёк, в экшенбаре бежит маркер; нужно нажать Shift, когда он в зелёной зоне. Попаданий нужно
+# hits (по редкости), после каждого зона переезжает и маркер ускоряется на speed-up. Промах сверх misses-allowed или пауза
+# дольше timeout-ticks — рыба срывается (escape-xp — утешительный опыт удочке). «Клёв» удочки и Ферма+ расширяют зону.
+minigame:
+  enabled: true
+  title: true
+  bar-length: 24
+  timeout-ticks: 70
+  misses-allowed: 0
+  speed-up: 1.12
+  zone-per-bite: 6       # + клеток зоны на каждые 100% бонуса «клёв» (0.3 → +1.8)
+  zone-premium: 1
+  escape-xp: 3
+  rarity:
+    common:    { hits: 1, zone: 8, speed: 0.70 }
+    uncommon:  { hits: 2, zone: 7, speed: 0.85 }
+    rare:      { hits: 3, zone: 6, speed: 1.00 }
+    epic:      { hits: 4, zone: 5, speed: 1.15 }
+    legendary: { hits: 5, zone: 4, speed: 1.30 }
+  bar:
+    format: "&b🎣 &8[{bar}&8] {dots}"
+    wave: "&3≈"
+    zone: "&a▮"
+    marker: "&f◆"
+    marker-in: "&e◆"
+    hit: "&a●"
+    todo: "&8●"
+
 # ── Продажа (/рыбалка продать или кнопка в меню) ──
 sell:
   # auto — Vault, если есть, иначе команда; vault; command
@@ -235,6 +264,12 @@ messages:
   net-list-empty: "&7Сетей на сервере нет."
   net-cleared: "&aСнято сетей: &f{count}&a."
   caught: "{color}Поймана {fish}&7! &8+{xp} опыта удочки"
+  fight-title: "&bКлюёт!"
+  fight-subtitle: "&7Жми &fShift&7, когда маркер в &aзелёной зоне"
+  fight-miss: "&cМимо! &7Осторожнее — сорвётся."
+  fight-escape: "&cСорвалась!"
+  fight-timeout: "&cУпустил — рыба ушла."
+  fight-success: "&a✔ Поймал!"
   night-bite: "&9🌙 Ночной клёв! &7Ночью рыба идёт лучше."
   caught-double: "&b✦ Двойной улов! &7Ещё одна рыба: {color}{fish}"
   announce: "&b🎣 &f{player} &7поймал {color}{fish}&7!"

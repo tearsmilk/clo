@@ -63,7 +63,25 @@ public final class FishingListener implements Listener {
         Fish f = plugin.fish().roll(where, luck, premium);
         if (f == null) f = plugin.fish().roll(null, luck, premium);   // в биоме ничего не водится — любая рыба
         if (f == null) return;
+        if (plugin.fight() != null && plugin.fight().enabled()) {
+            // мини-игра: предмет с крючка убираем, рыба выдастся после успешного вываживания
+            item.remove();
+            e.setExpToDrop(0);
+            plugin.fight().start(p, f, rod, b, where, night, luck);
+            return;
+        }
         item.setItemStack(plugin.items().create(f, 0, p));
+        afterCatch(p, f, rod, b, where, night, luck, premium);
+    }
+
+    /** Выдать рыбу напрямую в инвентарь (после вываживания) и провести как обычный улов. */
+    public void deliver(Player p, Fish f, ItemStack rod, Rods.Bonus b, Location where, boolean night, double luck) {
+        ItemStack it = plugin.items().create(f, 0, p);
+        for (ItemStack rest : p.getInventory().addItem(it).values()) p.getWorld().dropItemNaturally(p.getLocation(), rest);
+        afterCatch(p, f, rod, b, where, night, luck, plugin.isPremium(p));
+    }
+
+    private void afterCatch(Player p, Fish f, ItemStack rod, Rods.Bonus b, Location where, boolean night, double luck, boolean premium) {
         handleCatch(p, f, rod, b, false);
         if (night && plugin.getConfig().getBoolean("catch.night.message", true) && f.rarity().order() >= 2) plugin.msg(p, "night-bite");
 
