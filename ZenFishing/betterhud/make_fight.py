@@ -11,7 +11,7 @@ for i in range(CELLS):
     z = canvas(); z.alpha_composite(zone, (2 + CELL * i, BAR_Y + (bar.height - zone.height) // 2)); z.save(f'assets/fight/full/zone_{i}.png')
     m = canvas(); m.alpha_composite(marker, (2 + CELL * i, 0)); m.save(f'assets/fight/full/marker_{i}.png')
 DOT, GAP, MAXN = hit.width, 2, 5
-OVER_Y = 3   # BetterHud рисует слой 1 на ~3 px выше слоя 0 (скриншот 30.10) — компенсация для зоны и маркера
+OVER_Y = 2   # BetterHud рисует слой 1 на ~3 px выше слоя 0 (скриншот 30.10) — компенсация для зоны и маркера
 for n in range(1, MAXN + 1):
     x0 = (W - (n * DOT + (n - 1) * GAP)) // 2
     for i in range(n):
