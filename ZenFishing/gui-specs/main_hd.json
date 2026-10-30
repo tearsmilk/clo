@@ -1,0 +1,142 @@
+{
+ "namespace": "zenfishing",
+ "rows": 6,
+ "theme": "oak",
+ "container_panel": false,
+ "hide_inventory_label": false,
+ "canvas": {
+  "left": 30,
+  "right": 30,
+  "top": 17
+ },
+ "draw_free_slots": false,
+ "draw_player_inventory": false,
+ "id": "main",
+ "layers": [
+  {
+   "type": "divider",
+   "box": [
+    14,
+    22,
+    40,
+    7
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "divider",
+   "box": [
+    122,
+    22,
+    40,
+    7
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "slot_frame",
+   "slot_list": [
+    2,
+    4,
+    6
+   ],
+   "color": "#4e9fd6",
+   "inner": "#14213a"
+  },
+  {
+   "type": "flourish",
+   "box": [
+    38,
+    38,
+    100,
+    16
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "slot_frame",
+   "slot_list": [
+    20,
+    22,
+    24
+   ],
+   "color": "#4e9fd6",
+   "inner": "#14213a"
+  },
+  {
+   "type": "divider",
+   "box": [
+    36,
+    96,
+    104,
+    7
+   ],
+   "gem": "#ff7b6b"
+  },
+  {
+   "type": "slot_frame",
+   "slot": 49,
+   "color": "#4e9fd6",
+   "inner": "#14213a"
+  }
+ ],
+ "buttons": [
+  {
+   "id": "x",
+   "x": 4,
+   "y": 2,
+   "style": "none",
+   "name": "&bКоллекция",
+   "lore": [
+    "&7Все виды рыбы"
+   ]
+  }
+ ],
+ "extra_items": [
+  {
+   "id": "rod",
+   "material": "FISHING_ROD",
+   "slot": 2,
+   "preview": "sprite:fish"
+  },
+  {
+   "id": "head",
+   "material": "head-%player_name%",
+   "slot": 4,
+   "preview": "hub:head"
+  },
+  {
+   "id": "prem",
+   "material": "HEART_OF_THE_SEA",
+   "slot": 6,
+   "preview": "sprite:emerald"
+  },
+  {
+   "id": "sell",
+   "material": "GOLD_INGOT",
+   "slot": 20,
+   "preview": "sprite:coin"
+  },
+  {
+   "id": "top",
+   "material": "WRITABLE_BOOK",
+   "slot": 24,
+   "preview": "sprite:ledger"
+  },
+  {
+   "id": "close",
+   "material": "BARRIER",
+   "slot": 49,
+   "preview": "sprite:barrier"
+  }
+ ],
+ "header": {
+  "text": "РЫБАЛКА",
+  "style": "ribbon",
+  "font": "bold",
+  "case": "keep",
+  "width": 150,
+  "color": "#2f74b5",
+  "embroidered": "#bfefff"
+ }
+}

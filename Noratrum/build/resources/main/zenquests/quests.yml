@@ -1,0 +1,1122 @@
+# ==========================================================
+#  Квесты. Добавить новый — просто дописать блок.
+#
+#  Поля квеста:
+#    name         — название (цвета/градиенты)
+#    icon         — предмет-иконка в меню
+#    description  — описание (список строк)
+#    objective:
+#      type       — что делать:
+#                   BREAK   сломать блок        PLACE    поставить блок
+#                   KILL    убить моба/игрока   FISH     выловить (ванильный предмет)
+#                   CATCH_FISH   поймать рыбу ZenFishing   цель: id рыбы из fish.yml (carp, sturgeon …) или ANY
+#                   FISH_EARN    заработать продажей рыбы (ZenFishing)   цель: COINS
+#                   CRAFT   скрафтить           SMELT    забрать из печи
+#                   EAT     съесть/выпить       ENCHANT  зачаровать
+#                   BREED   развести            TAME     приручить
+#                   WALK    пройти блоков       PLAYTIME наиграть минут
+#                 TakuFarmers (нужен TakuFarmers с API 1.0+):
+#                   CROP_HIT      удачный удар мотыгой по выросшей культуре   цель: wheat, carrot, potato,
+#                   CROP_HARVEST  собрать урожая (сколько выпало)                   onion, tomato, cucumber
+#                   CROP_BREAK    срубить куст целиком (последний удар цикла)
+#                   COOK          закончить готовку на станции               цель: id станции
+#                   COOK_ITEM     приготовить блюдо (сколько выдано)         цель: предмет или id Nexo
+#                   MILL          перемолоть на жёрнове (сколько выдано)     цель: предмет или id Nexo
+#                   OBTAIN        получить предмет в инвентарь (мука из жёрнова) цель: материал или id Nexo (flour)
+#                   FLOUR_SACK    скрафтить мешок муки                       без цели
+#                   EARN / SPEND  заработать / потратить валюту              цель: COINS или GEMS
+#                   FARM_VISIT    зайти на свою ферму                        без цели
+#                   NPC_TALK      кликнуть по NPC                            цель: id NPC
+#                   DIALOG        поговорить с NPC (F)                       цель: id диалога
+#                   SEEDS         переработать растения в семена (стол семян) цель: id семян (seed_wheat …) или ANY
+#                 Грядки TakuFarmers (нужен TakuFarmers с API 1.1+), цель: id культуры грядки (farm_wheat …) или ANY:
+#                   WEED          прополоть грядку мотыгой       WATER     полить грядку лейкой
+#                   WELL          полить всё волшебным колодцем  FERTILIZE удобрить грядку
+#                   BED_PLANT     посадить на грядку             BED_HARVEST дорастить и срезать культуру на грядке
+#                   BED_PLACE     поставить грядку (без цели)
+#                   Салат: OBTAIN с целью summer_salad (получить салат в инвентарь) или COOK_ITEM summer_salad
+#      targets    — что именно (имена Minecraft). Пусто или ANY — что угодно.
+#                   Можно шаблоном: "*_LOG" (любые брёвна), "*_ORE" (любая руда)
+#      amount     — сколько
+#    rewards:
+#      lines      — как награда выглядит в меню (игрок видит это)
+#      commands   — что выполнит консоль. {player} — ник игрока
+#    premium-rewards:  (необязательно) бонус для подписки Ферма+, выдаётся СВЕРХУ rewards
+#      lines / commands — так же, как у rewards. Без подписки игрок видит бонус серым.
+#    premium: true     (необязательно) квест виден только с Ферма+ (для сезонных)
+#
+#  Ферма+ (подписка, право zenquests.premium — см. config.yml):
+#    daily.premium-count / premium-quests  — сколько и из чего выдавать подписчикам
+#                                            дополнительно к обычным
+#    weekly.premium-count / premium-quests — то же для недели
+#    story.<цепочка>.premium: true         — вся цепочка только для Ферма+
+#
+#  Сюжетная цепочка: name, icon, description (строки под названием в меню), premium, steps
+#    id премиум-квестов не должны совпадать с обычными
+#
+#  ежедневные: каждый день в 00:00 игроку выпадает count случайных из списка
+#  еженедельные: каждый понедельник в 00:00 — count случайных из списка
+#  сезонные: доступны все квесты сезона, пока идут даты start–end (включительно)
+#  сюжетные: цепочки по шагам — следующий шаг открывается после награды за предыдущий
+# ==========================================================
+
+# 18окт2026: пул пересобран под Ферму — только наши культуры (цели *культура ловят и farm_*),
+# готовка, жёрнов, рыбалка, экономика, NPC; награды — монеты. Старый файл: quests.yml.bak-18oct
+daily:
+  count: 3
+  quests:
+    waterer:
+      name: '&bПоливальщик'
+      icon: WATER_BUCKET
+      description: ['&7Полей грядки лейкой']
+      objective: {type: WATER, amount: 20}
+      rewards:
+        lines: ['&f• 150 монет']
+        commands: ['coins give {player} 150']
+    weeder:
+      name: '&aЧистые грядки'
+      icon: IRON_HOE
+      description: ['&7Прополи грядки мотыгой']
+      objective: {type: WEED, amount: 10}
+      rewards:
+        lines: ['&f• 150 монет']
+        commands: ['coins give {player} 150']
+    bed-sowing:
+      name: '&eПосевная'
+      icon: WHEAT_SEEDS
+      description: ['&7Посади растения на грядки']
+      objective: {type: BED_PLANT, amount: 15}
+      rewards:
+        lines: ['&f• 120 монет']
+        commands: ['coins give {player} 120']
+    fertilizing:
+      name: '&6Подкормка'
+      icon: BONE_MEAL
+      description: ['&7Удобри грядки']
+      objective: {type: FERTILIZE, amount: 3}
+      rewards:
+        lines: ['&f• 200 монет']
+        commands: ['coins give {player} 200']
+    harvester:
+      name: '&eЖнец'
+      icon: WHEAT
+      description: ['&7Собери пшеницу на ферме']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*wheat']
+        amount: 64
+      rewards:
+        lines: ['&f• 200 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 200', 'minecraft:xp add {player} 50 points']
+      premium-rewards:
+        lines: ['&6• +100 монет']
+        commands: ['coins give {player} 100']
+    gardener:
+      name: '&aОгородник'
+      icon: CARROT
+      description: ['&7Собери любые овощи на ферме']
+      objective:
+        type: CROP_HARVEST
+        targets: &id001 ['*carrot', '*potato', '*onion', '*tomato', '*cucumber', '*radish', '*lettuce', '*beetroot', '*turnip', '*garlic', '*peas', '*parsnip', '*strawberry', '*zucchini', '*cabbage', '*sweet_potato',
+          '*cauliflower', '*bell_pepper', '*eggplant', '*pumpkin']
+        amount: 48
+      rewards:
+        lines: ['&f• 250 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 250', 'minecraft:xp add {player} 50 points']
+      premium-rewards:
+        lines: ['&6• +120 монет']
+        commands: ['coins give {player} 120']
+    radish-rush:
+      name: '&cРедисовый забег'
+      icon: BEETROOT
+      description: ['&7Собери редис']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*radish']
+        amount: 48
+      rewards:
+        lines: ['&f• 180 монет', '&f• 30 опыта']
+        commands: ['coins give {player} 180', 'minecraft:xp add {player} 30 points']
+    tomato-picker:
+      name: '&cТоматы'
+      icon: APPLE
+      description: ['&7Собери помидоры']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*tomato']
+        amount: 32
+      rewards:
+        lines: ['&f• 300 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 300', 'minecraft:xp add {player} 60 points']
+    cucumber-picker:
+      name: '&2Огуречник'
+      icon: SEA_PICKLE
+      description: ['&7Собери огурцы']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*cucumber']
+        amount: 32
+      rewards:
+        lines: ['&f• 350 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 350', 'minecraft:xp add {player} 60 points']
+    onion-picker:
+      name: '&eЛуковое горе'
+      icon: BROWN_MUSHROOM
+      description: ['&7Собери лук']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*onion']
+        amount: 32
+      rewards:
+        lines: ['&f• 300 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 300', 'minecraft:xp add {player} 60 points']
+    berry-picker:
+      name: '&cКлубничка'
+      icon: SWEET_BERRIES
+      description: ['&7Собери клубнику']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*strawberry']
+        amount: 32
+      rewards:
+        lines: ['&f• 280 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 280', 'minecraft:xp add {player} 50 points']
+    cabbage-head:
+      name: '&aКочаны'
+      icon: FERN
+      description: ['&7Собери капусту']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*cabbage', '*cauliflower']
+        amount: 16
+      rewards:
+        lines: ['&f• 260 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 260', 'minecraft:xp add {player} 50 points']
+    pumpkin-picker:
+      name: '&6Тыквенный денёк'
+      icon: PUMPKIN
+      description: ['&7Собери тыквы']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*pumpkin']
+        amount: 16
+      rewards:
+        lines: ['&f• 320 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 320', 'minecraft:xp add {player} 60 points']
+    hoe-master:
+      name: '&6Мастер мотыги'
+      icon: IRON_HOE
+      description: ['&7Сделай удачные удары по урожаю']
+      objective: {type: CROP_HIT, amount: 100}
+      rewards:
+        lines: ['&f• 200 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 200', 'minecraft:xp add {player} 50 points']
+      premium-rewards:
+        lines: ['&6• +100 монет']
+        commands: ['coins give {player} 100']
+    field-clear:
+      name: '&eЧистое поле'
+      icon: HAY_BLOCK
+      description: ['&7Срежь кусты целиком']
+      objective: {type: CROP_BREAK, amount: 20}
+      rewards:
+        lines: ['&f• 200 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 200', 'minecraft:xp add {player} 50 points']
+    chef:
+      name: '&6Повар'
+      icon: CAMPFIRE
+      description: ['&7Приготовь что-нибудь на станции']
+      objective: {type: COOK, amount: 3}
+      rewards:
+        lines: ['&f• 200 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 200', 'minecraft:xp add {player} 50 points']
+      premium-rewards:
+        lines: ['&6• +100 монет']
+        commands: ['coins give {player} 100']
+    dish-of-day:
+      name: '&6Блюдо дня'
+      icon: BOWL
+      description: ['&7Приготовь блюда']
+      objective: {type: COOK_ITEM, amount: 5}
+      rewards:
+        lines: ['&f• 250 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 250', 'minecraft:xp add {player} 60 points']
+    small-miller:
+      name: '&eПодмастерье мельника'
+      icon: GRINDSTONE
+      description: ['&7Перемели пшеницу на жёрнове']
+      objective: {type: OBTAIN, targets: [flour], amount: 4}
+      rewards:
+        lines: ['&f• 250 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 250', 'minecraft:xp add {player} 60 points']
+    farm-visitor:
+      name: '&aХозяин фермы'
+      icon: OAK_FENCE_GATE
+      description: ['&7Загляни на свою ферму']
+      objective: {type: FARM_VISIT, amount: 1}
+      rewards:
+        lines: ['&f• 50 монет', '&f• 20 опыта']
+        commands: ['coins give {player} 50', 'minecraft:xp add {player} 20 points']
+    coin-earner:
+      name: '&eКопилка'
+      icon: GOLD_NUGGET
+      description: ['&7Заработай монеты']
+      objective:
+        type: EARN
+        targets: [COINS]
+        amount: 1000
+      rewards:
+        lines: ['&f• 150 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 150', 'minecraft:xp add {player} 50 points']
+    shopper:
+      name: '&bПокупатель'
+      icon: EMERALD
+      description: ['&7Потрать монеты в лавках']
+      objective:
+        type: SPEND
+        targets: [COINS]
+        amount: 300
+      rewards:
+        lines: ['&f• 120 монет', '&f• 30 опыта']
+        commands: ['coins give {player} 120', 'minecraft:xp add {player} 30 points']
+    angler:
+      name: '&bРыбак'
+      icon: FISHING_ROD
+      description: ['&7Поймай рыбу']
+      objective:
+        type: CATCH_FISH
+        targets: [ANY]
+        amount: 5
+      rewards:
+        lines: ['&f• 150 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 150', 'minecraft:xp add {player} 50 points']
+    carp-day:
+      name: '&bКарповый день'
+      icon: COD
+      description: ['&7Поймай карпа или карася']
+      objective:
+        type: CATCH_FISH
+        targets: [carp, crucian]
+        amount: 3
+      rewards:
+        lines: ['&f• 200 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 200', 'minecraft:xp add {player} 50 points']
+    rare-catch:
+      name: '&9Редкий улов'
+      icon: TROPICAL_FISH
+      description: ['&7Поймай осетра, тунца или лосося']
+      objective:
+        type: CATCH_FISH
+        targets: [sturgeon, tuna, salmon]
+        amount: 1
+      rewards:
+        lines: ['&f• 300 монет', '&f• 80 опыта']
+        commands: ['coins give {player} 300', 'minecraft:xp add {player} 80 points']
+    night-angler:
+      name: '&9Ночной рыбак'
+      icon: SALMON
+      description: ['&7Поймай рыбу ночью']
+      objective:
+        type: CATCH_NIGHT
+        targets: [ANY]
+        amount: 3
+      rewards:
+        lines: ['&f• 250 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 250', 'minecraft:xp add {player} 60 points']
+    full-bucket:
+      name: '&bПолное ведро'
+      icon: COD
+      description: ['&7Поймай любую рыбу']
+      objective:
+        type: CATCH_FISH
+        targets: [ANY]
+        amount: 10
+      rewards:
+        lines: ['&f• 300 монет', '&f• 80 опыта']
+        commands: ['coins give {player} 300', 'minecraft:xp add {player} 80 points']
+    predator:
+      name: '&bХищник'
+      icon: SALMON
+      description: ['&7Поймай щуку, судака или барракуду']
+      objective:
+        type: CATCH_FISH
+        targets: [pike, zander, barracuda]
+        amount: 2
+      rewards:
+        lines: ['&f• 220 монет', '&f• 60 опыта']
+        commands: ['coins give {player} 220', 'minecraft:xp add {player} 60 points']
+    sea-haul:
+      name: '&bМорской промысел'
+      icon: COD
+      description: ['&7Поймай сельдь, сардину или скумбрию']
+      objective:
+        type: CATCH_FISH
+        targets: [herring, sardine, mackerel]
+        amount: 5
+      rewards:
+        lines: ['&f• 200 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 200', 'minecraft:xp add {player} 50 points']
+    gourmet:
+      name: '&dГурман'
+      icon: COOKED_BEEF
+      description: ['&7Поешь']
+      objective: {type: EAT, amount: 10}
+      rewards:
+        lines: ['&f• 100 монет', '&f• 30 опыта']
+        commands: ['coins give {player} 100', 'minecraft:xp add {player} 30 points']
+    walker:
+      name: '&aПутешественник'
+      icon: LEATHER_BOOTS
+      description: ['&7Пройди блоков']
+      objective: {type: WALK, amount: 2000}
+      rewards:
+        lines: ['&f• 100 монет', '&f• 30 опыта']
+        commands: ['coins give {player} 100', 'minecraft:xp add {player} 30 points']
+    playtime-daily:
+      name: '&fНа связи'
+      icon: CLOCK
+      description: ['&7Проведи на сервере минут']
+      objective: {type: PLAYTIME, amount: 60}
+      rewards:
+        lines: ['&f• 200 монет', '&f• 50 опыта']
+        commands: ['coins give {player} 200', 'minecraft:xp add {player} 50 points']
+    gossip-daily:
+      name: '&dСоседи'
+      icon: WRITABLE_BOOK
+      description: ['&7Поговори с жителями']
+      objective: {type: NPC_TALK, amount: 5}
+      rewards:
+        lines: ['&f• 100 монет', '&f• 30 опыта']
+        commands: ['coins give {player} 100', 'minecraft:xp add {player} 30 points']
+  premium-count: 2
+  premium-quests:
+    field-clearer-plus:
+      name: '&6Чистое поле+'
+      icon: HAY_BLOCK
+      description: ['&7Срежь кусты пшеницы']
+      objective:
+        type: CROP_BREAK
+        targets: ['*wheat']
+        amount: 40
+      rewards:
+        lines: ['&f• 500 монет', '&f• 100 опыта']
+        commands: ['coins give {player} 500', 'minecraft:xp add {player} 100 points']
+    golden-harvest-plus:
+      name: '&6Золотой урожай'
+      icon: GOLDEN_CARROT
+      description: ['&7Собери любой урожай']
+      objective: {type: CROP_HARVEST, amount: 128}
+      rewards:
+        lines: ['&f• 600 монет', '&f• 150 опыта']
+        commands: ['coins give {player} 600', 'minecraft:xp add {player} 150 points']
+    master-chef-plus:
+      name: '&6Шеф-повар'
+      icon: CAKE
+      description: ['&7Приготовь блюда']
+      objective: {type: COOK_ITEM, amount: 12}
+      rewards:
+        lines: ['&f• 500 монет', '&f• 100 опыта']
+        commands: ['coins give {player} 500', 'minecraft:xp add {player} 100 points']
+    flour-plus:
+      name: '&6Мучной склад'
+      icon: BUNDLE
+      description: ['&7Собери мешок муки']
+      objective: {type: FLOUR_SACK, amount: 1}
+      rewards:
+        lines: ['&f• 500 монет', '&f• 100 опыта']
+        commands: ['coins give {player} 500', 'minecraft:xp add {player} 100 points']
+    pumpkin-plus:
+      name: '&6Тыквенный рай'
+      icon: CARVED_PUMPKIN
+      description: ['&7Собери тыквы']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*pumpkin']
+        amount: 32
+      rewards:
+        lines: ['&f• 600 монет', '&f• 100 опыта']
+        commands: ['coins give {player} 600', 'minecraft:xp add {player} 100 points']
+    pepper-plus:
+      name: '&6Овощи-гиганты'
+      icon: RED_DYE
+      description: ['&7Собери баклажаны и перец']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*eggplant', '*bell_pepper']
+        amount: 32
+      rewards:
+        lines: ['&f• 600 монет', '&f• 100 опыта']
+        commands: ['coins give {player} 600', 'minecraft:xp add {player} 100 points']
+    rare-fish-plus:
+      name: '&6Трофей'
+      icon: PUFFERFISH
+      description: ['&7Поймай белугу, меч-рыбу или золотого карпа']
+      objective:
+        type: CATCH_FISH
+        targets: [beluga, swordfish, golden_carp]
+        amount: 1
+      rewards:
+        lines: ['&f• 800 монет', '&f• 150 опыта']
+        commands: ['coins give {player} 800', 'minecraft:xp add {player} 150 points']
+    royal-catch-plus:
+      name: '&6Царская рыба'
+      icon: SALMON
+      description: ['&7Поймай осетра или белугу']
+      objective:
+        type: CATCH_FISH
+        targets: [sturgeon, beluga]
+        amount: 1
+      rewards:
+        lines: ['&f• 900 монет', '&f• 150 опыта']
+        commands: ['coins give {player} 900', 'minecraft:xp add {player} 150 points']
+weekly:
+  count: 3
+  quests:
+    bed-gardener:
+      name: '&aОгородник'
+      icon: COMPOSTER
+      description: ['&7Дорасти и срежь культуры на грядках']
+      objective: {type: BED_HARVEST, amount: 60}
+      rewards:
+        lines: ['&f• 2 000 монет']
+        commands: ['coins give {player} 2000']
+    expansion:
+      name: '&eРасширение'
+      icon: FARMLAND
+      description: ['&7Поставь новые грядки']
+      objective: {type: BED_PLACE, amount: 5}
+      rewards:
+        lines: ['&f• 800 монет']
+        commands: ['coins give {player} 800']
+    online:
+      name: '&fЗавсегдатай'
+      icon: CLOCK
+      description: ['&7Проведи на сервере минут']
+      objective: {type: PLAYTIME, amount: 300}
+      rewards:
+        lines: ['&f• 1 500 монет', '&f• 300 опыта']
+        commands: ['coins give {player} 1500', 'minecraft:xp add {player} 300 points']
+    regular:
+      name: '&fСтарожил'
+      icon: RECOVERY_COMPASS
+      description: ['&7Проведи на сервере минут']
+      objective: {type: PLAYTIME, amount: 900}
+      rewards:
+        lines: ['&f• 3 000 монет', '&f• 500 опыта']
+        commands: ['coins give {player} 3000', 'minecraft:xp add {player} 500 points']
+    miller:
+      name: '&eМельник'
+      icon: GRINDSTONE
+      description: ['&7Перемели пшеницу на жёрнове']
+      objective: {type: OBTAIN, targets: [flour], amount: 32}
+      rewards:
+        lines: ['&f• 2 000 монет', '&f• 400 опыта']
+        commands: ['coins give {player} 2000', 'minecraft:xp add {player} 400 points']
+    merchant:
+      name: '&eТорговец'
+      icon: GOLD_INGOT
+      description: ['&7Заработай монеты']
+      objective:
+        type: EARN
+        targets: [COINS]
+        amount: 5000
+      rewards:
+        lines: ['&f• 1 500 монет', '&f• 300 опыта']
+        commands: ['coins give {player} 1500', 'minecraft:xp add {player} 300 points']
+    big-spender:
+      name: '&bРасточитель'
+      icon: EMERALD
+      description: ['&7Потрать монеты']
+      objective:
+        type: SPEND
+        targets: [COINS]
+        amount: 5000
+      rewards:
+        lines: ['&f• 1 500 монет', '&f• 300 опыта']
+        commands: ['coins give {player} 1500', 'minecraft:xp add {player} 300 points']
+    great-harvest:
+      name: '&6Великий урожай'
+      icon: HAY_BLOCK
+      description: ['&7Собери любой урожай']
+      objective: {type: CROP_HARVEST, amount: 1500}
+      rewards:
+        lines: ['&f• 3 000 монет', '&f• 800 опыта']
+        commands: ['coins give {player} 3000', 'minecraft:xp add {player} 800 points']
+      premium-rewards:
+        lines: ['&6• +1 500 монет']
+        commands: ['coins give {player} 1500']
+    vegetable-king:
+      name: '&aОвощной король'
+      icon: CARROT
+      description: ['&7Собери любые овощи']
+      objective:
+        type: CROP_HARVEST
+        targets: *id001
+        amount: 600
+      rewards:
+        lines: ['&f• 2 500 монет', '&f• 500 опыта']
+        commands: ['coins give {player} 2500', 'minecraft:xp add {player} 500 points']
+      premium-rewards:
+        lines: ['&6• +1 000 монет']
+        commands: ['coins give {player} 1000']
+    pumpkin-week:
+      name: '&6Тыквенная неделя'
+      icon: PUMPKIN
+      description: ['&7Собери тыквы']
+      objective:
+        type: CROP_HARVEST
+        targets: ['*pumpkin']
+        amount: 200
+      rewards:
+        lines: ['&f• 3 000 монет', '&f• 500 опыта']
+        commands: ['coins give {player} 3000', 'minecraft:xp add {player} 500 points']
+    hoe-week:
+      name: '&6Неутомимая мотыга'
+      icon: DIAMOND_HOE
+      description: ['&7Сделай удачные удары по урожаю']
+      objective: {type: CROP_HIT, amount: 1000}
+      rewards:
+        lines: ['&f• 2 000 монет', '&f• 400 опыта']
+        commands: ['coins give {player} 2000', 'minecraft:xp add {player} 400 points']
+    kitchen-week:
+      name: '&6Кухонная неделя'
+      icon: SMOKER
+      description: ['&7Закончи готовку на станциях']
+      objective: {type: COOK, amount: 40}
+      rewards:
+        lines: ['&f• 2 500 монет', '&f• 400 опыта']
+        commands: ['coins give {player} 2500', 'minecraft:xp add {player} 400 points']
+    flour-baron:
+      name: '&eМучной барон'
+      icon: BUNDLE
+      description: ['&7Собери мешки муки']
+      objective: {type: FLOUR_SACK, amount: 3}
+      rewards:
+        lines: ['&f• 3 000 монет', '&f• 500 опыта']
+        commands: ['coins give {player} 3000', 'minecraft:xp add {player} 500 points']
+    sea-wolf:
+      name: '&bМорской волк'
+      icon: FISHING_ROD
+      description: ['&7Поймай рыбу']
+      objective:
+        type: CATCH_FISH
+        targets: [ANY]
+        amount: 60
+      rewards:
+        lines: ['&f• 2 000 монет', '&f• 400 опыта']
+        commands: ['coins give {player} 2000', 'minecraft:xp add {player} 400 points']
+    marathon:
+      name: '&aМарафон'
+      icon: LEATHER_BOOTS
+      description: ['&7Пройди блоков']
+      objective: {type: WALK, amount: 20000}
+      rewards:
+        lines: ['&f• 1 000 монет', '&f• 300 опыта']
+        commands: ['coins give {player} 1000', 'minecraft:xp add {player} 300 points']
+    gourmand:
+      name: '&dОбжора'
+      icon: GOLDEN_APPLE
+      description: ['&7Поешь']
+      objective: {type: EAT, amount: 120}
+      rewards:
+        lines: ['&f• 1 000 монет', '&f• 300 опыта']
+        commands: ['coins give {player} 1000', 'minecraft:xp add {player} 300 points']
+    farm-regular:
+      name: '&aЗаботливый хозяин'
+      icon: OAK_FENCE_GATE
+      description: ['&7Заходи на свою ферму (раз в день)']
+      objective: {type: FARM_VISIT, amount: 7}
+      rewards:
+        lines: ['&f• 1 000 монет', '&f• 200 опыта']
+        commands: ['coins give {player} 1000', 'minecraft:xp add {player} 200 points']
+    gossip:
+      name: '&dСплетник'
+      icon: WRITABLE_BOOK
+      description: ['&7Поговори с жителями']
+      objective: {type: NPC_TALK, amount: 20}
+      rewards:
+        lines: ['&f• 800 монет', '&f• 200 опыта']
+        commands: ['coins give {player} 800', 'minecraft:xp add {player} 200 points']
+    night-fisher:
+      name: '&9Ночной рыболов'
+      icon: SALMON
+      description: ['&7Поймай рыбу ночью']
+      objective:
+        type: CATCH_NIGHT
+        targets: [ANY]
+        amount: 20
+      rewards:
+        lines: ['&f• 1 200 монет', '&f• 200 опыта']
+        commands: ['coins give {player} 1200', 'minecraft:xp add {player} 200 points']
+    collector:
+      name: '&bКоллекционер'
+      icon: TROPICAL_FISH
+      description: ['&7Поймай щук, судаков, сомов или форель']
+      objective:
+        type: CATCH_FISH
+        targets: [pike, zander, catfish, trout]
+        amount: 15
+      rewards:
+        lines: ['&f• 1 500 монет', '&f• 250 опыта']
+        commands: ['coins give {player} 1500', 'minecraft:xp add {player} 250 points']
+    cold-waters:
+      name: '&9Холодные воды'
+      icon: SALMON
+      description: ['&7Поймай лосося, форель или хариуса']
+      objective:
+        type: CATCH_FISH
+        targets: [salmon, trout, grayling]
+        amount: 8
+      rewards:
+        lines: ['&f• 1 800 монет', '&f• 300 опыта']
+        commands: ['coins give {player} 1800', 'minecraft:xp add {player} 300 points']
+    pond-jewel:
+      name: '&dЖемчужина пруда'
+      icon: TROPICAL_FISH
+      description: ['&7Поймай карпа кои или золотую рыбку']
+      objective:
+        type: CATCH_FISH
+        targets: [koi, goldfish]
+        amount: 1
+      rewards:
+        lines: ['&f• 2 500 монет', '&f• 400 опыта']
+        commands: ['coins give {player} 2500', 'minecraft:xp add {player} 400 points']
+  premium-count: 2
+  premium-quests:
+    crop-legend-plus:
+      name: '&6Легенда полей'
+      icon: NETHERITE_HOE
+      description: ['&7Срежь кусты целиком']
+      objective: {type: CROP_BREAK, amount: 400}
+      rewards:
+        lines: ['&f• 5 000 монет', '&f• 1000 опыта']
+        commands: ['coins give {player} 5000', 'minecraft:xp add {player} 1000 points']
+    harvest-king-plus:
+      name: '&6Король урожая'
+      icon: HAY_BLOCK
+      description: ['&7Собери любой урожай']
+      objective: {type: CROP_HARVEST, amount: 3000}
+      rewards:
+        lines: ['&f• 6 000 монет', '&f• 1000 опыта']
+        commands: ['coins give {player} 6000', 'minecraft:xp add {player} 1000 points']
+    millionaire-plus:
+      name: '&6Миллионер'
+      icon: GOLD_BLOCK
+      description: ['&7Заработай монеты']
+      objective:
+        type: EARN
+        targets: [COINS]
+        amount: 25000
+      rewards:
+        lines: ['&f• 5 000 монет', '&f• 1000 опыта']
+        commands: ['coins give {player} 5000', 'minecraft:xp add {player} 1000 points']
+    royal-kitchen-plus:
+      name: '&6Королевская кухня'
+      icon: CAKE
+      description: ['&7Приготовь блюда']
+      objective: {type: COOK_ITEM, amount: 100}
+      rewards:
+        lines: ['&f• 5 000 монет', '&f• 1000 опыта']
+        commands: ['coins give {player} 5000', 'minecraft:xp add {player} 1000 points']
+    mill-master-plus:
+      name: '&6Мастер жёрнова'
+      icon: GRINDSTONE
+      description: ['&7Перемели пшеницу на жёрнове']
+      objective: {type: OBTAIN, targets: [flour], amount: 100}
+      rewards:
+        lines: ['&f• 5 000 монет', '&f• 1000 опыта']
+        commands: ['coins give {player} 5000', 'minecraft:xp add {player} 1000 points']
+    angler-plus:
+      name: '&6Рыбак-профи'
+      icon: FISHING_ROD
+      description: ['&7Поймай рыбу']
+      objective:
+        type: CATCH_FISH
+        targets: [ANY]
+        amount: 100
+      rewards:
+        lines: ['&f• 4 000 монет', '&f• 800 опыта']
+        commands: ['coins give {player} 4000', 'minecraft:xp add {player} 800 points']
+    legend-plus:
+      name: '&6Легенда озера'
+      icon: HEART_OF_THE_SEA
+      description: ['&7Поймай Лунную рыбу или Хозяина озера']
+      objective:
+        type: CATCH_FISH
+        targets: [moon_fish, farm_legend]
+        amount: 1
+      rewards:
+        lines: ['&f• 4 000 монет', '&f• 600 опыта']
+        commands: ['coins give {player} 4000', 'minecraft:xp add {player} 600 points']
+seasons:
+  autumn-2026:
+    name: <gradient:#f7971e:#ffd200>Осень 2026</gradient>
+    start: '2026-09-01'
+    end: '2026-11-30'
+    quests:
+      harvest:
+        name: '&6Урожай'
+        icon: PUMPKIN
+        description: ['&7Собери тыквы']
+        objective:
+          type: CROP_HARVEST
+          targets: ['*pumpkin']
+          amount: 64
+        rewards:
+          lines: ['&f• 1 500 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 1500', 'minecraft:xp add {player} 300 points']
+      golden-autumn:
+        name: '&6Золотая осень'
+        icon: JACK_O_LANTERN
+        description: ['&7Собери тыквы и кабачки']
+        objective:
+          type: CROP_HARVEST
+          targets: ['*pumpkin', '*zucchini']
+          amount: 256
+        rewards:
+          lines: ['&f• 4 000 монет', '&f• 600 опыта']
+          commands: ['coins give {player} 4000', 'minecraft:xp add {player} 600 points']
+      pie:
+        name: '&6Осенний стол'
+        icon: PUMPKIN_PIE
+        description: ['&7Приготовь блюда']
+        objective: {type: COOK_ITEM, amount: 16}
+        rewards:
+          lines: ['&f• 1 500 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 1500', 'minecraft:xp add {player} 300 points']
+      autumn-harvest:
+        name: '&6Осенняя жатва'
+        icon: HAY_BLOCK
+        description: ['&7Собери любой урожай']
+        objective: {type: CROP_HARVEST, amount: 800}
+        rewards:
+          lines: ['&f• 3 000 монет', '&f• 500 опыта']
+          commands: ['coins give {player} 3000', 'minecraft:xp add {player} 500 points']
+      autumn-fish:
+        name: '&bОсенний клёв'
+        icon: FISHING_ROD
+        description: ['&7Поймай рыбу']
+        objective:
+          type: CATCH_FISH
+          targets: [ANY]
+          amount: 30
+        rewards:
+          lines: ['&f• 1 500 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 1500', 'minecraft:xp add {player} 300 points']
+      autumn-night:
+        name: '&9Осенние ночи'
+        icon: SALMON
+        description: ['&7Поймай рыбу ночью']
+        objective:
+          type: CATCH_NIGHT
+          targets: [ANY]
+          amount: 25
+        rewards:
+          lines: ['&f• 2 000 монет', '&f• 350 опыта']
+          commands: ['coins give {player} 2000', 'minecraft:xp add {player} 350 points']
+      autumn-rare:
+        name: '&9Осенние трофеи'
+        icon: PUFFERFISH
+        description: ['&7Поймай осетра, тунца или лосося']
+        objective:
+          type: CATCH_FISH
+          targets: [sturgeon, tuna, salmon]
+          amount: 5
+        rewards:
+          lines: ['&f• 2 500 монет', '&f• 400 опыта']
+          commands: ['coins give {player} 2500', 'minecraft:xp add {player} 400 points']
+      fair:
+        name: '&eЯрмарка'
+        icon: GOLD_INGOT
+        description: ['&7Заработай монеты к ярмарке']
+        objective:
+          type: EARN
+          targets: [COINS]
+          amount: 10000
+        rewards:
+          lines: ['&f• 2 500 монет', '&f• 500 опыта']
+          commands: ['coins give {player} 2500', 'minecraft:xp add {player} 500 points']
+      harvest-feast-plus:
+        name: '&6Праздник урожая'
+        icon: CAKE
+        description: ['&7Приготовь блюда к празднику']
+        objective: {type: COOK_ITEM, amount: 60}
+        rewards:
+          lines: ['&f• 3 000 монет', '&f• 800 опыта']
+          commands: ['coins give {player} 3000', 'minecraft:xp add {player} 800 points']
+        premium: true
+  winter-2026:
+    name: <gradient:#00c6ff:#e0f7ff>Зима 2026</gradient>
+    start: '2026-12-01'
+    end: '2027-02-28'
+    quests:
+      winter-harvest:
+        name: '&bЗимний урожай'
+        icon: HAY_BLOCK
+        description: ['&7Собери любой урожай']
+        objective: {type: CROP_HARVEST, amount: 1000}
+        rewards:
+          lines: ['&f• 3 000 монет', '&f• 500 опыта']
+          commands: ['coins give {player} 3000', 'minecraft:xp add {player} 500 points']
+      winter-kitchen:
+        name: '&bТёплая кухня'
+        icon: SMOKER
+        description: ['&7Закончи готовку на станциях']
+        objective: {type: COOK, amount: 30}
+        rewards:
+          lines: ['&f• 2 000 монет', '&f• 400 опыта']
+          commands: ['coins give {player} 2000', 'minecraft:xp add {player} 400 points']
+      hot-cocoa:
+        name: '&6Горячий ужин'
+        icon: MUSHROOM_STEW
+        description: ['&7Поешь']
+        objective: {type: EAT, amount: 30}
+        rewards:
+          lines: ['&f• 1 000 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 1000', 'minecraft:xp add {player} 300 points']
+      winter-fishing:
+        name: '&bПодлёдный лов'
+        icon: FISHING_ROD
+        description: ['&7Поймай рыбу']
+        objective:
+          type: CATCH_FISH
+          targets: [ANY]
+          amount: 50
+        rewards:
+          lines: ['&f• 2 000 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 2000', 'minecraft:xp add {player} 300 points']
+      gifts-plus:
+        name: '&6Подарки'
+        icon: CHEST
+        description: ['&7Заработай монеты к празднику']
+        objective:
+          type: EARN
+          targets: [COINS]
+          amount: 20000
+        rewards:
+          lines: ['&f• 5 000 монет', '&f• 1000 опыта']
+          commands: ['coins give {player} 5000', 'minecraft:xp add {player} 1000 points']
+        premium: true
+story:
+  valley-chronicles:
+    name: <gradient:#c471f5:#fa71cd>Хроники Тихой долины</gradient>
+    icon: WRITABLE_BOOK
+    description: ['&7Старый фермер оставил тебе заросший', '&7участок и потрёпанный дневник.', '&7Верни долине былую славу.']
+    steps:
+      arrival:
+        name: '&fГлава I. Новый дом'
+        icon: OAK_FENCE_GATE
+        description: ['&8«Калитка скрипнула, будто здороваясь...»', '&7Загляни на свою ферму.']
+        objective: {type: FARM_VISIT, amount: 1}
+        rewards:
+          lines: ['&f• 100 монет', '&f• 20 опыта', '&f• 8 семян пшеницы']
+          commands: ['coins give {player} 100', 'minecraft:xp add {player} 20 points', 'nexo give seed_wheat 8 {player}']
+      overgrown:
+        name: '&fГлава II. Заросли'
+        icon: SHORT_GRASS
+        description: ['&8«Сорняки по пояс. Пора за работу.»', '&7Поработай мотыгой на грядках.']
+        objective: {type: CROP_HIT, amount: 50}
+        rewards:
+          lines: ['&f• 150 монет', '&f• 50 опыта']
+          commands: ['coins give {player} 150', 'minecraft:xp add {player} 50 points']
+      first-sowing:
+        name: '&fГлава III. Первый посев'
+        icon: WHEAT_SEEDS
+        description: ['&8«Первые ростки — первая радость.»', '&7Вырасти и срежь 10 кустов.']
+        objective: {type: CROP_BREAK, amount: 10}
+        rewards:
+          lines: ['&f• 200 монет', '&f• 80 опыта']
+          commands: ['coins give {player} 200', 'minecraft:xp add {player} 80 points']
+      first-harvest:
+        name: '&fГлава IV. Первый урожай'
+        icon: WHEAT
+        description: ['&8«Колосья звенят на ветру.»', '&7Собери урожай мотыгой на ферме.']
+        objective: {type: CROP_HARVEST, amount: 64}
+        rewards:
+          lines: ['&f• 300 монет', '&f• 100 опыта']
+          commands: ['coins give {player} 300', 'minecraft:xp add {player} 100 points']
+      neighbors:
+        name: '&fГлава V. Соседи'
+        icon: VILLAGER_SPAWN_EGG
+        description: ['&8«В долине ещё остались люди.»', '&7Поговори с жителями (NPC).']
+        objective: {type: NPC_TALK, amount: 3}
+        rewards:
+          lines: ['&f• 200 монет', '&f• 100 опыта']
+          commands: ['coins give {player} 200', 'minecraft:xp add {player} 100 points']
+      old-mill:
+        name: '&fГлава VI. Старая мельница'
+        icon: GRINDSTONE
+        description: ['&8«Жёрнов скрипит, но ещё мелет.»', '&7Получи муку из жёрнова.']
+        objective: {type: OBTAIN, targets: [flour], amount: 8}
+        rewards:
+          lines: ['&f• 500 монет', '&f• 200 опыта']
+          commands: ['coins give {player} 500', 'minecraft:xp add {player} 200 points']
+      kitchen:
+        name: '&fГлава VII. Тёплая кухня'
+        icon: CAMPFIRE
+        description: ['&8«Запах свежей выпечки на всю долину.»', '&7Приготовь 10 продуктов на кухне.']
+        objective: {type: COOK, amount: 10}
+        rewards:
+          lines: ['&f• 600 монет', '&f• 250 опыта']
+          commands: ['coins give {player} 600', 'minecraft:xp add {player} 250 points']
+      market:
+        name: '&fГлава VIII. Ярмарка'
+        icon: EMERALD
+        description: ['&8«Пора показать долине, на что способна ферма.»', '&7Заработай монеты.']
+        objective:
+          type: EARN
+          targets: [COINS]
+          amount: 3000
+        rewards:
+          lines: ['&f• 800 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 800', 'minecraft:xp add {player} 300 points']
+      night-raid:
+        name: '&fГлава IX. Обустройство'
+        icon: BARREL
+        description: ['&8«Хозяйство само себя не обустроит.»', '&7Потрать монеты на ферму.']
+        objective:
+          type: SPEND
+          targets: [COINS]
+          amount: 2000
+        rewards:
+          lines: ['&f• 800 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 800', 'minecraft:xp add {player} 300 points']
+      big-harvest:
+        name: '&fГлава X. Большой урожай'
+        icon: HAY_BLOCK
+        description: ['&8«Амбары должны быть полны к осени.»', '&7Собери много урожая на ферме.']
+        objective: {type: CROP_HARVEST, amount: 500}
+        rewards:
+          lines: ['&f• 1 500 монет', '&f• 500 опыта']
+          commands: ['coins give {player} 1500', 'minecraft:xp add {player} 500 points']
+      diary-end:
+        name: <gradient:#ffd34e:#ff9f1c>Глава XI. Последняя страница</gradient>
+        icon: ENCHANTED_BOOK
+        description: ['&8«Долина снова живёт. Спасибо тебе.»', '&7Пройди путь фермера: срежь растения целиком.']
+        objective: {type: CROP_BREAK, amount: 100}
+        rewards:
+          lines: ['&f• 3 000 монет', '&f• 1000 опыта']
+          commands: ['coins give {player} 3000', 'minecraft:xp add {player} 1000 points']
+  first-bed:
+    name: <gradient:#8fd36b:#4caf50>Первая грядка</gradient>
+    icon: FARMLAND
+    description: ['&7Своя грядка — свой урожай.', '&7Поставь её и посади первое растение.']
+    steps:
+      place-bed:
+        name: '&fГлава I. Первая грядка'
+        icon: FARMLAND
+        description: ['&8«Земля тут мягкая — самое то.»', '&7Поставь грядку на своей ферме.']
+        objective: {type: BED_PLACE, amount: 1}
+        rewards:
+          lines: ['&f• 100 монет']
+          commands: ['coins give {player} 100']
+      plant-bed:
+        name: '&fГлава II. Первые всходы'
+        icon: WHEAT_SEEDS
+        description: ['&8«Семечко в землю — и жди.»', '&7Посади растение на грядку.']
+        objective: {type: BED_PLANT, amount: 1}
+        rewards:
+          lines: ['&f• 100 монет', '&f• 8 семян пшеницы']
+          commands: ['coins give {player} 100', 'minecraft:give {player} wheat_seeds 8']
+  quiet-harbor:
+    name: <gradient:#38b6ff:#5ce1e6>Тихая гавань</gradient>
+    icon: FISHING_ROD
+    description: ['&7Долина ожила, а у пристани ждёт', '&7старая лодка и непуганая рыба.', '&7Продолжение хроник: рыбацкая глава.']
+    steps:
+      first-cast:
+        name: '&fГлава I. Первая поклёвка'
+        icon: FISHING_ROD
+        description: ['&8«На пристани пахнет тиной и смолой. Дед говорил: рыба тут есть.»', '&7Поймай любую рыбу.']
+        objective: {type: CATCH_FISH, amount: 5}
+        rewards:
+          lines: ['&f• 300 монет', '&f• 100 опыта', '&f• 8 семян пшеницы']
+          commands: ['coins give {player} 300', 'minecraft:xp add {player} 100 points', 'minecraft:give {player} wheat_seeds 8']
+      fish-market:
+        name: '&fГлава II. Рыбный рынок'
+        icon: GOLD_NUGGET
+        description: ['&8«Торговка на рынке берёт всё, что шевелится.»', '&7Заработай монет продажей рыбы']
+        objective: {type: FISH_EARN, targets: [COINS], amount: 1500}
+        rewards:
+          lines: ['&f• 400 монет', '&f• 120 опыта']
+          commands: ['coins give {player} 400', 'minecraft:xp add {player} 120 points']
+      night-shift:
+        name: '&fГлава III. Ночная смена'
+        icon: LANTERN
+        description: ['&8«Ночью озеро другое: тихое и щедрое.»', '&7Поймай рыбу ночью.']
+        objective: {type: CATCH_NIGHT, amount: 10}
+        rewards:
+          lines: ['&f• 500 монет', '&f• 150 опыта']
+          commands: ['coins give {player} 500', 'minecraft:xp add {player} 150 points']
+      predators:
+        name: '&fГлава IV. Хищники'
+        icon: TRIPWIRE_HOOK
+        description: ['&8«Что-то крупное рвёт сети у камышей.»', '&7Поймай хищную рыбу', '&8(щука, судак, сом, угорь, налим)']
+        objective: {type: CATCH_FISH, targets: [pike, zander, catfish, eel, burbot], amount: 10}
+        rewards:
+          lines: ['&f• 600 монет', '&f• 200 опыта']
+          commands: ['coins give {player} 600', 'minecraft:xp add {player} 200 points']
+      galley:
+        name: '&fГлава V. Камбуз'
+        icon: CAMPFIRE
+        description: ['&8«Рыбаки вернулись голодные, кухня не остывает.»', '&7Приготовь продукты на кухне.']
+        objective: {type: COOK, amount: 15}
+        rewards:
+          lines: ['&f• 700 монет', '&f• 250 опыта']
+          commands: ['coins give {player} 700', 'minecraft:xp add {player} 250 points']
+      deep-water:
+        name: '&fГлава VI. Глубокая вода'
+        icon: PRISMARINE_SHARD
+        description: ['&8«За отмелью дно уходит в темноту.»', '&7Поймай редкую рыбу', '&8(осётр, тунец, лосось, барракуда, морской окунь,', '&8кои, лазурная форель, групер, рыба-клоун, иглобрюх)']
+        objective: {type: CATCH_FISH, targets: [sturgeon, tuna, salmon, barracuda, sea_bass, koi, azure_trout, grouper, clownfish, pufferfish], amount: 5}
+        rewards:
+          lines: ['&f• 900 монет', '&f• 300 опыта']
+          commands: ['coins give {player} 900', 'minecraft:xp add {player} 300 points']
+      winter-stock:
+        name: '&fГлава VII. Запасы на зиму'
+        icon: BARREL
+        description: ['&8«Ферму никто не отменял: рыба рыбой, а амбар сам не наполнится.»', '&7Собери урожай.']
+        objective: {type: CROP_HARVEST, amount: 300}
+        rewards:
+          lines: ['&f• 1 000 монет', '&f• 350 опыта']
+          commands: ['coins give {player} 1000', 'minecraft:xp add {player} 350 points']
+      lake-master:
+        name: '<gradient:#38b6ff:#5ce1e6>Глава VIII. Хозяин глубин</gradient>'
+        icon: HEART_OF_THE_SEA
+        description: ['&8«Старики шепчут о рыбе, которую никто не вытащил.»', '&7Поймай эпическую или легендарную рыбу']
+        objective: {type: CATCH_FISH, targets: [golden_carp, swordfish, marsh_king, beluga, mola, ice_pike, crystal_pike, moon_fish, farm_legend, goldfish, sea_dragon, kraken_calf], amount: 1}
+        rewards:
+          lines: ['&f• 3 000 монет', '&f• 1000 опыта', '&f• Удочка 10 уровня']
+          commands: ['coins give {player} 3000', 'minecraft:xp add {player} 1000 points', 'рыбалка rod {player} 10']
+  farm-life:
+    premium: true
+    name: '&6Фермерская жизнь'
+    icon: HAY_BLOCK
+    description: ['&7Посевы, хлеб и большое хозяйство.']
+    steps:
+      seeds:
+        name: '&fПосевная'
+        icon: WHEAT_SEEDS
+        description: ['&7Собери пшеницу']
+        objective:
+          type: CROP_HARVEST
+          targets: ['*wheat']
+          amount: 64
+        rewards:
+          lines: ['&f• 400 монет', '&f• 100 опыта']
+          commands: ['coins give {player} 400', 'minecraft:xp add {player} 100 points']
+      bakery:
+        name: '&fПекарня'
+        icon: BREAD
+        description: ['&7Приготовь блюда']
+        objective: {type: COOK_ITEM, amount: 16}
+        rewards:
+          lines: ['&f• 800 монет', '&f• 200 опыта']
+          commands: ['coins give {player} 800', 'minecraft:xp add {player} 200 points']
+      big-farm:
+        name: '&fБольшое хозяйство'
+        icon: COW_SPAWN_EGG
+        description: ['&7Собери любой урожай']
+        objective: {type: CROP_HARVEST, amount: 1000}
+        rewards:
+          lines: ['&f• 3 000 монет', '&f• 500 опыта']
+          commands: ['coins give {player} 3000', 'minecraft:xp add {player} 500 points']

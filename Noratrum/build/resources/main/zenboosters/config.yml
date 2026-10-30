@@ -1,0 +1,56 @@
+# Бустеры (модуль Noratrum). Личные — игроку, глобальные — всем. /бустер give|global|list|clear|reload (право zenboosters.admin),
+# /бустер — свои активные. Время: 30m, 2h, 1d, 1h30m. Данные — boosters.yml рядом.
+# Как складываются несколько бустеров одного типа: multiply — перемножаются (x2 × x1.5 = x3), max — берётся больший.
+stack: multiply
+join-reminder: true
+
+# Типы. Другие плагины берут множитель через ink.hoka.zenboosters.BoostersAPI.multiplier(uuid, "<тип>") (1.0 — нет бустера).
+# Что уже применяется: fishing и coins за рыбу — в рыбалке Noratrum. Остальное применяет TakuFarmers (см. HANDOVER/заявку на API):
+#   coins          — монеты с продажи урожая (TakuFarmers умножает сумму при продаже), с продажи рыбы — уже
+#   farm_xp        — опыт фермы (TakuFarmers умножает начисление island xp)
+#   fishing        — клёв: время ожидания поклёвки делится на множитель — уже
+#   crop_growth    — рост растений: время роста делится на множитель (TakuFarmers)
+#   station_speed  — станции/жёрнов/скалка/стол семян: время работы делится на множитель (TakuFarmers)
+types:
+  coins:         { name: "&6Монеты",          icon: GOLD_INGOT,   max: 5 }
+  farm_xp:       { name: "&aОпыт фермы",      icon: EXPERIENCE_BOTTLE, max: 5 }
+  fishing:       { name: "&bКлёв",            icon: FISHING_ROD,  max: 4 }
+  crop_growth:   { name: "&2Рост растений",   icon: WHEAT,        max: 4 }
+  station_speed: { name: "&eСкорость станций", icon: CAMPFIRE,     max: 4 }
+
+# Бустер-предметы (/бустер item <игрок> <тип|all> [x] [время] [global]): ПКМ активирует и тратит 1 шт.
+items:
+  material: POPPY            # тестовый вид — мак; на тип можно задать свой: type-material: { coins: GOLD_INGOT }
+  type-material: {}
+  model: ""                  # своя модель из ресурспака (напр. nexo:booster_coins), пусто — обычный предмет
+  glow: true
+  mult: 2                    # множитель по умолчанию
+  time: 30m                  # длительность по умолчанию
+  allow-stack: true          # false — нельзя активировать личный бустер того же типа, пока активен
+  name: "&d⚡ Бустер: {type} &dx{mult}"
+  name-global: "&6⚡ Глобальный бустер: {type} &6x{mult}"
+  lore: ["&7Длительность: &f{time}", "&7Действует только на тебя", "", "&eПКМ — активировать"]
+  lore-global: ["&7Длительность: &f{time}", "&7Действует на &6всех игроков&7 сервера", "", "&eПКМ — активировать"]
+
+messages:
+  prefix: "&d⚡ &r"
+  no-permission: "&cНет прав."
+  usage-admin: "&7/бустер give <игрок> <тип> <x> <время> &8— &fличный\n&7/бустер item <игрок> <тип|all> [x] [время] [global] &8— &fпредметы\n&7/бустер global <тип> <x> <время> &8— &fвсем\n&7/бустер list [игрок] &8— &fсписок\n&7/бустер clear <игрок|global> [тип] &8— &fснять\n&7/бустер reload\n&7Типы: coins, farm_xp, fishing, crop_growth, station_speed. Время: 30m, 2h, 1d."
+  unknown-type: "&cНет типа {type}. Есть: &f{types}"
+  player-unknown: "&cИгрок {player} не найден."
+  given: "&aБустер {type} &ax{mult} на {left} выдан игроку &f{player}&a."
+  received: "&dТебе выдан бустер {type} &dx{mult} на {left}!"
+  global-started: "&d⚡ Глобальный бустер {type} &dx{mult} на {left}! &7(от {by})"
+  expired: "&7Бустер {type} &7x{mult} закончился."
+  expired-global: "&7Глобальный бустер {type} &7x{mult} закончился."
+  join-active: "&dАктивен бустер {type} &dx{mult}&7, осталось {left}."
+  list-header-global: "&dГлобальные бустеры: &f{count}"
+  list-header-personal: "&dБустеры {player}: &f{count}"
+  list-line: "&7• {type} &fx{mult} &8— &7ещё {left} &8({by})"
+  list-empty: "&7Активных бустеров нет."
+  cleared: "&aСнято бустеров: &f{count} &7({player})."
+  reloaded: "&aПерезагружено: типов — {count}."
+  player-not-found: "&cИгрок {player} не в сети."
+  items-given: "&aВыдано бустеров-предметов: &f{count} &7({scope}) игроку &f{player}&a."
+  activated: "&d⚡ Бустер {type} &dx{mult} активирован на {left}!"
+  already-active: "&cБустер {type} &cуже активен — дождись окончания."

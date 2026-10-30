@@ -1,0 +1,33 @@
+# Значки групп ZenGroups для таба/чата/ника (9 px, стиль badges.yml). Текстуры — assets/zengroups/textures/font/.
+# font: minecraft:default — чтобы голый символ из плейсхолдера рисовался картинкой. char не задавать: Nexo назначит сам.
+badge_moder:
+  texture: zengroups:font/badge_moder
+  font: minecraft:default
+  ascent: 8
+  height: 9
+badge_media:
+  texture: zengroups:font/badge_media
+  font: minecraft:default
+  ascent: 8
+  height: 9
+badge_vipplus:
+  texture: zengroups:font/badge_vipplus
+  font: minecraft:default
+  ascent: 8
+  height: 9
+badge_vip:
+  texture: zengroups:font/badge_vip
+  font: minecraft:default
+  ascent: 8
+  height: 9
+# Копии значков TakuCore (badges.yml) в шрифте minecraft:default — чтобы ZenGroups мог отдавать их голым символом в таб/чат
+zg_badge_admin:
+  texture: gui/badge_admin
+  font: minecraft:default
+  ascent: 8
+  height: 9
+zg_badge_player:
+  texture: gui/badge_player
+  font: minecraft:default
+  ascent: 8
+  height: 9
