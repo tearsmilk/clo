@@ -38,7 +38,23 @@ public final class PapiHook extends PlaceholderExpansion {
         Player on = p.getPlayer();
         if (params.toLowerCase().startsWith("fight_")) {
             ink.hoka.zenfishing.FishFight.State st = on == null || plugin.fight() == null ? null : plugin.fight().state(on);
-            switch (params.toLowerCase().substring(6)) {
+            String sub = params.toLowerCase().substring(6);
+            // по клеткам для BetterHud (одно условие на картинку): zone_<i>, marker_<i>, hit_<i>, todo_<i> → 1/0
+            int us = sub.lastIndexOf('_');
+            if (us > 0) {
+                try {
+                    int i = Integer.parseInt(sub.substring(us + 1)); String k = sub.substring(0, us);
+                    if (st == null) return "0";
+                    switch (k) {
+                        case "zone": return i >= st.zoneStart() && i < st.zoneStart() + st.zoneLen() ? "1" : "0";
+                        case "marker": return st.pos() == i ? "1" : "0";
+                        case "hit": return i < st.need() && i < st.hits() ? "1" : "0";
+                        case "todo": return i < st.need() && i >= st.hits() ? "1" : "0";
+                        default: break;
+                    }
+                } catch (NumberFormatException ignored) { }
+            }
+            switch (sub) {
                 case "active": return st == null ? "0" : "1";
                 case "pos": return st == null ? "-1" : String.valueOf(st.pos());
                 case "zone_start": return st == null ? "0" : String.valueOf(st.zoneStart());

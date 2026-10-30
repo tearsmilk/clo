@@ -1,7 +1,7 @@
 # Заметки для Claude по проекту
 
 ## Noratrum — ZenQuests + ZenFishing + ZenGroups одним paper-плагином (`Noratrum/`, версия `o012mk23f87`, authors fame/ktnqqq)
-- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-10`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
+- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-11`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
   `ZenGroups/` — `src/main/java` и `src/main/resources` подключены в Noratrum; их собственных gradle/plugin.yml больше нет).
   Отдельных jar ZenQuests/ZenFishing/ZenGroups на сервере НЕТ — не заливать, иначе дубли PAPI/Vault.
 - **Никогда не перезаписывать jar поверх работающего с тем же именем**: JVM грузит классы лениво, и до рестарта консоль флудит
@@ -55,7 +55,7 @@
   в зелёной зоне `hits` раз (по редкости: 1..5), зона уже и маркер быстрее у редкой рыбы; промах/пауза — рыба срывается; успех →
   `FishingListener.deliver` (обычный улов, двойной улов, опыт). Во время борьбы новый заброс отменяется.
   Отрисовка (`minigame.display`): `betterhud` — картинка над экшенбаром: `plugins/BetterHud/{huds,images}/fishfight.yml`, блок `fishfight:`
-  в конце `layouts/default-layout.yml`, картинки `assets/fight/*.png`, `fishfight` в `default-hud`; данные через PAPI `%zenfishing_fight_active|pos|zone_start|zone_end|hits|need%`
+  в конце `layouts/default-layout.yml`, картинки `assets/fight/*.png`, `fishfight` в `default-hud`; данные через PAPI `%zenfishing_fight_active%` и по клеткам `%zenfishing_fight_zone_<i>|marker_<i>|hit_<i>|todo_<i>%` (1/0; одно условие на картинку — несколько условий BetterHud не выполнял)
   (исходники `ZenFishing/betterhud/`). `actionbar` — текстовая полоса.
 - Своей подписки нет: бонусы рыбалки даёт Ферма+ из ZenQuests (право `zenquests.premium` / `QuestsAPI.isPremium`). Квесты на рыбу —
   типы `CATCH_FISH` (цель id рыбы), `CATCH_RARITY`, `CATCH_NIGHT`, `CATCH_BIG` (≥ `catch.big-kg`). Ночью (13000–23000) клёв и удача выше
