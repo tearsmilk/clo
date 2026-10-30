@@ -16,6 +16,7 @@ import java.util.Locale;
  * /бустер                                   — свои активные бустеры
  * /бустер give <игрок> <тип> <x> <время>    — личный бустер (admin)
  * /бустер global <тип> <x> <время>          — глобальный (admin)
+ * /бустер item <игрок> <тип|all> [x] [время] [global] — выдать бустер-предмет(ы); по умолчанию items.mult/items.time из конфига
  * /бустер list [игрок]  |  clear <игрок|global> [тип]  |  reload   (admin)
  * Время: 30m, 2h, 1d, 1h30m (голое число — минуты).
  */
@@ -56,6 +57,21 @@ public final class BoosterCommand implements CommandExecutor, TabCompleter {
                 if (mult <= 1 || ms <= 0) { plugin.msg(sender, "usage-admin"); return true; }
                 m().addGlobal(type.id(), mult, ms, sender.getName());
                 plugin.broadcast("global-started", "type", type.name(), "mult", BoosterManager.fmt(mult), "left", BoosterManager.time(ms), "by", sender.getName());
+            }
+            case "item", "предмет", "items" -> {
+                if (args.length < 3) { plugin.msg(sender, "usage-admin"); return true; }
+                Player t = Bukkit.getPlayerExact(args[1]);
+                if (t == null) { plugin.msg(sender, "player-not-found", "player", args[1]); return true; }
+                double mult = args.length >= 4 && !BoosterItems.parseGlobal(args[3]) ? parseMult(args[3]) : plugin.getConfig().getDouble("items.mult", 2);
+                long ms = args.length >= 5 && !BoosterItems.parseGlobal(args[4]) ? BoosterManager.parseTime(args[4]) : BoosterManager.parseTime(plugin.getConfig().getString("items.time", "30m"));
+                boolean global = false; for (String a : args) if (BoosterItems.parseGlobal(a)) global = true;
+                if (mult <= 1 || ms <= 0) { plugin.msg(sender, "usage-admin"); return true; }
+                List<BoosterManager.Type> types = new ArrayList<>();
+                if (args[2].equalsIgnoreCase("all") || args[2].equalsIgnoreCase("все")) types.addAll(m().types().values());
+                else { BoosterManager.Type ty = m().type(args[2]); if (ty == null) { plugin.msg(sender, "unknown-type", "type", args[2], "types", String.join(", ", m().types().keySet())); return true; } types.add(ty); }
+                for (BoosterManager.Type ty : types)
+                    for (var rest : t.getInventory().addItem(plugin.items().create(ty, mult, ms, global, 1)).values()) t.getWorld().dropItemNaturally(t.getLocation(), rest);
+                plugin.msg(sender, "items-given", "count", types.size(), "player", t.getName(), "scope", global ? "глобальные" : "личные");
             }
             case "list", "список" -> {
                 if (args.length >= 2) { OfflinePlayer t = offline(args[1]); if (t == null) { plugin.msg(sender, "player-unknown", "player", args[1]); return true; } show(sender, t.getUniqueId(), t.getName() != null ? t.getName() : args[1]); }
@@ -103,10 +119,11 @@ public final class BoosterCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission("zenboosters.admin")) return List.of();
         List<String> names = new ArrayList<>(); for (Player p : Bukkit.getOnlinePlayers()) names.add(p.getName());
         List<String> types = new ArrayList<>(m().types().keySet());
-        if (args.length == 1) return filter(List.of("give", "global", "list", "clear", "reload"), args[0]);
+        if (args.length == 1) return filter(List.of("give", "global", "item", "list", "clear", "reload"), args[0]);
         String s = args[0].toLowerCase(Locale.ROOT);
         if (s.equals("give")) return switch (args.length) { case 2 -> filter(names, args[1]); case 3 -> filter(types, args[2]); case 4 -> filter(List.of("1.5", "2", "3"), args[3]); case 5 -> filter(List.of("30m", "1h", "3h", "1d"), args[4]); default -> List.of(); };
         if (s.equals("global")) return switch (args.length) { case 2 -> filter(types, args[1]); case 3 -> filter(List.of("1.5", "2", "3"), args[2]); case 4 -> filter(List.of("30m", "1h", "3h", "1d"), args[3]); default -> List.of(); };
+        if (s.equals("item")) { List<String> t2 = new ArrayList<>(List.of("all")); t2.addAll(types); return switch (args.length) { case 2 -> filter(names, args[1]); case 3 -> filter(t2, args[2]); case 4 -> filter(List.of("2", "1.5", "3", "global"), args[3]); case 5 -> filter(List.of("30m", "1h", "global"), args[4]); case 6 -> filter(List.of("global"), args[5]); default -> List.of(); }; }
         if (s.equals("list") && args.length == 2) return filter(names, args[1]);
         if (s.equals("clear")) { if (args.length == 2) { List<String> l = new ArrayList<>(List.of("global")); l.addAll(names); return filter(l, args[1]); } if (args.length == 3) return filter(types, args[2]); }
         return List.of();

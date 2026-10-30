@@ -18,6 +18,7 @@ import java.util.List;
 public final class ZenBoosters extends Module {
 
     private BoosterManager manager;
+    private BoosterItems items;
 
     public ZenBoosters(Noratrum host) { super(host, "ZenBoosters", "boosters"); }
 
@@ -28,6 +29,8 @@ public final class ZenBoosters extends Module {
         manager.load();
         BoostersAPI.bind(manager);
         getServer().getPluginManager().registerEvents(manager, this);
+        items = new BoosterItems(this);
+        getServer().getPluginManager().registerEvents(items, this);
         BoosterCommand cmd = new BoosterCommand(this);
         registerCommand("booster", List.of("бустер", "бустеры", "boosters", "zenboosters"), cmd, cmd);
         Bukkit.getScheduler().runTaskTimer(this, manager::tick, 20L, 20L);
@@ -40,6 +43,7 @@ public final class ZenBoosters extends Module {
 
     public void reloadAll() { reloadConfig(); manager.load(); }
     public BoosterManager manager() { return manager; }
+    public BoosterItems items() { return items; }
 
     public void msg(CommandSender to, String key, Object... kv) {
         String s = getConfig().getString("messages." + key);

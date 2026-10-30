@@ -1,7 +1,7 @@
 # Заметки для Claude по проекту
 
 ## Noratrum — ZenQuests + ZenFishing + ZenGroups одним paper-плагином (`Noratrum/`, версия `o012mk23f87`, authors fame/ktnqqq)
-- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-9`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
+- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-10`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
   `ZenGroups/` — `src/main/java` и `src/main/resources` подключены в Noratrum; их собственных gradle/plugin.yml больше нет).
   Отдельных jar ZenQuests/ZenFishing/ZenGroups на сервере НЕТ — не заливать, иначе дубли PAPI/Vault.
 - **Никогда не перезаписывать jar поверх работающего с тем же именем**: JVM грузит классы лениво, и до рестарта консоль флудит
@@ -15,7 +15,7 @@
   тип определяется по meta плагина автоматически. Право `noratrum.plugins` (default true); без него — ванильная команда.
 - Модуль ZenBoosters (`ZenBoosters/`, папка `plugins/Noratrum/boosters/`): личные/глобальные множители coins, farm_xp, fishing, crop_growth,
   station_speed; `/бустер give|global|list|clear|reload` (`zenboosters.admin`), PAPI `%zenboosters_<тип>[_active|_left]%`, API
-  `BoostersAPI.multiplier(uuid, type)`. В Noratrum применены fishing (ожидание клёва / m) и coins за рыбу; остальное должен применять
+  `BoostersAPI.multiplier(uuid, type)`; бустер-предметы `/бустер item <игрок> <тип|all> [x] [время] [global]` (ПКМ активирует, вид `items.material`). В Noratrum применены fishing (ожидание клёва / m) и coins за рыбу; остальное должен применять
   TakuFarmers — заявка в `ZenBoosters/API-TakuFarmers.md`.
 - Ниже разделы ZenQuests/ZenFishing/ZenGroups: пути `plugins/Zen*/…` читать как `plugins/Noratrum/<quests|fishing|groups>/…`,
   «jar ZenX» — как jar Noratrum.
