@@ -31,6 +31,7 @@ public final class PlayerData {
     public final List<String> pinned = new ArrayList<>();            // ключи квестов, закреплённых в худе (по порядку)
     public boolean pinnedInit = false;                                 // ежедневные уже закреплялись автоматически
     public boolean storyPinned = true;
+    public boolean ffly = false;                                       // /ffly включён (помнится между заходами)
     public boolean bookGiven = false;                                  // книга квестов уже выдавалась                                 // текущий сюжетный квест показывать в худе
     public boolean dirty = false;
 
@@ -66,6 +67,7 @@ public final class PlayerData {
         d.pinnedInit = y.getBoolean("pinned-init", false);
         d.storyPinned = y.getBoolean("story-pinned", true);
         d.bookGiven = y.getBoolean("book-given", false);
+        d.ffly = y.getBoolean("ffly", false);
         ConfigurationSection st = y.getConfigurationSection("story");
         if (st != null) for (String chain : st.getKeys(false)) d.storyStep.put(chain, st.getInt(chain, 0));
         return d;
@@ -87,6 +89,7 @@ public final class PlayerData {
         y.set("pinned-init", pinnedInit);
         y.set("story-pinned", storyPinned);
         y.set("book-given", bookGiven);
+        y.set("ffly", ffly);
         for (Map.Entry<String, Integer> e : storyStep.entrySet()) y.set("story." + e.getKey(), e.getValue());
         file.getParentFile().mkdirs();
         y.save(file);

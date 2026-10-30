@@ -12,15 +12,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
-/** /ffly — полёт на своей ферме для Ферма+. Своя ферма — мир TakuFarmersAPI.getFarmWorldName(uuid). */
+/** /ffly — полёт на своей ферме для Ферма+ (переключатель, помнится между заходами в PlayerData.ffly).
+ *  Своя ферма — мир TakuFarmersAPI.getFarmWorldName(uuid). */
 public final class FarmFly implements CommandExecutor, Listener {
 
     private final ZenQuests plugin;
-    private final Set<UUID> flying = new HashSet<>();
 
     public FarmFly(ZenQuests plugin) { this.plugin = plugin; }
 
@@ -38,14 +36,27 @@ public final class FarmFly implements CommandExecutor, Listener {
         return w != null && w.equalsIgnoreCase(p.getWorld().getName());
     }
 
+    private boolean allowed(Player p) {
+        return plugin.getConfig().getBoolean("ffly.enabled", true) && (plugin.quests().isPremium(p) || p.hasPermission("zenquests.ffly.free"));
+    }
+
+    /** Применить сохранённый выбор: на своей ферме с правом — разрешить полёт, иначе снять. */
+    public void apply(Player p, boolean notifyLeft) {
+        PlayerData d = plugin.quests().data(p);
+        boolean fly = d.ffly && allowed(p) && onOwnFarm(p);
+        if (fly) { if (!p.getAllowFlight()) p.setAllowFlight(true); }
+        else if (d.ffly && !onOwnFarm(p)) { stop(p); if (notifyLeft) plugin.msg(p, "ffly-left"); }
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player p)) { plugin.msg(sender, "players-only"); return true; }
         if (!plugin.getConfig().getBoolean("ffly.enabled", true)) return true;
         if (!plugin.quests().isPremium(p) && !p.hasPermission("zenquests.ffly.free")) { plugin.msg(p, "ffly-no-premium"); return true; }
         if (!onOwnFarm(p)) { plugin.msg(p, "ffly-not-farm"); return true; }
-        if (flying.remove(p.getUniqueId())) { stop(p); plugin.msg(p, "ffly-off"); return true; }
-        flying.add(p.getUniqueId());
+        PlayerData d = plugin.quests().data(p);
+        d.ffly = !d.ffly; d.dirty = true;
+        if (!d.ffly) { stop(p); plugin.msg(p, "ffly-off"); return true; }
         p.setAllowFlight(true);
         plugin.msg(p, "ffly-on");
         return true;
@@ -56,16 +67,17 @@ public final class FarmFly implements CommandExecutor, Listener {
         p.setFlying(false); p.setAllowFlight(false);
     }
 
+    /** Сменил мир: на свою ферму — вернуть полёт (если /ffly включён), с фермы — снять, выбор не сбрасывается. */
     @EventHandler
-    public void onWorld(PlayerChangedWorldEvent e) {
+    public void onWorld(PlayerChangedWorldEvent e) { apply(e.getPlayer(), true); }
+
+    /** Зашёл на сервер прямо на ферме — полёт сразу, выбор /ffly хранится в данных игрока. */
+    @EventHandler
+    public void onJoin(org.bukkit.event.player.PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (flying.contains(p.getUniqueId()) && !onOwnFarm(p)) {
-            flying.remove(p.getUniqueId()); stop(p); plugin.msg(p, "ffly-left");
-        }
+        Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) apply(p, false); }, 10L);
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent e) {
-        if (flying.remove(e.getPlayer().getUniqueId())) stop(e.getPlayer());
-    }
+    public void onQuit(PlayerQuitEvent e) { /* выбор сохраняется в PlayerData; полёт сервер сам сбросит при входе, apply вернёт его на ферме */ }
 }

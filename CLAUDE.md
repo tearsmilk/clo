@@ -1,7 +1,7 @@
 # Заметки для Claude по проекту
 
 ## Noratrum — ZenQuests + ZenFishing + ZenGroups одним paper-плагином (`Noratrum/`, версия `o012mk23f87`, authors fame/ktnqqq)
-- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-4`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
+- Сборка: `./gradlew build` в `Noratrum/` → `plugins/Noratrum-o012mk23f87-<n>.jar` (сейчас `-5`; исходники модулей по-прежнему в `ZenQuests/`, `ZenFishing/`,
   `ZenGroups/` — `src/main/java` и `src/main/resources` подключены в Noratrum; их собственных gradle/plugin.yml больше нет).
   Отдельных jar ZenQuests/ZenFishing/ZenGroups на сервере НЕТ — не заливать, иначе дубли PAPI/Vault.
 - **Никогда не перезаписывать jar поверх работающего с тем же именем**: JVM грузит классы лениво, и до рестарта консоль флудит
@@ -30,7 +30,7 @@
 - Конфиги: `plugins/ZenQuests/config.yml`, `quests.yml`; `/квесты reload` после правок (jar — только рестарт).
 - Жёрнов TakuFarmers теперь мебель millstone без событий — тип `MILL` мёртв, квесты на муку используют `OBTAIN` (targets: [flour]):
   `ObtainTracker` раз в секунду считает прирост предмета в инвентаре. Книга квестов — `QuestBook` (ПКМ → меню, выдаётся при входе,
-  `/квесты book`), 3D-модель `gui-specs/quest_book_model.py`. `/ffly` — полёт на своей ферме для Ферма+ (`FarmFly`, мир через TakuFarmersAPI).
+  `/квесты book`), 3D-модель `gui-specs/quest_book_model.py`. `/ffly` — полёт на своей ферме для Ферма+ (`FarmFly`, мир через TakuFarmersAPI); переключатель хранится в `PlayerData.ffly` и переживает перезаход (на ферме полёт возвращается сам, вне фермы снимается без сброса выбора).
   **quests.yml на сервере — мастер-копия** (владелец правит его сам, 18.10 заменил на свой набор из 24 ежедневных): перед любой правкой
   скачать с сервера, НЕ перезаписывать локальной версией из репо. Деплой jar — ТОЛЬКО после успешной сверки (cmp), старый jar
   удалять только после неё; при 502 панели повторять запись.
