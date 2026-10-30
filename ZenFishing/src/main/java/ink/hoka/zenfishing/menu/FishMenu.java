@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * /рыбалка: главное — профиль, удочка в руке, Ферма+, прокачка, продажа, топ.
- * Прокачка — удочка в шапке и 5 веток: клик вкладывает очко (и списывает монеты, если задана цена).
+ * /рыбалка: главное — профиль, удочка в руке, Ферма+, продажа, топ.
+ * Улучшение удочки — отдельное меню (клавиша F с удочкой в руке): удочка, сведения, следующая ступень и одна кнопка «Улучшить».
  */
 public final class FishMenu implements Listener {
 
@@ -45,8 +45,10 @@ public final class FishMenu implements Listener {
     private static final int[] INNER = {
             10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25,
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
-    private static final int ROD = 2, PROFILE = 4, PREMIUM = 6, UPGRADE = 22, SELL = 20, TOP = 24, CLOSE = 49, BACK = 49;
-    private static final int[] TRACK_SLOTS = {20, 21, 22, 23, 24};
+    private static final int ROD = 2, PROFILE = 4, PREMIUM = 6, SELL = 22, TOP = 24, CLOSE = 49;
+    // меню улучшения (вертикальная плашка, колонки 2..6): удочка, три сведения, следующая ступень, кнопка на 3 слота
+    private static final int U_ROD = 4, U_LEVEL = 12, U_BONUS = 13, U_MONEY = 14, U_NEXT = 31;
+    private static final int[] U_BUTTON = {48, 49, 50};
     private static final char SHIFT_TO_EDGE = '', SHIFT_BACK = '';
 
     private final ZenFishing plugin;
@@ -88,7 +90,6 @@ public final class FishMenu implements Listener {
             ItemMeta m = show.getItemMeta();
             if (m != null) { m.addItemFlags(ItemFlag.values()); if (tooltipStyle() != null) try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { } show.setItemMeta(m); }
             inv.setItem(ROD, icon("rod", show));
-            h.actions.put(ROD, () -> openRod(p));
         } else inv.setItem(ROD, icon("rod", item(Material.FISHING_ROD, cfg("rod.name", "Удочка"), cfgList("rod.none"), false)));
 
         // Ферма+ (подписка ZenQuests) — бонусы на рыбалке
@@ -98,9 +99,7 @@ public final class FishMenu implements Listener {
         inv.setItem(PREMIUM, icon(prem ? "premium-active" : "premium-inactive",
                 item(mat(prem ? "premium.active.item" : "premium.inactive.item", Material.NAUTILUS_SHELL), fill(cfg(prem ? "premium.active.name" : "premium.inactive.name", "{premium}")), lore, prem)));
 
-        // коллекция / продажа / топ
-        inv.setItem(UPGRADE, icon("upgrade", item(mat("upgrade.item", Material.ANVIL), cfg("upgrade.name", "Прокачка"), cfgList("upgrade.lore"), false)));
-        h.actions.put(UPGRADE, () -> openRod(p));
+        // продажа / топ
         ZenFishing.Sale sale = plugin.appraise(p);
         inv.setItem(SELL, icon("sell", item(mat("sell.item", Material.GOLD_INGOT), cfg("sell.name", "Продать"),
                 fillAll(cfgList("sell.lore"), "count", sale.count(), "amount", Text.num(sale.amount())), false)));
@@ -131,7 +130,7 @@ public final class FishMenu implements Listener {
         return f == null ? "—" : f.rarity().color() + f.name();
     }
 
-    // ── прокачка удочки ──
+    // ── улучшение удочки (F с удочкой в руке) ──
 
     private ItemStack rodInHand(Player p) {
         ItemStack rod = p.getInventory().getItemInMainHand();
@@ -139,53 +138,89 @@ public final class FishMenu implements Listener {
         return plugin.rods().isRod(rod) ? rod : null;
     }
 
-    public void openRod(Player p) {
+    public void openUpgrade(Player p) {
         Rods rods = plugin.rods();
         Holder h = new Holder();
-        Inventory inv = Bukkit.createInventory(h, 54, menuTitle("rod", cfg("rod-title", "Прокачка удочки")));
+        Inventory inv = Bukkit.createInventory(h, 54, menuTitle("upgrade", cfg("rod-title", "Удочка")));
         h.inv = inv;
         frame(inv);
         ItemStack rod = rodInHand(p);
         if (rod == null) {
-            inv.setItem(PROFILE, item(Material.FISHING_ROD, cfg("rod-none.name", "Нет удочки"), cfgList("rod-none.lore"), false));
+            inv.setItem(U_ROD, item(Material.FISHING_ROD, cfg("rod-none.name", "Нет удочки"), cfgList("rod-none.lore"), false));
+            p.openInventory(inv);
+            return;
+        }
+        rods.refresh(rod, p);
+        ItemStack show = rod.clone();
+        ItemMeta m = show.getItemMeta();
+        if (m != null) { m.addItemFlags(ItemFlag.values()); if (tooltipStyle() != null) try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { } show.setItemMeta(m); }
+        inv.setItem(U_ROD, icon("rod", show));
+
+        boolean prem = plugin.isPremium(p);
+        int lvl = rods.level(rod), tier = rods.tier(rod);
+        Rods.Tier cur = rods.current(rod), next = rods.next(rod);
+        double money = plugin.economy().balance(p), cost = rods.nextCost(rod, prem);
+        Object[] kv = {"level", lvl, "xp", rods.xp(rod), "need", rods.need(lvl), "bar", rods.bar(lvl, rods.xp(rod)), "tier", tier, "max-tier", rods.maxTier(),
+                "money", Text.num(money), "cost", Text.num(cost), "need-level", next == null ? "-" : next.level(), "next-tier", tier + 1};
+        // сведения: уровень удочки, бонусы ступени, кошелёк
+        inv.setItem(U_LEVEL, invisible(fill(cfg("upgrade.level.name", "&bУровень удочки"), kv), fillAll(cfgList("upgrade.level.lore"), kv)));
+        List<String> bl = fillAll(cfgList("upgrade.bonus.lore"), kv);
+        if (cur != null) bl.addAll(rods.bonusLines(cur)); else bl.add(cfg("upgrade.bonus.none", "&8нет"));
+        inv.setItem(U_BONUS, invisible(fill(cfg("upgrade.bonus.name", "&bБонусы удочки"), kv), bl));
+        inv.setItem(U_MONEY, invisible(fill(cfg("upgrade.money.name", "&eМонеты"), kv), fillAll(cfgList("upgrade.money.lore"), kv)));
+        // следующая ступень
+        if (next == null) {
+            inv.setItem(U_NEXT, invisible(fill(cfg("upgrade.next.name-max", "&6Максимум"), kv), fillAll(cfgList("upgrade.next.lore-max"), kv)));
+            for (int slot : U_BUTTON) inv.setItem(slot, invisible(fill(cfg("upgrade.button.name-max", "&7Улучшить"), kv), fillAll(cfgList("upgrade.button.lore-max"), kv)));
         } else {
-            rods.refresh(rod, p);
-            ItemStack show = rod.clone();
-            ItemMeta m = show.getItemMeta();
-            if (m != null) { m.addItemFlags(ItemFlag.values()); if (tooltipStyle() != null) try { m.setTooltipStyle(tooltipStyle()); } catch (Throwable ignored) { } show.setItemMeta(m); }
-            inv.setItem(PROFILE, icon("rod", show));
-            boolean prem = plugin.isPremium(p);
-            int free = rods.points(rod);
-            for (int i = 0; i < Rods.TRACKS.length && i < TRACK_SLOTS.length; i++) {
-                int pts = rods.track(rod, i), max = rods.trackMax(i);
-                boolean full = pts >= max;
-                double cost = rods.trackCost(rod, i, prem);
-                Object[] kv = {"track", rods.trackName(i), "points", pts, "max", max, "value", Rods.pct(rods.trackValue(rod, i)),
-                        "next", Rods.pct((pts + 1) * rods.trackStep(i)), "cost", Text.num(cost), "free", free};
-                List<String> lore = fillAll(cfgList(full ? "tracks.lore-max" : free > 0 ? "tracks.lore" : "tracks.lore-no-points"), kv);
-                ItemStack it = item(mat("tracks.items." + Rods.TRACKS[i], Material.PAPER), fill(cfg(full ? "tracks.name-max" : "tracks.name", "{track}"), kv), lore, full);
-                inv.setItem(TRACK_SLOTS[i], icon("track", it));
-                final int idx = i;
-                h.actions.put(TRACK_SLOTS[i], () -> upgrade(p, idx));
+            boolean okLevel = lvl >= next.level(), okMoney = money >= cost || cost <= 0;
+            List<String> nl = fillAll(cfgList("upgrade.next.lore"), kv);
+            nl.addAll(rods.bonusLines(next));
+            nl.add(""); nl.add(fill(cfg(okLevel ? "upgrade.next.req-level-ok" : "upgrade.next.req-level-no", "&7Уровень: {need-level}"), kv));
+            nl.add(fill(cfg(okMoney ? "upgrade.next.req-money-ok" : "upgrade.next.req-money-no", "&7Цена: {cost}"), kv));
+            inv.setItem(U_NEXT, invisible(fill(cfg("upgrade.next.name", "&bСтупень {next-tier}"), kv), nl));
+            boolean can = okLevel && okMoney;
+            for (int slot : U_BUTTON) {
+                inv.setItem(slot, invisible(fill(cfg(can ? "upgrade.button.name" : "upgrade.button.name-locked", "&aУлучшить"), kv), fillAll(cfgList(can ? "upgrade.button.lore" : "upgrade.button.lore-locked"), kv)));
+                h.actions.put(slot, () -> upgrade(p));
             }
         }
-        inv.setItem(BACK, icon("back", item(mat("back.item", Material.ARROW), cfg("back.name", "Назад"), List.of(), false)));
-        h.actions.put(BACK, () -> openMain(p));
         p.openInventory(inv);
     }
 
-    private void upgrade(Player p, int i) {
+    private void upgrade(Player p) {
         Rods rods = plugin.rods();
         ItemStack rod = rodInHand(p);
-        if (rod == null) { plugin.msg(p, "upgrade-no-rod"); openRod(p); return; }
-        if (rods.track(rod, i) >= rods.trackMax(i)) { plugin.msg(p, "upgrade-max"); return; }
-        if (rods.points(rod) <= 0) { plugin.msg(p, "upgrade-no-points"); return; }
-        double cost = rods.trackCost(rod, i, plugin.isPremium(p));
-        if (cost > 0 && plugin.economy().canCharge() && !plugin.economy().take(p, cost)) { plugin.msg(p, "upgrade-no-money", "cost", Text.num(cost)); return; }
-        if (!rods.upgrade(rod, i, p)) return;
-        plugin.msg(p, "upgraded", "track", rods.trackName(i), "value", Rods.pct(rods.trackValue(rod, i)), "free", rods.points(rod));
+        if (rod == null) { plugin.msg(p, "upgrade-no-rod"); openUpgrade(p); return; }
+        Rods.Tier next = rods.next(rod);
+        if (next == null) { plugin.msg(p, "upgrade-max"); return; }
+        if (rods.level(rod) < next.level()) { plugin.msg(p, "upgrade-need-level", "level", next.level()); return; }
+        double cost = rods.nextCost(rod, plugin.isPremium(p));
+        if (cost > 0) {
+            if (!plugin.economy().canCharge()) { plugin.msg(p, "sell-unavailable"); return; }
+            if (!plugin.economy().take(p, cost)) { plugin.msg(p, "upgrade-no-money", "cost", Text.num(cost)); return; }
+        }
+        if (!rods.upgrade(rod, p)) return;
+        plugin.msg(p, "upgraded", "tier", rods.tier(rod), "max-tier", rods.maxTier(), "cost", Text.num(cost));
         p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_USE, 0.6f, 1.4f);
-        openRod(p);
+        openUpgrade(p);
+    }
+
+    /** F (смена рук) с удочкой в главной руке — открыть меню улучшения. */
+    @EventHandler
+    public void onSwap(org.bukkit.event.player.PlayerSwapHandItemsEvent e) {
+        if (!plugin.getConfig().getBoolean("menu.upgrade.open-on-swap", true)) return;
+        Player p = e.getPlayer();
+        if (!plugin.rods().isRod(p.getInventory().getItemInMainHand())) return;
+        e.setCancelled(true);
+        if (!p.hasPermission("zenfishing.use")) return;
+        openUpgrade(p);
+    }
+
+    /** Невидимый предмет-кнопка (модель menu.icons.empty), текст — только в подсказке; фон рисует плашка. */
+    private ItemStack invisible(String name, List<String> lore) {
+        ItemStack it = item(Material.PAPER, name, lore, false);
+        return icon("empty", it);
     }
 
     // ── события ──
@@ -214,7 +249,7 @@ public final class FishMenu implements Listener {
         String bg = plugin.getConfig().getString("menu.textures.backgrounds." + background, "");
         if (!textured() || bg == null || bg.isEmpty()) return title;
         Key font = Key.key(plugin.getConfig().getString("menu.textures.font", "zenquests:menu"));
-        String seq = plugin.getConfig().getString("menu.textures.sequence", "");
+        String seq = plugin.getConfig().getString("menu.textures.sequences." + background, plugin.getConfig().getString("menu.textures.sequence", ""));
         if (seq == null || seq.isBlank()) seq = "" + SHIFT_TO_EDGE + "{bg}" + SHIFT_BACK;
         Component image = Component.text(seq.replace("{bg}", bg)).font(font).color(NamedTextColor.WHITE);
         if (!plugin.getConfig().getBoolean("menu.textures.title", false)) return image;

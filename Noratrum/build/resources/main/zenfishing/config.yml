@@ -11,35 +11,41 @@ rod:
   # Опыт до следующего уровня: xp-base × xp-growth^(уровень−1)   (1→2: 100, 2→3: 125, 10→11: ~750 …)
   xp-base: 100
   xp-growth: 1.25
-  # Сколько очков прокачки даёт каждый новый уровень. Очки вкладываются в ветки в меню /рыбалка → Прокачка.
-  points-per-level: 1
-  # Ветки: per-point — бонус за одно очко (0.02 = 2%), max — очков в ветке, cost-base × cost-growth^вложено — цена
-  # очередного очка в монетах (0 — бесплатно). Сумма max всех веток = (max-level − 1) × points-per-level.
-  upgrades:
-    luck:   { name: "Удача",         per-point: 0.08, max: 10, cost-base: 150, cost-growth: 1.35 }   # шанс редкой рыбы
-    bite:   { name: "Клёв",          per-point: 0.06, max: 10, cost-base: 120, cost-growth: 1.35 }   # быстрее поклёвка
-    double: { name: "Двойной улов",  per-point: 0.02, max: 10, cost-base: 200, cost-growth: 1.35 }   # шанс второй рыбы
-    sell:   { name: "Цена",          per-point: 0.04, max: 10, cost-base: 180, cost-growth: 1.35 }   # дороже продажа
-    xp:     { name: "Опыт",          per-point: 0.05, max: 9,  cost-base: 150, cost-growth: 1.35 }   # больше опыта удочке
+  # Улучшение удочки — одна кнопка в меню (F с удочкой в руке). Ступени по порядку: level — нужный уровень удочки (растёт от
+  # рыбалки), cost — цена в монетах Vault, бонусы — доли (0.08 = +8%), значения ступени действуют целиком (не суммируются).
+  tiers:
+    - { level: 3,  cost: 300,   luck: 0.05, bite: 0.05, double: 0.01, sell: 0.02, xp: 0.05 }
+    - { level: 6,  cost: 700,   luck: 0.10, bite: 0.10, double: 0.02, sell: 0.04, xp: 0.10 }
+    - { level: 10, cost: 1500,  luck: 0.16, bite: 0.15, double: 0.04, sell: 0.07, xp: 0.15 }
+    - { level: 15, cost: 3000,  luck: 0.24, bite: 0.20, double: 0.06, sell: 0.10, xp: 0.20 }
+    - { level: 20, cost: 5500,  luck: 0.32, bite: 0.26, double: 0.08, sell: 0.14, xp: 0.25 }
+    - { level: 26, cost: 9000,  luck: 0.42, bite: 0.32, double: 0.11, sell: 0.18, xp: 0.30 }
+    - { level: 33, cost: 14000, luck: 0.54, bite: 0.40, double: 0.14, sell: 0.23, xp: 0.36 }
+    - { level: 40, cost: 20000, luck: 0.66, bite: 0.48, double: 0.17, sell: 0.28, xp: 0.42 }
+    - { level: 46, cost: 28000, luck: 0.78, bite: 0.55, double: 0.20, sell: 0.34, xp: 0.48 }
+    - { level: 50, cost: 40000, luck: 0.90, bite: 0.60, double: 0.24, sell: 0.40, xp: 0.55 }
+  bonus-names: { luck: "Удача", bite: "Клёв", double: "Двойной улов", sell: "Цена продажи", xp: "Опыт удочки" }
+  bonus-line: "&7{name}: &a+{value}%"
   # Свой стиль подсказки удочки (ресурспак assets/zenfishing/textures/gui/sprites/tooltip/sea_*.png). Пусто — обычный.
   tooltip-style: "zenfishing:sea"
   name: "&b🎣 Удочка &7[&fур. {level}&7]"
   name-max: "&b🎣 Удочка &7[&6МАКС&7]"
-  # {tracks} — по строке track-line на каждую прокачанную ветку; {free} — свободные очки
+  # {bonuses} — строки bonus-line по текущей ступени; {tier}/{max-tier} — ступень улучшения
   lore:
     - "&#3aace4━━━━━━━━━━━━━━"
     - "&7Опыт: &f{xp}&7/&f{need}"
     - "{bar}"
     - "&#3aace4━━━━━━━━━━━━━━"
-    - "{tracks}"
-    - "&7Свободных очков: &e{free}"
+    - "&7Улучшение: &f{tier}&7/&f{max-tier}"
+    - "{bonuses}"
+    - "&8F — улучшить удочку"
   lore-max:
     - "&#3aace4━━━━━━━━━━━━━━"
     - "&6✦ Максимальный уровень"
     - "&#3aace4━━━━━━━━━━━━━━"
-    - "{tracks}"
-    - "&7Свободных очков: &e{free}"
-  track-line: "&7{track}: &a+{value}% &8({points})"
+    - "&7Улучшение: &f{tier}&7/&f{max-tier}"
+    - "{bonuses}"
+    - "&8F — улучшить удочку"
   bar: { length: 20, filled: "&b▮", empty: "&8▮" }
 
 # ── Улов ──
@@ -133,7 +139,7 @@ net:
 
 menu:
   title: "<gradient:#38b6ff:#5ce1e6>🎣 Рыбалка</gradient>"
-  rod-title: "<gradient:#38b6ff:#5ce1e6>🎣 Прокачка удочки</gradient>"
+  rod-title: "<gradient:#38b6ff:#5ce1e6>🎣 Удочка</gradient>"
   accent: LIGHT_BLUE_STAINED_GLASS_PANE
   corner: CYAN_STAINED_GLASS_PANE
   background: BLACK_STAINED_GLASS_PANE
@@ -145,9 +151,11 @@ menu:
     font: "zenfishing:menu"
     title: false
     sequence: "\uE100\uE010\uE102\uE011\uE103\uE012\uE102\uE013\uE103{bg}\uE101"
-    backgrounds: { main: "\uE000", rod: "\uE001" }
+    backgrounds: { main: "\uE000", rod: "\uE001", upgrade: "\uE002" }
+    # отдельная последовательность для фона (без сцены по краям): меню улучшения — только вертикальная плашка
+    sequences: { upgrade: "\uE100\uE002\uE101" }
   # Свои иконки кнопок (модели предметов, напр. zenquests:icon_close). Пусто — обычный предмет.
-  icons: { close: "", back: "", prev: "", next: "", sell: "", top: "", premium-active: "", premium-inactive: "", collection: "", unknown: "", rod: "" }
+  icons: { close: "", back: "", prev: "", next: "", sell: "", top: "", premium-active: "", premium-inactive: "", collection: "", unknown: "", rod: "", empty: "zenquests:icon_empty" }
   profile:
     name: "&b{player}"
     lore:
@@ -158,25 +166,28 @@ menu:
   rod:
     name: "&bУдочка в руке"
     none: ["&7Возьми удочку в руку,", "&7чтобы увидеть её уровень"]
+  # Меню улучшения (F с удочкой в руке; фон — вертикальная плашка): удочка (4), сведения (12..14), ступень (31), кнопка (48..50)
   upgrade:
-    name: "&bПрокачка удочки"
-    lore: ["&7Вложи очки в удачу, клёв,", "&7двойной улов, цену и размер рыбы", "", "&eНажми, чтобы открыть"]
-    item: ANVIL
-  # Меню прокачки: шапка — удочка, 5 веток, назад
-  tracks:
-    name: "&b{track} &7[&f{points}&7/&f{max}&7]"
-    name-max: "&b{track} &7[&6МАКС&7]"
-    lore:
-      - "&7Сейчас: &a+{value}%"
-      - "&7Следующее очко: &a+{next}%"
-      - ""
-      - "&7Цена: &e{cost} {currency}"
-      - "&7Свободных очков: &e{free}"
-      - ""
-      - "&eНажми, чтобы вложить очко"
-    lore-max: ["&7Сейчас: &a+{value}%", "", "&6✦ Ветка прокачана полностью"]
-    lore-no-points: ["&7Сейчас: &a+{value}%", "&7Следующее очко: &a+{next}%", "", "&cНет свободных очков", "&7Очки дают уровни удочки"]
-    items: { luck: RABBIT_FOOT, bite: CLOCK, double: COD, sell: GOLD_NUGGET, xp: EXPERIENCE_BOTTLE }
+    open-on-swap: true
+    level: { name: "&bУровень удочки: &f{level}", lore: ["&7Опыт: &f{xp}&7/&f{need}", "{bar}", "", "&8Уровень растёт от рыбалки"] }
+    bonus: { name: "&bБонусы удочки &7[&f{tier}&7/&f{max-tier}&7]", lore: ["&7Текущая ступень даёт:"], none: "&8пока ничего — улучши удочку" }
+    money: { name: "&eМонеты: &f{money} {currency}", lore: ["&7Улучшение стоит монет", "&7и требует уровень удочки"] }
+    next:
+      name: "&bСтупень {next-tier} &7из &f{max-tier}"
+      lore: ["&7Даст:"]
+      req-level-ok: "&a✔ &7Уровень удочки: &f{need-level}"
+      req-level-no: "&c✘ &7Уровень удочки: &f{need-level} &8(сейчас {level})"
+      req-money-ok: "&a✔ &7Цена: &e{cost} {currency}"
+      req-money-no: "&c✘ &7Цена: &e{cost} {currency} &8(есть {money})"
+      name-max: "&6✦ Максимальная ступень"
+      lore-max: ["&7Удочка улучшена полностью"]
+    button:
+      name: "&a▶ Улучшить"
+      lore: ["&7Ступень {tier} → &f{next-tier}", "&7Спишется: &e{cost} {currency}", "", "&eНажми, чтобы улучшить"]
+      name-locked: "&c▶ Улучшить"
+      lore-locked: ["&7Нужен уровень удочки &f{need-level}", "&7и &e{cost} {currency}"]
+      name-max: "&7▶ Улучшить"
+      lore-max: ["&8Максимум"]
   rod-none:
     name: "&cНет удочки"
     lore: ["&7Возьми удочку в руку", "&7и открой меню снова"]
@@ -235,10 +246,10 @@ messages:
   new-species: "&6★ Новый вид в коллекции: {color}{fish} &7({known}/{total})"
   level-up: "&b🎣 Удочка прокачана до &fуровня {level}&b!"
   level-max: "&6✦ Удочка достигла максимального уровня!"
-  upgraded: "&b🎣 {track} &7→ &a+{value}%&7. Осталось очков: &e{free}"
+  upgraded: "&b🎣 Удочка улучшена: ступень &f{tier}&7/&f{max-tier}&7. Списано &e{cost} {currency}&7."
   upgrade-no-rod: "&cВозьми удочку в руку."
-  upgrade-no-points: "&cНет свободных очков — лови рыбу, уровни дают очки."
-  upgrade-max: "&7Эта ветка уже прокачана полностью."
+  upgrade-need-level: "&cНужен уровень удочки &f{level}&c — лови рыбу."
+  upgrade-max: "&7Удочка улучшена полностью."
   upgrade-no-money: "&cНе хватает монет: нужно &e{cost} {currency}&c."
   sold: "&aПродано рыбы: &f{count} &aна &e{amount} {currency}&a."
   nothing-to-sell: "&7В инвентаре нет рыбы."

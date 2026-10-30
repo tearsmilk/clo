@@ -45,6 +45,13 @@ public final class Economy {
 
     public boolean canCharge() { return vault != null; }
 
+    /** Баланс игрока (Vault); 0 без Vault. */
+    public double balance(Player p) {
+        if (vault == null) return 0;
+        try { return ((Number) vault.getClass().getMethod("getBalance", OfflinePlayer.class).invoke(vault, p)).doubleValue(); }
+        catch (Throwable t) { return 0; }
+    }
+
     /** @return true, если выплата прошла */
     public boolean pay(Player p, double amount) {
         if (amount <= 0) return false;

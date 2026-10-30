@@ -51,7 +51,7 @@ public final class ZenFishing extends Module {
     @Override
     public void onDisable() { if (stats != null) stats.saveDirty(); if (nets != null) nets.save(); }
 
-    public void reloadAll() { reloadConfig(); fish.load(); economy.hook(); }
+    public void reloadAll() { reloadConfig(); fish.load(); economy.hook(); rods.reloadTiers(); }
 
     public FishRegistry fish() { return fish; }
     public Rods rods() { return rods; }

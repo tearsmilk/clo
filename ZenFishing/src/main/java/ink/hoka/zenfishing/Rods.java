@@ -4,7 +4,6 @@ import ink.hoka.zenfishing.util.Text;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -15,26 +14,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Удочка: уровень и опыт — в PDC предмета. Каждый уровень даёт очки прокачки (rod.points-per-level),
- * очки вкладываются в ветки (rod.upgrades.*) в меню /рыбалка → Прокачка. Бонусы считаются из веток + подписки.
+ * Удочка: уровень и опыт — в PDC предмета (растут от рыбалки). Улучшение — ступени rod.tiers: одна кнопка в меню (F с удочкой в руке),
+ * каждая ступень требует уровень удочки и монеты Vault и даёт набор бонусов целиком. Бонусы = ступень + подписка Ферма+.
  */
 public final class Rods {
-
-    /** Ветки прокачки — ключи rod.upgrades.<id>, порядок — порядок в меню. */
-    public static final String[] TRACKS = {"luck", "bite", "double", "sell", "xp"};
 
     /** Бонусы удочки в руке: доли (0.25 = +25%). */
     public record Bonus(int level, double luck, double bite, double dbl, double sell, double big, double xpMul) {}
 
+    /** Ступень улучшения: требуемый уровень удочки, цена в монетах и бонусы (накопительно — значения ступени целиком). */
+    public record Tier(int level, double cost, double luck, double bite, double dbl, double sell, double xp) {}
+
     private final ZenFishing plugin;
-    private final NamespacedKey kLevel, kXp;
-    private final NamespacedKey[] kTrack = new NamespacedKey[TRACKS.length];
+    private final NamespacedKey kLevel, kXp, kTier;
 
     public Rods(ZenFishing plugin) {
         this.plugin = plugin;
         kLevel = new NamespacedKey(plugin, "level");
         kXp = new NamespacedKey(plugin, "xp");
-        for (int i = 0; i < TRACKS.length; i++) kTrack[i] = new NamespacedKey(plugin, "up_" + TRACKS[i]);
+        kTier = new NamespacedKey(plugin, "tier");
     }
 
     public boolean isRod(ItemStack it) { return it != null && it.getType() == Material.FISHING_ROD; }
@@ -47,9 +45,8 @@ public final class Rods {
 
     public int level(ItemStack it) { return isRod(it) ? Math.max(1, pdc(it, kLevel, 1)) : 0; }
     public int xp(ItemStack it) { return pdc(it, kXp, 0); }
-    public int track(ItemStack it, int i) { return pdc(it, kTrack[i], 0); }
+    public int tier(ItemStack it) { return isRod(it) ? Math.max(0, pdc(it, kTier, 0)) : 0; }
     public int maxLevel() { return Math.max(1, plugin.getConfig().getInt("rod.max-level", 50)); }
-    public int pointsPerLevel() { return Math.max(1, plugin.getConfig().getInt("rod.points-per-level", 1)); }
 
     /** Опыт, нужный для перехода с level на level+1. */
     public int need(int level) {
@@ -57,31 +54,37 @@ public final class Rods {
         return (int) Math.round(base * Math.pow(g, level - 1));
     }
 
-    // ── ветки ──
+    // ── ступени улучшения (rod.tiers) ──
 
-    private ConfigurationSection up(int i) { return plugin.getConfig().getConfigurationSection("rod.upgrades." + TRACKS[i]); }
-    public String trackName(int i) { ConfigurationSection s = up(i); return s == null ? TRACKS[i] : s.getString("name", TRACKS[i]); }
-    public int trackMax(int i) { ConfigurationSection s = up(i); return s == null ? 10 : s.getInt("max", 10); }
-    public double trackStep(int i) { ConfigurationSection s = up(i); return s == null ? 0 : s.getDouble("per-point", 0); }
-    public double trackValue(ItemStack rod, int i) { return track(rod, i) * trackStep(i); }
-
-    /** Цена в монетах следующего улучшения ветки (0 — бесплатно). */
-    public double trackCost(ItemStack rod, int i, boolean premium) {
-        ConfigurationSection s = up(i);
-        if (s == null) return 0;
-        double c = s.getDouble("cost-base", 0) * Math.pow(s.getDouble("cost-growth", 1), track(rod, i));
-        if (premium) c *= 1 - plugin.getConfig().getDouble("premium.upgrade-discount", 0);
-        return Math.round(c);
+    private List<Tier> tiers;
+    public List<Tier> tiers() {
+        if (tiers != null) return tiers;
+        List<Tier> out = new ArrayList<>();
+        for (java.util.Map<?, ?> m : plugin.getConfig().getMapList("rod.tiers")) {
+            out.add(new Tier(num(m.get("level"), 1).intValue(), num(m.get("cost"), 0).doubleValue(), num(m.get("luck"), 0).doubleValue(),
+                    num(m.get("bite"), 0).doubleValue(), num(m.get("double"), 0).doubleValue(), num(m.get("sell"), 0).doubleValue(), num(m.get("xp"), 0).doubleValue()));
+        }
+        return tiers = out;
+    }
+    public void reloadTiers() { tiers = null; }
+    private static Number num(Object o, Number def) { return o instanceof Number n ? n : def; }
+    public int maxTier() { return tiers().size(); }
+    /** Ступень с номером t (1..maxTier), null — нет такой. */
+    public Tier tierCfg(int t) { return t >= 1 && t <= tiers().size() ? tiers().get(t - 1) : null; }
+    public Tier current(ItemStack rod) { return tierCfg(tier(rod)); }
+    public Tier next(ItemStack rod) { return tierCfg(tier(rod) + 1); }
+    /** Цена следующей ступени с учётом скидки Ферма+. */
+    public double nextCost(ItemStack rod, boolean premium) {
+        Tier n = next(rod);
+        if (n == null) return 0;
+        return Math.round(n.cost() * (premium ? 1 - plugin.getConfig().getDouble("premium.upgrade-discount", 0) : 1));
     }
 
-    public int spent(ItemStack rod) { int s = 0; for (int i = 0; i < TRACKS.length; i++) s += track(rod, i); return s; }
-    public int points(ItemStack rod) { return isRod(rod) ? Math.max(0, (level(rod) - 1) * pointsPerLevel() - spent(rod)) : 0; }
-
-    /** Вложить очко в ветку (деньги списывает вызывающий). @return false — нет очков или ветка на максимуме. */
-    public boolean upgrade(ItemStack rod, int i, Player p) {
-        if (!isRod(rod) || points(rod) <= 0 || track(rod, i) >= trackMax(i)) return false;
+    /** Поднять ступень на 1 (проверки уровня и денег — у вызывающего). */
+    public boolean upgrade(ItemStack rod, Player p) {
+        if (!isRod(rod) || next(rod) == null) return false;
         ItemMeta m = rod.getItemMeta();
-        m.getPersistentDataContainer().set(kTrack[i], PersistentDataType.INTEGER, track(rod, i) + 1);
+        m.getPersistentDataContainer().set(kTier, PersistentDataType.INTEGER, tier(rod) + 1);
         rod.setItemMeta(m);
         refresh(rod, p);
         return true;
@@ -90,7 +93,8 @@ public final class Rods {
     /** Бонусы удочки (с учётом подписки игрока). Без удочки — уровень 0 и только подписка. */
     public Bonus bonus(ItemStack rod, boolean premium) {
         double luck = 0, bite = 0, dbl = 0, sell = 0, big = 0, xp = 1;
-        if (isRod(rod)) { luck = trackValue(rod, 0); bite = trackValue(rod, 1); dbl = trackValue(rod, 2); sell = trackValue(rod, 3); xp += trackValue(rod, 4); }
+        Tier t = isRod(rod) ? current(rod) : null;
+        if (t != null) { luck = t.luck(); bite = t.bite(); dbl = t.dbl(); sell = t.sell(); xp += t.xp(); }
         var c = plugin.getConfig();
         if (premium) {
             luck += c.getDouble("premium.luck", 0); bite += c.getDouble("premium.bite-speed", 0);
@@ -132,10 +136,9 @@ public final class Rods {
         m.displayName(Text.parse(fill(c.getString(max ? "rod.name-max" : "rod.name", "Удочка"), rod, lvl, xp)));
         List<Component> lore = new ArrayList<>();
         for (String l : c.getStringList(max ? "rod.lore-max" : "rod.lore")) {
-            if (l.equals("{tracks}")) {
-                for (int i = 0; i < TRACKS.length; i++) if (track(rod, i) > 0)
-                    lore.add(Text.parse(fill(c.getString("rod.track-line", "&7{track}: &a+{value}%"), rod, lvl, xp)
-                            .replace("{track}", trackName(i)).replace("{value}", pct(trackValue(rod, i))).replace("{points}", String.valueOf(track(rod, i)))));
+            if (l.equals("{bonuses}")) {
+                Tier t = current(rod);
+                if (t != null) for (String line : bonusLines(t)) lore.add(Text.parse(line));
             } else lore.add(Text.parse(fill(l, rod, lvl, xp)));
         }
         m.lore(lore);
@@ -145,9 +148,22 @@ public final class Rods {
         rod.setItemMeta(m);
     }
 
+    /** Строки бонусов ступени по шаблону rod.bonus-line (только ненулевые). */
+    public List<String> bonusLines(Tier t) {
+        List<String> out = new ArrayList<>();
+        String tpl = plugin.getConfig().getString("rod.bonus-line", "&7{name}: &a+{value}%");
+        String[][] rows = {{"luck", String.valueOf(t.luck())}, {"bite", String.valueOf(t.bite())}, {"double", String.valueOf(t.dbl())}, {"sell", String.valueOf(t.sell())}, {"xp", String.valueOf(t.xp())}};
+        for (String[] r : rows) {
+            double v = Double.parseDouble(r[1]);
+            if (v <= 0) continue;
+            out.add(tpl.replace("{name}", plugin.getConfig().getString("rod.bonus-names." + r[0], r[0])).replace("{value}", pct(v)));
+        }
+        return out;
+    }
+
     private String fill(String s, ItemStack rod, int lvl, int xp) {
         return s.replace("{level}", String.valueOf(lvl)).replace("{xp}", String.valueOf(xp)).replace("{need}", String.valueOf(need(lvl)))
-                .replace("{bar}", bar(lvl, xp)).replace("{free}", String.valueOf(points(rod)));
+                .replace("{bar}", bar(lvl, xp)).replace("{tier}", String.valueOf(tier(rod))).replace("{max-tier}", String.valueOf(maxTier()));
     }
 
     public String bar(int lvl, int xp) {

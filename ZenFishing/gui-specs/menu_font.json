@@ -29,6 +29,15 @@
     },
     {
       "type": "bitmap",
+      "file": "zenfishing:gui/menu/upgrade.png",
+      "ascent": 30,
+      "height": 239,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
       "file": "zenfishing:gui/scene/scene_tl.png",
       "ascent": 30,
       "height": 120,

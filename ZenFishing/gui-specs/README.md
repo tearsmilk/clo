@@ -8,8 +8,11 @@
 - Накладки: `python3 scripts/gui_builder.py gui-specs/main_hd.json OUT` и `rod_hd.json` (из папки скилла
   `minecraft-nexo-gui` с патчем ленты), затем `python3 inventory_frame.py OUT/texture/*.png` (синяя рама инвентаря).
 - Пак: `assets/zenfishing/font/menu.json` (`menu_font.json`), `textures/gui/menu/{main,rod}.png`, `textures/gui/scene/*`.
-  Слоты главного меню: 2 удочка, 4 профиль, 6 Рыбак+, 20 продать, 22 прокачка, 24 топ, 49 закрыть; прокачка —
-  4 удочка, 20..24 ветки, 49 назад (`FishMenu`).
+  Слоты главного меню: 2 удочка, 4 профиль, 6 Ферма+, 22 продать, 24 топ, 49 закрыть (`FishMenu`).
+- Меню улучшения удочки (F с удочкой в руке, 30.10): `upgrade_bg.py OUT.png` → `textures/gui/menu/upgrade.png`, глиф `\uE002`,
+  своя последовательность `menu.textures.sequences.upgrade` без сцены — видна только вертикальная плашка на колонках 2..6
+  (всё остальное, включая инвентарь и хотбар, прозрачно). Слоты: 4 удочка, 12 уровень, 13 бонусы, 14 монеты, 31 следующая ступень,
+  48..50 кнопка «Улучшить» (невидимые предметы `zenquests:icon_empty`, текст в подсказках). Превью — `preview_upgrade.png`.
 - Превью: `preview_main.png`, `preview_rod.png`.
 
 ## Текстуры рыбы
